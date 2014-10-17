@@ -1,0 +1,294 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE tiles-definitions PUBLIC
+       "-//Apache Software Foundation//DTD Tiles Configuration 2.1//EN"
+        "http://tiles.apache.org/dtds/tiles-config_2_1.dtd">
+<!--  	"/Users/cfondacci/Documents/workspaceProto2/tiles-config_2_1.dtd">  -->
+<tiles-definitions>
+
+	<definition name="default-breadcrumb" template="/jsp/structure/breadcrumb-section.jsp">
+		<put-attribute name="page-breadcrumb" value="/jsp/blocks/block-breadcrumb.jsp"/>
+		<put-attribute name="page-subtitle" value="/jsp/structure/empty.jsp" />
+	</definition>
+	<definition name="base" template="/jsp/structure/default.jsp">
+		<put-attribute name="title" value="Overview" />
+		<put-attribute name="ads-footer" value="/jsp/footer/ads-footer.jsp" />
+		<put-attribute name="meta-header" value="/jsp/header/meta-header.jsp" />
+		<put-attribute name="header" value="/jsp/header/default-header.jsp" />
+		<put-attribute name="footer" value="/jsp/footer/default-footer.jsp" />
+		<put-attribute name="content" value="/jsp/structure/empty.jsp" />
+		<put-attribute name="central-block" value="/jsp/structure/empty.jsp" />
+		<put-attribute name="page-left" value="/jsp/left-column/left-messaging.jsp" />
+		<put-attribute name="page-top" value="/jsp/structure/empty.jsp" />
+		<put-attribute name="page-breadcrumb-section" value="default-breadcrumb" type="definition" />
+		<put-attribute name="page-toolbar" value="/jsp/structure/empty.jsp"/>
+		<put-attribute name="page-controls" value="/jsp/structure/empty.jsp"/>
+<!-- 		<put-attribute name="header-bars" value="/jsp/structure/empty.jsp"/> -->
+		<put-attribute name="header-bars" value="/jsp/blocks/block-header-bars.jsp"/>
+<!-- 		<put-attribute name="background" value=""/> -->
+<!-- 		<put-attribute name="left-style" value=""/> -->
+<!-- 		<put-attribute name="header-bars" value="/jsp/blocks/block-header-bars.jsp"/> -->
+		<put-attribute name="background" value=""/>
+		<put-attribute name="left-style" value="left-header"/>
+		<put-attribute name="main-col-class" value="main-col"/>
+	</definition>
+	<definition name="overview-breadcrumb" template="/jsp/structure/breadcrumb-section.jsp">
+		<put-attribute name="page-breadcrumb" value="/jsp/blocks/block-breadcrumb.jsp"/>
+		<put-attribute name="page-subtitle" value="/jsp/blocks/block-subtitle-overview.jsp" />
+	</definition>
+	<definition name="base-overview" extends="base">
+		<put-attribute name="page-top" value="/jsp/top/top-overview.jsp" />
+		<put-attribute name="header" value="/jsp/header/overview-header.jsp"/>
+		<put-attribute name="footer" value="/jsp/footer/overview-footer.jsp" />
+		<put-attribute name="page-left" value="/jsp/left-column/left-title-messaging-app.jsp" />
+		<put-attribute name="page-breadcrumb-section" value="overview-breadcrumb" type="definition" />
+	</definition>
+	<definition name="search-breadcrumb" template="/jsp/structure/breadcrumb-section.jsp">
+		<put-attribute name="page-breadcrumb" value="/jsp/blocks/block-breadcrumb.jsp"/>
+		<put-attribute name="page-subtitle" value="/jsp/blocks/block-subtitle-search.jsp" />
+	</definition>
+	<definition name="base-search" extends="base">
+		<put-attribute name="page-top" value="/jsp/top/top-search.jsp" />
+		<put-attribute name="header" value="/jsp/header/default-header.jsp"/>
+		<put-attribute name="page-left" value="/jsp/left-column/left-title-messaging-app.jsp" />
+		<put-attribute name="footer" value="/jsp/footer/search-footer.jsp" />
+		<put-attribute name="facet-range-block" value="/jsp/structure/empty.jsp" />
+		<put-attribute name="page-breadcrumb-section" value="search-breadcrumb" type="definition" />
+		<put-attribute name="page-controls" value="/jsp/controls/search-control.jsp"/>
+	</definition>
+
+	<!--  Homepage -->
+	<definition name="homepage" extends="base">
+		<put-attribute name="content" value="/jsp/pages/homepage-content.jsp"/>
+		<put-attribute name="page-top" value="/jsp/top/top-homepage.jsp"/>
+<!-- 		<put-attribute name="background" value=""/> -->
+<!-- 		<put-attribute name="left-style" value=""/> -->
+		<put-attribute name="header-bars" value="/jsp/blocks/block-header-bars.jsp"/>
+<!-- 		<put-attribute name="page-breadcrumb-section" value="/jsp/structure/empty.jsp" /> -->
+		<put-attribute name="page-toolbar" value="/jsp/toolbars/toolbar-homepage.jsp"/>
+		<put-attribute name="page-left" value="/jsp/left-column/left-homepage.jsp" />
+		<put-attribute name="page-breadcrumb-section" value="/jsp/structure/homepage-breadcrumb-section.jsp"/>
+		<put-attribute name="ads-footer" value="/jsp/structure/empty.jsp" />
+		<put-attribute name="footer" value="/jsp/footer/homepage-footer.jsp" />
+<!-- 		<put-attribute name="main-col-class" value=""/> -->
+	</definition>
+	<!-- User Overview -->
+	<definition name="userOverview.content" template="/jsp/pages/overview-content.jsp">
+		<put-attribute name="right-col" value="/jsp/right-column/user-overview-right.jsp"/>
+		<put-attribute name="central-block" value="/jsp/structure/empty.jsp" />
+		<put-attribute name="mosaic-subtitle" value="/jsp/structure/empty.jsp"/>
+	</definition>
+	<definition name="userOverview" extends="base-overview">
+		<put-attribute name="page-controls" value="/jsp/controls/user-overview-controls.jsp"/>
+		<put-attribute name="page-toolbar" value="/jsp/toolbars/toolbar-user-overview.jsp"/>
+		<put-attribute name="content" value="userOverview.content" type="definition"/>
+	</definition>
+	<definition name="ajaxUserOverview" template="/jsp/pages/overview-content.jsp">
+		<put-attribute name="toolbar" value="/jsp/toolbars/user-overview-toolbar.jsp"/>
+		<put-attribute name="right-col" value="/jsp/right-column/user-overview-right.jsp"/>
+	</definition>
+	
+	<!-- Place Overview -->
+	<definition name="placeOverview.content" template="/jsp/pages/overview-content.jsp">
+		<put-attribute name="right-col" value="/jsp/right-column/place-overview-right.jsp"/>
+		<put-attribute name="central-block" value="/jsp/blocks/block-events-place.jsp" />
+<!-- 		<put-attribute name="central-block" value="/jsp/structure/empty.jsp" /> -->
+		<put-attribute name="mosaic-subtitle" value="/jsp/blocks/block-owner-events.jsp"/>
+	</definition>
+	<definition name="placeOverview" extends="base-overview">
+		<put-attribute name="page-controls" value="/jsp/controls/place-overview-controls.jsp"/>
+		<put-attribute name="page-toolbar" value="/jsp/toolbars/toolbar-place-overview.jsp"/>
+		<put-attribute name="content" value="placeOverview.content" type="definition"/>
+	</definition>
+	
+	<!-- Event Overview -->
+	<definition name="eventOverview.content" template="/jsp/pages/overview-content.jsp">
+		<put-attribute name="toolbar" value="/jsp/toolbars/event-overview-toolbar.jsp"/>
+		<put-attribute name="right-col" value="/jsp/right-column/event-overview-right.jsp"/>
+		<put-attribute name="central-block" value="/jsp/structure/empty.jsp" />
+		<put-attribute name="mosaic-subtitle" value="/jsp/structure/empty.jsp"/>
+	</definition>
+	<definition name="eventOverview" extends="base-overview">
+		<put-attribute name="content" value="eventOverview.content" type="definition"/>
+		<put-attribute name="page-controls" value="/jsp/controls/place-overview-controls.jsp"/>
+		<put-attribute name="page-toolbar" value="/jsp/toolbars/toolbar-event-overview.jsp"/>
+	</definition>
+	<definition name="ajaxEventOverview" template="/jsp/pages/overview-content.jsp">
+		<put-attribute name="toolbar" value="/jsp/toolbars/event-overview-toolbar.jsp"/>
+		<put-attribute name="right-col" value="/jsp/right-column/event-overview-right.jsp"/>
+	</definition>
+	
+	<!-- Users search -->
+	<definition name="searchUsers.content" template="/jsp/pages/search-content.jsp">
+		<put-attribute name="item-info-block" value="/jsp/blocks/block-location-info.jsp"/>
+		<put-attribute name="right-col" value="/jsp/right-column/user-search-right.jsp"/>
+	</definition>
+	<definition name="searchUsers" extends="base-search">
+		<put-attribute name="content" value="searchUsers.content" type="definition"/>
+		<put-attribute name="footer" value="/jsp/footer/search-user-footer.jsp" />
+		<put-attribute name="page-top" value="/jsp/top/top-overview.jsp" />
+		<put-attribute name="header" value="/jsp/header/overview-header.jsp"/>
+	</definition>
+	<definition name="ajaxSearchUsers" template="/jsp/blocks/search-users.jsp">
+		<put-attribute name="item-info-block" value="/jsp/blocks/block-location-info.jsp"/>
+		<put-attribute name="right-col" value="/jsp/right-column/user-search-right.jsp"/>
+	</definition>
+
+	<!-- Places search -->
+	<definition name="searchPlaces.content" template="/jsp/pages/search-content.jsp">
+		<put-attribute name="item-info-block" value="/jsp/blocks/block-place-location-info.jsp"/>
+		<put-attribute name="right-col" value="/jsp/right-column/place-search-right.jsp"/>
+	</definition>
+	<definition name="searchPlaces" extends="base-search">
+		<put-attribute name="page-toolbar" value="/jsp/toolbars/toolbar-search.jsp"/>
+<!-- 		<put-attribute name="page-controls" value="/jsp/structure/empty.jsp"/> -->
+		<put-attribute name="content" value="searchPlaces.content" type="definition"/>
+		<put-attribute name="header" value="/jsp/header/place-search-header.jsp" />
+	</definition>
+	<definition name="ajaxSearchPlaces" template="/jsp/blocks/search-users.jsp">
+		<put-attribute name="content" value="searchPlaces.content" type="definition"/>
+		<put-attribute name="right-col" value="/jsp/right-column/place-search-right.jsp"/>
+	</definition>
+		
+	<!-- Events search -->
+	<definition name="searchEvents.content" template="/jsp/pages/search-content.jsp">
+		<put-attribute name="item-info-block" value="/jsp/blocks/block-event-info.jsp"/>
+		<put-attribute name="right-col" value="/jsp/right-column/event-search-right.jsp"/>
+	</definition>
+	<definition name="searchEvents" extends="base-search">
+		<put-attribute name="page-toolbar" value="/jsp/toolbars/toolbar-search.jsp"/>
+		<put-attribute name="content" value="searchEvents.content" type="definition"/>
+		<put-attribute name="right-col" value="/jsp/right-column/event-search-right.jsp"/>
+		<put-attribute name="page-top" value="/jsp/top/top-overview.jsp" />
+		<put-attribute name="footer" value="/jsp/footer/search-events-footer.jsp" />
+		<put-attribute name="header" value="/jsp/header/overview-header.jsp"/>
+	</definition>
+	
+	<!-- News search -->
+	<definition name="searchNews.content" template="/jsp/pages/search-news.jsp">
+		<put-attribute name="right-col" value="/jsp/right-column/news-search-right.jsp"/>
+	</definition>
+	<definition name="searchNews" extends="base">
+		<put-attribute name="content" value="searchNews.content" type="definition"/>
+		<put-attribute name="right-col" value="/jsp/right-column/news-search-right.jsp"/>
+	</definition>
+	
+	<!-- MAP search -->
+	<definition name="searchMap.content" template="/jsp/pages/search-map.jsp">
+		<put-attribute name="right-col" value="/jsp/right-column/place-search-right.jsp"/>
+	</definition>
+	<definition name="searchMap" extends="base">
+		<put-attribute name="content" value="searchMap.content" type="definition"/>
+		<put-attribute name="right-col" value="/jsp/right-column/place-search-right.jsp"/>
+		<put-attribute name="header" value="/jsp/header/searchmap-header.jsp"/>
+	</definition>
+	
+	
+	<!--  My Media -->
+	<definition name="myMedia" extends="base">
+		<put-attribute name="header" value="/jsp/header/mymedia-header.jsp"/>
+		<put-attribute name="content" value="/jsp/pages/user-media.jsp"/>
+	</definition>
+	<definition name="ajaxMyMedia" template="/jsp/pages/user-media.jsp"/>
+	
+	<!--  My Profile -->
+	<definition name="myProfile" extends="base">
+		<put-attribute name="footer" value="/jsp/footer/profile-footer.jsp"/>
+		<put-attribute name="content" value="/jsp/structure/empty.jsp"/>
+		<put-attribute name="page-top" value="/jsp/top/top-profile.jsp"/>
+		<put-attribute name="page-left" value="/jsp/structure/empty.jsp" />
+		<put-attribute name="background" value=""/>
+		<put-attribute name="left-style" value=""/>
+		<put-attribute name="header-bars" value="/jsp/blocks/block-header-bars.jsp"/>
+		<put-attribute name="page-breadcrumb-section" value="/jsp/structure/empty.jsp" />
+		<put-attribute name="main-col-class" value=""/>
+	</definition>
+	<definition name="error" extends="base">
+		<put-attribute name="content" value="/jsp/structure/empty.jsp"/>
+		<put-attribute name="page-top" value="/jsp/top/top-error.jsp"/>
+		<put-attribute name="background" value=""/>
+		<put-attribute name="left-style" value=""/>
+		<put-attribute name="header-bars" value="/jsp/blocks/block-header-bars.jsp"/>
+		<put-attribute name="page-breadcrumb-section" value="/jsp/structure/empty.jsp" />
+		<put-attribute name="meta-header" value="/jsp/header/meta-header-noindex.jsp" />
+		<put-attribute name="page-left" value="/jsp/structure/empty.jsp" />
+		<put-attribute name="main-col-class" value=""/>
+	</definition>
+	<definition name="login" extends="base">
+		<put-attribute name="content" value="/jsp/structure/empty.jsp"/>
+		<put-attribute name="page-top" value="/jsp/top/top-login.jsp"/>
+		<put-attribute name="background" value=""/>
+		<put-attribute name="left-style" value=""/>
+		<put-attribute name="header-bars" value="/jsp/blocks/block-header-bars.jsp"/>
+		<put-attribute name="page-breadcrumb-section" value="/jsp/structure/empty.jsp" />
+		<put-attribute name="footer" value="/jsp/footer/login-footer.jsp"/>
+		<put-attribute name="meta-header" value="/jsp/header/meta-header-noindex.jsp" />
+		<put-attribute name="page-left" value="/jsp/structure/empty.jsp" />
+		<put-attribute name="main-col-class" value=""/>
+	</definition>
+	
+	<!-- STATIC PAGES -->
+	<definition name="static" extends="base">
+		<put-attribute name="content" value="/jsp/structure/empty.jsp"/>
+		<put-attribute name="background" value=""/>
+		<put-attribute name="left-style" value=""/>
+		<put-attribute name="header-bars" value="/jsp/blocks/block-header-bars.jsp"/>
+		<put-attribute name="page-breadcrumb-section" value="/jsp/structure/empty.jsp" />
+		<put-attribute name="footer" value="/jsp/footer/login-footer.jsp"/>
+<!-- 		<put-attribute name="meta-header" value="/jsp/header/meta-header-noindex.jsp" /> -->
+		<put-attribute name="page-left" value="/jsp/structure/empty.jsp" />
+		<put-attribute name="main-col-class" value=""/>
+	</definition>
+	<definition name="about" extends="static">
+		<put-attribute name="page-top" value="/jsp/top/top-about.jsp"/>
+	</definition>
+	<definition name="partners" extends="static">
+		<put-attribute name="page-top" value="/jsp/top/top-partners.jsp"/>
+	</definition>
+	<definition name="promote" extends="static">
+		<put-attribute name="header" value="/jsp/header/payment-header.jsp" />
+		<put-attribute name="footer" value="/jsp/footer/payment-footer.jsp" />
+		<put-attribute name="page-top" value="/jsp/top/top-promote.jsp"/>
+	</definition>
+	
+	<!-- ERROR PAGES -->
+	<definition name="login-error" extends="base">
+		<put-attribute name="content" value="/jsp/structure/empty.jsp"/>
+		<put-attribute name="page-top" value="/jsp/top/top-login-error.jsp"/>
+		<put-attribute name="background" value=""/>
+		<put-attribute name="left-style" value=""/>
+		<put-attribute name="header-bars" value="/jsp/blocks/block-header-bars.jsp"/>
+		<put-attribute name="page-breadcrumb-section" value="/jsp/structure/empty.jsp" />
+		<put-attribute name="footer" value="/jsp/footer/login-footer.jsp"/>
+		<put-attribute name="meta-header" value="/jsp/header/meta-header-noindex.jsp" />
+		<put-attribute name="page-left" value="/jsp/structure/empty.jsp" />
+		<put-attribute name="main-col-class" value=""/>
+	</definition>
+	<definition name="404" extends="base">
+		<put-attribute name="content" value="/jsp/structure/empty.jsp"/>
+		<put-attribute name="page-top" value="/jsp/top/top-404.jsp"/>
+		<put-attribute name="background" value=""/>
+		<put-attribute name="left-style" value=""/>
+		<put-attribute name="header-bars" value="/jsp/blocks/block-header-bars.jsp"/>
+		<put-attribute name="page-breadcrumb-section" value="/jsp/structure/empty.jsp" />
+		<put-attribute name="meta-header" value="/jsp/header/meta-header-noindex.jsp" />
+		<put-attribute name="page-left" value="/jsp/structure/empty.jsp" />
+		<put-attribute name="main-col-class" value=""/>
+	</definition>
+	<!--  My Messages -->
+<!--	<definition name="myMessages" extends="base">-->
+<!--		<put-attribute name="content" value="/jsp/pages/user-messages.jsp"/>-->
+<!--	</definition>-->
+	<definition name="myMessages" extends="base">
+		<put-attribute name="content" value="/jsp/structure/empty.jsp"/>
+		<put-attribute name="page-top" value="/jsp/top/top-messages.jsp"/>
+		<put-attribute name="footer" value="/jsp/footer/msg-footer.jsp" />
+		<put-attribute name="background" value=""/>
+		<put-attribute name="left-style" value=""/>
+		<put-attribute name="header-bars" value="/jsp/blocks/block-header-bars.jsp"/>
+		<put-attribute name="page-breadcrumb-section" value="/jsp/structure/empty.jsp" />
+		<put-attribute name="meta-header" value="/jsp/header/meta-header-noindex.jsp" />
+		<put-attribute name="page-left" value="/jsp/structure/empty.jsp" />
+		<put-attribute name="main-col-class" value=""/>
+	</definition>
+
+</tiles-definitions>

@@ -1,0 +1,727 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:jee="http://www.springframework.org/schema/jee"
+	xsi:schemaLocation="
+    http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+    http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-3.0.xsd">
+    
+	<bean id="abstractUserAwareAction" class="com.nextep.proto.action.base.AbstractUserAwareAction" abstract="true">
+		<property name="apiService" ref="apiService"/>
+		<property name="noSeoApiService" ref="mobileApiService"/>
+		<property name="searchSupport" ref="userSearchSupport"/>
+		<property name="placeSearchSupport" ref="placeSearchSupport"/>
+		<property name="messagingSupport" ref="messagingSupport"/>
+		<property name="urlService" ref="urlService"/>
+		<property name="rightsManagementService" ref="rightsManagementService"/>
+	</bean>
+	<bean id="abstractAction" class="com.nextep.proto.action.base.AbstractAction" abstract="true">
+		<property name="apiService" ref="apiService"/>
+		<property name="noSeoApiService" ref="mobileApiService"/>
+		<property name="messageSource" ref="globalMessages"/>
+		<property name="usersService" ref="usersService"/>
+		<property name="userSearchService" ref="searchPersistenceService"/>
+		<property name="rightsManagementService" ref="rightsManagementService"/>
+		<property name="connectionTimeoutInMinutes">
+    		<jee:jndi-lookup jndi-name="java:comp/env/user/connectionTimeoutMinutes"/>
+    	</property>
+    	<property name="domainName">
+			<jee:jndi-lookup jndi-name="java:comp/env/togaytherDomain"/>
+		</property>
+		<property name="loginSupport" ref="commonLoginSupport"/>
+		<property name="googleEnabled">
+			<jee:jndi-lookup jndi-name="java:comp/env/google.enabled"/>
+		</property>
+		<property name="adBannerSupport" ref="adBannerSupport"/>
+	</bean>
+	<bean id="abstractMobileAction" parent="abstractAction" abstract="true">
+		<property name="apiService" ref="mobileApiService"/>
+	</bean>
+	<bean id="userOverviewAction" class="com.nextep.proto.action.impl.UserOverviewAction" parent="abstractAction" scope="request">
+		<property name="localizationSupport" ref="userLocalizationSupport"/>
+		<property name="mediaProvider" ref="mediaProvider"/>
+		<property name="overviewSupport" ref="userOverviewSupport"/>
+		<property name="tagSupport" ref="tagSupport"/>
+		<property name="urlService" ref="urlService"/>
+		<property name="currentUserSupport" ref="currentUserSupport"/>
+<!--		<property name="searchSupport" ref="userSearchSupport"/>-->
+<!--		<property name="placeSearchSupport" ref="placeSearchSupport"/>-->
+		<property name="messagingSupport" ref="messagingSupport"/>
+		<property name="favoritePlacesSupport" ref="favoritePlacesSupport"/>
+		<property name="favoriteUsersSupport" ref="favoriteUsersSupport"/>
+		<property name="activitySupport" ref="userActivitySupport"/>
+		<property name="propertiesSupport" ref="propertiesSupport"/>
+		<property name="descriptionSupport" ref="descriptionSupport"/>
+		<property name="headerSupport" ref="overviewHeaderSupport"/>
+		<property name="commentSupport" ref="commentSupport"/>
+		<property name="commentTagSupport" ref="commentTagSupport"/>
+		<property name="mosaicSupport" ref="mosaicSupport"/>
+		<property name="mapSupport" ref="mapSupport"/>
+		<property name="eventsListSupport" ref="myEventsListSupport"/>
+		<property name="viewManagementService" ref="viewManagementService"/> 
+	</bean>
+	<bean id="placeOverviewAction" class="com.nextep.proto.action.impl.PlaceOverviewAction" parent="abstractAction" scope="request">
+		<property name="localizationSupport" ref="placeLocalizationSupport"/>
+		<property name="mediaProvider" ref="mediaProvider"/>
+		<property name="overviewSupport" ref="placeOverviewSupport"/>
+		<property name="tagSupport" ref="tagSupport"/>
+		<property name="urlService" ref="urlService"/>
+		<property name="currentUserSupport" ref="currentUserSupport"/>
+		<property name="localSearchSupport" ref="userLocalSearchSupport"/>
+<!--		<property name="placeSearchSupport" ref="placeSearchSupport"/>-->
+		<property name="messagingSupport" ref="messagingSupport"/>
+		<property name="mapSupport" ref="mapOverviewSupport"/>
+		<property name="eventsListSupport" ref="eventsListSupport"></property>
+		<property name="activitySupport" ref="activitySupport"/>
+		<property name="nearbySupport" ref="nearbyPlacesSupport"/>
+		<property name="propertiesSupport" ref="propertiesSupport"/>
+		<property name="descriptionSupport" ref="descriptionSupport"/>
+		<property name="headerSupport" ref="overviewHeaderSupport"/>
+		<property name="commentSupport" ref="commentSupport"/>
+		<property name="commentTagSupport" ref="commentTagSupport"/>
+		<property name="mosaicSupport" ref="mosaicSupport"/>
+		<property name="viewManagementService" ref="viewManagementService"/>
+		<property name="popularSupport" ref="placePopularCitiesSupport"/>
+		<property name="secondaryPopularSupport" ref="popularPlacesSupport"/>
+		<property name="geoPlaceTypesSupport" ref="geoPlaceTypesSupport"/>
+		<property name="rightsManagementService" ref="rightsManagementService"/>
+		<property name="calendarSupport" ref="calendarSupport"/>
+	</bean>
+	<bean id="eventOverviewAction" class="com.nextep.proto.action.impl.EventOverviewAction" parent="abstractAction" scope="request">
+		<property name="localizationSupport" ref="eventLocalizationSupport"/>
+		<property name="mediaProvider" ref="mediaProvider"/>
+		<property name="overviewSupport" ref="eventOverviewSupport"/>
+		<property name="tagSupport" ref="tagSupport"/>
+		<property name="urlService" ref="urlService"/>
+		<property name="currentUserSupport" ref="currentUserSupport"/>
+		<property name="messagingSupport" ref="messagingSupport"/>
+		<property name="searchSupport" ref="userAttendsSearchSupport"/>
+		<property name="apisCriterionFactory" ref="apisEventCriterionFactory"/>
+		<property name="mapSupport" ref="mapSupport"/>
+		<property name="activitySupport" ref="activitySupport"/>
+		<property name="headerSupport" ref="overviewHeaderSupport"/>
+		<property name="descriptionSupport" ref="descriptionSupport"/>
+		<property name="commentSupport" ref="commentSupport"/>
+		<property name="propertiesSupport" ref="propertiesSupport"/>
+		<property name="propertiesService" ref="propertiesService"/>
+		<property name="mosaicSupport" ref="eventMosaicSupport"/>
+		<property name="eventsListSupport" ref="otherEventsListSupport"/>
+		<property name="viewManagementService" ref="viewManagementService"/>
+	</bean>
+	<bean id="mobileOverviewAction" class="com.nextep.proto.action.mobile.impl.MobileOverviewAction" parent="abstractMobileAction" scope="request">
+		<property name="overviewSupport" ref="routingOverviewSupport"/>
+		<property name="currentUserSupport" ref="currentUserSupport"/>
+		<property name="mediaProvider" ref="mediaProvider"/>
+		<property name="tagSupport" ref="mobileTagSupport"/>
+		<property name="descriptionSupport" ref="descriptionSupport"/>
+		<property name="urlService" ref="mobileUrlService"/>
+		<property name="jsonBuilder" ref="jsonBuilder"/>
+		<property name="baseUrl">
+			<jee:jndi-lookup jndi-name="java:comp/env/togaytherBaseUrl"/>
+		</property>
+		<property name="maxRelatedElements">
+			<jee:jndi-lookup jndi-name="java:comp/env/maxMobileLikes"/>
+		</property>
+		<property name="radius">
+			<jee:jndi-lookup jndi-name="java:comp/env/mobile/nearbyPlacesRadius"></jee:jndi-lookup>
+		</property>
+		<property name="localizationService" ref="localizationService"/>
+		<property name="viewManagementService" ref="viewManagementService"/>
+	</bean>
+	<bean id="eventUpdateAction" class="com.nextep.proto.action.impl.EventUpdateAction" parent="abstractAction" scope="request">
+		<property name="eventService" ref="eventsService"/>
+		<property name="eventSeriesService" ref="eventSeriesService"/>
+		<property name="geoService" ref="geoService"/>
+		<property name="searchService" ref="searchPersistenceService"/>
+		<property name="apisCriterionFactory" ref="apisEventCriterionFactory"/>
+		<property name="puffService" ref="puffService"/>
+		<property name="apisUserCriterionFactory" ref="apisUserFromTokenCriterionFactory"/>
+		<property name="activitiesService" ref="activitiesService"/>
+		<property name="descriptionsManagementService" ref="descriptionsManagementService"/>
+		<property name="eventManagementService" ref="eventManagementService"/>
+	</bean>
+	<bean id="placeUpdateAction" class="com.nextep.proto.action.impl.PlaceUpdateAction" parent="abstractAction" scope="request">
+		<property name="placeService" ref="placesService"/>
+		<property name="activitiesService" ref="activitiesService"/>
+		<property name="tagsService" ref="tagsService"/>
+		<property name="searchService" ref="searchPersistenceService"/>
+		<property name="puffService" ref="puffService"/>
+		<property name="propertiesManagementService" ref="propertiesManagementService"/>
+		<property name="descriptionsManagementService" ref="descriptionsManagementService"/>
+		<property name="rightsManagementService" ref="rightsManagementService"/>
+		<property name="cityRadius">
+			<jee:jndi-lookup jndi-name="java:comp/env/mobile/nearbyCitiesRadius"></jee:jndi-lookup>
+		</property>
+		<property name="jsonBuilder" ref="jsonBuilder"/>
+	</bean>
+	<bean id="mobilePlaceUpdateAction" parent="placeUpdateAction" scope="request">
+		<property name="mobile" value="true"></property>
+	</bean>
+	<bean id="myMediaAction" class="com.nextep.proto.action.impl.MyMediaAction" parent="abstractAction" scope="request">
+		<property name="mediaProvider" ref="mediaProvider"/>
+		<property name="urlService" ref="urlService"/>
+		<property name="currentUserSupport" ref="currentUserSupport"/>
+		<property name="messagingSupport" ref="messagingSupport"/>
+		<property name="headerSupport" ref="myMediaHeaderSupport"/>
+	</bean>
+	<bean id="myProfileAction" class="com.nextep.proto.action.impl.MyProfileAction" parent="abstractAction" scope="request">
+		<property name="tagSupport" ref="tagSupport"/>
+		<property name="urlService" ref="urlService"/>
+		<property name="currentUserSupport" ref="currentUserSupport"/>
+		<property name="messagingSupport" ref="messagingSupport"/>
+		<property name="propertiesEditionSupport" ref="propertiesEditionSupport"/>
+		<property name="descriptionsEditionSupport" ref="descriptionsEditionSupport"/>
+		<property name="headerSupport" ref="myProfileHeaderSupport"/>
+		<property name="mediaProvider" ref="mediaProvider"/>
+		<property name="localizationSupport" ref="userLocalizationSupport"/>
+		<property name="sponsorshipSupport" ref="sponsorshipSupport"/>
+	</bean>
+	<bean id="abstractSearchUserAction" class="com.nextep.proto.action.base.AbstractSearchUserAction" parent="abstractAction" abstract="true">
+		<property name="localizationSupport" ref="userLocalizationSupport"/>
+		<property name="searchSupport" ref="userSearchSupport"/>
+<!--		<property name="placesSupport" ref="placesSupport"/>-->
+		<property name="apiService" ref="apiService" />
+		<property name="placeSearchSupport" ref="placeSearchSupport"/>
+		<property name="urlService" ref="urlService"/>
+		<property name="rangeFormat" value="[%d TO %d]" />
+		<property name="popularSupport" ref="popularCitiesSupport"/>
+		<property name="mediaProvider" ref="mediaProvider"/>
+		<property name="tagSupport" ref="tagSupport"/>
+	</bean>
+	<bean id="ajaxSearchUserAction" class="com.nextep.proto.action.impl.AjaxSearchUserAction" parent="abstractSearchUserAction" scope="request"/>
+	<bean id="searchUserAction" class="com.nextep.proto.action.impl.SearchUserAction" parent="abstractSearchUserAction" scope="request">
+		<property name="currentUserSupport" ref="currentUserSupport"/>
+		<property name="messagingSupport" ref="messagingSupport"/>
+		<property name="headerSupport" ref="searchHeaderSupport"/>
+		<property name="geoPlaceTypesSupport" ref="geoPlaceTypesSupport"/>
+	</bean>
+	<bean id="searchPlaceAction" class="com.nextep.proto.action.impl.SearchPlaceAction" parent="abstractAction" scope="request">
+		<property name="localizationSupport" ref="placeLocalizationSupport"/>
+		<property name="searchSupport" ref="placeSearchSupport"/>
+		<property name="urlService" ref="urlService"/>
+		<property name="placeSearchSupport" ref="placeSearchSupport"/>
+		<property name="currentUserSupport" ref="currentUserSupport"/>
+		<property name="messagingSupport" ref="messagingSupport"/>
+		<property name="headerPopularSupport" ref="subGeoItemPopularSupport"/>
+		<property name="popularSupport" ref="placePopularCitiesSupport"/>
+		<property name="sponsoredPopularSupport" ref="sponsoredPopularSupport"/>
+		<property name="geoService" ref="geoService"/>
+		<property name="headerSupport" ref="searchHeaderSupport"/>
+		<property name="childSupport" ref="placeChildSupport"/>
+		<property name="nearbyRadius">
+			<jee:jndi-lookup jndi-name="java:comp/env/search.nearbyRadius"></jee:jndi-lookup>
+		</property>
+		<property name="nearbySearchSupport" ref="nearbySearchSupport"/>
+		<property name="mapSupport" ref="mapSupport"/>
+		<property name="tagSupport" ref="tagSupport"/>
+		<property name="placesPerPage">
+			<jee:jndi-lookup jndi-name="java:comp/env/placesPerPage"></jee:jndi-lookup>
+		</property>
+		<property name="geoPlaceTypesSupport" ref="geoPlaceTypesSupport"/>
+		<property name="viewManagementService" ref="viewManagementService"/>
+	</bean>
+	<bean id="searchEventAction" class="com.nextep.proto.action.impl.SearchEventAction" parent="abstractAction" scope="request">
+		<property name="localizationSupport" ref="eventLocalizationSupport"/>
+		<property name="searchSupport" ref="eventSearchSupport"/>
+		<property name="urlService" ref="urlService"/>
+		<property name="currentUserSupport" ref="currentUserSupport"/>
+		<property name="messagingSupport" ref="messagingSupport"/>
+		<property name="popularSupport" ref="eventPopularCitiesSupport"/>
+		<property name="headerPopularSupport" ref="subGeoItemPopularSupport"/>
+		<property name="geoService" ref="geoService"/>
+		<property name="headerSupport" ref="searchHeaderSupport"/>
+		<property name="mapSupport" ref="mapSupport"/>
+		<property name="childSupport" ref="eventChildSupport"/>
+		<property name="mediaProvider" ref="eventsMediaProvider"/>
+		<property name="viewManagementService" ref="viewManagementService"/>
+		<property name="geoPlaceTypesSupport" ref="geoPlaceTypesSupport"/>
+	</bean>
+	<bean id="mobileSearchPlaces" class="com.nextep.proto.action.mobile.impl.NearbyPlacesListAction" parent="abstractMobileAction" scope="request">
+		<property name="searchSupport" ref="mobilePlaceSearchSupport"/>
+		<property name="tagSupport" ref="mobileTagSupport"/>
+		<property name="nearbySearchSupport" ref="nearbySearchSupport"/>
+		<property name="urlService" ref="mobileUrlService"/>
+		<property name="eventManagementService" ref="eventManagementService"/>
+		<property name="distanceDisplayService" ref="distanceDisplayService"/>
+		<property name="activitySupport" ref="activitySupport"/>
+		<property name="geoService" ref="geoService"/>
+		<property name="baseUrl">
+			<jee:jndi-lookup jndi-name="java:comp/env/togaytherBaseUrl"/>
+		</property>
+		<property name="pageSize">
+			<jee:jndi-lookup jndi-name="java:comp/env/mobile/nearbyPlacesCount"></jee:jndi-lookup>
+		</property>
+		
+		<property name="radius">
+			<jee:jndi-lookup jndi-name="java:comp/env/mobile/nearbyPlacesRadius"></jee:jndi-lookup>
+		</property>
+		<property name="cityRadius">
+			<jee:jndi-lookup jndi-name="java:comp/env/mobile/nearbyCitiesRadius"></jee:jndi-lookup>
+		</property>
+		<property name="currentUserSupport" ref="currentUserSupport"/>
+		<property name="localizationService" ref="localizationService"/>
+		<property name="jsonBuilder" ref="jsonBuilder"/>
+		<property name="viewManagementService" ref="viewManagementService"/>
+		<property name="lastSeenMaxTime">
+			<jee:jndi-lookup jndi-name="java:comp/env/smaug/lastSeenMaxTime"/>
+		</property>
+	</bean>
+	<bean id="mobileCheckinAction" class="com.nextep.proto.action.mobile.impl.MobileCheckInAction" parent="abstractMobileAction" scope="request">
+		<property name="currentUserSupport" ref="currentUserSupport"/>
+		<property name="localizationService" ref="localizationService"/>
+	</bean>
+	<bean id="mobileLikeActivityAction" class="com.nextep.proto.action.mobile.impl.MobileLikeActivityAction" parent="abstractMobileAction" scope="request">
+		<property name="currentUserSupport" ref="currentUserSupport"/>
+		<property name="jsonBuilder" ref="jsonBuilder"/>
+	</bean>
+	<bean id="mobileSearchEvents" class="com.nextep.proto.action.mobile.impl.NearbyEventsListAction" parent="abstractMobileAction" scope="request">
+		<property name="searchSupport" ref="eventSearchSupport"/>
+		<property name="tagSupport" ref="mobileTagSupport"/>
+		<property name="nearbySearchSupport" ref="nearbySearchSupport"/>
+		<property name="urlService" ref="mobileUrlService"/>
+		<property name="distanceDisplayService" ref="distanceDisplayService"/>
+		<property name="baseUrl">
+			<jee:jndi-lookup jndi-name="java:comp/env/togaytherBaseUrl"/>
+		</property>
+		<property name="pageSize">
+			<jee:jndi-lookup jndi-name="java:comp/env/mobile/nearbyPlacesCount"></jee:jndi-lookup>
+		</property>
+		
+		<property name="radius">
+			<jee:jndi-lookup jndi-name="java:comp/env/mobile/nearbyPlacesRadius"></jee:jndi-lookup>
+		</property>
+		<property name="cityRadius">
+			<jee:jndi-lookup jndi-name="java:comp/env/mobile/nearbyCitiesRadius"></jee:jndi-lookup>
+		</property>
+		<property name="currentUserSupport" ref="currentUserSupport"/>
+		<property name="localizationService" ref="localizationService"/>
+		<property name="jsonBuilder" ref="jsonBuilder"/>
+	</bean>
+	<bean id="mobileUserListAction" class="com.nextep.proto.action.mobile.impl.MobileUserListAction" parent="abstractMobileAction" scope="request">
+		<property name="searchSupport" ref="mobileUserSearchSupport"/>
+		<property name="tagSupport" ref="mobileTagSupport"/>
+		<property name="urlService" ref="mobileUrlService"/>
+		<property name="pageSize">
+			<jee:jndi-lookup jndi-name="java:comp/env/mobile/usersListCount"></jee:jndi-lookup>
+		</property>
+	</bean>
+	<bean id="ajaxSearchPlaceAction" class="com.nextep.proto.action.impl.AjaxSearchPlaceAction" parent="abstractAction" scope="request">
+		<property name="localizationSupport" ref="placeLocalizationSupport"/>
+		<property name="searchSupport" ref="placeSearchSupport"/>
+		<property name="urlService" ref="urlService"/>
+		<property name="placeSearchSupport" ref="placeSearchSupport"/>
+	</bean>
+	<bean id="ajaxMediaAction" class="com.nextep.proto.action.impl.AjaxMediaAction">
+		<property name="apiService" ref="apiService" />
+		<property name="mediaProvider" ref="mediaProvider"/>
+	</bean>
+	<bean id="ajaxSuggestCityAction" class="com.nextep.proto.action.impl.AjaxSuggestCityAction" parent="abstractAction" scope="request">
+		<property name="geoService" ref="geoService" />
+		<property name="urlService" ref="urlService"/>
+	</bean>
+	<bean id="ajaxSuggestUserAction" class="com.nextep.proto.action.impl.AjaxSuggestUserAction" parent="abstractAction" scope="request">
+		<property name="urlService" ref="urlService"/>
+	</bean>
+<!-- 	<bean id="ajaxSuggestPlaceAction" class="com.nextep.proto.action.impl.AjaxSuggestPlaceAction"> -->
+<!-- 		<property name="geoService" ref="geoService" /> -->
+<!-- 		<property name="urlService" ref="urlService"/> -->
+<!-- 	</bean> -->
+	<bean id="ajaxCityDefinitionAction" class="com.nextep.proto.action.impl.AjaxCityDefinitionAction">
+		<property name="apiService" ref="apiService" />
+	</bean>
+	<bean id="ajaxSendMessageAction" class="com.nextep.proto.action.impl.AjaxSendMessageAction"  parent="abstractAction" scope="request">
+		<property name="messageService" ref="messagesService" />
+		<property name="currentUserSupport" ref="currentUserSupport"/>
+		<property name="notificationService" ref="notificationService"/>
+	</bean>
+	<bean id="ajaxInstantMessagesAction" class="com.nextep.proto.action.impl.AjaxInstantMessagesAction" parent="abstractAction" scope="request">
+		<property name="apiService" ref="apiService"/>
+		<property name="messagingSupport" ref="messagingSupport"/>
+		<property name="messageService" ref="messagesService"/>
+		<property name="messagePersistenceService" ref="messagesService"/>
+		<property name="urlService" ref="urlService"/>
+		<property name="currentUserSupport" ref="currentUserSupport"/>
+		<property name="notificationService" ref="notificationService"/>
+	</bean>
+	<bean id="ajaxMapInfoAction" class="com.nextep.proto.action.impl.AjaxMapInfoAction" parent="abstractAction" scope="request">
+		<property name="urlService" ref="urlService"/>
+		<property name="quickInfoSupport" ref="mapQuickInfoSupport"/>
+	</bean> 
+	<bean id="userRegisterAction" class="com.nextep.proto.action.impl.UserRegistrationAction" scope="request" parent="abstractAction">
+		<property name="tagsService" ref="tagsService"/>
+		<property name="geoService" ref="geoService"/>
+		<property name="headerSupport" ref="myProfileHeaderSupport"/>
+		<property name="searchPersistenceService" ref="searchPersistenceService"/>
+		<property name="messagePersistenceService" ref="messagesService"/>
+		<property name="mediaPersistenceSupport" ref="autoCropMediaPersistenceSupport"/>
+		<property name="propertiesManagementService" ref="propertiesManagementService"/>
+		<property name="descriptionsManagementService" ref="descriptionsManagementService"/>
+		<property name="activitiesService" ref="activitiesService"/>
+		<property name="urlService" ref="urlService"/>
+		<property name="defaultCityKey">
+			<jee:jndi-lookup jndi-name="java:comp/env/defaultCityKey"></jee:jndi-lookup>
+		</property>
+		<property name="cityRadius">
+			<jee:jndi-lookup jndi-name="java:comp/env/mobile/nearbyCitiesRadius"></jee:jndi-lookup>
+		</property>
+		<property name="welcomeMsgUser">
+			<jee:jndi-lookup jndi-name="java:comp/env/welcomeMessageUserKey"></jee:jndi-lookup>
+		</property>
+		<property name="jsonBuilder" ref="jsonBuilder"/>
+	</bean>
+	<bean id="userLoginAction" class="com.nextep.proto.action.impl.UserLoginAction"  scope="request"  parent="abstractAction" >
+		<property name="usersService" ref="usersService"/>
+		<property name="searchService" ref="searchPersistenceService"/>
+		<property name="urlService" ref="urlService"/>
+		<property name="headerSupport" ref="myProfileHeaderSupport"/>
+		<property name="currentUserSupport" ref="currentUserSupport"/>
+		<property name="baseUrl">
+			<jee:jndi-lookup jndi-name="java:comp/env/togaytherBaseUrl"/>
+		</property>
+	</bean>
+	<bean id="facebookLoginAction" class="com.nextep.proto.action.impl.FacebookLoginAction"  scope="request"  parent="abstractAction" >
+		<property name="mediaService" ref="mediaService"/>
+		<property name="searchService" ref="searchPersistenceService"/>
+		<property name="geoService" ref="geoService"/>
+		<property name="activitiesService" ref="activitiesService"/>
+		<property name="urlService" ref="urlService"/>
+	</bean>
+	<bean id="mobileUserLoginAction" class="com.nextep.proto.action.impl.UserLoginAction"  scope="request"  parent="abstractMobileAction" >
+		<property name="usersService" ref="mobileUsersService"/>
+		<property name="searchService" ref="searchPersistenceService"/>
+		<property name="urlService" ref="urlService"/>
+		<property name="headerSupport" ref="myProfileHeaderSupport"/>
+		<property name="currentUserSupport" ref="currentUserSupport"/>
+		<property name="mobileService" value="true"/>
+		<property name="baseUrl">
+			<jee:jndi-lookup jndi-name="java:comp/env/togaytherBaseUrl"/>
+		</property>
+		<property name="jsonBuilder" ref="jsonBuilder"/>
+	</bean>
+	<bean id="indexAction" class="com.nextep.proto.action.impl.IndexAction" parent="abstractAction" scope="request">
+		<property name="apiService" ref="apiService" />
+		<property name="tagSupport" ref="tagSupport"/>
+		<property name="urlService" ref="urlService"/>
+		<property name="distanceService" ref="distanceService"/>
+		<property name="headerSupport" ref="indexHeaderSupport"/>
+		<property name="popularSupport" ref="commonPopularCitiesSupport"/>
+		<property name="secondaryPopularSupport" ref="popularCountriesSupport"/>
+		<property name="localizationSupport" ref="placeLocalizationSupport"/>
+		<property name="currentUserSupport" ref="currentUserSupport"/>
+		<property name="latestChangesPopularSupport" ref="popularActivitiesSupport"/>
+		<property name="messagingSupport" ref="messagingSupport"/>
+		<property name="searchSupport" ref="placeSearchSupport"/>
+		<property name="activitySupport" ref="activitySupport"/>
+		<property name="mapSupport" ref="homeMapSupport"/>
+		<property name="favoritePlacesSupport" ref="favoritePlacesSupport"/>
+		<property name="favoriteUsersSupport" ref="favoriteUsersSupport"/>
+		<property name="rightsManagementService" ref="rightsManagementService"/>
+		<property name="maxLastChangesCount">
+			<jee:jndi-lookup jndi-name="java:comp/env/homepage.maxFetchedActivities"/>
+		</property>
+		<property name="maxTopUsersSecurity">
+			<jee:jndi-lookup jndi-name="java:comp/env/homepage.maxTopUsersSecurity"/>
+		</property>
+	</bean>
+	<bean id="addMediaAction" class="com.nextep.proto.action.impl.AddMediaAction" parent="abstractAction" scope="request">
+		<property name="mediaPersistenceSupport" ref="mediaPersistenceSupport" />
+		<property name="userCriterionFactory" ref="apisUserFromTokenCriterionFactory"/>
+		<property name="searchService" ref="searchPersistenceService"/>
+		<property name="activitiesService" ref="activitiesService"/>
+		<property name="urlService" ref="fullAjaxUrlService"/>
+		<property name="headerSupport" ref="myMediaHeaderSupport"/>
+		<property name="mediaProvider" ref="mediaProviderPreview"/>
+		<property name="jsonBuilder" ref="jsonBuilder"/>
+	</bean>
+	<!-- Same as AddMedia except that we use a specific media persistence with default auto crop -->
+	<bean id="mobileAddMediaAction" parent="addMediaAction" scope="request">
+		<property name="mediaPersistenceSupport" ref="mobileMediaPersistenceSupport"/>
+	</bean>
+	<bean id="cropMediaAction" class="com.nextep.proto.action.impl.CropMediaAction" parent="abstractAction" scope="request">
+		<property name="mediaPersistenceSupport" ref="mediaPersistenceSupport" />
+		<property name="mediaService" ref="mediaService"/>
+	</bean>
+	<bean id="cleanPastEventsAction" class="com.nextep.proto.action.impl.tools.CleanPastEventsAction" parent="abstractAction" scope="request">
+		<property name="searchService" ref="searchPersistenceService"/>
+		<property name="taskRunnerService" ref="apisToolsTaskRunnerService"/>
+	</bean>
+	<bean id="generateThumbsAction" class="com.nextep.proto.action.impl.tools.GenerateMissingThumbsAction" parent="abstractAction" scope="request">
+		<property name="mediaPersistenceSupport" ref="autoCropMediaPersistenceSupport" />
+		<property name="taskRunnerService" ref="apisToolsTaskRunnerService"/>
+		<property name="localMediaDirectory">
+			<jee:jndi-lookup jndi-name="java:comp/env/media/localPath"/>
+		</property>
+		<property name="mediaService" ref="mediaService"/>
+	</bean>
+	<bean id="reindexUsersAction" class="com.nextep.proto.action.impl.tools.ReIndexUsersAction" parent="abstractAction" scope="request">
+		<property name="apiService" ref="toolsApiService"/>
+		<property name="searchPersistenceService" ref="searchPersistenceService"/>
+		<property name="taskRunnerService" ref="apisToolsTaskRunnerService"/>
+	</bean>
+	<bean id="geocodePlacesAction" class="com.nextep.proto.action.impl.tools.GeocodePlacesAction" parent="abstractAction" scope="request">
+		<property name="apiService" ref="toolsApiService"/>
+		<property name="placesService" ref="placesService"/>
+		<property name="puffService" ref="puffService"/>
+	</bean>
+	<bean id="ilikeAction" class="com.nextep.proto.action.impl.ILikeAction" parent="abstractAction" scope="request">
+		<property name="searchPersistenceService" ref="searchPersistenceService"/>
+		<property name="activitiesService" ref="activitiesService"/>
+		<property name="currentUserSupport" ref="currentUserSupport"/>
+		<property name="overviewSupport" ref="routingOverviewSupport"/>
+		<property name="urlService" ref="urlService"/>
+		<property name="headerSupport" ref="overviewHeaderSupport"/> 
+		<property name="messageService" ref="messagesService"/> 
+	</bean>
+	<bean id="ajaxGetMediaFormAction" class="com.nextep.proto.action.impl.GetMediaFormAction" parent="abstractAction" scope="request">
+		<property name="urlService" ref="urlService"/>
+		<property name="currentUserSupport" ref="currentUserSupport"/>
+		<property name="headerSupport" ref="myMediaHeaderSupport"/>
+		<property name="rightsManagementService" ref="rightsManagementService"/>
+	</bean>
+	<bean id="ajaxGetMessageFormAction" class="com.nextep.proto.action.impl.GetMessageFormAction" parent="abstractAction" scope="request">
+		<property name="currentUserSupport" ref="currentUserSupport"/>
+	</bean>
+	<bean id="indexEventsAction" class="com.nextep.proto.action.impl.tools.IndexEventsAction" parent="abstractAction" scope="request">
+		<property name="searchService" ref="searchPersistenceService"/>
+		<property name="taskRunnerService" ref="apisToolsTaskRunnerService"/>
+	</bean>
+	<bean id="indexPlacesAction" class="com.nextep.proto.action.impl.tools.IndexPlacesAction" parent="abstractAction" scope="request">
+		<property name="searchService" ref="searchPersistenceService"/>
+		<property name="taskRunnerService" ref="apisToolsTaskRunnerService"/>
+		<property name="apiService" ref="toolsApiService"/>
+	</bean>
+	<bean id="openPlacesSeoAction" class="com.nextep.proto.action.impl.tools.OpenPlacesSEOAction" parent="abstractAction" scope="request">
+		<property name="searchService" ref="searchPersistenceService"/>
+		<property name="apiService" ref="toolsApiService"/>
+		<property name="popularActivitiesSupport" ref="popularActivitiesSupport"/>
+		<property name="placesService" ref="placesService"/>
+		<property name="activitiesService" ref="activitiesService"/>
+		<property name="maxFetchedActivities">
+			<jee:jndi-lookup jndi-name="java:comp/env/seo.maxFetchedActivities"/>
+		</property>
+	</bean>
+	<bean id="indexCitiesAction" class="com.nextep.proto.action.impl.tools.IndexCitiesAction" parent="abstractAction" scope="request">
+		<property name="searchService" ref="searchPersistenceService"/>
+		<property name="apiService" ref="toolsApiService"/>
+		<property name="taskRunnerService" ref="apisToolsTaskRunnerService"/>
+	</bean>
+	<bean id="indexActivitiesAction" class="com.nextep.proto.action.impl.tools.IndexActivitiesAction" parent="abstractAction" scope="request">
+		<property name="searchService" ref="searchPersistenceService"/>
+		<property name="apiService" ref="toolsApiService"/>
+		<property name="taskRunnerService" ref="apisToolsTaskRunnerService"/>
+	</bean>
+	<bean id="indexGeoCitiesAction" class="com.nextep.proto.action.impl.tools.IndexGeoCitiesAction" parent="abstractAction" scope="request">
+		<property name="searchService" ref="searchPersistenceService"/>
+		<property name="apiService" ref="toolsApiService"/>
+		<property name="taskRunnerService" ref="apisToolsTaskRunnerService"/>
+		<property name="minCityPopulation">
+			<jee:jndi-lookup jndi-name="java:comp/env/minCityPopulationForIndexation"></jee:jndi-lookup>
+		</property>
+	</bean>
+	<bean id="ajaxGetEventFormAction" class="com.nextep.proto.action.impl.GetEventFormAction" parent="abstractAction" scope="request">
+		<property name="eventEditionSupport" ref="eventEditionSupport"/>
+		<property name="descriptionsEditionSupport" ref="descriptionsEditionSupport"/>
+		<property name="currentUserSupport" ref="currentUserSupport"/>
+		<property name="headerSupport" ref="overviewHeaderSupport"/>
+	</bean>
+	<bean id="ajaxGetPlaceFormAction" class="com.nextep.proto.action.impl.GetPlaceFormAction" parent="abstractAction" scope="request">
+		<property name="placeEditionSupport" ref="placeEditionSupport"/>
+		<property name="propertiesEditionSupport" ref="propertiesEditionSupport"/>
+		<property name="descriptionsEditionSupport" ref="descriptionsEditionSupport"/>
+		<property name="currentUserSupport" ref="currentUserSupport"/>
+		<property name="headerSupport" ref="overviewHeaderSupport"/>
+		<property name="tagSupport" ref="tagSupport"/>
+		<property name="amenitiesTagSupport" ref="tagSupport"/>
+		<property name="rightsManagementService" ref="rightsManagementService"/>
+	</bean>
+	<bean id="ajaxGetDescriptionsFormAction" class="com.nextep.proto.action.impl.GetDescriptionsFormAction" parent="abstractAction" scope="request">
+		<property name="currentUserSupport" ref="currentUserSupport"/>
+		<property name="descriptionsEditionSupport" ref="descriptionsEditionSupport"/>
+		<property name="rightsManagementService" ref="rightsManagementService"/>
+		<property name="headerSupport" ref="descriptionsHeaderSupport"/>
+	</bean>
+	<bean id="updateDescriptionAction" class="com.nextep.proto.action.impl.DescriptionUpdateAction" parent="abstractAction" scope="request">
+		<property name="urlService" ref="urlService"/>
+		<property name="currentUserSupport" ref="currentUserSupport"/>
+		<property name="rightsManagementService" ref="rightsManagementService"/>
+		<property name="headerSupport" ref="descriptionsHeaderSupport"/>
+		<property name="descriptionsManagementService" ref="descriptionsManagementService"/>
+		<property name="activitiesService" ref="activitiesService"/>		
+	</bean>
+ 	<bean id="deleteMediaAction" class="com.nextep.proto.action.impl.DeleteMediaAction" parent="abstractAction" scope="request">
+		<property name="mediaService" ref="mediaService"/>
+		<property name="currentUserSupport" ref="currentUserSupport"/>
+		<property name="rightsManagementService" ref="rightsManagementService"/>
+		<property name="headerSupport" ref="myMediaHeaderSupport"/>
+		<property name="activitiesService" ref="activitiesService"/>
+		<property name="searchService" ref="searchPersistenceService"/>
+	</bean>
+ 	<bean id="deleteCalObjectAction" class="com.nextep.proto.action.impl.DeleteCalObjectAction" parent="abstractAction" scope="request">
+		<property name="currentUserSupport" ref="currentUserSupport"/>
+		<property name="rightsManagementService" ref="rightsManagementService"/>
+		<property name="headerSupport" ref="myMediaHeaderSupport"/>
+		<property name="placesService" ref="placesService"/>
+		<property name="activitiesService" ref="activitiesService"/>
+		<property name="searchPersistenceService" ref="searchPersistenceService"/>
+	</bean>
+	<bean id="moveMediaAction" class="com.nextep.proto.action.impl.MoveMediaAction" parent="abstractAction" scope="request">
+		<property name="mediaService" ref="mediaService"/>
+		<property name="currentUserSupport" ref="currentUserSupport"/>
+		<property name="rightsManagementService" ref="rightsManagementService"/>
+		<property name="mediaProvider" ref="mediaProvider"/>
+	</bean>
+	<bean id="postCommentAction" class="com.nextep.proto.action.impl.PostCommentAction" parent="abstractAction" scope="request">
+		<property name="urlService" ref="urlService"/>
+		<property name="currentUserSupport" ref="currentUserSupport"/>
+		<property name="commentService" ref="commentsService"/>
+		<property name="activitiesService" ref="activitiesService"/>
+		<property name="searchService" ref="searchPersistenceService"/>
+		<property name="headerSupport" ref="overviewHeaderSupport"/>
+	</bean>
+	<bean id="ajaxCommentsAction" class="com.nextep.proto.action.impl.AjaxCommentsAction" parent="abstractAction" scope="request">
+		<property name="urlService" ref="urlService"/>
+		<property name="currentUserSupport" ref="currentUserSupport"/>
+		<property name="commentSupport" ref="commentSupport"/>
+		<property name="commentTagSupport" ref="commentTagSupport"/>
+		<property name="headerSupport" ref="overviewHeaderSupport"/>
+		<property name="jsonBuilder" ref="jsonBuilder"/>
+		<property name="radius">
+			<jee:jndi-lookup jndi-name="java:comp/env/mobile/nearbyPlacesRadius"></jee:jndi-lookup>
+		</property>
+		<property name="localizationService" ref="localizationService"/>
+	</bean>
+	<bean id="ajaxActivitiesAction" class="com.nextep.proto.action.impl.AjaxActivitiesAction" parent="abstractAction" scope="request">
+		<property name="urlService" ref="urlService"/>
+		<property name="activitySupport" ref="activitySupport"/>
+		<property name="userActivitySupport" ref="userActivitySupport"/>
+		<property name="headerSupport" ref="overviewHeaderSupport"/>
+	</bean>
+	<bean id="toggleUserTagAction" class="com.nextep.proto.action.impl.ToggleUserTagAction" parent="abstractAction" scope="request">
+		<property name="currentUserSupport" ref="currentUserSupport"/>
+		<property name="tagsService" ref="tagsService"/>
+	</bean>
+	<bean id="myMessagesAction" class="com.nextep.proto.action.impl.MyMessagesAction" parent="abstractAction" scope="request">
+		<property name="currentUserSupport" ref="currentUserSupport"/>
+		<property name="messagingSupport" ref="messagingSupport"/>
+		<property name="urlService" ref="urlService"/>
+		<property name="myMessagingSupport" ref="messagingSupport"/>
+		<property name="messagesPerPage" value="15"/>
+		<property name="headerSupport" ref="myMessagesHeaderSupport"/>
+		<property name="jsonBuilder" ref="jsonBuilder"/>
+		<property name="radius">
+			<jee:jndi-lookup jndi-name="java:comp/env/mobile/nearbyPlacesRadius"></jee:jndi-lookup>
+		</property>
+		<property name="localizationService" ref="localizationService"/>
+	</bean>
+	<bean id="myMessageReplyAction" class="com.nextep.proto.action.impl.MyMessageReplyAction" parent="abstractAction" scope="request">
+		<property name="urlService" ref="urlService"/>
+		<property name="currentUserSupport" ref="currentUserSupport"/>
+		<property name="messagingSupport" ref="messagingSupport"/>
+		<property name="myMessagingSupport" ref="messagingReplySupport"/>
+		<property name="jsonBuilder" ref="jsonBuilder"/>
+		<property name="radius">
+			<jee:jndi-lookup jndi-name="java:comp/env/mobile/nearbyPlacesRadius"></jee:jndi-lookup>
+		</property>
+		<property name="localizationService" ref="localizationService"/>
+		<property name="messageService" ref="messagesService"/>
+	</bean>
+	<bean id="mobileGalleryAction" class="com.nextep.proto.action.mobile.impl.MobileGalleryAction" parent="abstractMobileAction" scope="request">
+		<property name="jsonBuilder" ref="jsonBuilder"/>
+	</bean>
+	<bean id="disconnectAction" class="com.nextep.proto.action.impl.DisconnectAction" parent="abstractAction" scope="request">
+		<property name="currentUserSupport" ref="currentUserSupport"/>
+		<property name="searchService" ref="searchPersistenceService"/>
+	</bean>
+	<bean id="XMLSitemapRootIndexAction" class="com.nextep.proto.action.impl.sitemap.XMLSitemapRootIndexAction" parent="abstractAction" scope="request">
+		<property name="urlService" ref="urlService"/>
+		<property name="apiService" ref="toolsApiService"/>
+		<property name="sitemapService" ref="sitemapService"/>
+		<property name="sitemapPageSize">
+			<jee:jndi-lookup jndi-name="java:comp/env/sitemap.pageSize"></jee:jndi-lookup>
+		</property>
+		<property name="minCityPopulation">
+			<jee:jndi-lookup jndi-name="java:comp/env/sitemap.cityMinPopulation"></jee:jndi-lookup>
+		</property>
+	</bean>
+	<bean id="XMLSitemapIndexAction" class="com.nextep.proto.action.impl.sitemap.XMLSitemapIndexAction" parent="abstractAction" scope="request">
+		<property name="urlService" ref="urlService"/>
+		<property name="apiService" ref="toolsApiService"/>
+		<property name="sitemapService" ref="sitemapService"/>
+		<property name="sitemapPageSize">
+			<jee:jndi-lookup jndi-name="java:comp/env/sitemap.pageSize"></jee:jndi-lookup>
+		</property>
+		<property name="minCityPopulation">
+			<jee:jndi-lookup jndi-name="java:comp/env/sitemap.cityMinPopulation"></jee:jndi-lookup>
+		</property>
+	</bean>
+	<bean id="XMLSitemapAction" class="com.nextep.proto.action.impl.sitemap.XMLSitemapAction" parent="abstractAction" scope="request">
+		<property name="urlService" ref="urlService"/>
+		<property name="apiService" ref="toolsApiService"/>
+		<property name="sitemapService" ref="sitemapService"/>
+		<property name="sitemapPageSize">
+			<jee:jndi-lookup jndi-name="java:comp/env/sitemap.pageSize"></jee:jndi-lookup>
+		</property>
+		<property name="minCityPopulation">
+			<jee:jndi-lookup jndi-name="java:comp/env/sitemap.cityMinPopulation"></jee:jndi-lookup>
+		</property>
+		<property name="nearbyRadius">
+			<jee:jndi-lookup jndi-name="java:comp/env/search.nearbyRadius"></jee:jndi-lookup>
+		</property>
+	</bean>
+	<bean id="refreshEventSeriesAction" class="com.nextep.proto.action.impl.tools.RefreshEventSeriesAction" parent="abstractAction" scope="request">
+		<property name="taskRunnerService" ref="apisToolsTaskRunnerService"/>
+		<property name="eventManagementService" ref="eventManagementService"/>
+	</bean>
+	<bean id="ajaxGeoListAction" class="com.nextep.proto.action.impl.AjaxGeoListAction" parent="abstractAction" scope="request">
+		<property name="urlService" ref="urlService"/>
+	</bean>
+	<bean id="aboutAction" class="com.nextep.proto.action.impl.StaticAction" parent="abstractAction" scope="request">
+		<property name="urlService" ref="urlService"/>
+		<property name="headerSupport" ref="aboutHeaderSupport"/>
+		<property name="localizationSupport" ref="placeLocalizationSupport"/>
+	</bean> 
+	<bean id="partnersAction" class="com.nextep.proto.action.impl.StaticAction" parent="abstractAction" scope="request">
+		<property name="headerSupport" ref="partnersHeaderSupport"/>
+		<property name="localizationSupport" ref="placeLocalizationSupport"/>
+	</bean> 
+	<bean id="promoteAction" class="com.nextep.proto.action.impl.PromoteAction" parent="abstractAction" scope="request">
+		<property name="headerSupport" ref="promoteHeaderSupport"/>
+		<property name="localizationSupport" ref="placeLocalizationSupport"/>
+		<property name="currentUserSupport" ref="currentUserSupport"/>
+		<property name="paymentSupport" ref="paymillPaymentSupport"/>
+	</bean> 
+	<bean id="staticNotFoundAction" class="com.nextep.proto.action.impl.StaticNotFoundAction" parent="abstractAction">
+		<property name="headerSupport" ref="aboutHeaderSupport"/>
+	</bean>
+	<bean id="mobileReportingAction" class="com.nextep.proto.action.mobile.impl.MobileReportingAction" parent="abstractMobileAction" scope="request">
+		<property name="currentUserSupport" ref="currentUserSupport"/>
+		<property name="mediaService" ref="mediaService"/>
+		<property name="placeService" ref="placesService"/>
+		<property name="activitiesService" ref="activitiesService"/>
+	</bean>
+	<bean id="paymentAction" class="com.nextep.proto.action.impl.PaymentAction" parent="abstractAction" scope="request">
+		<property name="privateKey">
+			<jee:jndi-lookup jndi-name="java:comp/env/paymill.api.privateKey"></jee:jndi-lookup>
+		</property>
+		<property name="currentUserSupport" ref="currentUserSupport"/>
+		<property name="userService" ref="usersService"/>
+	</bean> 
+	<bean id="sponsorshipAction" class="com.nextep.proto.action.impl.SponsorshipAction" parent="abstractAction" scope="request">
+		<property name="currentUserSupport" ref="currentUserSupport"/>
+		<property name="sponsorshipSupport" ref="sponsorshipSupport"/>
+		<property name="headerSupport" ref="overviewHeaderSupport"/>
+		<property name="urlService" ref="urlService"/>
+	</bean> 
+	<bean id="sponsorshipActivationAction" class="com.nextep.proto.action.impl.SponsorshipActivationAction" parent="abstractAction" scope="request">
+		<property name="currentUserSupport" ref="currentUserSupport"/>
+		<property name="userService" ref="usersService"/>
+		<property name="advertisingService" ref="advertisingService"/>
+		<property name="searchService" ref="searchPersistenceService"/>
+		<property name="headerSupport" ref="overviewHeaderSupport"/>
+		<property name="urlService" ref="urlService"/>
+	</bean>
+	<bean id="rankPlacesAction" class="com.nextep.proto.action.impl.tools.RankPlacesAction" parent="abstractAction" scope="request">
+		<property name="statisticService" ref="statisticsService"/>
+		<property name="searchService" ref="searchPersistenceService"/>
+	</bean> 
+</beans> 

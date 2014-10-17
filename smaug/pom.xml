@@ -1,0 +1,23 @@
+<project
+	xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+	<parent>
+		<groupId>neXtep</groupId>
+		<artifactId>master-pom</artifactId>
+		<version>0.0.1</version>
+	</parent>
+	<modelVersion>4.0.0</modelVersion>
+	<artifactId>smaug</artifactId>
+	<packaging>pom</packaging>
+	<name>Search Module for Aggregation of Users Greeds</name>
+	<version>0.5.1-SNAPSHOT</version>
+
+	<modules>
+		<module>smaug-common</module>
+		<module>smaug-api</module>
+<!-- 		<module>smaug-solr</module> -->
+	</modules>
+
+</project>

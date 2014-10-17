@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:jee="http://www.springframework.org/schema/jee"
+	xsi:schemaLocation="
+    http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+    http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-3.0.xsd
+    http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd">
+	<import resource="classpath:META-INF/api/services/springContext.xml" />
+	<import resource="classpath:META-INF/concurrent/javautil/springContext.xml" />
+	<import resource="classpath:META-INF/smaug/solr/springContext.xml" />
+	<import resource="classpath:META-INF/users-services/springContext.xml" />
+	<import resource="classpath:META-INF/media-services/springContext.xml" />
+	<import resource="classpath:META-INF/tags-services/springContext.xml" />
+	<import resource="classpath:META-INF/geo-services/springContext.xml" />
+	<import resource="classpath:META-INF/messages-services/springContext.xml" />
+	<import resource="classpath:META-INF/events-services/springContext.xml" />
+	<import resource="classpath:META-INF/activities-services/springContext.xml" />
+	<import resource="classpath:META-INF/advertising-services/springContext.xml" />
+	<import resource="classpath:META-INF/properties-services/springContext.xml" />
+	<import resource="classpath:META-INF/descriptions-services/springContext.xml" />
+	<import resource="classpath:META-INF/comments-services/springContext.xml" />
+	<import resource="classpath:META-INF/statistics-services/springContext.xml" />
+	<import resource="classpath:META-INF/unit/utils/springContext.xml" />
+	<import resource="calContext.xml" />
+	<import resource="blockContext.xml" />
+	<import resource="factoryContext.xml" />
+	<import resource="actionContext.xml" />
+	<import resource="serviceContext.xml" />
+
+
+	<bean id="globalMessages" class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
+		<property name="basename" value="classpath:globalmessages"/>
+		<property name="defaultEncoding" value="UTF-8"/>
+		<property name="fallbackToSystemLocale" value="false"/>
+	</bean>
+
+</beans>
+

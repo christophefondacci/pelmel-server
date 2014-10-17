@@ -1,0 +1,106 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<artifactId>api</artifactId>
+		<groupId>neXtep</groupId>
+		<version>0.5.4-SNAPSHOT</version>
+	</parent>
+	<artifactId>api-aql</artifactId>
+	<name>Apis Query Language</name>
+
+	<build>
+		<plugins>
+		
+		<!--
+			The antlr plugin is deactivated to give some compatibility with
+			the guys which are using an older and less compatible maven plugin
+			for Eclipse.
+			In the meantime, grammar files are commited to the regular
+			src/main/java source tree.
+		 -->
+<!-- 			<plugin> -->
+<!-- 				<groupId>org.antlr</groupId> -->
+<!-- 				<artifactId>antlr3-maven-plugin</artifactId> -->
+<!-- 				<version>3.1.3-1</version> -->
+<!-- 				<executions> -->
+<!-- 					<execution> -->
+<!-- 						<goals> -->
+<!-- 							<goal>antlr</goal> -->
+<!-- 						</goals> -->
+<!-- 					</execution> -->
+<!-- 				</executions> -->
+<!-- 			</plugin> -->
+
+		<!--
+			This was an ugly trick to try to make the antlr plugin with older
+			m2eclipse plugin. It worked, but it works no more with the latest
+			m2e plugin which handles antlr plugin perfectly by itself.
+		-->
+<!-- 			<plugin> -->
+<!-- 				<artifactId>maven-antrun-plugin</artifactId> -->
+<!-- 				<executions> -->
+<!-- 					<execution> -->
+<!-- 						<id>clean-generated-sources</id> -->
+<!-- 						<phase>initialize</phase> -->
+<!-- 						<goals> -->
+<!-- 							<goal>run</goal> -->
+<!-- 						</goals> -->
+<!-- 						<configuration> -->
+<!-- 							<tasks> -->
+<!-- 								<delete dir="target/generated-sources/antlr3" /> -->
+<!-- 							</tasks> -->
+<!-- 						</configuration> -->
+<!-- 					</execution> -->
+<!-- 					<execution> -->
+<!-- 						<id>copy-generated-sources</id> -->
+<!-- 						<phase>process-sources</phase> -->
+<!-- 						<goals> -->
+<!-- 							<goal>run</goal> -->
+<!-- 						</goals> -->
+<!-- 						<configuration> -->
+<!-- 							<tasks> -->
+<!-- 								<copy todir="src/main/java"> -->
+<!-- 									<fileset dir="target/generated-sources/antlr3" -->
+<!-- 										includes="**/*.java" /> -->
+<!-- 								</copy> -->
+<!-- 								<delete dir="target/generated-sources/antlr3" /> -->
+<!-- 							</tasks> -->
+<!-- 						</configuration> -->
+<!-- 					</execution> -->
+<!-- 				</executions> -->
+<!-- 			</plugin> -->
+		</plugins>
+	</build>
+
+	<dependencies>
+		<dependency>
+			<groupId>tvtrip</groupId>
+			<artifactId>api-services</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.antlr</groupId>
+			<artifactId>antlr-runtime</artifactId>
+			<version>3.1.3</version>
+		</dependency>
+
+		<!-- Test -->
+
+		<dependency>
+			<groupId>tvtrip</groupId>
+			<artifactId>api-test</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.8.1</version>
+			<scope>test</scope>
+		</dependency>
+
+	</dependencies>
+</project>

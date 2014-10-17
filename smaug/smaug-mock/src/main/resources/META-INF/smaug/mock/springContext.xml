@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+	<import resource="classpath:/META-INF/common/springContext.xml" />
+	<bean id="searchService" class="com.videopolis.smaug.service.impl.MockSearchServiceImpl">
+		<property name="solrServer">
+			<bean class="org.apache.solr.client.solrj.impl.CommonsHttpSolrServer">
+				<constructor-arg value="http://carlos:8080/solr/" />
+			</bean>
+		</property>
+		<property name="geodataDao" ref="commonGeodataDao" />
+	</bean>
+
+</beans>

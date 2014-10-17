@@ -1,0 +1,21 @@
+# Exclude Files From All Robots:
+
+User-agent: *
+
+Disallow: /userOverview*
+Disallow: /searchUser*
+Disallow: /ajax*
+Disallow: /add*
+Disallow: /s-search/u-*
+Disallow: /s-recherche/u-*
+Disallow: /s-search/m-map/*
+Disallow: /s-recherche/s-carte/*
+Disallow: /mapInfo*
+Disallow: /ilike*
+Disallow: /s-search/n-*
+Disallow: /s-recherche/n-*
+
+Sitemap: http://www.pelmelguide.com/sitemap.xml
+
+# End robots.txt file
+

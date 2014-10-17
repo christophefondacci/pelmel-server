@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:util="http://www.springframework.org/schema/util"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+	http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-2.0.xsd">
+
+	<bean id="searchReferenceJaxbService"
+		class="com.videopolis.smaug.common.jaxb.ResourceJaxbServiceImpl">
+		<property name="modelPackageName" value="com.videopolis.smaug.common.model.impl.xml" />
+		<property name="resourcePath" value="classpath:" />
+	</bean>
+
+	<bean id="searchReferenceService" init-method="init"
+		class="com.videopolis.smaug.common.service.impl.SearchReferenceServiceImpl">
+		<property name="facetCategories">
+			<bean factory-bean="searchReferenceJaxbService" factory-method="unmarshallXmlFromResource">
+				<constructor-arg
+					value="com.videopolis.smaug.common.model.impl.xml.FacetCategories" />
+				<constructor-arg value="facetCategories.xml" />
+			</bean>
+		</property>
+		<property name="sorters">
+			<bean factory-bean="searchReferenceJaxbService" factory-method="unmarshallXmlFromResource">
+				<constructor-arg
+					value="com.videopolis.smaug.common.model.impl.xml.Sorters" />
+				<constructor-arg value="sorters.xml" />
+			</bean>
+		</property>
+		<property name="rangeFormat" value="[%d TO %d]" />
+	</bean>
+
+</beans>

@@ -1,0 +1,44 @@
+{
+  "name": "pelmel",
+  "title": "Pelmel Guide",
+  "description": "Your Mobile Guide To Gay Hangouts",
+  "version": "2.1.0",
+  "homepage": "http://www.pelmelguide.com",
+  "author": {
+    "name": "Christophe Fondacci - FGP Digital",
+    "url": "http://www.pelmelguide.com"
+  },
+  "repository": {
+    "type": "svn",
+    "url": "http://tg_admin/svn/togayther"
+  },
+  "bugs": "christophe@pelmelguide.com",
+  "licenses": [
+    {
+      "type": "Commercial",
+      "url": "http://www.pelmelguide.com"
+    }
+  ],
+  "keywords": [
+    "pelmel",
+    "guide",
+    "gay",
+    "hangouts",
+    "mobile",
+    "guide"
+  ],
+  "devDependencies": {
+    "grunt-usemin": "~2.2.0",
+    "grunt": "~0.4.5",
+    "load-grunt-tasks": "~0.6.0"
+  },
+  "dependencies": {
+    "grunt-contrib-clean": "~0.5.0",
+    "grunt-contrib-concat": "~0.4.0",
+    "grunt-contrib-uglify": "~0.5.0",
+    "grunt-contrib-copy": "~0.5.0",
+    "grunt-contrib-cssmin": "~0.10.0",
+    "grunt-filerev": "^0.2.1",
+    "grunt-usemin": "^2.1.1"
+  }
+}

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:jaxrs="http://cxf.apache.org/jaxrs"
+	xmlns:jee="http://www.springframework.org/schema/jee"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+        http://www.springframework.org/schema/beans/spring-beans-3.0.xsd 
+        http://www.springframework.org/schema/jee 
+        http://www.springframework.org/schema/jee/spring-jee-3.0.xsd">
+
+	<!-- JPA -->
+	<import resource="classpath:META-INF/geo-services/jpaContext.xml" />
+
+	<!-- Transaction support -->
+	<import resource="classpath:META-INF/geo-services/transactionContext.xml" />
+
+	<!-- DAO Layer -->
+	<import resource="classpath:META-INF/geo-services/daoContext.xml" />
+
+	<bean id="geoDataSource"
+		class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		<constructor-arg
+			value="jdbc:mysql://localhost:3306/proto_users?useUnicode=true&amp;characterEncoding=UTF-8&amp;cachePrepStmts=true" />
+		<constructor-arg value="root" />
+		<constructor-arg value="" />
+	</bean>
+	<bean id="geoService" class="com.nextep.geo.services.impl.GeoServiceImpl">
+		<property name="calDao" ref="geoDao" />
+	</bean>
+	<bean id="placesService" class="com.nextep.geo.services.impl.PlacesServiceImpl">
+		<property name="geoDao" ref="geoDao" />
+	</bean>
+</beans>

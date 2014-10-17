@@ -1,0 +1,7 @@
+.metadata
+target
+httpd
+tomcat
+.*
+!/.gitignore
+node_modules

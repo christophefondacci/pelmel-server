@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<facetCategories xmlns="http://www.tvtrip.com/smaug/SearchReference"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.tvtrip.com/smaug/SearchReference ../xsd/SearchReference.xsd ">
+
+	<facetCategory>
+		<categoryCode>price</categoryCode>
+		<groupingStrategy>OR</groupingStrategy>
+		<urlCode>r</urlCode>
+		<urlSeoTranslation>false</urlSeoTranslation>
+		<range>true</range>
+		<scopes>
+			<scope>LISTVIEW</scope>
+		</scopes>
+	</facetCategory>
+
+	<facetCategory>
+		<categoryCode>star</categoryCode>
+		<groupingStrategy>OR</groupingStrategy>
+		<urlCode>c</urlCode>
+		<urlSeoTranslation>true</urlSeoTranslation>
+		<scopes>
+			<scope>LISTVIEW</scope>
+		</scopes>
+	</facetCategory>
+
+	<facetCategory>
+		<categoryCode>amenity</categoryCode>
+		<groupingStrategy>AND</groupingStrategy>
+		<urlCode>a</urlCode>
+		<urlSeoTranslation>true</urlSeoTranslation>
+		<scopes>
+			<scope>LISTVIEW</scope>
+		</scopes>
+	</facetCategory>
+
+<!-- 
+	<facetCategory>
+		<categoryCode>neighborhood</categoryCode>
+		<groupingStrategy>OR</groupingStrategy>
+		<urlCode>n</urlCode>
+		<urlSeoTranslation>true</urlSeoTranslation>
+	</facetCategory>
+ -->
+
+	<facetCategory>
+		<categoryCode>brand</categoryCode>
+		<groupingStrategy>OR</groupingStrategy>
+		<urlCode>b</urlCode>
+		<urlSeoTranslation>true</urlSeoTranslation>
+		<scopes>
+			<scope>LISTVIEW</scope>
+		</scopes>
+	</facetCategory>
+
+	<facetCategory>
+		<categoryCode>style</categoryCode>
+		<groupingStrategy>AND</groupingStrategy>
+		<urlCode>y</urlCode>
+		<urlSeoTranslation>true</urlSeoTranslation>
+		<scopes>
+			<scope>LISTVIEW</scope>
+		</scopes>
+	</facetCategory>
+
+	<facetCategory>
+		<categoryCode>hotelName</categoryCode>
+		<groupingStrategy>OR</groupingStrategy>
+		<urlCode>m</urlCode>
+		<urlSeoTranslation>false</urlSeoTranslation>
+		<scopes>
+			<scope>LISTVIEW</scope>
+		</scopes>
+	</facetCategory>
+
+	<facetCategory>
+		<categoryCode>beginWith</categoryCode>
+		<groupingStrategy>OR</groupingStrategy>
+		<urlCode>w</urlCode>
+		<urlSeoTranslation>false</urlSeoTranslation>
+		<scopes>
+			<scope>CHILDREN</scope>
+			<scope>CITY</scope>
+			<scope>HOTEL</scope>
+			<scope>POI</scope>
+		</scopes>
+	</facetCategory>
+
+	<facetCategory>
+		<categoryCode>category</categoryCode>
+		<groupingStrategy>OR</groupingStrategy>
+		<urlCode>g</urlCode>
+		<urlSeoTranslation>true</urlSeoTranslation>
+		<scopes>
+			<scope>POI</scope>
+		</scopes>
+	</facetCategory>
+</facetCategories>

@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:jee="http://www.springframework.org/schema/jee"
+	xsi:schemaLocation="
+    http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+    http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-3.0.xsd
+    http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd">
+	
+
+	<bean id="apisTaskRunnerService" parent="abstractConcurrentJavaUtilTaskRunnerService">
+		<property name="timeout" value="3000" />
+	</bean>
+	<bean id="apisRequestTaskRunnerService" parent="abstractConcurrentJavaUtilTaskRunnerService" />
+	<bean id="apisToolsTaskRunnerService" parent="abstractConcurrentJavaUtilTaskRunnerService">
+	</bean>
+	<bean id="searchService" parent="abstractSearchService">
+		<property name="userSolrUrl">
+			<jee:jndi-lookup jndi-name="java:comp/env/smaug/usersSolrServer"/>
+		</property>
+		<property name="placesSolrUrl" >
+			<jee:jndi-lookup jndi-name="java:comp/env/smaug/placesSolrServer"/>
+		</property>
+		<property name="eventsSolrUrl">
+			<jee:jndi-lookup jndi-name="java:comp/env/smaug/eventsSolrServer"/>
+		</property>
+		<property name="activitiesSolrUrl">
+			<jee:jndi-lookup jndi-name="java:comp/env/smaug/activitiesSolrServer"/>
+		</property>
+		<property name="suggestSolrUrl">
+			<jee:jndi-lookup jndi-name="java:comp/env/smaug/suggestSolrServer"/>
+		</property>
+		<property name="citiesSolrUrl">
+			<jee:jndi-lookup jndi-name="java:comp/env/smaug/citiesSolrServer"/>
+		</property>
+		<property name="filterSeo" value="true"/>
+	</bean>
+	<bean id="mobileSearchService" parent="searchService">
+		<property name="filterSeo" value="false"/>
+	</bean>
+	<bean id="searchPersistenceService" class="com.nextep.smaug.solr.service.impl.SolrSearchPersistenceServiceImpl" init-method="init">
+		<property name="userSolrUrl">
+			<jee:jndi-lookup jndi-name="java:comp/env/smaug/masterUsersSolrServer"/>
+		</property>
+		<property name="placesSolrUrl" >
+			<jee:jndi-lookup jndi-name="java:comp/env/smaug/masterPlacesSolrServer"/>
+		</property>
+		<property name="eventsSolrUrl">
+			<jee:jndi-lookup jndi-name="java:comp/env/smaug/masterEventsSolrServer"/>
+		</property>
+		<property name="activitiesSolrUrl">
+			<jee:jndi-lookup jndi-name="java:comp/env/smaug/masterActivitiesSolrServer"/>
+		</property>
+		<property name="suggestSolrUrl">
+			<jee:jndi-lookup jndi-name="java:comp/env/smaug/masterSuggestSolrServer"/>
+		</property>
+		<property name="citiesSolrUrl">
+			<jee:jndi-lookup jndi-name="java:comp/env/smaug/masterCitiesSolrServer"/>
+		</property>
+		
+		<property name="lastSeenMaxTime">
+			<jee:jndi-lookup jndi-name="java:comp/env/smaug/lastSeenMaxTime"/>
+		</property>
+	</bean>
+
+	<bean id="apiService" parent="abstractApiService">
+		<property name="taskRunnerService" ref="apisTaskRunnerService" />
+		<property name="requestTaskRunnerService" ref="apisRequestTaskRunnerService" />
+		<property name="searchService" ref="searchService" />
+		<property name="calServices">
+			<list>
+				<ref bean="usersService" />
+				<ref bean="mediaService" />
+				<ref bean="tagsService" />
+				<ref bean="geoService" />
+				<ref bean="messagesService" />
+				<ref bean="placesService"/>
+				<ref bean="eventsService"/>
+				<ref bean="eventSeriesService"/>
+				<ref bean="activitiesService"/>
+				<ref bean="advertisingService"/>
+				<ref bean="bannersService"/>
+				<ref bean="propertiesService"/>
+				<ref bean="descService"/>
+				<ref bean="commentsService"/>
+				<ref bean="statisticsService"/>
+				<ref bean="viewsService"/>
+			</list>
+		</property>
+	</bean>
+	<bean id="mobileApiService" parent="apiService">
+		<property name="searchService" ref="mobileSearchService"/>
+	</bean>
+	<bean id="toolsApiService" parent="apiService">
+		<property name="taskRunnerService" ref="apisToolsTaskRunnerService"/>
+	</bean>
+	<bean id="urlService" class="com.nextep.proto.services.impl.UrlServiceImpl">
+		<property name="webappPrefix" value=""/>
+		<property name="messageSource" ref="globalMessages"/>
+		<property name="domainName">
+			<jee:jndi-lookup jndi-name="java:comp/env/togaytherDomain"/>
+		</property>
+	</bean>
+	<bean id="mobileUrlService" class="com.nextep.proto.services.mobile.impl.MobileUrlServiceImpl">
+		<property name="baseUrlService" ref="urlService"/>
+	</bean>
+	<bean id="fullAjaxUrlService" parent="urlService">
+		<property name="ajaxOverview" value="true"/>
+		<property name="addJSCalls" value="false"/>
+	</bean>
+	<bean id="puffService" class="com.nextep.proto.services.impl.PuffServiceImpl">
+		<property name="partnerId" value="1000"/>
+	</bean>
+	<bean id="distanceDisplayService" class="com.nextep.proto.services.impl.DistanceDisplayServiceImpl">
+		<property name="distanceService" ref="distanceService"/>
+		<property name="messageSource" ref="globalMessages"/>
+	</bean>
+	<bean id="propertiesManagementService" class="com.nextep.proto.services.impl.PropertiesManagementServiceImpl">
+		<property name="messageSource" ref="globalMessages"/>
+		<property name="puffService" ref="puffService"/>
+		<property name="propertiesService" ref="propertiesService"/>
+	</bean>
+	<bean id="descriptionsManagementService" class="com.nextep.proto.services.impl.DescriptionsManagementServiceImpl">
+		<property name="puffService" ref="puffService"/>
+		<property name="descriptionService" ref="descService"/>
+	</bean>
+	<bean id="rightsManagementService" class="com.nextep.proto.services.impl.RightsManagementServiceImpl">
+		<property name="adminUserKeys">
+			<jee:jndi-lookup jndi-name="java:comp/env/adminUserKeys"/>
+		</property>
+	</bean>
+	
+	<bean id="navigationResourceService"
+		class="com.nextep.proto.services.impl.NavigationResourceServiceImpl">
+		<property name="path" value="classpath:"/>
+	</bean>
+	<bean id="distanceService" parent="abstractDistanceService">
+		<property name="units">
+			<bean factory-bean="navigationResourceService" factory-method="unmarshallXmlFromResource">
+				<constructor-arg ref="measurementJaxbService" />
+				<constructor-arg value="com.videopolis.unit.model.impl.xml.Units" />
+				<constructor-arg value="distance.xml" />
+			</bean>
+		</property>
+	</bean>
+	<bean id="jsonBuilder" class="com.nextep.proto.builders.impl.JsonBuilderImpl">
+		<property name="messageSource" ref="globalMessages"/>
+		<property name="distanceDisplayService" ref="distanceDisplayService"/>
+		<property name="eventManagementService" ref="eventManagementService"/>
+		<property name="baseUrl">
+			<jee:jndi-lookup jndi-name="java:comp/env/togaytherBaseUrl"/>
+		</property>
+	</bean>
+	
+	<bean id="localizationService" class="com.nextep.proto.services.impl.LocalizationServiceImpl">
+		<property name="usersService" ref="usersService"/>
+		<property name="activitiesService" ref="activitiesService"/>
+		<property name="localizationDistance">
+			<jee:jndi-lookup jndi-name="java:comp/env/mobile/localizationDistance"></jee:jndi-lookup>
+		</property>
+		<property name="lastSeenMaxTime">
+			<jee:jndi-lookup jndi-name="java:comp/env/smaug/lastSeenMaxTime"/>
+		</property>
+		<property name="searchService" ref="searchPersistenceService"/>
+		<property name="geoService" ref="geoService"/>		
+	</bean>
+	<bean id="mediaHelper" class="com.nextep.proto.helpers.MediaHelper">
+		<property name="domainName">
+			<jee:jndi-lookup jndi-name="java:comp/env/togaytherDomain"/>
+		</property>
+	</bean>
+	<bean id="sitemapService" class="com.nextep.proto.services.impl.SitemapServiceImpl"/>
+	<bean id="eventManagementService" class="com.nextep.proto.services.impl.EventManagementServiceImpl">
+		<property name="eventService" ref="eventsService"/>
+		<property name="messageSource" ref="globalMessages"/>
+		<property name="mediaService" ref="mediaService"/>
+		<property name="searchService" ref="searchPersistenceService"/>
+		<property name="apiService" ref="apiService"/>
+		<property name="descriptionsManagementService" ref="descriptionsManagementService"/>
+		<property name="taskService" ref="apisRequestTaskRunnerService"/>
+		<property name="maxEventsCreation">
+			<jee:jndi-lookup jndi-name="java:comp/env/maxEventsCreation"/>
+		</property>
+	</bean>
+	<bean id="viewManagementService" class="com.nextep.proto.services.impl.ViewManagementServiceImpl">
+		<property name="viewsService" ref="viewsService"/>
+	</bean>
+	<bean id="notificationService" class="com.nextep.proto.services.impl.NotificationServiceImpl" init-method="init">
+		<property name="pushKeyPath">
+			<jee:jndi-lookup jndi-name="java:comp/env/push.key.path"/>
+		</property>
+		<property name="pushKeyPassword">
+			<jee:jndi-lookup jndi-name="java:comp/env/push.key.password"/>
+		</property>
+		<property name="production">
+			<jee:jndi-lookup jndi-name="java:comp/env/push.production"/>
+		</property>
+	</bean>
+	<bean id="pngOptimizer" class="com.googlecode.pngtastic.core.PngOptimizer"/>
+</beans>
+

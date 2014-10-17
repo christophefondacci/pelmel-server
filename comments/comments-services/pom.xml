@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<artifactId>comments</artifactId>
+		<groupId>neXtep</groupId>
+		<version>0.0.1-SNAPSHOT</version>
+	</parent>
+	<artifactId>comments-services</artifactId>
+	<name>Comments services</name>
+	<properties>
+		<spring.version>3.0.5.RELEASE</spring.version>
+	</properties>
+	<dependencies>
+		<dependency>
+			<groupId>neXtep</groupId>
+			<artifactId>comments-model</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>neXtep</groupId>
+			<artifactId>cal-services</artifactId>
+			<version>${cal.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>neXtep</groupId>
+			<artifactId>cal-utils</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+			<scope>compile</scope>
+		</dependency>
+		
+		<!-- Spring -->
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-orm</artifactId>
+			<version>${spring.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-jdbc</artifactId>
+			<version>${spring.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.aspectj</groupId>
+			<artifactId>aspectjweaver</artifactId>
+			<version>1.6.8</version>
+		</dependency>
+	</dependencies>
+</project>

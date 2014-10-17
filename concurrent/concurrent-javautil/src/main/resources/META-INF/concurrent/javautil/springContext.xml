@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
+
+	<!-- Default factory for TaskCallable -->
+	<bean id="concurrentJavaUtilSimpleTaskCallableFactory"
+		class="com.videopolis.concurrent.factory.impl.SimpleTaskCallableFactoryImpl" />
+
+	<!-- Pooled factory for TaskCallable -->
+	<bean id="concurrentJavaUtilPoolTaskCallableFactory"
+		class="com.videopolis.concurrent.factory.impl.PoolTaskCallableFactoryImpl"
+		init-method="init" destroy-method="dispose">
+		<property name="wrappedFactory" ref="concurrentJavaUtilSimpleTaskCallableFactory" />
+	</bean>
+
+	<bean abstract="true" id="abstractConcurrentJavaUtilTaskRunnerService"
+		class="com.videopolis.concurrent.service.impl.ExecutorServiceTaskRunnerServiceImpl">
+		<property name="executorService">
+			<bean class="java.util.concurrent.Executors" factory-method="newCachedThreadPool" />
+		</property>
+		<property name="taskCallableFactory" ref="concurrentJavaUtilSimpleTaskCallableFactory" />
+	</bean>
+
+</beans>

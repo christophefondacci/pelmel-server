@@ -1,0 +1,432 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:jee="http://www.springframework.org/schema/jee"
+	xsi:schemaLocation="
+    http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+    http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-3.0.xsd">
+
+	<bean id="overviewHeaderSupport" class="com.nextep.proto.blocks.impl.HeaderOverviewSupportImpl" scope="prototype">
+		<property name="messageSource" ref="globalMessages"/>
+		<property name="urlService" ref="urlService"/>
+		<property name="domainName">
+			<jee:jndi-lookup jndi-name="java:comp/env/togaytherDomain"/>
+		</property>
+	</bean>
+	<bean id="searchHeaderSupport" class="com.nextep.proto.blocks.impl.HeaderSearchSupportImpl" scope="prototype">
+		<property name="messageSource" ref="globalMessages"/>
+		<property name="urlService" ref="urlService"/>
+		<property name="domainName">
+			<jee:jndi-lookup jndi-name="java:comp/env/togaytherDomain"/>
+		</property>
+	</bean>
+	<bean id="indexHeaderSupport" class="com.nextep.proto.blocks.impl.HeaderIndexSupportImpl" scope="prototype">
+		<property name="messageSource" ref="globalMessages"/>
+		<property name="domainName">
+			<jee:jndi-lookup jndi-name="java:comp/env/togaytherDomain"/>
+		</property>
+	</bean>
+	<bean id="mapHeaderSupport" class="com.nextep.proto.blocks.impl.HeaderMapSupportImpl" scope="prototype">
+		<property name="messageSource" ref="globalMessages"/>
+		<property name="baseHeaderSupport" ref="searchHeaderSupport"/>
+	</bean>
+	<bean id="titledHeaderSupport" class="com.nextep.proto.blocks.impl.HeaderTitledSupportImpl" abstract="true">
+		<property name="messageSource" ref="globalMessages"/>
+	</bean>
+	<bean id="myMessagesHeaderSupport" parent="titledHeaderSupport" scope="prototype">
+		<property name="titleMessageKey" value="header.title.myMessages"/>
+		<property name="pageStyle" value="my-messages"/>
+		<property name="canonical" value="/myMessages"/>
+	</bean>
+	<bean id="myProfileHeaderSupport" parent="titledHeaderSupport" scope="prototype">
+		<property name="titleMessageKey" value="header.title.myProfile"/>
+		<property name="descriptionMessageKey" value="header.description.profile"/>
+		<property name="pageStyle" value="profile"/>
+		<property name="canonical" value="/myProfile"/>
+	</bean>
+	<bean id="aboutHeaderSupport" parent="titledHeaderSupport" scope="prototype">
+		<property name="titleMessageKey" value="header.title.about"/>
+		<property name="pageStyle" value="profile"/>
+		<property name="canonical" value="/about"/>
+		<property name="robotsTags" value="INDEX,FOLLOW"/>
+	</bean>
+	<bean id="partnersHeaderSupport" parent="titledHeaderSupport" scope="prototype">
+		<property name="titleMessageKey" value="partners.title"/>
+		<property name="pageStyle" value="profile"/>
+		<property name="canonical" value="/partners"/>
+		<property name="robotsTags" value="INDEX,FOLLOW"/>
+	</bean>
+	<bean id="promoteHeaderSupport" parent="titledHeaderSupport" scope="prototype">
+		<property name="titleMessageKey" value="promote.page.title"/>
+		<property name="pageStyle" value="profile"/>
+		<property name="canonical" value="/promote"/>
+		<property name="robotsTags" value="INDEX,FOLLOW"/>
+	</bean>
+	<bean id="myMediaHeaderSupport" parent="titledHeaderSupport" scope="prototype">
+		<property name="titleMessageKey" value="header.title.myMedia"/>
+		<property name="pageStyle" value="bar"/>
+	</bean>
+	<bean id="descriptionsHeaderSupport" parent="titledHeaderSupport" scope="prototype">
+		<property name="titleMessageKey" value="desc.form.title"/>
+		<property name="pageStyle" value="bar"/>
+	</bean>
+	<bean id="commonSearchSupport" class="com.nextep.proto.blocks.impl.CommonSearchSupportImpl" scope="prototype">
+		<property name="messageSource" ref="globalMessages"/>
+	</bean>
+	<bean id="userSearchSupport" class="com.nextep.proto.blocks.impl.UserSearchSupportImpl"
+		scope="prototype">
+		<property name="messageSource" ref="globalMessages" />
+		<property name="commonSearchSupport" ref="commonSearchSupport"/>
+	</bean>
+	<bean id="userLikeSearchSupport" parent="userSearchSupport">
+		<property name="translationFacetTitle" value="block.facets.users.like.title"/>
+	</bean>
+	<bean id="userAttendsSearchSupport" parent="userSearchSupport">
+		<property name="translationFacetTitle" value="block.facets.users.attends.title"/>
+		<property name="hideTitleWhenNoResult" value="true"/>
+	</bean>
+	<bean id="mobileUserSearchSupport" class="com.nextep.proto.blocks.mobile.impl.MobileSearchSupportImpl">
+		<property name="baseSearchSupport" ref="userSearchSupport"></property>
+		<property name="baseUrl">
+			<jee:jndi-lookup jndi-name="java:comp/env/togaytherBaseUrl"/>
+		</property>
+	</bean>
+	<bean id="userLocalSearchSupport" scope="prototype" parent="userSearchSupport">
+		<property name="translationFacetTitle" value="block.facets.usersLocal.title"/>
+	</bean>
+	<bean id="placeSearchSupport" class="com.nextep.proto.blocks.impl.PlaceSearchSupportImpl"
+		scope="prototype">
+		<property name="messageSource" ref="globalMessages" />
+		<property name="commonSearchSupport" ref="commonSearchSupport"/>
+	</bean>
+	<bean id="mobilePlaceSearchSupport" class="com.nextep.proto.blocks.mobile.impl.MobileSearchSupportImpl">
+		<property name="baseSearchSupport" ref="placeSearchSupport"></property>
+		<property name="baseUrl">
+			<jee:jndi-lookup jndi-name="java:comp/env/togaytherBaseUrl"/>
+		</property>
+	</bean>
+	<bean id="eventSearchSupport" class="com.nextep.proto.blocks.impl.EventSearchSupportImpl" scope="prototype">
+		<property name="messageSource" ref="globalMessages"/>
+		<property name="commonSearchSupport" ref="commonSearchSupport"/>
+	</bean>
+	<bean id="abstractLocalizationSupport" class="com.nextep.proto.blocks.base.AbstractLocalizationSupport" abstract="true">
+		<property name="messageSource" ref="globalMessages"/>
+	</bean>
+	<bean id="userLocalizationSupport" class="com.nextep.proto.blocks.impl.UserLocalizationSupportImpl"
+		scope="prototype" parent="abstractLocalizationSupport"/>
+	<bean id="placeLocalizationSupport" class="com.nextep.proto.blocks.impl.PlaceLocalizationSupportImpl"
+		scope="prototype" parent="abstractLocalizationSupport"/>
+	<bean id="eventLocalizationSupport" class="com.nextep.proto.blocks.impl.EventLocalizationSupportImpl"
+		scope="prototype" parent="abstractLocalizationSupport"/>
+	<bean id="mapLocalizationSupport" class="com.nextep.proto.blocks.impl.MapLocalizationSupportImpl"
+		scope="prototype" parent="abstractLocalizationSupport"/>	
+	<bean id="messagingSupport" class="com.nextep.proto.blocks.impl.MessagingSupportImpl"
+		scope="prototype">
+		<property name="messageRefreshIntervalMs">
+			<jee:jndi-lookup jndi-name="java:comp/env/messageRefreshIntervalMs"/>
+		</property>
+		<property name="messageSource" ref="globalMessages"/>
+	</bean>
+	<bean id="messagingReplySupport" class="com.nextep.proto.blocks.impl.MessagingReplySupportImpl"
+		scope="prototype">
+		<property name="messageSource" ref="globalMessages"/>
+		<property name="baseMessagingSupport" ref="messagingSupport"/>
+	</bean>
+	<bean id="mediaProvider" class="com.nextep.proto.blocks.impl.MediaProviderImpl"
+		scope="prototype" >
+		<property name="baseUrl">
+			<jee:jndi-lookup jndi-name="java:comp/env/togaytherBaseUrl"/>
+		</property>
+		<property name="overviewImageWidth" value="750"/>
+		<property name="overviewImageHeight" value="346"/>
+		<property name="urlService" ref="urlService"/>
+	</bean>
+	<bean id="eventsMediaProvider" class="com.nextep.proto.blocks.impl.MediaEventsProviderImpl" scope="prototype">
+		<property name="baseMediaProvider">
+			<bean class="com.nextep.proto.blocks.impl.MediaProviderImpl"
+			scope="prototype" >
+				<property name="baseUrl">
+					<jee:jndi-lookup jndi-name="java:comp/env/togaytherBaseUrl"/>
+				</property>
+				<property name="overviewImageWidth" value="750"/>
+				<property name="overviewImageHeight" value="316"/>
+				<property name="urlService" ref="urlService"/>
+			</bean>
+		</property>
+	</bean>
+	<bean id="mediaProviderPreview" class="com.nextep.proto.blocks.impl.MediaProviderImpl"
+		scope="prototype" >
+		<property name="baseUrl">
+			<jee:jndi-lookup jndi-name="java:comp/env/togaytherBaseUrl"/>
+		</property>
+		<property name="overviewImageWidth" value="270"/>
+		<property name="overviewImageHeight" value="200"/>
+		<property name="urlService" ref="urlService"/>
+	</bean>
+	<bean id="mediaPersistenceSupport"
+		class="com.nextep.proto.blocks.impl.MediaPersistenceSupportImpl"
+		scope="prototype">
+		<property name="mediaService" ref="mediaService" />
+		<property name="localMediaPath">
+			<jee:jndi-lookup jndi-name="java:comp/env/media/localPath"/>
+		</property>
+		<property name="localMediaUrlPrefix" value="/media"></property>
+		<property name="maxWidth" value="750"/>
+		<property name="maxHeight" value="350"/>
+		<property name="thumbMaxWidth" value="111" />
+		<property name="thumbMaxHeight" value="111" />
+		<property name="miniThumbMaxWidth" value="50" />
+		<property name="miniThumbMaxHeight" value="50" />
+		<property name="previewWidth" value="270"/>
+		<property name="previewHeight" value="200"/>
+		<property name="mobileMaxWidth" value="320"/>
+		<property name="mobileMaxHeight" value="416"/>
+		<property name="mobileMaxWidthLandscape" value="480"/>
+		<property name="mobileMaxHeightLandscape" value="268"/>
+		<property name="mobileMaxWidthHighDef" value="640"/>
+		<property name="mobileMaxHeightHighDef" value="896"/>
+		<property name="mobileMaxWidthHighDefLandscape" value="960"/>
+		<property name="mobileMaxHeightHighDefLandscape" value="588"/>
+		<property name="messageSource" ref="globalMessages"/>
+		<property name="pngOptimizer" ref="pngOptimizer"/>
+		<property name="defaultAutoCrop" value="false"/>
+	</bean>
+	<bean id="mobileMediaPersistenceSupport" parent="mediaPersistenceSupport">
+		<property name="defaultAutoCrop" value="true"/>
+	</bean>
+	<bean id="autoCropMediaPersistenceSupport" parent="mediaPersistenceSupport">
+		<property name="defaultAutoCrop" value="true"/>
+	</bean>
+	<bean id="commonOverviewSupport" class="com.nextep.proto.blocks.impl.CommonOverviewSupportImpl"
+		scope="prototype">
+		<property name="messageSource" ref="globalMessages"/>
+	</bean>
+	<bean id="userOverviewSupport" class="com.nextep.proto.blocks.impl.UserOverviewSupportImpl"
+		scope="prototype">
+		<property name="messageSource" ref="globalMessages"/>
+		<property name="baseUrl">
+			<jee:jndi-lookup jndi-name="java:comp/env/togaytherBaseUrl"/>
+		</property>
+	</bean>
+	<bean id="placeOverviewSupport" class="com.nextep.proto.blocks.impl.PlaceOverviewSupportImpl"
+		scope="prototype">
+		<property name="commonOverviewSupport" ref="commonOverviewSupport"/>
+		<property name="messageSource" ref="globalMessages"/>
+		<property name="baseUrl">
+			<jee:jndi-lookup jndi-name="java:comp/env/togaytherBaseUrl"/>
+		</property>
+	</bean>
+	<bean id="eventOverviewSupport" class="com.nextep.proto.blocks.impl.EventOverviewSupportImpl"
+		scope="prototype" >
+		<property name="commonOverviewSupport" ref="commonOverviewSupport"/>
+		<property name="messageSource" ref="globalMessages"/>
+		<property name="baseUrl">
+			<jee:jndi-lookup jndi-name="java:comp/env/togaytherBaseUrl"/>
+		</property>
+	</bean>
+	<bean id="routingOverviewSupport" class="com.nextep.proto.blocks.mobile.impl.MobileRoutingOverviewSupportImpl">
+		<property name="typedOverviewSupportMap">
+			<map key-type="java.lang.String">
+				<entry key="PLAC" value-ref="placeOverviewSupport"/>
+				<entry key="USER" value-ref="userOverviewSupport"/>
+				<entry key="EVNT" value-ref="eventOverviewSupport"/>
+			</map>
+		</property>
+	</bean>
+	<bean id="tagSupport" class="com.nextep.proto.blocks.impl.TagSupportImpl"
+		scope="prototype">
+		<property name="messageSource" ref="globalMessages" />
+	</bean>
+	<bean id="mobileTagSupport" class="com.nextep.proto.blocks.mobile.impl.MobileTagSupportImpl">
+		<property name="baseTagSupport" ref="tagSupport"/>
+		<property name="baseUrl">
+			<jee:jndi-lookup jndi-name="java:comp/env/togaytherBaseUrl"/>
+		</property>
+	</bean>
+	<bean id="currentUserSupport" class="com.nextep.proto.blocks.impl.CurrentUserSupportImpl" scope="prototype">
+		<property name="messageSource" ref="globalMessages" />
+	</bean>
+	<bean id="favoritePlacesSupport" class="com.nextep.proto.blocks.impl.FavoritePlacesSupportImpl" scope="prototype">
+		<property name="messageSource" ref="globalMessages"/>
+		<property name="titleTranslationKey" value="block.favorites.placesTitle"/>
+	</bean>
+	<bean id="favoriteEventsSupport" class="com.nextep.proto.blocks.impl.FavoriteEventsSupportImpl" scope="prototype">
+		<property name="messageSource" ref="globalMessages"/>
+	</bean>
+	<bean id="favoriteUsersSupport" class="com.nextep.proto.blocks.impl.FavoriteUsersSupportImpl" scope="prototype">
+		<property name="messageSource" ref="globalMessages"/>
+	</bean>
+	<bean id="nearbyPlacesSupport" class="com.nextep.proto.blocks.impl.NearbyPlacesSupportImpl" scope="prototype">
+		<property name="messageSource" ref="globalMessages"/>
+		<property name="distanceService" ref="distanceDisplayService"/>
+	</bean>
+	
+	<bean id="mapSupport" class="com.nextep.proto.blocks.impl.MapSupportImpl" scope="prototype">
+		<property name="urlService" ref="urlService"/>
+	</bean>
+	<bean id="homeMapSupport" class="com.nextep.proto.blocks.impl.HomeMapSupportImpl" scope="prototype">
+		<property name="urlService" ref="urlService"/>
+	</bean>
+	<bean id="mapOverviewSupport" class="com.nextep.proto.blocks.impl.MapOverviewSupportImpl" scope="prototype">
+		<property name="urlService" ref="urlService"/>
+		<property name="baseMapSupport" ref="mapSupport"/>
+	</bean>
+	<bean id="popularCitiesSupport" class="com.nextep.proto.blocks.impl.PopularUserPlacesSupportImpl" scope="prototype">
+		<property name="messageSource" ref="globalMessages"/>
+		<property name="basePopularSupport" ref="commonPopularCitiesSupport"/>
+	</bean>
+	<bean id="commonPopularCitiesSupport" class="com.nextep.proto.blocks.impl.CommonPopularCitiesSupportImpl" scope="prototype">
+		<property name="messageSource" ref="globalMessages"/>
+	</bean>
+	<bean id="popularCountriesSupport" class="com.nextep.proto.blocks.impl.PopularCountriesSupportImpl" scope="prototype">
+		<property name="messageSource" ref="globalMessages"/>
+		<property name="basePopularSupport" ref="commonPopularCitiesSupport"/>
+	</bean>
+	
+	<bean id="eventPopularCitiesSupport" class="com.nextep.proto.blocks.impl.EventPopularCitiesSupportImpl" scope="prototype">
+		<property name="messageSource" ref="globalMessages"/>
+		<property name="basePopularSupport" ref="commonPopularCitiesSupport"/>
+	</bean>
+	<bean id="placePopularCitiesSupport" class="com.nextep.proto.blocks.impl.PlacePopularCitiesSupportImpl" scope="prototype">
+		<property name="messageSource" ref="globalMessages"/>
+		<property name="basePopularSupport" ref="commonPopularCitiesSupport"/>
+	</bean>
+	<bean id="sponsoredPopularSupport" class="com.nextep.proto.blocks.impl.SponsoredPopularSupportImpl" scope="prototype">
+		<property name="messageSource" ref="globalMessages"/>
+	</bean>
+	<bean id="subGeoItemPopularSupport" class="com.nextep.proto.blocks.impl.SubGeoItemPopularSupportImpl" scope="prototype">
+		<property name="messageSource" ref="globalMessages"/>
+		<property name="basePopularSupport" ref="commonPopularCitiesSupport"/>
+	</bean>
+	<bean id="popularEventsSupport" class="com.nextep.proto.blocks.impl.PopularEventsSupportImpl" scope="prototype">
+		<property name="messageSource" ref="globalMessages"/>
+		<property name="basePopularSupport" ref="commonPopularCitiesSupport"/>
+	</bean>
+	<bean id="popularPlacesSupport" class="com.nextep.proto.blocks.impl.PopularPlacesSupportImpl" scope="prototype">
+		<property name="messageSource" ref="globalMessages"/>
+		<property name="basePopularSupport" ref="commonPopularCitiesSupport"/>
+	</bean>
+	<bean id="popularActivitiesSupport" class="com.nextep.proto.blocks.impl.PopularActivitiesSupportImpl" scope="prototype">
+		<property name="messageSource" ref="globalMessages"/>
+		<property name="basePopularSupport" ref="commonPopularCitiesSupport"/>
+		<property name="maxElements">
+			<jee:jndi-lookup jndi-name="java:comp/env/homepage.maxRecentChanges"/>
+		</property>
+	</bean>
+	<bean id="eventsListSupport" class="com.nextep.proto.blocks.impl.EventsListBoxSupportImpl" scope="prototype">
+		<property name="messageSource" ref="globalMessages"/>
+	</bean>
+	<bean id="otherEventsListSupport" class="com.nextep.proto.blocks.impl.EventsListBoxSupportImpl" scope="prototype">
+		<property name="messageSource" ref="globalMessages"/>
+		<property name="translationKeyTitle" value="block.events.other"/>
+	</bean>
+	<bean id="myEventsListSupport" class="com.nextep.proto.blocks.impl.EventsListBoxSupportImpl" scope="prototype">
+		<property name="messageSource" ref="globalMessages"/>
+		<property name="translationKeyTitle" value="block.events.user"/>
+	</bean>
+	<bean id="activitySupport" class="com.nextep.proto.blocks.impl.ActivitiesSupportImpl" scope="prototype">
+		<property name="messageSource" ref="globalMessages"/>
+		<property name="distanceService" ref="distanceDisplayService"/>
+	</bean>
+	<bean id="commonOverviewListSupport" class="com.nextep.proto.blocks.impl.CommonOverviewListBoxSupportImpl" scope="prototype" abstract="true">
+		<property name="messageSource" ref="globalMessages"/>
+	</bean>
+	<bean id="eventsOverviewListSupport" class="com.nextep.proto.blocks.impl.EventOverviewListBoxSupportImpl" scope="prototype">
+		<property name="baseListBoxSupport">
+			<bean parent="commonOverviewListSupport">
+				<property name="titleKey" value="news.top.title.events"/>
+			</bean>
+		</property>
+	</bean>
+	<bean id="placesOverviewListSupport" parent="commonOverviewListSupport" scope="prototype">
+		<property name="titleKey" value="news.top.title.places"/>
+	</bean>
+	<bean id="userActivitySupport" class="com.nextep.proto.blocks.impl.UserActivitiesSupportImpl" scope="prototype">
+		<property name="baseActivitySupport" ref="activitySupport"/>
+	</bean>
+	<bean id="eventEditionSupport" class="com.nextep.proto.blocks.impl.EventEditionSupportImpl" scope="prototype">
+		<property name="messageSource" ref="globalMessages"/>
+	</bean>
+	<bean id="placeEditionSupport" class="com.nextep.proto.blocks.impl.PlaceEditionSupportImpl" scope="prototype">
+		<property name="messageSource" ref="globalMessages"/>
+		<property name="rightsManagementService" ref="rightsManagementService"/>
+	</bean>
+	<bean id="propertiesEditionSupport" class="com.nextep.proto.blocks.impl.PropertiesEditionSupportImpl" scope="prototype">
+		<property name="propertiesService" ref="propertiesManagementService"/>
+	</bean>
+	<bean id="descriptionsEditionSupport" class="com.nextep.proto.blocks.impl.DescriptionsEditionSupportImpl" scope="prototype"/>
+	<bean id="propertiesSupport" class="com.nextep.proto.blocks.impl.PropertiesSupportImpl" scope="prototype">
+		<property name="messageSource" ref="globalMessages"/>
+	</bean>
+	<bean id="descriptionSupport" class="com.nextep.proto.blocks.impl.DescriptionsListBoxSupportImpl" scope="prototype">
+		<property name="messageSource" ref="globalMessages"/>
+		<property name="baseUrl">
+			<jee:jndi-lookup jndi-name="java:comp/env/togaytherBaseUrl"/>
+		</property>
+	</bean>
+	<bean id="mapQuickInfoSupport" class="com.nextep.proto.blocks.impl.MapQuickInfoSupportImpl" scope="prototype">
+		<property name="messageSource" ref="globalMessages"/>
+	</bean>
+	<bean id="commentSupport" class="com.nextep.proto.blocks.impl.CommentSupportImpl" scope="prototype">
+		<property name="messageSource" ref="globalMessages"/>
+		<property name="distanceService" ref="distanceDisplayService"/>
+	</bean>
+	<bean id="commentTagSupport" class="com.nextep.proto.blocks.impl.CommentSelectableTagSupportImpl" scope="prototype">
+		<property name="baseTagSupport" ref="tagSupport"></property>
+	</bean>
+	<bean id="nearbySearchSupport" class="com.nextep.proto.blocks.impl.NearbySearchSupportImpl" scope="prototype">
+		<property name="distanceDisplayService" ref="distanceDisplayService"></property>
+	</bean>
+	<bean id="commonLoginSupport" class="com.nextep.proto.blocks.impl.CommonLoginSupportImpl" scope="prototype">
+		<property name="domainName">
+			<jee:jndi-lookup jndi-name="java:comp/env/togaytherDomain"/>
+		</property>
+	</bean>
+	<bean id="placeChildSupport" class="com.nextep.proto.blocks.impl.PlaceChildSupportImpl" scope="prototype">
+		<property name="messageSource" ref="globalMessages"/>
+	</bean>
+	<bean id="eventChildSupport" class="com.nextep.proto.blocks.impl.EventChildSupportImpl" scope="prototype">
+	</bean>
+	<bean id="mosaicSupport" class="com.nextep.proto.blocks.impl.MosaicSupportImpl" scope="prototype">
+		<property name="rows" value="30"/>
+		<property name="columns" value="4"/>
+		<property name="messageSource" ref="globalMessages"/>
+	</bean>
+	<bean id="eventMosaicSupport" parent="mosaicSupport" scope="prototype">
+		<property name="titleMessageKey" value="mosaic.event.title"/>
+	</bean>
+	<bean id="geoPlaceTypesSupport" class="com.nextep.proto.blocks.impl.GeoPlaceTypesSupportImpl" scope="prototype">
+		<property name="messageSource" ref="globalMessages"/>
+	</bean>
+	<bean id="paymillPaymentSupport" class="com.nextep.proto.blocks.impl.PaymentSupportImpl" scope="prototype">
+		<property name="paymentUrl">
+			<jee:jndi-lookup jndi-name="java:comp/env/payment.url"/>
+		</property>
+		<property name="businessId">
+			<jee:jndi-lookup jndi-name="java:comp/env/paymill.api.publicKey"/>
+		</property>
+		<property name="returnUrl" value="/paymentValidation"/>
+		<property name="errorUrl" value="/paymentError"/>
+		<property name="notifyUrl" value="/notifyPayment"/>
+		<property name="domainName">
+			<jee:jndi-lookup jndi-name="java:comp/env/togaytherDomain"/>
+		</property>
+		<property name="messageSource" ref="globalMessages"/>
+	</bean>
+	<bean id="sponsorshipSupport" class="com.nextep.proto.blocks.impl.SponsorshipSupportImpl" scope="prototype">
+		<property name="messageSource" ref="globalMessages"/>
+	</bean>
+	<bean id="googleAdBannerSupport" class="com.nextep.proto.blocks.impl.GoogleAdBannerSupportImpl" scope="prototype">
+		<property name="googleEnabled">
+			<jee:jndi-lookup jndi-name="java:comp/env/google.enabled"/>
+		</property>
+	</bean>
+	<bean id="adBannerSupport" class="com.nextep.proto.blocks.impl.AdBannerSupportImpl" scope="prototype">
+		<property name="parentSupport" ref="googleAdBannerSupport"/>
+	</bean>
+	<bean id="calendarSupport" class="com.nextep.proto.blocks.impl.CalendarSupportImpl" scope="prototype">
+		<property name="messageSource" ref="globalMessages"/>
+		<property name="eventManagementService" ref="eventManagementService"/>
+		<property name="distanceDisplayService" ref="distanceDisplayService"/>
+	</bean>
+</beans>

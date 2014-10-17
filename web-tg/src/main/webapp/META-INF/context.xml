@@ -1,0 +1,105 @@
+<?xml version='1.0' encoding='utf-8'?>
+<Context>
+
+	<!-- data sources -->
+	<Resource name="jdbc/togayther" auth="Container" type="javax.sql.DataSource"
+		maxActive="30" maxIdle="30" maxWait="10000" username="root"
+		driverClassName="com.mysql.jdbc.Driver" defaultAutoCommit="true"
+		poolPreparedStatements="true" validationQuery="SELECT 1"
+		url="jdbc:mysql://localhost:3306/proto_users?useUnicode=true&amp;characterEncoding=UTF-8&amp;cachePrepStmts=true&amp;zeroDateTimeBehavior=convertToNull" />
+
+	<Resource name="jdbc/togayther_write" auth="Container" type="javax.sql.DataSource"
+		maxActive="30" maxIdle="30" maxWait="10000" username="root"
+		driverClassName="com.mysql.jdbc.Driver" defaultAutoCommit="true"
+		poolPreparedStatements="true" validationQuery="SELECT 1"
+		url="jdbc:mysql://localhost:3306/proto_users?useUnicode=true&amp;characterEncoding=UTF-8&amp;cachePrepStmts=true&amp;zeroDateTimeBehavior=convertToNull" />
+
+	<!-- Locally deployed Solr slave instances -->
+	<Environment name="smaug/usersSolrServer" type="java.lang.String"
+		value="http://127.0.0.1:8983/solr-users/users/" />
+	<Environment name="smaug/placesSolrServer" type="java.lang.String"
+		value="http://127.0.0.1:8983/solr-geoplaces/geocore/" />
+	<Environment name="smaug/citiesSolrServer" type="java.lang.String"
+		value="http://127.0.0.1:8983/solr-geocities/geocities/" />
+	<Environment name="smaug/eventsSolrServer" type="java.lang.String"
+		value="http://127.0.0.1:8983/solr-events/events/" />
+	<Environment name="smaug/activitiesSolrServer" type="java.lang.String"
+		value="http://127.0.0.1:8983/solr-activities/activities/" />
+	<Environment name="smaug/suggestSolrServer" type="java.lang.String"
+		value="http://127.0.0.1:8983/solr-suggest/suggest/" />
+		
+	<!-- Solr Master servers for write -->
+	<Environment name="smaug/masterUsersSolrServer" type="java.lang.String"
+		value="http://127.0.0.1:8983/solr-users/users/" />
+	<Environment name="smaug/masterPlacesSolrServer" type="java.lang.String"
+		value="http://127.0.0.1:8983/solr-geoplaces/geocore/" />
+	<Environment name="smaug/masterCitiesSolrServer" type="java.lang.String"
+		value="http://127.0.0.1:8983/solr-geocities/geocities/" />
+	<Environment name="smaug/masterEventsSolrServer" type="java.lang.String"
+		value="http://127.0.0.1:8983/solr-events/events/" />
+	<Environment name="smaug/masterActivitiesSolrServer" type="java.lang.String"
+		value="http://127.0.0.1:8983/solr-activities/activities/" />
+	<Environment name="smaug/masterSuggestSolrServer" type="java.lang.String"
+		value="http://127.0.0.1:8983/solr-suggest/suggest/" />
+		
+	<Environment name="smaug/lastSeenMaxTime" type="java.lang.Long"
+		value="6000000" />	
+	<Environment name="media/localPath" type="java.lang.String"
+		value="/Users/cfondacci/Dev/proto/http-static/media/" />
+	<Environment name="user/connectionTimeoutMinutes" type="java.lang.Integer"
+		value="10" />
+	<Environment name="user/mobileConnectionTimeoutMinutes" type="java.lang.Integer"
+		value="20" />	
+	<Environment name="messageRefreshIntervalMs" type="java.lang.Integer"
+		value="10000" />
+<!-- 	<Environment name="togaytherBaseUrl" type="java.lang.String" -->
+<!-- 		value="http://local.togayther.net" /> -->
+	<Environment name="togaytherBaseUrl" type="java.lang.String"
+		value="http://192.168.1.24" />
+	<Environment name="togaytherDomain" type="java.lang.String"
+		value="pelmelguide" />
+	<Environment name="mobile/localizationDistance" type="java.lang.Double"
+		value="0.062" />
+	<Environment name="mobile/nearbyPlacesRadius" type="java.lang.Double"
+		value="40" />
+	<Environment name="mobile/nearbyCitiesRadius" type="java.lang.Double"
+		value="100" />
+	<Environment name="mobile/nearbyPlacesCount" type="java.lang.Integer"
+		value="150" />
+	<Environment name="mobile/usersListCount" type="java.lang.Integer"
+		value="50" />
+	<Environment name="minCityPopulationForIndexation" type="java.lang.Integer"
+		value="50000" />
+	<Environment name="defaultCityKey" type="java.lang.String"
+		value="CITY4699066" />
+	<Environment name="sitemap.pageSize" type="java.lang.Integer" value="1000"/>
+	<Environment name="search.nearbyRadius" type="java.lang.Double" value="30"/>
+	<Environment name="sitemap.cityMinPopulation" type="java.lang.Integer" value="10000"/>
+	<Environment name="maxEventsCreation" type="java.lang.Integer" value="5"/>
+
+	<Environment name="maxMobileLikes" type="java.lang.Integer" value="50"/>
+	<Environment name="placesPerPage" type="java.lang.Integer" value="18"/>
+	<Environment name="homepage.maxRecentChanges" type="java.lang.Integer" value="36"/>
+	<Environment name="homepage.maxFetchedActivities" type="java.lang.Integer" value="100"/>
+	<Environment name="homepage.maxTopUsersSecurity" type="java.lang.Integer" value="7"/>
+	<Environment name="google.enabled" type="java.lang.Boolean" value="false"/>
+	<Environment name="seo.maxFetchedActivities" type="java.lang.Integer" value="3000"/>
+	<Environment name="paypal.api.id" type="java.lang.String" value="christ_1361267266_biz_api1.gmail.com"/>
+	<Environment name="paypal.api.password" type="java.lang.String" value="1361267290"/>
+	<Environment name="paypal.api.signature" type="java.lang.String" value="AFcWxV21C7fd0v3bYYYRCpSSRl31Azx1aDHtU5uXq7JT86h719IXY86D"/>
+	<Environment name="paypal.api.version" type="java.lang.String" value="98.0"/>
+	<Environment name="paypal.api.postUrl" type="java.lang.String" value="https://www.sandbox.paypal.com/cgi-bin/webscr"/>
+	<Environment name="paypal.api.businessEmail" type="java.lang.String" value="christ_1361267266_biz@gmail.com"/>
+	<Environment name="paymill.api.privateKey" type="java.lang.String" value="1a5d73a09eac1debce1fcc9e91ee1d0b"/>
+	<Environment name="paymill.api.publicKey" type="java.lang.String" value="473111045874418180cea25184fe7a20"/>
+	<Environment name="payment.url" type="java.lang.String" value="/processPayment"/>
+	<Environment name="adminUserKeys" type="java.lang.String" value="USER37"/>
+	
+	<Environment name="welcomeMessageUserKey" type="java.lang.String" value="USER37"/>
+
+
+	<Environment name="push.key.path" type="java.lang.String" value="/Users/cfondacci/Documents/PELMEL/iphone_dev.p12"/>
+	<Environment name="push.key.password" type="java.lang.String" value="tDk@1558"/>
+	<Environment name="push.production" type="java.lang.Boolean" value="false"/>
+</Context>
+

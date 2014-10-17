@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<units xmlns="http://www.tvtrip.com/navigation/measurement">
+	<system>
+		<code>si</code>
+		<name>International System</name>
+		<contents>
+			<ref unit="km" />
+			<ref unit="m" />
+			<ref unit="cm" />
+		</contents>
+	</system>
+	<system>
+		<code>imperial</code>
+		<name>Imperial System</name>
+		<contents>
+			<ref unit="mi" />
+			<ref unit="yd" />
+			<ref unit="ft" />
+			<ref unit="in" />
+		</contents>
+	</system>
+	<unit>
+		<code>mi</code>
+		<name>Mile</name>
+		<symbol>mi</symbol>
+		<rate>1</rate>
+	</unit>
+	<unit>
+		<code>yd</code>
+		<name>Yard</name>
+		<symbol>yd</symbol>
+		<rate>1760</rate>
+	</unit>
+	<unit>
+		<code>m</code>
+		<name>Meter</name>
+		<symbol>m</symbol>
+		<rate>1609.344</rate>
+	</unit>
+	<unit>
+		<code>km</code>
+		<name>Kilometer</name>
+		<symbol>km</symbol>
+		<rate>1.609344</rate>
+	</unit>
+	<unit>
+		<code>cm</code>
+		<name>Centimeter</name>
+		<symbol>cm</symbol>
+		<rate>160934.4</rate>
+	</unit>
+	<unit>
+		<code>ft</code>
+		<name>Feet</name>
+		<symbol>'</symbol>
+		<rate>5280</rate>
+	</unit>
+	<unit>
+		<code>in</code>
+		<name>Inches</name>
+		<symbol>''</symbol>
+		<rate>63360</rate>
+	</unit>
+
+</units>

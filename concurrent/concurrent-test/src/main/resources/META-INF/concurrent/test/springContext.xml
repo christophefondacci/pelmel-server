@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
+
+	<!-- Import here modules to test -->
+	<import resource="classpath:/META-INF/concurrent/simple/springContext.xml" />
+	<import resource="classpath:/META-INF/concurrent/quartz/springContext.xml" />
+<!--	<import resource="classpath:/META-INF/concurrent/javautil/springContext.xml" />-->
+
+	<bean id="concurrentSimpleTaskRunnerService" parent="abstractConcurrentSimpleTaskRunnerService">
+		<property name="timeout" value="3900" />
+	</bean>
+
+	<bean id="concurrentQuartzTaskRunnerService" parent="abstractConcurrentQuartzTaskRunnerService">
+		<property name="timeout" value="3900" />
+	</bean>
+
+<!--	<bean id="concurrentJavaUtilTaskRunnerService" parent="abstractConcurrentJavaUtilTaskRunnerService">-->
+<!--		<property name="timeout" value="3900" />-->
+<!--	</bean>-->
+
+	<bean id="dummyTaskRunnerService"
+		class="com.videopolis.concurrent.service.impl.DummyTaskRunnerServiceImpl">
+		<property name="timeout" value="3900" />
+	</bean>
+
+</beans>

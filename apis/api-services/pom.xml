@@ -1,0 +1,63 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<parent>
+		<artifactId>api</artifactId>
+		<groupId>neXtep</groupId>
+		<version>0.5.4-SNAPSHOT</version>
+	</parent>
+	<modelVersion>4.0.0</modelVersion>
+	<artifactId>api-services</artifactId>
+	<name>Aggregated Proxy Integration Services</name>
+	<description>Provides services that aggregates the content providers</description>
+
+	<properties>
+		<cal.version>0.2.0-SNAPSHOT</cal.version>
+	</properties>
+
+	<dependencies>
+
+		<!-- CAL -->
+
+		<dependency>
+			<groupId>neXtep</groupId>
+			<artifactId>cal-services</artifactId>
+			<version>${cal.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>neXtep</groupId>
+			<artifactId>cal-model</artifactId>
+			<version>${cal.version}</version>
+		</dependency>
+
+		<!-- Smaug -->
+
+		<dependency>
+			<groupId>neXtep</groupId>
+			<artifactId>smaug-api</artifactId>
+			<version>0.5.1-SNAPSHOT</version>
+		</dependency>
+
+		<!-- Concurrent -->
+
+		<dependency>
+			<groupId>tvtrip</groupId>
+			<artifactId>concurrent-api</artifactId>
+			<version>0.0.6-SNAPSHOT</version>
+		</dependency>
+
+		<!-- Misc -->
+
+		<dependency>
+			<groupId>commons-collections</groupId>
+			<artifactId>commons-collections</artifactId>
+			<version>3.2.1</version>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.8.1</version>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+
+</project>

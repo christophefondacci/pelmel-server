@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.tvtrip.com/smaug/SearchReference"
+	xmlns:tns="http://www.tvtrip.com/smaug/SearchReference"
+	elementFormDefault="qualified">
+
+	<element name="facetCategory">
+		<complexType>
+			<all>
+				<element name="categoryCode" type="string" />
+				<element name="groupingStrategy" type="string" />
+				<element name="urlCode" type="string" />
+				<element name="urlSeoTranslation" type="boolean" />
+				<element name="range" default="false" type="boolean"
+					minOccurs="0" maxOccurs="1" />
+				<element ref="tns:scopes" minOccurs="0" maxOccurs="1" />
+			</all>
+			<attribute name="filterOnly" default="false" type="boolean" />
+			<attribute name="facetCache" default="true" type="boolean" />
+		</complexType>
+	</element>
+
+	<element name="sorter">
+		<complexType>
+			<all>
+				<element name="fieldName" type="string" />
+				<element name="ascending" type="boolean" default="true" />
+				<element name="urlCode" type="string" />
+				<element name="defaultIndex" type="int" minOccurs="0"
+					maxOccurs="1" />
+				<element name="sticky" type="boolean" default="false"
+					minOccurs="0" maxOccurs="1" />
+			</all>
+		</complexType>
+	</element>
+
+	<element name="facetCategories">
+		<complexType>
+			<sequence>
+				<element ref="tns:facetCategory" minOccurs="0" maxOccurs="unbounded" />
+			</sequence>
+		</complexType>
+	</element>
+
+	<element name="sorters">
+		<complexType>
+			<sequence>
+				<element ref="tns:sorter" minOccurs="0" maxOccurs="unbounded" />
+			</sequence>
+		</complexType>
+	</element>
+
+	<element name="scopes">
+		<complexType>
+			<sequence>
+				<element name="scope" type="string" minOccurs="0" maxOccurs="unbounded" />
+			</sequence>
+		</complexType>
+	</element>
+</schema>

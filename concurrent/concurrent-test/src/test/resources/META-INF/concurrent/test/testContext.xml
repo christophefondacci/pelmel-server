@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
+
+	<!-- Load main context -->
+	<import resource="classpath:META-INF/concurrent/test/springContext.xml" />
+
+	<!-- List of TaskRunnerService instances to test -->
+	<!-- Important: The test requires a timeout of 3600ms to work -->
+	<bean id="taskRunnerServicesToTest" class="java.util.ArrayList">
+		<constructor-arg>
+			<list>
+				<ref bean="concurrentSimpleTaskRunnerService" />
+				<ref bean="concurrentQuartzTaskRunnerService" />
+<!--				<ref bean="concurrentJavaUtilTaskRunnerService" />-->
+			</list>
+		</constructor-arg>
+	</bean>
+
+</beans>

@@ -1,0 +1,677 @@
+package com.nextep.proto.action.mobile.impl;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import net.sf.json.JSONObject;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import com.nextep.activities.model.Activity;
+import com.nextep.advertising.model.AdvertisingBooster;
+import com.nextep.cal.util.services.CalPersistenceService;
+import com.nextep.descriptions.model.Description;
+import com.nextep.events.model.EventSeries;
+import com.nextep.geo.model.City;
+import com.nextep.geo.model.GeographicItem;
+import com.nextep.geo.model.Place;
+import com.nextep.json.model.impl.JsonActivity;
+import com.nextep.json.model.impl.JsonLightCity;
+import com.nextep.json.model.impl.JsonMedia;
+import com.nextep.json.model.impl.JsonNearbyPlacesResponse;
+import com.nextep.json.model.impl.JsonPlace;
+import com.nextep.media.model.Media;
+import com.nextep.proto.action.base.AbstractAction;
+import com.nextep.proto.action.model.JsonProvider;
+import com.nextep.proto.action.model.NearbySearchAware;
+import com.nextep.proto.action.model.SearchAware;
+import com.nextep.proto.action.model.TagAware;
+import com.nextep.proto.apis.adapters.ApisFacetToItemKeyAdapter;
+import com.nextep.proto.apis.model.impl.ApisActivitiesHelper;
+import com.nextep.proto.apis.model.impl.ApisLocalizationHelper;
+import com.nextep.proto.blocks.ActivitySupport;
+import com.nextep.proto.blocks.CurrentUserSupport;
+import com.nextep.proto.blocks.NearbySearchSupport;
+import com.nextep.proto.blocks.SearchSupport;
+import com.nextep.proto.blocks.TagSupport;
+import com.nextep.proto.builders.JsonBuilder;
+import com.nextep.proto.helpers.DisplayHelper;
+import com.nextep.proto.helpers.MediaHelper;
+import com.nextep.proto.helpers.SearchHelper;
+import com.nextep.proto.model.Constants;
+import com.nextep.proto.model.PlaceType;
+import com.nextep.proto.model.SearchType;
+import com.nextep.proto.services.DistanceDisplayService;
+import com.nextep.proto.services.EventManagementService;
+import com.nextep.proto.services.LocalizationService;
+import com.nextep.proto.services.ViewManagementService;
+import com.nextep.proto.spring.ContextHolder;
+import com.nextep.tags.model.Tag;
+import com.nextep.users.model.MutableUser;
+import com.nextep.users.model.User;
+import com.videopolis.apis.factory.ApisFactory;
+import com.videopolis.apis.factory.SearchRestriction;
+import com.videopolis.apis.model.ApisCriterion;
+import com.videopolis.apis.model.ApisRequest;
+import com.videopolis.apis.model.FacetInformation;
+import com.videopolis.apis.model.SearchStatistic;
+import com.videopolis.apis.service.ApiCompositeResponse;
+import com.videopolis.calm.exception.CalException;
+import com.videopolis.calm.factory.CalmFactory;
+import com.videopolis.calm.model.CalmObject;
+import com.videopolis.calm.model.ItemKey;
+import com.videopolis.calm.model.Sorter;
+import com.videopolis.cals.factory.ContextFactory;
+import com.videopolis.cals.model.PaginationInfo;
+import com.videopolis.smaug.common.model.FacetCategory;
+import com.videopolis.smaug.common.model.SearchScope;
+import com.videopolis.smaug.common.model.SuggestScope;
+import com.videopolis.smaug.model.FacetCount;
+
+public class NearbyPlacesListAction extends AbstractAction implements
+		SearchAware, JsonProvider, TagAware, NearbySearchAware {
+
+	private static final long serialVersionUID = 2386753201776395502L;
+	private static final Log LOGGER = LogFactory
+			.getLog(NearbyPlacesListAction.class);
+
+	private static String APIS_ALIAS_NEARBY_PLACES = "np";
+	private static String APIS_ALIAS_NEARBY_ACTIVITIES = "na";
+	private static String APIS_ALIAS_CITY = "parentCity";
+	private static String APIS_ALIAS_PLACES_FACETS = "unused";
+
+	private static final int SORT_RANGE_DISTANCE = 2;
+	private static final int NEARBY_ACTIVITIES_COUNT = 20;
+
+	// Injected constants
+	private double radius;
+	private double cityRadius;
+	private int pageSize;
+	private String baseUrl;
+
+	// Injected supports & services
+	private CurrentUserSupport currentUserSupport;
+	private SearchSupport searchSupport;
+	private ActivitySupport activitySupport;
+	private TagSupport tagSupport;
+	private NearbySearchSupport nearbySearchSupport;
+	private LocalizationService localizationService;
+	private DistanceDisplayService distanceDisplayService;
+	private CalPersistenceService geoService;
+	private ViewManagementService viewManagementService;
+	private EventManagementService eventManagementService;
+	private JsonBuilder jsonBuilder;
+	private long lastSeenMaxTime;
+
+	// Actions arguments
+	private double lat, lng;
+	private String searchLatStr, searchLngStr;
+	private int page;
+	private boolean highRes;
+	private String searchText;
+	private String parentKey;
+
+	// Internal vars
+	private String JsonString;
+	private JsonNearbyPlacesResponse jsonResponse;
+
+	@Override
+	protected String doExecute() throws Exception {
+		final Collection<FacetCategory> facetCategories = SearchHelper
+				.buildUserPlacesCategories();
+		// Processing lat/lng when search differs from user
+		Double searchLat, searchLng;
+		if (searchLatStr == null && searchLngStr == null) {
+			searchLat = lat == 0 ? null : lat;
+			searchLng = lng == 0 ? null : lng;
+		} else {
+			searchLat = Double.parseDouble(searchLatStr);
+			searchLng = Double.parseDouble(searchLngStr);
+		}
+		// Creating the request
+		final ApisRequest request = ApisFactory.createCompositeRequest();
+
+		// Preparing the places list criterion
+		ApisCriterion placesCriterion = null;
+		if (searchText == null) {
+			if (parentKey == null) {
+				if (searchLat != null && searchLng != null) {
+					// Looking for nearby places
+					placesCriterion = SearchRestriction.searchNear(Place.class,
+							SearchScope.NEARBY_BLOCK, searchLat, searchLng,
+							radius, pageSize, page).aliasedBy(
+							APIS_ALIAS_NEARBY_PLACES);
+
+					// Adding activities
+					final List<Sorter> activitiesDateSorter = SearchHelper
+							.getActivitiesDefaultSorter();
+					final ApisCriterion activitiesCrit = SearchRestriction
+							.searchNear(Activity.class,
+									SearchScope.NEARBY_ACTIVITIES, searchLat,
+									searchLng, radius, NEARBY_ACTIVITIES_COUNT,
+									0).sortBy(activitiesDateSorter)
+							.aliasedBy(APIS_ALIAS_NEARBY_ACTIVITIES);
+
+					// Adding required elements for activity generation
+					ApisActivitiesHelper
+							.addActivityConnectedItemsQuery(activitiesCrit);
+
+					request.addCriterion(activitiesCrit);
+
+				} else {
+					// Building every city having places by using facets of a
+					// place search
+					final FacetCategory cityCategory = SearchHelper
+							.getCityFacetCategory();
+					final ApisFacetToItemKeyAdapter cityKeyAdapter = new ApisFacetToItemKeyAdapter(
+							SearchScope.CITY, cityCategory, -1);
+					placesCriterion = (ApisCriterion) SearchRestriction
+							.searchAll(Place.class, SearchScope.CITY, 10, 0)
+							.facettedBy(Arrays.asList(cityCategory))
+							.customAdapt(cityKeyAdapter,
+									APIS_ALIAS_NEARBY_PLACES);
+				}
+			} else {
+				// If we got a parent, we search for places INSIDE the parent
+				// rather than nearby
+				placesCriterion = SearchRestriction.withContained(Place.class,
+						SearchScope.NEARBY_BLOCK, pageSize, page).aliasedBy(
+						APIS_ALIAS_NEARBY_PLACES);
+			}
+		} else {
+			List<SuggestScope> scopes = new ArrayList<SuggestScope>();
+			scopes.add(SuggestScope.DESTINATION);
+			scopes.add(SuggestScope.PLACE);
+			placesCriterion = SearchRestriction.searchFromText(
+					GeographicItem.class, scopes, searchText, pageSize)
+					.aliasedBy(APIS_ALIAS_NEARBY_PLACES);
+
+			FacetCategory cityCategory = SearchHelper.getCityFacetCategory();
+			request.addCriterion(SearchRestriction
+					.searchAll(Place.class, SearchScope.CITY, 10, 0)
+					.facettedBy(Arrays.asList(cityCategory))
+					.aliasedBy(APIS_ALIAS_PLACES_FACETS));
+		}
+
+		// Adding default places information
+		placesCriterion.with(Description.class).with(Media.class)
+				.with(Tag.class).with(AdvertisingBooster.class)
+				.with(EventSeries.class);
+		// Integrating the criterion
+		if (parentKey == null) {
+			// At the root level by default
+			request.addCriterion(placesCriterion);
+		} else {
+			// Or encapsulated inside a parent search for non-nearby places
+			final ItemKey parentItemKey = CalmFactory.parseKey(parentKey);
+
+			// Preparing query of activities for this parent
+			final ApisCriterion activitiesCrit = SearchRestriction.with(
+					Activity.class, NEARBY_ACTIVITIES_COUNT, 0).aliasedBy(
+					APIS_ALIAS_NEARBY_ACTIVITIES);
+			ApisActivitiesHelper.addActivityConnectedItemsQuery(activitiesCrit);
+
+			// Building parent getter, querying contained places
+			request.addCriterion((ApisCriterion) SearchRestriction
+					.uniqueKeys(Arrays.asList(parentItemKey))
+					.aliasedBy(APIS_ALIAS_CITY).addCriterion(placesCriterion)
+					.addCriterion(activitiesCrit));
+		}
+		request.addCriterion(
+				SearchRestriction.searchAll(User.class,
+						SearchScope.USER_LOCALIZATION, 0, 0).facettedBy(
+						Arrays.asList(SearchHelper
+								.getUserCurrentPlaceCategory())))
+				.addCriterion(
+						SearchRestriction.searchAll(User.class,
+								SearchScope.CHILDREN, 0, 0).facettedBy(
+								Arrays.asList(SearchHelper
+										.getUserPlacesCategory())))
+				.addCriterion(
+						ApisLocalizationHelper.buildNearestCityCriterion(lat,
+								lng, cityRadius));
+
+		if (getNxtpUserToken() != null) {
+			request.addCriterion((ApisCriterion) currentUserSupport
+					.createApisCriterionFor(getNxtpUserToken(), true).with(
+							GeographicItem.class));
+		}
+
+		final ApiCompositeResponse response = (ApiCompositeResponse) getApiService()
+				.execute(request, ContextFactory.createContext(getLocale()));
+
+		// Extracting current user
+		final User user = response.getUniqueElement(User.class,
+				CurrentUserSupport.APIS_ALIAS_CURRENT_USER);
+
+		// Checking user status / update timeouts
+		checkCurrentUser(user);
+
+		// Extracting facets
+		final FacetInformation currentPlaceFacetInfo = response
+				.getFacetInformation(SearchScope.USER_LOCALIZATION);
+		// Hashing current user places by place key
+		Map<String, Integer> currentPlacesMap = new HashMap<String, Integer>();
+		final List<FacetCount> currentPlaceCounts = currentPlaceFacetInfo
+				.getFacetCounts(SearchHelper.getUserCurrentPlaceCategory());
+		for (FacetCount c : currentPlaceCounts) {
+			int count = c.getCount();
+			// We never count the current user in the number of persons in a
+			// place so we substract 1 when we fall on the place where the
+			// current user is located
+			if (user != null && user.getLastLocationKey() != null) {
+				if (user.getLastLocationTime() != null
+						&& user.getLastLocationKey().toString()
+								.equals(c.getFacet().getFacetCode())) {
+					long timeoutTime = user.getLastLocationTime().getTime()
+							+ lastSeenMaxTime;
+					if (timeoutTime > System.currentTimeMillis()) {
+						count--;
+					}
+				}
+			}
+
+			currentPlacesMap.put(c.getFacet().getFacetCode(), count);
+		}
+
+		// Hashing liked user places by place key
+		final FacetInformation facetInfo = response
+				.getFacetInformation(SearchScope.CHILDREN);
+		Map<String, Integer> likedPlacesMap = unwrapFacets(facetInfo,
+				SearchHelper.getUserPlacesCategory());
+		List<? extends Place> places;
+		List<? extends Activity> activities;
+		if (parentKey == null) {
+			places = response
+					.getElements(Place.class, APIS_ALIAS_NEARBY_PLACES);
+			activities = response.getElements(Activity.class,
+					APIS_ALIAS_NEARBY_ACTIVITIES);
+		} else {
+			// If we had a parent key set we need to extract places from its
+			// parent geographic element
+			final GeographicItem city = response.getUniqueElement(
+					GeographicItem.class, APIS_ALIAS_CITY);
+			places = city.get(Place.class, APIS_ALIAS_NEARBY_PLACES);
+			activities = city.get(Activity.class, APIS_ALIAS_NEARBY_ACTIVITIES);
+		}
+		// final FacetInformation facetInfo = response
+		// .getFacetInformation(SearchScope.NEARBY_BLOCK);
+		final PaginationInfo paginationInfo = response
+				.getPaginationInfo(Place.class);
+		searchSupport.initialize(null, getUrlService(), getLocale(), null,
+				null, null, paginationInfo, places);
+		tagSupport.initialize(getLocale(), Collections.EMPTY_LIST);
+		nearbySearchSupport.initialize(getLocale(), response);
+		final List<JsonPlace> jsonPlaces = new ArrayList<JsonPlace>();
+
+		// Preparing a single localized date
+		for (CalmObject o : searchSupport.getSearchResults()) {
+			final Place place = (Place) o;
+
+			// Skipping hotels for mobile devices.
+			if (PlaceType.hotel.name().equals(place.getPlaceType())) {
+				continue;
+			}
+			final JsonPlace p = jsonBuilder.buildJsonPlace(place, highRes,
+					getLocale(), likedPlacesMap, currentPlacesMap);
+
+			// Distance management
+			final SearchStatistic distanceStat = response.getStatistic(
+					o.getKey(), SearchStatistic.DISTANCE);
+			if (distanceStat != null) {
+				p.setRawDistance(distanceStat.getNumericValue().doubleValue());
+				final String distanceString = distanceDisplayService
+						.getDistanceFromItem(o.getKey(), response, getLocale());
+				p.setDistance(distanceString);
+			} else {
+				// Setting the city as the distance string if no nearby search
+				p.setDistance(DisplayHelper.getName(place.getCity()));
+			}
+
+			// Adding place to list
+			jsonPlaces.add(p);
+		}
+
+		// Sorting results
+		Collections.sort(jsonPlaces, new Comparator<JsonPlace>() {
+			@Override
+			public int compare(JsonPlace o1, JsonPlace o2) {
+				int boost1 = o1.getBoostValue();
+				int boost2 = o2.getBoostValue();
+				// if we got 2 different ad boosts we use it for the sort
+				if (boost1 != boost2) {
+					return boost2 - boost1;
+				} else {
+
+					SearchStatistic distanceStat1 = null;
+					SearchStatistic distanceStat2 = null;
+					try {
+						distanceStat1 = response.getStatistic(
+								CalmFactory.parseKey(o1.getItemKey()),
+								SearchStatistic.DISTANCE);
+						distanceStat2 = response.getStatistic(
+								CalmFactory.parseKey(o2.getItemKey()),
+								SearchStatistic.DISTANCE);
+					} catch (CalException e) {
+						LOGGER.error(
+								"Problem sorting elements : " + e.getMessage(),
+								e);
+					}
+					// Else we use the standard sort algorithm based on user
+					// inside a place and user liking a place
+					int val1 = o1.getUsersCount() * 100 + o1.getLikesCount();
+					int val2 = o2.getUsersCount() * 100 + o2.getLikesCount();
+					if (distanceStat1 != null) {
+						int dist = distanceStat1.getNumericValue().intValue();
+						int mod = (dist % SORT_RANGE_DISTANCE);
+						int val = (dist / SORT_RANGE_DISTANCE) + mod;
+						val1 += -val * 1000;
+					}
+					if (distanceStat2 != null) {
+						int dist = distanceStat2.getNumericValue().intValue();
+						int mod = (dist % SORT_RANGE_DISTANCE);
+						int val = (dist / SORT_RANGE_DISTANCE) + mod;
+						val2 += -val * 1000;
+					}
+					return val2 - val1;
+				}
+			}
+		});
+
+		final List<? extends City> cities = response.getElements(City.class,
+				APIS_ALIAS_NEARBY_PLACES);
+		final FacetInformation citiesFacetInfo = response
+				.getFacetInformation(SearchScope.CITY);
+		final Map<String, Integer> citiesPlacesMap = unwrapFacets(
+				citiesFacetInfo, SearchHelper.getCityFacetCategory());
+		final List<JsonLightCity> jsonCities = new ArrayList<JsonLightCity>();
+		for (City city : cities) {
+			final JsonLightCity jsonCity = new JsonLightCity();
+			jsonCity.setKey(city.getKey() == null ? null : city.getKey()
+					.toString());
+			jsonCity.setName(city.getName());
+			jsonCity.setLatitude(city.getLatitude());
+			jsonCity.setLongitude(city.getLongitude());
+			// Getting the number of facets
+			final Integer placesCount = citiesPlacesMap.get(city.getKey()
+					.toString());
+			if (placesCount != null) {
+				jsonCity.setPlacesCount(placesCount);
+			} else {
+				continue;
+			}
+			// Building qualified localization ADM1 + COUNTRY
+			final StringBuilder cityName = new StringBuilder();
+			if (city.getAdm1() != null) {
+				cityName.append(DisplayHelper.getName(city.getAdm1()) + ", ");
+			}
+			cityName.append(DisplayHelper.getName(city.getCountry()));
+			jsonCity.setLocalization(cityName.toString());
+
+			// Adding media
+			final Media m = MediaHelper.getSingleMedia(city);
+			if (m != null) {
+				final JsonMedia jsonMedia = jsonBuilder.buildJsonMedia(m,
+						highRes);
+				jsonCity.setMedia(jsonMedia);
+			}
+			// Adding JSON city to list
+			jsonCities.add(jsonCity);
+		}
+
+		// Sorting cities
+		Collections.sort(jsonCities, new Comparator<JsonLightCity>() {
+			@Override
+			public int compare(JsonLightCity o1, JsonLightCity o2) {
+				int countDiff = o2.getPlacesCount() - o1.getPlacesCount();
+				if (countDiff == 0) {
+					return o1.getName().compareTo(o2.getName());
+				} else {
+					return countDiff;
+				}
+			}
+		});
+		jsonResponse = new JsonNearbyPlacesResponse();
+		jsonResponse.setPlaces(jsonPlaces);
+		jsonResponse.setCities(jsonCities);
+
+		final MutableUser currentUser = response.getUniqueElement(
+				MutableUser.class, CurrentUserSupport.APIS_ALIAS_CURRENT_USER);
+
+		// Localizing user city
+		final City localizedCity = response.getUniqueElement(City.class,
+				ApisLocalizationHelper.APIS_ALIAS_CITY_NEARBY);
+		ContextHolder.toggleWrite();
+		if (localizedCity != null) {
+			geoService.setItemFor(user.getKey(), localizedCity.getKey());
+			// currentUser.add(localizedCity);
+		}
+		if (currentUser != null && searchLat != null && searchLng != null
+				&& lat == searchLat.doubleValue()
+				&& lng == searchLng.doubleValue()) {
+			localizationService.localize(currentUser, places, response, lat,
+					lng);
+		}
+
+		// Counting views
+		if (localizedCity != null) {
+			viewManagementService.logViewCount(localizedCity, currentUser,
+					Constants.VIEW_TYPE_MOBILE);
+		}
+
+		// Extracting activities
+
+		final PaginationInfo activitiesPagination = response
+				.getPaginationInfo(APIS_ALIAS_NEARBY_ACTIVITIES);
+		activitySupport.initialize(getUrlService(), getLocale(),
+				activitiesPagination, activities);
+		for (Activity activity : activities) {
+			final JsonActivity jsonActivity = jsonBuilder.buildJsonActivity(
+					activity, highRes, getLocale());
+			final String text = activitySupport.getActivityHtmlLine(activity);
+			jsonActivity.setMessage(text);
+			jsonResponse.addNearbyActivity(jsonActivity);
+		}
+
+		// Building city JSON
+		if (localizedCity != null) {
+			final JsonLightCity jsonCity = jsonBuilder.buildJsonLightCity(
+					localizedCity, highRes, getLocale());
+			jsonResponse.setLocalizedCity(jsonCity);
+		}
+		return SUCCESS;
+	}
+
+	/**
+	 * Unwraps the facet information structure into a map of facet counts hashed
+	 * by their facet codes represented as plain string.
+	 * 
+	 * @param facetInfo
+	 *            the {@link FacetInformation} to unwrap
+	 * @param category
+	 *            the {@link FacetCategory} to unwrap
+	 * @return the corresponding {@link Map}
+	 */
+	private Map<String, Integer> unwrapFacets(FacetInformation facetInfo,
+			FacetCategory category) {
+		final Map<String, Integer> facetMap = new HashMap<String, Integer>();
+		if (facetInfo != null) {
+			final List<FacetCount> facetCounts = facetInfo
+					.getFacetCounts(category);
+			for (FacetCount c : facetCounts) {
+				facetMap.put(c.getFacet().getFacetCode(), c.getCount());
+			}
+		}
+		return facetMap;
+	}
+
+	@Override
+	public String getJson() {
+		if (JsonString == null) {
+			JsonString = JSONObject.fromObject(jsonResponse).toString();
+		}
+		return JsonString;
+	}
+
+	public void setLat(double lat) {
+		this.lat = lat;
+	}
+
+	public void setLng(double lng) {
+		this.lng = lng;
+	}
+
+	public void setPage(int page) {
+		this.page = page;
+	}
+
+	public int getPage() {
+		return page;
+	}
+
+	public void setRadius(double radius) {
+		this.radius = radius;
+	}
+
+	public double getRadius() {
+		return radius;
+	}
+
+	public void setPageSize(int pageSize) {
+		this.pageSize = pageSize;
+	}
+
+	@Override
+	public void setSearchSupport(SearchSupport searchSupport) {
+		this.searchSupport = searchSupport;
+	}
+
+	@Override
+	public SearchSupport getSearchSupport() {
+		return searchSupport;
+	}
+
+	@Override
+	public void setTagSupport(TagSupport tagSupport) {
+		this.tagSupport = tagSupport;
+	}
+
+	@Override
+	public TagSupport getTagSupport() {
+		return tagSupport;
+	}
+
+	@Override
+	public void setNearbySearchSupport(NearbySearchSupport nearbySearchSupport) {
+		this.nearbySearchSupport = nearbySearchSupport;
+	}
+
+	@Override
+	public NearbySearchSupport getNearbySearchSupport() {
+		return nearbySearchSupport;
+	}
+
+	public void setCurrentUserSupport(CurrentUserSupport currentUserSupport) {
+		this.currentUserSupport = currentUserSupport;
+	}
+
+	public void setLocalizationService(LocalizationService localizationService) {
+		this.localizationService = localizationService;
+	}
+
+	@Override
+	public SearchType getSearchType() {
+		return null;
+	}
+
+	@Override
+	public void setSearchType(SearchType searchType) {
+
+	}
+
+	public void setDistanceDisplayService(
+			DistanceDisplayService distanceDisplayService) {
+		this.distanceDisplayService = distanceDisplayService;
+	}
+
+	public void setBaseUrl(String baseUrl) {
+		this.baseUrl = baseUrl;
+	}
+
+	public void setCityRadius(double cityRadius) {
+		this.cityRadius = cityRadius;
+	}
+
+	public void setHighRes(boolean highRes) {
+		this.highRes = highRes;
+	}
+
+	public boolean isHighRes() {
+		return highRes;
+	}
+
+	public void setJsonBuilder(JsonBuilder jsonBuilder) {
+		this.jsonBuilder = jsonBuilder;
+	}
+
+	public void setLastSeenMaxTime(long lastSeenMaxTime) {
+		this.lastSeenMaxTime = lastSeenMaxTime;
+	}
+
+	public void setSearchText(String searchText) {
+		this.searchText = searchText;
+	}
+
+	public String getSearchText() {
+		return searchText;
+	}
+
+	public void setParentKey(String parentKey) {
+		this.parentKey = parentKey;
+	}
+
+	public String getParentKey() {
+		return parentKey;
+	}
+
+	public void setGeoService(CalPersistenceService geoService) {
+		this.geoService = geoService;
+	}
+
+	public void setViewManagementService(
+			ViewManagementService viewManagementService) {
+		this.viewManagementService = viewManagementService;
+	}
+
+	public void setEventManagementService(
+			EventManagementService eventManagementService) {
+		this.eventManagementService = eventManagementService;
+	}
+
+	public void setActivitySupport(ActivitySupport activitySupport) {
+		this.activitySupport = activitySupport;
+	}
+
+	public void setSearchLat(String searchLat) {
+		this.searchLatStr = searchLat;
+	}
+
+	public String getSearchLat() {
+		return searchLatStr;
+	}
+
+	public void setSearchLng(String searchLng) {
+		this.searchLngStr = searchLng;
+	}
+
+	public String getSearchLng() {
+		return searchLngStr;
+	}
+}

@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:jee="http://www.springframework.org/schema/jee"
+	xsi:schemaLocation="
+    http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+    http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-3.0.xsd">
+
+	<bean id="usersService" parent="abstractUsersService">
+		<property name="connectionTimeoutInMinutes">
+			<jee:jndi-lookup jndi-name="java:comp/env/user/connectionTimeoutMinutes" />
+		</property>
+	</bean>
+	<bean id="mobileUsersService" parent="abstractUsersService">
+		<property name="connectionTimeoutInMinutes">
+			<jee:jndi-lookup jndi-name="java:comp/env/user/mobileConnectionTimeoutMinutes" />
+		</property>
+	</bean>
+	<bean id="mediaService" parent="abstractMediaService" />
+	<bean id="tagsService" parent="abstractTagsService" />
+	<bean id="geoService" parent="abstractGeoService" />
+	<bean id="messagesService" parent="abstractMessageService" />
+	<bean id="eventsService" parent="abstractEventsService" />
+	<bean id="eventSeriesService" parent="abstractEventSeriesService" />
+	<bean id="activitiesService" parent="abstractActivitiesService" />
+	<bean id="advertisingService" parent="abstractAdvertisingService" />
+	<bean id="bannersService" parent="abstractBannersService" />
+	<bean id="propertiesService" parent="abstractPropertiesService" />
+	<bean id="descService" parent="abstractDescriptionsService" />
+	<bean id="commentsService" parent="abstractCommentsService" />
+	<bean id="viewsService" parent="abstractViewsService" />
+	<bean id="statisticsService" parent="abstractStatisticsService" />
+
+	<bean id="descriptionsDataSource" class="com.nextep.proto.spring.ReadWriteDataSourceRouter">
+		<property name="targetDataSources">
+			<map key-type="java.lang.String">
+				<entry key="READ" value="java:comp/env/jdbc/togayther"/>
+				<entry key="WRITE" value="java:comp/env/jdbc/togayther_write"/>
+			</map>
+		</property>
+		<property name="defaultTargetDataSource" value="java:comp/env/jdbc/togayther"/>
+	</bean>
+	<bean id="activitiesDataSource" class="com.nextep.proto.spring.ReadWriteDataSourceRouter">
+		<property name="targetDataSources">
+			<map key-type="java.lang.String">
+				<entry key="READ" value="java:comp/env/jdbc/togayther"/>
+				<entry key="WRITE" value="java:comp/env/jdbc/togayther_write"/>
+			</map>
+		</property>
+		<property name="defaultTargetDataSource" value="java:comp/env/jdbc/togayther"/>
+	</bean>
+	<bean id="advertisingDataSource" class="com.nextep.proto.spring.ReadWriteDataSourceRouter">
+		<property name="targetDataSources">
+			<map key-type="java.lang.String">
+				<entry key="READ" value="java:comp/env/jdbc/togayther"/>
+				<entry key="WRITE" value="java:comp/env/jdbc/togayther_write"/>
+			</map>
+		</property>
+		<property name="defaultTargetDataSource" value="java:comp/env/jdbc/togayther"/>
+	</bean>
+	<bean id="eventsDataSource" class="com.nextep.proto.spring.ReadWriteDataSourceRouter">
+		<property name="targetDataSources">
+			<map key-type="java.lang.String">
+				<entry key="READ" value="java:comp/env/jdbc/togayther"/>
+				<entry key="WRITE" value="java:comp/env/jdbc/togayther_write"/>
+			</map>
+		</property>
+		<property name="defaultTargetDataSource" value="java:comp/env/jdbc/togayther"/>
+	</bean>
+	<bean id="geoDataSource" class="com.nextep.proto.spring.ReadWriteDataSourceRouter">
+		<property name="targetDataSources">
+			<map key-type="java.lang.String">
+				<entry key="READ" value="java:comp/env/jdbc/togayther"/>
+				<entry key="WRITE" value="java:comp/env/jdbc/togayther_write"/>
+			</map>
+		</property>
+		<property name="defaultTargetDataSource" value="java:comp/env/jdbc/togayther"/>
+	</bean>
+	<bean id="mediaDataSource" class="com.nextep.proto.spring.ReadWriteDataSourceRouter">
+		<property name="targetDataSources">
+			<map key-type="java.lang.String">
+				<entry key="READ" value="java:comp/env/jdbc/togayther"/>
+				<entry key="WRITE" value="java:comp/env/jdbc/togayther_write"/>
+			</map>
+		</property>
+		<property name="defaultTargetDataSource" value="java:comp/env/jdbc/togayther"/>
+	</bean>
+	<bean id="messagesDataSource" class="com.nextep.proto.spring.ReadWriteDataSourceRouter">
+		<property name="targetDataSources">
+			<map key-type="java.lang.String">
+				<entry key="READ" value="java:comp/env/jdbc/togayther"/>
+				<entry key="WRITE" value="java:comp/env/jdbc/togayther_write"/>
+			</map>
+		</property>
+		<property name="defaultTargetDataSource" value="java:comp/env/jdbc/togayther"/>
+	</bean>
+	<bean id="propertiesDataSource" class="com.nextep.proto.spring.ReadWriteDataSourceRouter">
+		<property name="targetDataSources">
+			<map key-type="java.lang.String">
+				<entry key="READ" value="java:comp/env/jdbc/togayther"/>
+				<entry key="WRITE" value="java:comp/env/jdbc/togayther_write"/>
+			</map>
+		</property>
+		<property name="defaultTargetDataSource" value="java:comp/env/jdbc/togayther"/>
+	</bean>
+	<bean id="tagsDataSource" class="com.nextep.proto.spring.ReadWriteDataSourceRouter">
+		<property name="targetDataSources">
+			<map key-type="java.lang.String">
+				<entry key="READ" value="java:comp/env/jdbc/togayther"/>
+				<entry key="WRITE" value="java:comp/env/jdbc/togayther_write"/>
+			</map>
+		</property>
+		<property name="defaultTargetDataSource" value="java:comp/env/jdbc/togayther"/>
+	</bean>
+	<bean id="usersDataSource" class="com.nextep.proto.spring.ReadWriteDataSourceRouter">
+		<property name="targetDataSources">
+			<map key-type="java.lang.String">
+				<entry key="READ" value="java:comp/env/jdbc/togayther"/>
+				<entry key="WRITE" value="java:comp/env/jdbc/togayther_write"/>
+			</map>
+		</property>
+		<property name="defaultTargetDataSource" value="java:comp/env/jdbc/togayther"/>
+	</bean>
+	
+	<bean id="commentsDataSource" class="com.nextep.proto.spring.ReadWriteDataSourceRouter">
+		<property name="targetDataSources">
+			<map key-type="java.lang.String">
+				<entry key="READ" value="java:comp/env/jdbc/togayther"/>
+				<entry key="WRITE" value="java:comp/env/jdbc/togayther_write"/>
+			</map>
+		</property>
+		<property name="defaultTargetDataSource" value="java:comp/env/jdbc/togayther"/>
+	</bean>
+	<bean id="statisticsDataSource" class="com.nextep.proto.spring.ReadWriteDataSourceRouter">
+		<property name="targetDataSources">
+			<map key-type="java.lang.String">
+				<entry key="READ" value="java:comp/env/jdbc/togayther"/>
+				<entry key="WRITE" value="java:comp/env/jdbc/togayther_write"/>
+			</map>
+		</property>
+		<property name="defaultTargetDataSource" value="java:comp/env/jdbc/togayther"/>
+	</bean>
+</beans>

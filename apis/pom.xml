@@ -1,0 +1,19 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<parent>
+		<groupId>neXtep</groupId>
+		<artifactId>master-pom</artifactId>
+		<version>0.0.1</version>
+	</parent>
+	<modelVersion>4.0.0</modelVersion>
+	<artifactId>api</artifactId>
+	<packaging>pom</packaging>
+	<name>Aggregated Proxy Integration</name>
+	<version>0.5.4-SNAPSHOT</version>
+	<description>Aggregation of the TvTrip content providers (CAL implementations)</description>
+	<modules>
+		<module>api-services</module>
+		<module>api-test</module>
+		<module>api-aql</module>
+	</modules>
+</project>

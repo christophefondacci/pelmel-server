@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sorters xmlns="http://www.tvtrip.com/smaug/SearchReference"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.tvtrip.com/smaug/SearchReference ../xsd/SearchReference.xsd ">
+
+	<sorter>
+		<fieldName>ranking</fieldName>
+		<ascending>false</ascending>
+		<urlCode>p</urlCode>
+		<defaultIndex>1</defaultIndex>
+	</sorter>
+
+	<sorter>
+		<fieldName>ranking</fieldName>
+		<ascending>true</ascending>
+		<urlCode>q</urlCode>
+	</sorter>
+
+	<!-- Sorting by price has been disabled until we have some prices to show -->
+	<!-- <sorter> -->
+	<!-- <fieldName>price</fieldName> -->
+	<!-- <ascending>true</ascending> -->
+	<!-- <urlCode>i</urlCode> -->
+	<!-- </sorter> -->
+	<!-- <sorter> -->
+	<!-- <fieldName>price</fieldName> -->
+	<!-- <ascending>false</ascending> -->
+	<!-- <urlCode>j</urlCode> -->
+	<!-- </sorter> -->
+
+	<sorter>
+		<fieldName>rating</fieldName>
+		<ascending>false</ascending>
+		<urlCode>a</urlCode>
+	</sorter>
+
+	<sorter>
+		<fieldName>geo_distance</fieldName>
+		<ascending>true</ascending>
+		<urlCode>r</urlCode>
+	</sorter>
+
+	<sorter>
+		<fieldName>name_sort</fieldName>
+		<ascending>true</ascending>
+		<urlCode>n</urlCode>
+	</sorter>
+
+	<sorter>
+		<fieldName>name_sort</fieldName>
+		<ascending>false</ascending>
+		<urlCode>m</urlCode>
+	</sorter>
+
+	<sorter>
+		<fieldName>has_video</fieldName>
+		<ascending>false</ascending>
+		<urlCode>v</urlCode>
+		<defaultIndex>0</defaultIndex>
+		<sticky>true</sticky>
+	</sorter>
+</sorters>
