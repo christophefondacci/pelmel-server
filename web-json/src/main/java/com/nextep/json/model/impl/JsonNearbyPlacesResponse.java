@@ -9,6 +9,7 @@ public class JsonNearbyPlacesResponse {
 	private List<JsonLightCity> cities = new ArrayList<JsonLightCity>();
 	private JsonLightCity localizedCity;
 	private List<JsonActivity> nearbyActivities = new ArrayList<JsonActivity>();
+	private List<JsonLightUser> nearbyUsers = new ArrayList<JsonLightUser>();
 
 	public void setPlaces(List<JsonPlace> places) {
 		this.places = places;
@@ -42,7 +43,19 @@ public class JsonNearbyPlacesResponse {
 		nearbyActivities.add(activity);
 	}
 
+	public void addNearbyUser(JsonLightUser user) {
+		nearbyUsers.add(user);
+	}
+
 	public void setNearbyActivities(List<JsonActivity> nearbyActivities) {
 		this.nearbyActivities = nearbyActivities;
+	}
+
+	public void setNearbyUsers(List<JsonLightUser> nearbyUsers) {
+		this.nearbyUsers = nearbyUsers;
+	}
+
+	public List<JsonLightUser> getNearbyUsers() {
+		return nearbyUsers;
 	}
 }

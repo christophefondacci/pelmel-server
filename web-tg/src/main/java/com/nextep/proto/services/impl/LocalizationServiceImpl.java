@@ -53,6 +53,12 @@ public class LocalizationServiceImpl implements LocalizationService {
 					}
 				}
 
+				// Always saving user lat/lng for nearby user-to-user search
+				currentUser.setLatitude(lat);
+				currentUser.setLongitude(lng);
+				// Storing user localization info (lat, long and place)
+				usersService.saveItem(user);
+
 				// If localized, we store the place
 				// if (currentPlaceKey != null) {
 				// checkin(currentUser, currentPlaceKey,

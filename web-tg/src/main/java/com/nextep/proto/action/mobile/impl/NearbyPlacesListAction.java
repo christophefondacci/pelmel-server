@@ -24,10 +24,12 @@ import com.nextep.geo.model.GeographicItem;
 import com.nextep.geo.model.Place;
 import com.nextep.json.model.impl.JsonActivity;
 import com.nextep.json.model.impl.JsonLightCity;
+import com.nextep.json.model.impl.JsonLightUser;
 import com.nextep.json.model.impl.JsonMedia;
 import com.nextep.json.model.impl.JsonNearbyPlacesResponse;
 import com.nextep.json.model.impl.JsonPlace;
 import com.nextep.media.model.Media;
+import com.nextep.media.model.MediaRequestTypes;
 import com.nextep.proto.action.base.AbstractAction;
 import com.nextep.proto.action.model.JsonProvider;
 import com.nextep.proto.action.model.NearbySearchAware;
@@ -84,11 +86,13 @@ public class NearbyPlacesListAction extends AbstractAction implements
 
 	private static String APIS_ALIAS_NEARBY_PLACES = "np";
 	private static String APIS_ALIAS_NEARBY_ACTIVITIES = "na";
+	private static String APIS_ALIAS_NEARBY_USERS = "nu";
 	private static String APIS_ALIAS_CITY = "parentCity";
 	private static String APIS_ALIAS_PLACES_FACETS = "unused";
 
 	private static final int SORT_RANGE_DISTANCE = 2;
 	private static final int NEARBY_ACTIVITIES_COUNT = 20;
+	private static final int NEARBY_USERS_COUNT = 20;
 
 	// Injected constants
 	private double radius;
@@ -165,6 +169,14 @@ public class NearbyPlacesListAction extends AbstractAction implements
 
 					request.addCriterion(activitiesCrit);
 
+					// Adding users
+					final ApisCriterion usersCrit = (ApisCriterion) SearchRestriction
+							.searchNear(User.class, SearchScope.USERS,
+									searchLat, searchLng, radius,
+									NEARBY_USERS_COUNT, 0)
+							.aliasedBy(APIS_ALIAS_NEARBY_USERS)
+							.with(Media.class, MediaRequestTypes.THUMB);
+					request.addCriterion(usersCrit);
 				} else {
 					// Building every city having places by using facets of a
 					// place search
@@ -213,16 +225,25 @@ public class NearbyPlacesListAction extends AbstractAction implements
 			final ItemKey parentItemKey = CalmFactory.parseKey(parentKey);
 
 			// Preparing query of activities for this parent
-			final ApisCriterion activitiesCrit = SearchRestriction.with(
-					Activity.class, NEARBY_ACTIVITIES_COUNT, 0).aliasedBy(
-					APIS_ALIAS_NEARBY_ACTIVITIES);
+			final ApisCriterion activitiesCrit = SearchRestriction
+					.withContained(Activity.class,
+							SearchScope.NEARBY_ACTIVITIES,
+							NEARBY_ACTIVITIES_COUNT, 0).aliasedBy(
+							APIS_ALIAS_NEARBY_ACTIVITIES);
 			ApisActivitiesHelper.addActivityConnectedItemsQuery(activitiesCrit);
+
+			// Adding users
+			final ApisCriterion usersCrit = (ApisCriterion) SearchRestriction
+					.withContained(User.class, SearchScope.USERS,
+							NEARBY_USERS_COUNT, 0)
+					.aliasedBy(APIS_ALIAS_NEARBY_USERS)
+					.with(Media.class, MediaRequestTypes.THUMB);
 
 			// Building parent getter, querying contained places
 			request.addCriterion((ApisCriterion) SearchRestriction
 					.uniqueKeys(Arrays.asList(parentItemKey))
 					.aliasedBy(APIS_ALIAS_CITY).addCriterion(placesCriterion)
-					.addCriterion(activitiesCrit));
+					.addCriterion(activitiesCrit).addCriterion(usersCrit));
 		}
 		request.addCriterion(
 				SearchRestriction.searchAll(User.class,
@@ -288,11 +309,13 @@ public class NearbyPlacesListAction extends AbstractAction implements
 				SearchHelper.getUserPlacesCategory());
 		List<? extends Place> places;
 		List<? extends Activity> activities;
+		List<? extends User> users;
 		if (parentKey == null) {
 			places = response
 					.getElements(Place.class, APIS_ALIAS_NEARBY_PLACES);
 			activities = response.getElements(Activity.class,
 					APIS_ALIAS_NEARBY_ACTIVITIES);
+			users = response.getElements(User.class, APIS_ALIAS_NEARBY_USERS);
 		} else {
 			// If we had a parent key set we need to extract places from its
 			// parent geographic element
@@ -300,6 +323,7 @@ public class NearbyPlacesListAction extends AbstractAction implements
 					GeographicItem.class, APIS_ALIAS_CITY);
 			places = city.get(Place.class, APIS_ALIAS_NEARBY_PLACES);
 			activities = city.get(Activity.class, APIS_ALIAS_NEARBY_ACTIVITIES);
+			users = city.get(User.class, APIS_ALIAS_NEARBY_USERS);
 		}
 		// final FacetInformation facetInfo = response
 		// .getFacetInformation(SearchScope.NEARBY_BLOCK);
@@ -467,7 +491,6 @@ public class NearbyPlacesListAction extends AbstractAction implements
 		}
 
 		// Extracting activities
-
 		final PaginationInfo activitiesPagination = response
 				.getPaginationInfo(APIS_ALIAS_NEARBY_ACTIVITIES);
 		activitySupport.initialize(getUrlService(), getLocale(),
@@ -478,6 +501,13 @@ public class NearbyPlacesListAction extends AbstractAction implements
 			final String text = activitySupport.getActivityHtmlLine(activity);
 			jsonActivity.setMessage(text);
 			jsonResponse.addNearbyActivity(jsonActivity);
+		}
+
+		// JSONifying users
+		for (User nearbyUser : users) {
+			final JsonLightUser jsonUser = jsonBuilder.buildJsonLightUser(
+					nearbyUser, highRes, getLocale());
+			jsonResponse.addNearbyUser(jsonUser);
 		}
 
 		// Building city JSON
