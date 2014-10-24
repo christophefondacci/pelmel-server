@@ -141,17 +141,22 @@ public class NearbyPlacesListAction extends AbstractAction implements
 		}
 		// Creating the request
 		final ApisRequest request = ApisFactory.createCompositeRequest();
+		// Place rating sorter
+		final List<Sorter> placeSorters = Arrays.asList(SearchHelper
+				.getPlaceRatingSorter());
 
 		// Preparing the places list criterion
 		ApisCriterion placesCriterion = null;
 		if (searchText == null) {
 			if (parentKey == null) {
 				if (searchLat != null && searchLng != null) {
+
 					// Looking for nearby places
-					placesCriterion = SearchRestriction.searchNear(Place.class,
-							SearchScope.NEARBY_BLOCK, searchLat, searchLng,
-							radius, pageSize, page).aliasedBy(
-							APIS_ALIAS_NEARBY_PLACES);
+					placesCriterion = SearchRestriction
+							.searchNear(Place.class, SearchScope.NEARBY_BLOCK,
+									searchLat, searchLng, radius, pageSize,
+									page).sortBy(placeSorters)
+							.aliasedBy(APIS_ALIAS_NEARBY_PLACES);
 
 					// Adding activities
 					final List<Sorter> activitiesDateSorter = SearchHelper
@@ -225,11 +230,14 @@ public class NearbyPlacesListAction extends AbstractAction implements
 			final ItemKey parentItemKey = CalmFactory.parseKey(parentKey);
 
 			// Preparing query of activities for this parent
+			final List<Sorter> activitiesDateSorter = SearchHelper
+					.getActivitiesDefaultSorter();
 			final ApisCriterion activitiesCrit = SearchRestriction
 					.withContained(Activity.class,
 							SearchScope.NEARBY_ACTIVITIES,
-							NEARBY_ACTIVITIES_COUNT, 0).aliasedBy(
-							APIS_ALIAS_NEARBY_ACTIVITIES);
+							NEARBY_ACTIVITIES_COUNT, 0)
+					.aliasedBy(APIS_ALIAS_NEARBY_ACTIVITIES)
+					.sortBy(activitiesDateSorter);
 			ApisActivitiesHelper.addActivityConnectedItemsQuery(activitiesCrit);
 
 			// Adding users
