@@ -148,7 +148,7 @@ public class UsersServiceImpl extends AbstractDaoBasedCalServiceImpl implements
 	protected ItemsResponse getItemsFor(ItemKey itemKey, CalContext context)
 			throws CalException {
 		final List<User> users = ((UsersDao) getCalDao()).getUsersFor(itemKey,
-				10, 0);
+				-1, -1);
 		final ItemsResponseImpl response = new ItemsResponseImpl();
 		response.setItems(users);
 		return response;

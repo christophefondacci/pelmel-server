@@ -56,7 +56,7 @@ public class ILikeAction extends AbstractAction implements CurrentUserAware,
 	private int likes = 0;
 
 	private String id;
-	private int type;
+	private Integer type;
 
 	@Override
 	protected String doExecute() throws Exception {
@@ -167,6 +167,7 @@ public class ILikeAction extends AbstractAction implements CurrentUserAware,
 		likeInfo.setKey(id);
 		likeInfo.setLikeCount(likes);
 		likeInfo.setDislikeCount(overviewSupport.getDislikesCount());
+		likeInfo.setLiked(likeResult.wasLiked());
 		return JSONObject.fromObject(likeInfo).toString();
 	}
 
@@ -207,7 +208,7 @@ public class ILikeAction extends AbstractAction implements CurrentUserAware,
 	}
 
 	public int getType() {
-		return type;
+		return type == null ? -1 : type;
 	}
 
 	public void setMessageService(CalPersistenceService messageService) {

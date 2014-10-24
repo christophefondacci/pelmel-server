@@ -7,6 +7,7 @@ public class JsonLikeInfo {
 	private String key;
 	private int likeCount;
 	private int dislikeCount;
+	private boolean liked;
 	private List<JsonActivity> likes;
 	private List<JsonActivity> likers;
 
@@ -48,5 +49,13 @@ public class JsonLikeInfo {
 
 	public void setLikers(List<JsonActivity> likers) {
 		this.likers = likers;
+	}
+
+	public boolean isLiked() {
+		return liked;
+	}
+
+	public void setLiked(boolean liked) {
+		this.liked = liked;
 	}
 }

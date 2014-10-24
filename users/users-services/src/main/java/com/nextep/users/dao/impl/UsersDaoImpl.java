@@ -273,11 +273,13 @@ public class UsersDaoImpl extends AbstractCalDao<User> implements UsersDao {
 		if (key == null) {
 			return null;
 		} else {
-			final Query query = entityManager
-					.createQuery("from ItemUserImpl where itemKey=:key")
-					.setParameter("key", key.toString())
-					.setMaxResults(pageSize)
-					.setFirstResult(pageOffset * pageSize);
+			final Query query = entityManager.createQuery(
+					"from ItemUserImpl where itemKey=:key").setParameter("key",
+					key.toString());
+			if (pageSize > 0) {
+				query.setMaxResults(pageSize).setFirstResult(
+						pageOffset * pageSize);
+			}
 			try {
 				// Retrieving from DB
 				final List<ItemUserImpl> itemUsers = query.getResultList();
