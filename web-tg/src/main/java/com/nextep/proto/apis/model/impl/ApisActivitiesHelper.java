@@ -95,4 +95,5 @@ public final class ApisActivitiesHelper {
 								.aliasedBy(Constants.ALIAS_ACTIVITY_TARGET)
 								.with(Media.class));
 	}
+
 }

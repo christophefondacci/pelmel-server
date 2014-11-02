@@ -3,6 +3,7 @@ package com.nextep.smaug.service;
 import java.util.Date;
 import java.util.List;
 
+import com.nextep.geo.model.City;
 import com.nextep.smaug.solr.model.LikeActionResult;
 import com.nextep.users.model.User;
 import com.videopolis.calm.model.CalmObject;
@@ -60,6 +61,19 @@ public interface SearchPersistenceService {
 	void remove(CalmObject object);
 
 	void storeSuggest(ItemKey itemKey, List<String> knownNames);
+
+	/**
+	 * Index the given names and city for the given itemkey in the suggest index
+	 * 
+	 * @param itemKey
+	 *            {@link ItemKey} of the element
+	 * @param knownNames
+	 *            known names of the element
+	 * @param city
+	 *            {@link City} where this element is located for full text
+	 *            geographic search
+	 */
+	void storeSuggest(ItemKey itemKey, List<String> knownNames, City city);
 
 	/**
 	 * Updates the document corresponding to the specified user by removing the

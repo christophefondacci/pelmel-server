@@ -236,7 +236,11 @@ public class SolrSearchServiceImpl implements SearchService {
 	public SearchTextResponse searchText(String textToSearch,
 			SearchTextSettings settings, SearchWindow window) {
 		final StringBuilder buf = new StringBuilder();
-		buf.append("name:(" + textToSearch + ")");
+		if (settings.getSuggestScope().contains(SuggestScope.GEO_FULLTEXT)) {
+			buf.append("fulltextName:(" + textToSearch + ")");
+		} else {
+			buf.append("name:(" + textToSearch + ")");
+		}
 
 		// Optionally restricting searched type
 		String separator = " AND (";
@@ -255,6 +259,10 @@ public class SolrSearchServiceImpl implements SearchService {
 		buf.append(")");
 		// Building query
 		final SolrQuery query = new SolrQuery(buf.toString());
+		if (window != null) {
+			query.setRows(window.getItemsPerPage());
+			query.setStart(window.getPageNumber() * window.getItemsPerPage());
+		}
 		log.info("Suggest SOLR search: " + query);
 		// Enabling highlighting of matches
 		// query.setParam(HIGHLIGHTING_PARAMETER, true);

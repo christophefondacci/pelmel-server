@@ -8,6 +8,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.nextep.geo.model.Place;
+import com.nextep.geo.model.impl.RequestTypeWithAlternates;
 import com.nextep.proto.action.base.AbstractAction;
 import com.nextep.proto.spring.ContextHolder;
 import com.nextep.smaug.service.SearchPersistenceService;
@@ -64,7 +65,8 @@ public class IndexPlacesAction extends AbstractAction {
 
 	private void indexPlaces() throws ApisException {
 		final ApisRequest request = (ApisRequest) ApisFactory
-				.createRequest(Place.class).list(Place.class, null)
+				.createRequest(Place.class)
+				.list(Place.class, RequestTypeWithAlternates.WITH_ALTERNATES)
 				.with(Tag.class);
 		LOGGER.info("Loading all places to index");
 		final ApiResponse response = getApiService().execute(request,

@@ -18,6 +18,7 @@ import com.nextep.geo.model.City;
 import com.nextep.geo.model.MutablePlace;
 import com.nextep.geo.model.Place;
 import com.nextep.geo.model.impl.PlaceImpl;
+import com.nextep.geo.model.impl.RequestTypeWithAlternates;
 import com.videopolis.calm.exception.CalException;
 import com.videopolis.calm.helper.Assert;
 import com.videopolis.calm.model.CalmObject;
@@ -115,6 +116,14 @@ public class PlacesServiceImpl extends AbstractCalService implements
 		final ItemsResponseImpl response = new ItemsResponseImpl();
 		final List<Place> places = geoDao.listPlaces();
 		response.setItems(places);
+		if (requestType instanceof RequestTypeWithAlternates) {
+			final Map<Long, List<CalmObject>> alternateIdMap = new HashMap<Long, List<CalmObject>>();
+			for (Place p : places) {
+				GeoServiceHelper.fillAlternateMap(alternateIdMap, p);
+			}
+			GeoServiceHelper
+					.fillAlternatesFromMap(geoDao, alternateIdMap, null);
+		}
 		return response;
 	}
 

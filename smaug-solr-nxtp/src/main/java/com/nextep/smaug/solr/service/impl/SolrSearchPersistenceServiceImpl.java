@@ -5,8 +5,11 @@ import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -20,6 +23,7 @@ import com.nextep.activities.model.Activity;
 import com.nextep.advertising.model.AdvertisingBooster;
 import com.nextep.events.model.Event;
 import com.nextep.geo.model.Admin;
+import com.nextep.geo.model.AlternateName;
 import com.nextep.geo.model.City;
 import com.nextep.geo.model.Country;
 import com.nextep.geo.model.GeographicItem;
@@ -358,7 +362,8 @@ public class SolrSearchPersistenceServiceImpl implements
 				throw new SearchException("Unable to store calm object: " + e,
 						e);
 			}
-			storeSuggest(place.getKey(), Arrays.asList(place.getName()));
+			storeSuggest(place.getKey(), Arrays.asList(place.getName()),
+					place.getCity());
 		} else {
 			remove(place);
 		}
@@ -648,10 +653,37 @@ public class SolrSearchPersistenceServiceImpl implements
 
 	@Override
 	public void storeSuggest(ItemKey itemKey, List<String> knownNames) {
+		storeSuggest(itemKey, knownNames, null);
+	}
+
+	private Collection<String> getNameWithAlternates(String name, CalmObject o) {
+		final List<? extends AlternateName> alternateNames = o
+				.get(AlternateName.class);
+		final Set<String> names = new HashSet<String>();
+		names.add(name);
+		for (AlternateName alternateName : alternateNames) {
+			names.add(alternateName.getAlternameName());
+		}
+		return names;
+	}
+
+	@Override
+	public void storeSuggest(ItemKey itemKey, List<String> knownNames, City city) {
 		final SearchTextItemImpl item = new SearchTextItemImpl();
 		item.setId(itemKey.toString());
 		item.setNames(knownNames);
 		item.setType(itemKey.getType());
+		if (city != null) {
+			final Collection<String> cityNames = getNameWithAlternates(
+					city.getName(), city);
+			item.setCityName(cityNames);
+			final Collection<String> stateNames = getNameWithAlternates(city
+					.getAdm1().getName(), city.getAdm1());
+			item.setStateName(stateNames);
+			final Collection<String> countryNames = getNameWithAlternates(city
+					.getCountry().getName(), city.getCountry());
+			item.setCountryName(countryNames);
+		}
 		try {
 			suggestSolrServer.addBean(item);
 			suggestSolrServer.commit();

@@ -195,6 +195,9 @@
 		<property name="production">
 			<jee:jndi-lookup jndi-name="java:comp/env/push.production"/>
 		</property>
+		<property name="pushEnabled">
+			<jee:jndi-lookup jndi-name="java:comp/env/push.enabled"/>
+		</property>
 	</bean>
 	<bean id="pngOptimizer" class="com.googlecode.pngtastic.core.PngOptimizer"/>
 </beans>

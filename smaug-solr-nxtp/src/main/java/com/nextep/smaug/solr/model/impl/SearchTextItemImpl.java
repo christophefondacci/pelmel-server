@@ -1,5 +1,6 @@
 package com.nextep.smaug.solr.model.impl;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 
@@ -19,6 +20,13 @@ public class SearchTextItemImpl implements SearchItem {
 	private List<String> name;
 	@Field
 	private String type;
+	@Field
+	private Collection<String> cityName;
+	@Field
+	private Collection<String> stateName;
+	@Field
+	private Collection<String> countryName;
+
 	private String matchedText;
 
 	@Override
@@ -70,4 +78,17 @@ public class SearchTextItemImpl implements SearchItem {
 	public String getType() {
 		return type;
 	}
+
+	public void setCityName(Collection<String> cityName) {
+		this.cityName = cityName;
+	}
+
+	public void setStateName(Collection<String> stateName) {
+		this.stateName = stateName;
+	}
+
+	public void setCountryName(Collection<String> countryName) {
+		this.countryName = countryName;
+	}
+
 }

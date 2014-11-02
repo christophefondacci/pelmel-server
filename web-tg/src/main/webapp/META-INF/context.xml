@@ -55,7 +55,7 @@
 <!-- 	<Environment name="togaytherBaseUrl" type="java.lang.String" -->
 <!-- 		value="http://local.togayther.net" /> -->
 	<Environment name="togaytherBaseUrl" type="java.lang.String"
-		value="http://192.168.1.24" />
+		value="http://192.168.1.25" />
 	<Environment name="togaytherDomain" type="java.lang.String"
 		value="pelmelguide" />
 	<Environment name="mobile/localizationDistance" type="java.lang.Double"
@@ -101,5 +101,6 @@
 	<Environment name="push.key.path" type="java.lang.String" value="/Users/cfondacci/Documents/PELMEL/iphone_dev.p12"/>
 	<Environment name="push.key.password" type="java.lang.String" value="tDk@1558"/>
 	<Environment name="push.production" type="java.lang.Boolean" value="false"/>
+	<Environment name="push.enabled" type="java.lang.Boolean" value="false"/>
 </Context>
 

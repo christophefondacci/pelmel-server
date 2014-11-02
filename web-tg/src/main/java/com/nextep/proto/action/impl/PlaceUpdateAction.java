@@ -17,6 +17,7 @@ import com.nextep.advertising.model.AdvertisingBooster;
 import com.nextep.cal.util.services.CalPersistenceService;
 import com.nextep.descriptions.model.Description;
 import com.nextep.descriptions.model.DescriptionRequestType;
+import com.nextep.geo.model.AlternateName;
 import com.nextep.geo.model.City;
 import com.nextep.geo.model.MutablePlace;
 import com.nextep.geo.model.Place;
@@ -26,6 +27,9 @@ import com.nextep.proto.action.base.AbstractAction;
 import com.nextep.proto.action.model.DescriptionsUpdateAware;
 import com.nextep.proto.action.model.JsonProvider;
 import com.nextep.proto.action.model.PropertiesUpdateAware;
+import com.nextep.proto.apis.adapters.ApisPlaceAdm1Adapter;
+import com.nextep.proto.apis.adapters.ApisPlaceCountryAdapter;
+import com.nextep.proto.apis.adapters.ApisPlaceLocationAdapter;
 import com.nextep.proto.apis.model.impl.ApisLocalizationHelper;
 import com.nextep.proto.blocks.CurrentUserSupport;
 import com.nextep.proto.builders.JsonBuilder;
@@ -253,9 +257,21 @@ public class PlaceUpdateAction extends AbstractAction implements
 
 		// Fetching the updated place for search storage
 		final ApisRequest fetchRequest = (ApisRequest) ApisFactory
-				.createRequest(Place.class).uniqueKey(place.getKey().getId())
-				.with(Tag.class).with(AdvertisingBooster.class)
-				.with(Statistic.class);
+				.createRequest(Place.class)
+				.uniqueKey(place.getKey().getId())
+				.addCriterion(
+						(ApisCriterion) SearchRestriction.adapt(
+								new ApisPlaceLocationAdapter()).with(
+								AlternateName.class))
+				.addCriterion(
+						(ApisCriterion) SearchRestriction.adapt(
+								new ApisPlaceAdm1Adapter()).with(
+								AlternateName.class))
+				.addCriterion(
+						(ApisCriterion) SearchRestriction.adapt(
+								new ApisPlaceCountryAdapter()).with(
+								AlternateName.class)).with(Tag.class)
+				.with(AdvertisingBooster.class).with(Statistic.class);
 		final ApiResponse fetchResponse = getApiService().execute(fetchRequest,
 				ContextFactory.createContext(getLocale()));
 		final Place fetchedPlace = (Place) fetchResponse.getUniqueElement();

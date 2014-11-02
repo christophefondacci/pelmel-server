@@ -21,6 +21,8 @@ public class JsonUser extends JsonLiker {
 	private Collection<String> tags = new ArrayList<String>();
 	private List<JsonLightPlace> likedPlaces = new ArrayList<JsonLightPlace>();
 	private int likedPlacesCount;
+	private List<JsonLightPlace> checkedInPlaces = new ArrayList<JsonLightPlace>();
+	private int checkedInPlacesCount;
 	private JsonLightPlace lastLocation;
 	private Long lastLocationTime;
 
@@ -158,5 +160,25 @@ public class JsonUser extends JsonLiker {
 
 	public void setLastLocationTimeValue(Date lastLocationTime) {
 		this.lastLocationTime = lastLocationTime.getTime() / 1000;
+	}
+
+	public void setCheckedInPlacesCount(int checkedInPlacesCount) {
+		this.checkedInPlacesCount = checkedInPlacesCount;
+	}
+
+	public int getCheckedInPlacesCount() {
+		return checkedInPlacesCount;
+	}
+
+	public List<JsonLightPlace> getCheckedInPlaces() {
+		return checkedInPlaces;
+	}
+
+	public void setCheckedInPlaces(List<JsonLightPlace> checkedInPlaces) {
+		this.checkedInPlaces = checkedInPlaces;
+	}
+
+	public void addCheckedInPlace(JsonLightPlace checkedInPlace) {
+		this.checkedInPlaces.add(checkedInPlace);
 	}
 }

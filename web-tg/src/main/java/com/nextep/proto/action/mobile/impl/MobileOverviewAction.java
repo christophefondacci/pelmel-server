@@ -86,6 +86,7 @@ public class MobileOverviewAction extends AbstractAction implements
 	private static final String APIS_ALIAS_USER_NEAR = "unear";
 	private static final String APIS_ALIAS_NEARBY_PLACES = "nearbyPlaces";
 	private static final String APIS_ALIAS_COMMENTS = "comments";
+	private static final String APIS_ALIAS_ACTIVITIES_CHECKIN = "checkins";
 
 	private static final ApisItemKeyAdapter eventLocationAdapter = new ApisEventLocationAdapter();
 	private static final ApisItemKeyAdapter userLocationAdapter = new ApisUserLocationItemKeyAdapter();
@@ -193,7 +194,12 @@ public class MobileOverviewAction extends AbstractAction implements
 							(ApisCriterion) SearchRestriction
 									.with(Place.class, maxRelatedElements, 0)
 									.aliasedBy(APIS_ALIAS_PLACE_LIKE)
-									.with(Media.class, MediaRequestTypes.THUMB));
+									.with(Media.class, MediaRequestTypes.THUMB))
+					.with(ApisActivitiesHelper.withUserActivities(
+							MAX_LOCALIZATION_ACTIVITY, 0,
+							ActivityType.LOCALIZATION, ActivityType.CHECKIN)
+							.aliasedBy(APIS_ALIAS_ACTIVITIES_CHECKIN));
+			;
 		} else if (Event.CAL_ID.equals(itemKey.getType())) {
 			objCriterion.addCriterion((WithCriterion) SearchRestriction
 					.withContained(User.class, SearchScope.CHILDREN,
@@ -449,6 +455,49 @@ public class MobileOverviewAction extends AbstractAction implements
 						.buildJsonLightPlace(place, highRes, getLocale());
 				jsonUser.addLikedPlace(jsonPlace);
 			}
+
+			// Extracting activities for checkin information
+			final List<? extends Activity> activities = overviewObject.get(
+					Activity.class, APIS_ALIAS_ACTIVITIES_CHECKIN);
+			for (Activity a : activities) {
+
+				// Only considering localization activities
+				if (a.getActivityType() == ActivityType.LOCALIZATION
+						|| a.getActivityType() == ActivityType.CHECKIN) {
+					try {
+						// Getting place of this activity
+						final Place place = a.getUnique(Place.class,
+								Constants.ALIAS_ACTIVITY_TARGET);
+
+						// Making sure we don't add the same place twice (when
+						// several checkins)
+						final Set<String> placeKeys = new HashSet<String>();
+
+						// If not already in the list
+						if (place != null
+								&& !placeKeys.contains(place.getKey()
+										.toString())) {
+							// We build JSON representation of it
+							final JsonLightPlace jsonPlace = jsonBuilder
+									.buildJsonLightPlace(place, highRes,
+											getLocale());
+							// And add it
+							jsonUser.addCheckedInPlace(jsonPlace);
+							placeKeys.add(place.getKey().toString());
+						}
+					} catch (CalException e) {
+						LOGGER.error(
+								"Problems while getting user checkins from a localization activity: "
+										+ e.getMessage(), e);
+					}
+				}
+			}
+
+			// Generating checkins count
+			final PaginationInfo checkinsPagination = response
+					.getPaginationInfo(APIS_ALIAS_ACTIVITIES_CHECKIN);
+			jsonUser.setCheckedInPlacesCount(checkinsPagination.getItemCount());
+
 		} else if (Event.CAL_ID.equals(overviewObject.getKey().getType())) {
 			final JsonEvent jsonEvent = new JsonEvent();
 			jsonBuilder.fillJsonEvent(jsonEvent, (Event) overviewObject,
@@ -462,17 +511,20 @@ public class MobileOverviewAction extends AbstractAction implements
 		}
 		if (json != null) {
 			// Generating like
-			final PaginationInfo likePagination = response
-					.getPaginationInfo(APIS_ALIAS_USER_LIKERS);
-			json.setLikes(likePagination.getItemCount());
 
 			List<? extends User> likesUsers = Collections.emptyList();
 			if (User.CAL_TYPE.equals(overviewObject.getKey().getType())) {
 				likesUsers = overviewObject.get(User.class,
 						APIS_ALIAS_USER_LIKED);
+				final PaginationInfo likePagination = response
+						.getPaginationInfo(APIS_ALIAS_USER_LIKED);
+				json.setLikes(likePagination.getItemCount());
 			} else {
 				likesUsers = overviewObject.get(User.class,
 						APIS_ALIAS_USER_LIKERS);
+				final PaginationInfo likePagination = response
+						.getPaginationInfo(APIS_ALIAS_USER_LIKERS);
+				json.setLikes(likePagination.getItemCount());
 			}
 			for (User user : likesUsers) {
 				final JsonLightUser jsonUser = jsonBuilder.buildJsonLightUser(

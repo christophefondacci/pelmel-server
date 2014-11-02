@@ -206,6 +206,7 @@ public class NearbyPlacesListAction extends AbstractAction implements
 			List<SuggestScope> scopes = new ArrayList<SuggestScope>();
 			scopes.add(SuggestScope.DESTINATION);
 			scopes.add(SuggestScope.PLACE);
+			scopes.add(SuggestScope.GEO_FULLTEXT);
 			placesCriterion = SearchRestriction.searchFromText(
 					GeographicItem.class, scopes, searchText, pageSize)
 					.aliasedBy(APIS_ALIAS_NEARBY_PLACES);
@@ -344,6 +345,7 @@ public class NearbyPlacesListAction extends AbstractAction implements
 		final List<JsonPlace> jsonPlaces = new ArrayList<JsonPlace>();
 
 		// Preparing a single localized date
+		Map<String, List<JsonPlace>> placesCityMap = new HashMap<String, List<JsonPlace>>();
 		for (CalmObject o : searchSupport.getSearchResults()) {
 			final Place place = (Place) o;
 
@@ -369,6 +371,15 @@ public class NearbyPlacesListAction extends AbstractAction implements
 
 			// Adding place to list
 			jsonPlaces.add(p);
+
+			// Hashing places by city
+			final String cityKey = place.getCity().getKey().toString();
+			List<JsonPlace> jsonCityPlaces = placesCityMap.get(cityKey);
+			if (jsonCityPlaces == null) {
+				jsonCityPlaces = new ArrayList<JsonPlace>();
+				placesCityMap.put(cityKey, jsonCityPlaces);
+			}
+			jsonCityPlaces.add(p);
 		}
 
 		// Sorting results
@@ -470,9 +481,24 @@ public class NearbyPlacesListAction extends AbstractAction implements
 				}
 			}
 		});
+
+		// Preparing response
 		jsonResponse = new JsonNearbyPlacesResponse();
 		jsonResponse.setPlaces(jsonPlaces);
 		jsonResponse.setCities(jsonCities);
+
+		// Special SEARCH TEXT filtering when a single city returns 60% of
+		// results
+		if (searchText != null) {
+			for (String key : placesCityMap.keySet()) {
+				final List<JsonPlace> cityPlaces = placesCityMap.get(key);
+				// Checking if places represents 60% of results
+				if (cityPlaces.size() >= 0.6 * jsonPlaces.size()) {
+					jsonResponse.setPlaces(cityPlaces);
+					break;
+				}
+			}
+		}
 
 		final MutableUser currentUser = response.getUniqueElement(
 				MutableUser.class, CurrentUserSupport.APIS_ALIAS_CURRENT_USER);

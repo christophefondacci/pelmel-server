@@ -31,6 +31,7 @@ public class NotificationServiceImpl implements NotificationService {
 	private String pushKeyPath;
 	private String pushKeyPassword;
 	private boolean production;
+	private boolean pushEnabled = true;
 
 	private class MyFailedConnectionListener implements
 			FailedConnectionListener<SimpleApnsPushNotification> {
@@ -55,23 +56,25 @@ public class NotificationServiceImpl implements NotificationService {
 	}
 
 	public void init() throws Exception {
-		final ApnsEnvironment apnsEnv = production ? ApnsEnvironment
-				.getProductionEnvironment() : ApnsEnvironment
-				.getSandboxEnvironment();
-		pushManager = new PushManager<SimpleApnsPushNotification>(apnsEnv,
-				SSLContextUtil.createDefaultSSLContext(pushKeyPath,
-						pushKeyPassword), null, null, null,
-				new PushManagerConfiguration(), "PelmelPush");
-		pushManager.start();
-		pushManager
-				.registerFailedConnectionListener(new MyFailedConnectionListener());
+		if (pushEnabled) {
+			final ApnsEnvironment apnsEnv = production ? ApnsEnvironment
+					.getProductionEnvironment() : ApnsEnvironment
+					.getSandboxEnvironment();
+			pushManager = new PushManager<SimpleApnsPushNotification>(apnsEnv,
+					SSLContextUtil.createDefaultSSLContext(pushKeyPath,
+							pushKeyPassword), null, null, null,
+					new PushManagerConfiguration(), "PelmelPush");
+			pushManager.start();
+			pushManager
+					.registerFailedConnectionListener(new MyFailedConnectionListener());
+		}
 
 	}
 
 	@Override
 	public void sendNotification(User user, String message, int badgeCount,
 			String sound) {
-		if (user.getPushDeviceId() != null) {
+		if (user.getPushDeviceId() != null && pushEnabled) {
 
 			byte[] token;
 			try {
@@ -110,5 +113,9 @@ public class NotificationServiceImpl implements NotificationService {
 
 	public void setProduction(boolean production) {
 		this.production = production;
+	}
+
+	public void setPushEnabled(boolean pushEnabled) {
+		this.pushEnabled = pushEnabled;
 	}
 }
