@@ -19,8 +19,11 @@
 			expression="execution(* com.nextep.geo.services.impl.GeoServiceImpl.*(..))" />
 		<aop:pointcut id="placesServicePointcut"
 			expression="execution(* com.nextep.geo.services.impl.PlacesServiceImpl.*(..))" />
+		<aop:pointcut id="alternateNamesServicePointcut"
+			expression="execution(* com.nextep.geo.services.impl.AlternateNamesServiceImpl.*(..))" />
 		<aop:advisor advice-ref="geoTransactionAdvice" pointcut-ref="placesServicePointcut" />
 		<aop:advisor advice-ref="geoTransactionAdvice" pointcut-ref="geoServicePointcut" />
+		<aop:advisor advice-ref="geoTransactionAdvice" pointcut-ref="alternateNamesServicePointcut" />
 	</aop:config>
 
 	<bean id="geoTransactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">

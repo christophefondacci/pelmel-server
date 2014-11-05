@@ -75,6 +75,7 @@
 				<ref bean="geoService" />
 				<ref bean="messagesService" />
 				<ref bean="placesService"/>
+				<ref bean="alternateNamesService"/>
 				<ref bean="eventsService"/>
 				<ref bean="eventSeriesService"/>
 				<ref bean="activitiesService"/>

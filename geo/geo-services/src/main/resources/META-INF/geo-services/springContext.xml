@@ -24,4 +24,7 @@
 	<bean id="placesService" class="com.nextep.geo.services.impl.PlacesServiceImpl">
 		<property name="geoDao" ref="geoDao"/>
 	</bean>
+	<bean id="alternateNamesService" class="com.nextep.geo.services.impl.AlternateNamesServiceImpl">
+		<property name="geoDao" ref="geoDao"/>
+	</bean>
 </beans>
