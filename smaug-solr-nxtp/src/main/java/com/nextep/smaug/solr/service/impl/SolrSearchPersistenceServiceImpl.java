@@ -677,12 +677,16 @@ public class SolrSearchPersistenceServiceImpl implements
 			final Collection<String> cityNames = getNameWithAlternates(
 					city.getName(), city);
 			item.setCityName(cityNames);
-			final Collection<String> stateNames = getNameWithAlternates(city
-					.getAdm1().getName(), city.getAdm1());
-			item.setStateName(stateNames);
-			final Collection<String> countryNames = getNameWithAlternates(city
-					.getCountry().getName(), city.getCountry());
-			item.setCountryName(countryNames);
+			if (city.getAdm1() != null) {
+				final Collection<String> stateNames = getNameWithAlternates(
+						city.getAdm1().getName(), city.getAdm1());
+				item.setStateName(stateNames);
+			}
+			if (city.getCountry() != null) {
+				final Collection<String> countryNames = getNameWithAlternates(
+						city.getCountry().getName(), city.getCountry());
+				item.setCountryName(countryNames);
+			}
 		}
 		try {
 			suggestSolrServer.addBean(item);
