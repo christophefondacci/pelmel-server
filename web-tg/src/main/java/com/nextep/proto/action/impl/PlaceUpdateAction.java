@@ -334,9 +334,14 @@ public class PlaceUpdateAction extends AbstractAction implements
 			ContextHolder.toggleWrite();
 			activitiesService.saveItem(activity);
 			searchService.storeCalmObject(activity, SearchScope.CHILDREN);
-			sendEmailNotification(place, user, oldName, oldAddress,
-					oldPlaceType, oldCityName, oldLat, oldLng, oldTagKeys,
-					oldDescriptions, description);
+			try {
+				sendEmailNotification(place, user, oldName, oldAddress,
+						oldPlaceType, oldCityName, oldLat, oldLng, oldTagKeys,
+						oldDescriptions, description);
+			} catch (Exception e) {
+				LOGGER.error("Unable to send notification: " + e.getMessage(),
+						e);
+			}
 		}
 
 		// Building JSON
@@ -390,12 +395,8 @@ public class PlaceUpdateAction extends AbstractAction implements
 		}
 		buf.append("</tbody></table>");
 		buf.append("<span style=\"float:right;padding-top:10px;padding-bottom:10px;\">The PELMEL server ;)</span>");
-		try {
-			notificationService.notifyAdminByEmail("Place " + place.getName()
-					+ " updated by " + user.getPseudo(), buf.toString());
-		} catch (Exception e) {
-			LOGGER.error("Unable to send notification: " + e.getMessage(), e);
-		}
+		notificationService.notifyAdminByEmail("Place " + place.getName()
+				+ " updated by " + user.getPseudo(), buf.toString());
 	}
 
 	private void appendField(StringBuilder buf, String fieldName,
