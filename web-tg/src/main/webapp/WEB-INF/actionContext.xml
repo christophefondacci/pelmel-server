@@ -146,13 +146,18 @@
 		<property name="tagsService" ref="tagsService"/>
 		<property name="searchService" ref="searchPersistenceService"/>
 		<property name="puffService" ref="puffService"/>
+		<property name="urlService" ref="urlService"/>
 		<property name="propertiesManagementService" ref="propertiesManagementService"/>
 		<property name="descriptionsManagementService" ref="descriptionsManagementService"/>
 		<property name="rightsManagementService" ref="rightsManagementService"/>
+		<property name="notificationService" ref="notificationService"/>
 		<property name="cityRadius">
 			<jee:jndi-lookup jndi-name="java:comp/env/mobile/nearbyCitiesRadius"></jee:jndi-lookup>
 		</property>
 		<property name="jsonBuilder" ref="jsonBuilder"/>
+		<property name="baseUrl">
+			<jee:jndi-lookup jndi-name="java:comp/env/togaytherBaseUrl"/>
+		</property>
 	</bean>
 	<bean id="mobilePlaceUpdateAction" parent="placeUpdateAction" scope="request">
 		<property name="mobile" value="true"></property>

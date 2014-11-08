@@ -186,7 +186,7 @@
 	<bean id="viewManagementService" class="com.nextep.proto.services.impl.ViewManagementServiceImpl">
 		<property name="viewsService" ref="viewsService"/>
 	</bean>
-	<bean id="notificationService" class="com.nextep.proto.services.impl.NotificationServiceImpl" init-method="init">
+	<bean id="notificationService" class="com.nextep.proto.services.impl.NotificationServiceImpl" init-method="init" destroy-method="shutdown">
 		<property name="pushKeyPath">
 			<jee:jndi-lookup jndi-name="java:comp/env/push.key.path"/>
 		</property>
@@ -199,6 +199,10 @@
 		<property name="pushEnabled">
 			<jee:jndi-lookup jndi-name="java:comp/env/push.enabled"/>
 		</property>
+		<property name="adminEmailAlias">
+			<jee:jndi-lookup jndi-name="java:comp/env/notification.email"/>
+		</property>
+		<property name="activitySupport" ref="activitySupport"/>
 	</bean>
 	<bean id="pngOptimizer" class="com.googlecode.pngtastic.core.PngOptimizer"/>
 </beans>

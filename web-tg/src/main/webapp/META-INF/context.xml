@@ -102,5 +102,7 @@
 	<Environment name="push.key.password" type="java.lang.String" value="tDk@1558"/>
 	<Environment name="push.production" type="java.lang.Boolean" value="false"/>
 	<Environment name="push.enabled" type="java.lang.Boolean" value="false"/>
+
+	<Environment name="notification.email" type="java.lang.String" value="cfondacci@gmail.com"/>
 </Context>
 

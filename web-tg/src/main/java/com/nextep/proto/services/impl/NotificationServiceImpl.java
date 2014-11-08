@@ -1,10 +1,20 @@
 package com.nextep.proto.services.impl;
 
+import java.util.Date;
+import java.util.Properties;
+
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 import javax.net.ssl.SSLHandshakeException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.nextep.proto.blocks.ActivitySupport;
 import com.nextep.proto.services.NotificationService;
 import com.nextep.users.model.User;
 import com.relayrides.pushy.apns.ApnsEnvironment;
@@ -28,10 +38,14 @@ public class NotificationServiceImpl implements NotificationService {
 	private static Log LOGGER = LogFactory
 			.getLog(NotificationServiceImpl.class);
 	private PushManager<SimpleApnsPushNotification> pushManager;
+	// Push information
 	private String pushKeyPath;
 	private String pushKeyPassword;
 	private boolean production;
 	private boolean pushEnabled = true;
+	// Email notification
+	private String adminEmailAlias;
+	private ActivitySupport activitySupport;
 
 	private class MyFailedConnectionListener implements
 			FailedConnectionListener<SimpleApnsPushNotification> {
@@ -68,7 +82,12 @@ public class NotificationServiceImpl implements NotificationService {
 			pushManager
 					.registerFailedConnectionListener(new MyFailedConnectionListener());
 		}
+	}
 
+	public void shutdown() throws Exception {
+		if (pushManager != null) {
+			pushManager.shutdown();
+		}
 	}
 
 	@Override
@@ -76,6 +95,8 @@ public class NotificationServiceImpl implements NotificationService {
 			String sound) {
 		if (user.getPushDeviceId() != null && pushEnabled) {
 
+			LOGGER.info("Sending push notification to user [" + user.getKey()
+					+ "]");
 			byte[] token;
 			try {
 				token = TokenUtil
@@ -103,6 +124,47 @@ public class NotificationServiceImpl implements NotificationService {
 		}
 	}
 
+	@Override
+	public void notifyAdminByEmail(String title, String html) {
+		// Security.addProvider(new com.sun.net.ssl.internal.ssl.Provider());
+		// final String SSL_FACTORY = "javax.net.ssl.SSLSocketFactory";
+
+		if (adminEmailAlias == null || adminEmailAlias.trim().isEmpty()) {
+			return;
+		}
+		// Get a Properties object
+		Properties props = System.getProperties();
+		props.setProperty("mail.smtp.host", "smtp.pelmelguide.com");
+
+		Session session = Session.getDefaultInstance(props);
+
+		// -- Create a new message --
+		final MimeMessage msg = new MimeMessage(session);
+
+		// -- Set the FROM and TO fields --
+		try {
+			msg.setFrom(new InternetAddress("christophe@pelmelguide.com"));
+			msg.setRecipients(Message.RecipientType.TO,
+					InternetAddress.parse(adminEmailAlias, false));
+
+			msg.setSubject("[PELMEL Guide] " + title);
+			msg.setContent(html, "text/html");
+			msg.setSentDate(new Date());
+
+			Transport tr = session.getTransport("smtp");
+			tr.connect("smtp.pelmelguide.com", "christophe@pelmelguide.com",
+					"tdk;1558");
+			msg.saveChanges();
+			tr.sendMessage(msg, msg.getAllRecipients());
+			tr.close();
+			// Transport.send(msg);
+			LOGGER.info("SUCCESS: Sent email notification");
+		} catch (MessagingException e) {
+			LOGGER.error(
+					"Unable to send email notification: " + e.getMessage(), e);
+		}
+	}
+
 	public void setPushKeyPath(String pushKeyPath) {
 		this.pushKeyPath = pushKeyPath;
 	}
@@ -117,5 +179,13 @@ public class NotificationServiceImpl implements NotificationService {
 
 	public void setPushEnabled(boolean pushEnabled) {
 		this.pushEnabled = pushEnabled;
+	}
+
+	public void setAdminEmailAlias(String adminEmailAlias) {
+		this.adminEmailAlias = adminEmailAlias;
+	}
+
+	public void setActivitySupport(ActivitySupport activitySupport) {
+		this.activitySupport = activitySupport;
 	}
 }

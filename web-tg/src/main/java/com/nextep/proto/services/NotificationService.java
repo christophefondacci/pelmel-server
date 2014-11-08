@@ -24,4 +24,12 @@ public interface NotificationService {
 	 */
 	void sendNotification(User user, String message, int badgeCount,
 			String sound);
+
+	/**
+	 * Notifies administrators of the given information expressed as html
+	 * 
+	 * @param html
+	 *            the HTML source of the mail to send
+	 */
+	void notifyAdminByEmail(String title, String html);
 }
