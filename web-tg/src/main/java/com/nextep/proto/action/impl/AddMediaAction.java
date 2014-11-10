@@ -7,6 +7,9 @@ import java.util.List;
 
 import net.sf.json.JSONObject;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.nextep.activities.model.ActivityType;
 import com.nextep.activities.model.MutableActivity;
 import com.nextep.cal.util.services.CalPersistenceService;
@@ -24,6 +27,7 @@ import com.nextep.proto.builders.JsonBuilder;
 import com.nextep.proto.helpers.DisplayHelper;
 import com.nextep.proto.helpers.GeoHelper;
 import com.nextep.proto.model.Constants;
+import com.nextep.proto.services.NotificationService;
 import com.nextep.proto.spring.ContextHolder;
 import com.nextep.smaug.service.SearchPersistenceService;
 import com.nextep.users.model.User;
@@ -43,6 +47,7 @@ public class AddMediaAction extends AbstractAction implements MediaAware,
 		JsonProvider {
 
 	private static final long serialVersionUID = -2162490187996856628L;
+	private static final Log LOGGER = LogFactory.getLog(AddMediaAction.class);
 	private static final String APIS_ALIAS_PARENT_ITEM = "parent";
 	private static final ApisItemKeyAdapter EVENT_LOCATION_ADAPTER = new ApisEventLocationAdapter();
 
@@ -52,6 +57,7 @@ public class AddMediaAction extends AbstractAction implements MediaAware,
 	private SearchPersistenceService searchService;
 	private MediaProvider mediaProvider;
 	private JsonBuilder jsonBuilder;
+	private NotificationService notificationService;
 
 	private String mediaDesc;
 	private String parentKey;
@@ -121,6 +127,14 @@ public class AddMediaAction extends AbstractAction implements MediaAware,
 		addedMedia = mediaPersistenceSupport.createMedia(user, parentItemKey,
 				media, fileName, contentType, mediaDesc, video,
 				firstMediaPriority);
+
+		try {
+			notificationService.sendMediaAddedEmailNotification(parentItem,
+					user, addedMedia);
+		} catch (Exception e) {
+			LOGGER.error("Cannot send email notification: " + e.getMessage(), e);
+		}
+
 		// Now we log this activity
 		final GeographicItem localization = GeoHelper
 				.extractLocalization(parentItem);
@@ -252,4 +266,9 @@ public class AddMediaAction extends AbstractAction implements MediaAware,
 	public boolean isHighRes() {
 		return highRes;
 	}
+
+	public void setNotificationService(NotificationService notificationService) {
+		this.notificationService = notificationService;
+	}
+
 }

@@ -202,7 +202,10 @@
 		<property name="adminEmailAlias">
 			<jee:jndi-lookup jndi-name="java:comp/env/notification.email"/>
 		</property>
-		<property name="activitySupport" ref="activitySupport"/>
+		<property name="urlService" ref="urlService"/>
+		<property name="baseUrl">
+			<jee:jndi-lookup jndi-name="java:comp/env/togaytherBaseUrl"/>
+		</property>
 	</bean>
 	<bean id="pngOptimizer" class="com.googlecode.pngtastic.core.PngOptimizer"/>
 </beans>

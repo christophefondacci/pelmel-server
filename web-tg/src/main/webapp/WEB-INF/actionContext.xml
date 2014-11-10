@@ -155,9 +155,6 @@
 			<jee:jndi-lookup jndi-name="java:comp/env/mobile/nearbyCitiesRadius"></jee:jndi-lookup>
 		</property>
 		<property name="jsonBuilder" ref="jsonBuilder"/>
-		<property name="baseUrl">
-			<jee:jndi-lookup jndi-name="java:comp/env/togaytherBaseUrl"/>
-		</property>
 	</bean>
 	<bean id="mobilePlaceUpdateAction" parent="placeUpdateAction" scope="request">
 		<property name="mobile" value="true"></property>
@@ -437,6 +434,7 @@
 		<property name="headerSupport" ref="myMediaHeaderSupport"/>
 		<property name="mediaProvider" ref="mediaProviderPreview"/>
 		<property name="jsonBuilder" ref="jsonBuilder"/>
+		<property name="notificationService" ref="notificationService"/>
 	</bean>
 	<!-- Same as AddMedia except that we use a specific media persistence with default auto crop -->
 	<bean id="mobileAddMediaAction" parent="addMediaAction" scope="request">
@@ -703,6 +701,8 @@
 		<property name="mediaService" ref="mediaService"/>
 		<property name="placeService" ref="placesService"/>
 		<property name="activitiesService" ref="activitiesService"/>
+		<property name="notificationService" ref="notificationService"/>
+		<property name="urlService" ref="urlService"/>
 	</bean>
 	<bean id="paymentAction" class="com.nextep.proto.action.impl.PaymentAction" parent="abstractAction" scope="request">
 		<property name="privateKey">

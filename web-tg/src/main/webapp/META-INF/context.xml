@@ -103,6 +103,6 @@
 	<Environment name="push.production" type="java.lang.Boolean" value="false"/>
 	<Environment name="push.enabled" type="java.lang.Boolean" value="false"/>
 
-	<Environment name="notification.email" type="java.lang.String" value="cfondacci@gmail.com"/>
+	<Environment name="notification.email" type="java.lang.String" value="cfondacci@gmail.com christophet49@gmail.com"/>
 </Context>
 

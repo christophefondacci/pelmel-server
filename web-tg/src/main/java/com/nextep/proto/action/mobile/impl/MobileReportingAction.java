@@ -19,6 +19,8 @@ import com.nextep.media.model.MutableMedia;
 import com.nextep.proto.action.base.AbstractAction;
 import com.nextep.proto.action.model.JsonProvider;
 import com.nextep.proto.blocks.CurrentUserSupport;
+import com.nextep.proto.model.Constants;
+import com.nextep.proto.services.NotificationService;
 import com.nextep.proto.spring.ContextHolder;
 import com.nextep.users.model.User;
 import com.videopolis.apis.factory.ApisFactory;
@@ -47,14 +49,13 @@ public class MobileReportingAction extends AbstractAction implements
 
 	// Static constants
 	private static final String APIS_ALIAS_ITEM = "item";
-	private static final int TYPE_ABUSE = 1;
-	private static final int TYPE_CLOSED = 2;
 
 	// Injected supports & services
 	private CurrentUserSupport currentUserSupport;
 	private CalPersistenceService mediaService;
 	private CalPersistenceService placeService;
 	private CalPersistenceService activitiesService;
+	private NotificationService notificationService;
 
 	// Dynamic arguments
 	private String key;
@@ -92,7 +93,7 @@ public class MobileReportingAction extends AbstractAction implements
 
 		ActivityType reportActivity = null;
 		switch (type) {
-		case TYPE_ABUSE:
+		case Constants.REPORT_TYPE_ABUSE:
 			if (Media.CAL_TYPE.equals(item.getKey().getType())) {
 				// Getting a mutable media
 				final MutableMedia media = (MutableMedia) item;
@@ -109,7 +110,9 @@ public class MobileReportingAction extends AbstractAction implements
 				reportActivity = ActivityType.ABUSE;
 			}
 			break;
-		case TYPE_CLOSED:
+		case Constants.REPORT_TYPE_NOTGAY:
+		case Constants.REPORT_TYPE_LOCATION:
+		case Constants.REPORT_TYPE_CLOSED:
 			if (Place.CAL_TYPE.equals(item.getKey().getType())) {
 				// Getting a mutable place
 				final MutablePlace place = (MutablePlace) item;
@@ -133,6 +136,14 @@ public class MobileReportingAction extends AbstractAction implements
 				activity.setUserKey(currentUser.getKey());
 				activitiesService.saveItem(activity);
 
+				try {
+					notificationService.sendReportEmailNotification(item,
+							currentUser, type);
+				} catch (Exception e) {
+					LOGGER.error(
+							"Problems sending email notification: "
+									+ e.getMessage(), e);
+				}
 				// Now if current user is admin we close it
 				if (getRightsManagementService().isAdministrator(currentUser)) {
 					return REDIRECT;
@@ -183,4 +194,9 @@ public class MobileReportingAction extends AbstractAction implements
 	public void setActivitiesService(CalPersistenceService activitiesService) {
 		this.activitiesService = activitiesService;
 	}
+
+	public void setNotificationService(NotificationService notificationService) {
+		this.notificationService = notificationService;
+	}
+
 }

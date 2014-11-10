@@ -84,4 +84,9 @@ public interface Constants {
 	String VIEW_TYPE_OVERVIEW = "OVERVIEW";
 
 	String PROP_CODE_OPENING_HOURS = "openingHours";
+
+	int REPORT_TYPE_ABUSE = 1;
+	int REPORT_TYPE_CLOSED = 2;
+	int REPORT_TYPE_NOTGAY = 4;
+	int REPORT_TYPE_LOCATION = 3;
 }

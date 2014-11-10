@@ -3,16 +3,13 @@ package com.nextep.proto.action.impl;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 import net.sf.json.JSONObject;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.web.util.HtmlUtils;
 
 import com.nextep.activities.model.ActivityType;
 import com.nextep.activities.model.MutableActivity;
@@ -32,7 +29,6 @@ import com.nextep.proto.action.model.PropertiesUpdateAware;
 import com.nextep.proto.apis.model.impl.ApisLocalizationHelper;
 import com.nextep.proto.blocks.CurrentUserSupport;
 import com.nextep.proto.builders.JsonBuilder;
-import com.nextep.proto.helpers.DisplayHelper;
 import com.nextep.proto.model.ActivityConstants;
 import com.nextep.proto.model.PlaceType;
 import com.nextep.proto.services.DescriptionsManagementService;
@@ -90,7 +86,6 @@ public class PlaceUpdateAction extends AbstractAction implements
 	private JsonBuilder jsonBuilder;
 
 	private boolean mobile;
-	private String baseUrl;
 
 	private String userId;
 	private String placeId;
@@ -335,9 +330,10 @@ public class PlaceUpdateAction extends AbstractAction implements
 			activitiesService.saveItem(activity);
 			searchService.storeCalmObject(activity, SearchScope.CHILDREN);
 			try {
-				sendEmailNotification(place, user, oldName, oldAddress,
-						oldPlaceType, oldCityName, oldLat, oldLng, oldTagKeys,
-						oldDescriptions, description);
+				notificationService.sendPlaceUpdateEmailNotification(place,
+						user, oldName, oldAddress, oldPlaceType, oldCityName,
+						oldLat, oldLng, oldTagKeys, oldDescriptions,
+						description, descriptionKey);
 			} catch (Exception e) {
 				LOGGER.error("Unable to send notification: " + e.getMessage(),
 						e);
@@ -352,60 +348,6 @@ public class PlaceUpdateAction extends AbstractAction implements
 	@Override
 	public String getJson() {
 		return JSONObject.fromObject(jsonPlace).toString();
-	}
-
-	private void sendEmailNotification(Place place, User user, String oldName,
-			String oldAddress, String oldPlaceType, String oldCity,
-			String oldLat, String oldLng, List<ItemKey> oldTagKeys,
-			List<? extends Description> oldDescriptions,
-			String[] newDescriptions) {
-		final StringBuilder buf = new StringBuilder();
-		final String url = baseUrl
-				+ getUrlService().getOverviewUrl(getLocale(),
-						DisplayHelper.getDefaultAjaxContainer(), place);
-		final String userUrl = baseUrl
-				+ getUrlService().getOverviewUrl(getLocale(),
-						DisplayHelper.getDefaultAjaxContainer(), user);
-		buf.append("Hello administrators,<br><br>A place has been updated on <a href=\"http://www.pelmelguide.com\">PELMEL Guide</a>:<br><br>");
-		// buf.append("Hello administrators,<br><br>A place has been updated on PELMEL Guide:<br>");
-		buf.append("Place updated : <a href=\"" + url + "\">" + place.getName()
-				+ "</a><br>");
-		buf.append("Updated by : <a href=\"" + userUrl + "\">"
-				+ user.getPseudo() + "</a><br><br>");
-		buf.append("<table cellpadding=\"5\" style=\"border: 1px solid #ccc;\"><thead><tr><th>Field</th><th>Old Value</th><th>NEW value</th></thead><tbody>");
-		appendField(buf, "Name", oldName, place.getName());
-		appendField(buf, "Address", oldAddress, place.getAddress1());
-		appendField(buf, "Place type", oldPlaceType, place.getPlaceType());
-		appendField(buf, "City", oldCity, place.getCity().getName());
-		appendField(buf, "Latitude", oldLat,
-				String.valueOf(place.getLatitude()));
-		appendField(buf, "Longitude", oldLng,
-				String.valueOf(place.getLongitude()));
-		// Descriptions
-		final Map<String, Description> oldDescMap = new HashMap<String, Description>();
-		for (Description oldDesc : oldDescriptions) {
-			oldDescMap.put(oldDesc.getKey().toString(), oldDesc);
-		}
-		for (int i = 0; i < descriptionKey.length; i++) {
-			final String key = descriptionKey[i];
-			final String newDesc = description[i];
-			final Description oldDesc = oldDescMap.get(key);
-			appendField(buf, "Description",
-					oldDesc != null ? oldDesc.getDescription() : "", newDesc);
-		}
-		buf.append("</tbody></table>");
-		buf.append("<span style=\"float:right;padding-top:10px;padding-bottom:10px;\">The PELMEL server ;)</span>");
-		notificationService.notifyAdminByEmail("Place " + place.getName()
-				+ " updated by " + user.getPseudo(), buf.toString());
-	}
-
-	private void appendField(StringBuilder buf, String fieldName,
-			String oldVal, String newVal) {
-		boolean isBold = newVal != null && !newVal.equals(oldVal);
-		buf.append("<tr><td style=\"text-align:right;\"><i>" + fieldName
-				+ "</i></td><td>" + HtmlUtils.htmlEscape(oldVal) + "</td><td>"
-				+ (isBold ? "<b>" : "") + HtmlUtils.htmlEscape(newVal)
-				+ (isBold ? "</b>" : "") + "</td></tr>");
 	}
 
 	public String getPlaceId() {
@@ -620,7 +562,4 @@ public class PlaceUpdateAction extends AbstractAction implements
 		this.notificationService = notificationService;
 	}
 
-	public void setBaseUrl(String baseUrl) {
-		this.baseUrl = baseUrl;
-	}
 }

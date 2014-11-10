@@ -1,6 +1,13 @@
 package com.nextep.proto.services;
 
+import java.util.List;
+
+import com.nextep.descriptions.model.Description;
+import com.nextep.geo.model.Place;
+import com.nextep.media.model.Media;
 import com.nextep.users.model.User;
+import com.videopolis.calm.model.CalmObject;
+import com.videopolis.calm.model.ItemKey;
 
 /**
  * Common interface for sending notification to mobile devices
@@ -32,4 +39,53 @@ public interface NotificationService {
 	 *            the HTML source of the mail to send
 	 */
 	void notifyAdminByEmail(String title, String html);
+
+	/**
+	 * Notifies administrators about place update
+	 * 
+	 * @param place
+	 *            the {@link Place} being updated
+	 * @param user
+	 *            the {@link User} who made the update
+	 * @param oldName
+	 *            previous name
+	 * @param oldAddress
+	 *            previous address
+	 * @param oldPlaceType
+	 *            previous place type
+	 * @param oldCity
+	 *            previous city name
+	 * @param oldLat
+	 *            previous latitude
+	 * @param oldLng
+	 *            previous longitude
+	 * @param oldTagKeys
+	 *            previous tags
+	 * @param oldDescriptions
+	 *            previous descriptions
+	 * @param newDescriptions
+	 *            new descriptions
+	 * @param descriptionKey
+	 *            new description keys
+	 */
+	void sendPlaceUpdateEmailNotification(Place place, User user,
+			String oldName, String oldAddress, String oldPlaceType,
+			String oldCity, String oldLat, String oldLng,
+			List<ItemKey> oldTagKeys,
+			List<? extends Description> oldDescriptions,
+			String[] newDescriptions, String[] descriptionKey);
+
+	/**
+	 * Notifies administrator about a reported information
+	 * 
+	 * @param obj
+	 *            object being reported
+	 * @param user
+	 *            user who reported the information
+	 * @param reportType
+	 *            type of report (from Constants.REPORT_TYPE)
+	 */
+	void sendReportEmailNotification(CalmObject obj, User user, int reportType);
+
+	void sendMediaAddedEmailNotification(CalmObject obj, User user, Media media);
 }
