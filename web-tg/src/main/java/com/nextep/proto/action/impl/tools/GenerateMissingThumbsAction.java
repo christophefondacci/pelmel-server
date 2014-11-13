@@ -2,6 +2,8 @@ package com.nextep.proto.action.impl.tools;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -16,8 +18,15 @@ import com.nextep.proto.spring.ContextHolder;
 import com.nextep.users.model.User;
 import com.videopolis.apis.exception.ApisException;
 import com.videopolis.apis.factory.ApisFactory;
+import com.videopolis.apis.factory.SearchRestriction;
+import com.videopolis.apis.model.ApisCriterion;
 import com.videopolis.apis.model.ApisRequest;
+import com.videopolis.apis.service.ApiCompositeResponse;
 import com.videopolis.apis.service.ApiResponse;
+import com.videopolis.calm.exception.CalException;
+import com.videopolis.calm.factory.CalmFactory;
+import com.videopolis.calm.model.CalmObject;
+import com.videopolis.calm.model.ItemKey;
 import com.videopolis.cals.factory.ContextFactory;
 import com.videopolis.concurrent.exception.TaskExecutionException;
 import com.videopolis.concurrent.model.TaskExecutionContext;
@@ -39,6 +48,7 @@ public class GenerateMissingThumbsAction extends AbstractAction {
 	private String localMediaDirectory;
 	private boolean force = false;
 	private boolean offline = false;
+	private String itemKey;
 	private List<String> messages = new ArrayList<String>();
 
 	@Override
@@ -54,7 +64,7 @@ public class GenerateMissingThumbsAction extends AbstractAction {
 							"Problem while generating thumbs : "
 									+ e.getMessage(), e);
 					throw new TaskExecutionException(e);
-				} catch (RuntimeException e) {
+				} catch (Exception e) {
 					LOGGER.error(
 							"Problem while generating thumbs : "
 									+ e.getMessage(), e);
@@ -67,13 +77,28 @@ public class GenerateMissingThumbsAction extends AbstractAction {
 		return SUCCESS;
 	}
 
-	private void generateThumbs() throws ApisException {
-		final ApisRequest request = ApisFactory.createRequest(Media.class)
-				.list(Media.class, null);
-		final ApiResponse response = getApiService().execute(request,
-				ContextFactory.createContext(getLocale()));
+	private void generateThumbs() throws ApisException, CalException {
 
-		final List<Media> media = (List<Media>) response.getElements();
+		List<? extends Media> media = Collections.emptyList();
+
+		if (itemKey == null) {
+			final ApisRequest request = ApisFactory.createRequest(Media.class)
+					.list(Media.class, null);
+			final ApiResponse response = getApiService().execute(request,
+					ContextFactory.createContext(getLocale()));
+
+			media = (List<? extends Media>) response.getElements();
+		} else {
+			final ItemKey ik = CalmFactory.parseKey(itemKey);
+			final ApisRequest request = (ApisRequest) ApisFactory
+					.createCompositeRequest().addCriterion(
+							(ApisCriterion) SearchRestriction.uniqueKeys(
+									Arrays.asList(ik)).with(Media.class));
+			final ApiCompositeResponse response = (ApiCompositeResponse) getApiService()
+					.execute(request, ContextFactory.createContext(getLocale()));
+			final CalmObject obj = response.getUniqueElement();
+			media = obj.get(Media.class);
+		}
 		ContextHolder.toggleWrite();
 		for (Media m : media) {
 			// Checking offline state
@@ -149,5 +174,13 @@ public class GenerateMissingThumbsAction extends AbstractAction {
 
 	public boolean getOffline() {
 		return offline;
+	}
+
+	public void setItemKey(String itemKey) {
+		this.itemKey = itemKey;
+	}
+
+	public String getItemKey() {
+		return itemKey;
 	}
 }

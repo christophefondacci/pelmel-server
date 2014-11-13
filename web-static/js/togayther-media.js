@@ -9,6 +9,8 @@ function initPreview() {
 	$("#preview-image").Jcrop({
 		onChange: previewChanged,
 		onSelect: previewChanged,
+		boxWidth : 750,
+		boxHeight: 350,
 		aspectRatio: 2.1428
 	},function() {
 		jcrop_api = this;

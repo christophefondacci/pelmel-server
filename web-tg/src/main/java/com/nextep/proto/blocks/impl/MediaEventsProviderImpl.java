@@ -99,6 +99,11 @@ public class MediaEventsProviderImpl implements MediaProvider {
 		return m;
 	}
 
+	@Override
+	public String getPreviewFitClass(Media media) {
+		return null;
+	}
+
 	public void setBaseMediaProvider(MediaProvider baseMediaProvider) {
 		this.baseMediaProvider = baseMediaProvider;
 	}

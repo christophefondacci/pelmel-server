@@ -4,15 +4,23 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.Date;
+import java.util.Iterator;
 
+import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
+import javax.imageio.ImageWriteParam;
+import javax.imageio.ImageWriter;
+import javax.imageio.plugins.jpeg.JPEGImageWriteParam;
+import javax.imageio.spi.IIORegistry;
+import javax.imageio.spi.ImageWriterSpi;
+import javax.imageio.spi.ServiceRegistry;
+import javax.imageio.stream.FileImageOutputStream;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.context.MessageSource;
 
-import com.googlecode.pngtastic.core.PngImage;
 import com.googlecode.pngtastic.core.PngOptimizer;
 import com.nextep.cal.util.services.CalPersistenceService;
 import com.nextep.media.model.Media;
@@ -46,6 +54,36 @@ public class MediaPersistenceSupportImpl implements MediaPersistenceSupport {
 			mobileMaxWidthHighDefLandscape, mobileMaxHeightHighDefLandscape;
 	private int previewWidth, previewHeight;
 	private boolean defaultAutoCrop = false;
+
+	private ImageWriter getJpegWriter() throws IOException {
+		// use IIORegistry to get the available services
+		IIORegistry registry = IIORegistry.getDefaultInstance();
+		// return an iterator for the available ImageWriterSpi for jpeg images
+		Iterator<ImageWriterSpi> services = registry.getServiceProviders(
+				ImageWriterSpi.class, new ServiceRegistry.Filter() {
+					@Override
+					public boolean filter(Object provider) {
+						if (!(provider instanceof ImageWriterSpi))
+							return false;
+
+						ImageWriterSpi writerSPI = (ImageWriterSpi) provider;
+						String[] formatNames = writerSPI.getFormatNames();
+						for (int i = 0; i < formatNames.length; i++) {
+							if (formatNames[i].equalsIgnoreCase("JPEG")) {
+								return true;
+							}
+						}
+
+						return false;
+					}
+				}, true);
+		// ...assuming that servies.hasNext() == true, I get the first available
+		// service.
+		ImageWriterSpi writerSpi = services.next();
+		ImageWriter writer = writerSpi.createWriterInstance();
+		return writer;
+
+	}
 
 	@Override
 	public Media createMedia(User author, ItemKey parentItemKey, File tmpFile,
@@ -307,7 +345,9 @@ public class MediaPersistenceSupportImpl implements MediaPersistenceSupport {
 					cropX = cX;
 					cropY = cY;
 				}
-				if (cropX != null && cropWidth != null) {
+				if (cropX != null && cropWidth != null
+						&& cropX + cropWidth <= thumbWidth
+						&& cropY + cropHeight <= thumbHeight) {
 					try {
 						thumb = thumb.getSubimage(cropX, cropY,
 								Math.min(thumbWidth - cropX, cropWidth),
@@ -323,23 +363,39 @@ public class MediaPersistenceSupportImpl implements MediaPersistenceSupport {
 				final File thumbFile = new File(
 						getLocalMediaPath(parentItemKey),
 						parentItemKey.toString() + System.currentTimeMillis()
-								+ ".png");
-				thumbFile.mkdirs();
-				ImageIO.write(thumb, "png", thumbFile);
+								+ ".jpg");
+				new File(getLocalMediaPath(parentItemKey)).mkdirs();
+				// thumbFile.mkdirs();
 
+				// specifies where the jpg image has to be written
+				ImageWriter writer = getJpegWriter();
+				writer.setOutput(new FileImageOutputStream(thumbFile));
+
+				// writes the file with given compression level
+				// from your JPEGImageWriteParam instance
+				final JPEGImageWriteParam jpegParams = new JPEGImageWriteParam(
+						null);
+				jpegParams.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
+				jpegParams.setCompressionQuality(0.9f);
+				writer.write(null, new IIOImage(thumb, null, null), jpegParams);
+
+				// ImageIO.write(thumb, "jpg", thumbFile);
+
+				return thumbFile.getName();
 				// Optimizing PNG
-				PngImage pngImage = new PngImage(thumbFile.getCanonicalPath());
-
-				// Generating optimized output file
-				final File optimizedFile = new File(
-						getLocalMediaPath(parentItemKey),
-						parentItemKey.toString() + System.currentTimeMillis()
-								+ "-o" + ".png");
-
-				// Optimizing
-				pngOptimizer.optimize(pngImage,
-						optimizedFile.getAbsolutePath(), false, 9);
-				return optimizedFile.getName();
+				// PngImage pngImage = new
+				// PngImage(thumbFile.getCanonicalPath());
+				//
+				// // Generating optimized output file
+				// final File optimizedFile = new File(
+				// getLocalMediaPath(parentItemKey),
+				// parentItemKey.toString() + System.currentTimeMillis()
+				// + "-o" + ".png");
+				//
+				// // Optimizing
+				// pngOptimizer.optimize(pngImage,
+				// optimizedFile.getAbsolutePath(), false, 9);
+				// return optimizedFile.getName();
 
 			}
 		}

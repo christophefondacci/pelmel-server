@@ -23,6 +23,8 @@ public class MediaProviderImpl implements MediaProvider {
 	private ItemKey parentKey;
 	private String baseUrl;
 
+	private boolean fitAlways = false;
+
 	@Override
 	public void initialize(ItemKey parentKey, List<? extends Media> medias) {
 		initialize(parentKey, medias, null);
@@ -121,6 +123,7 @@ public class MediaProviderImpl implements MediaProvider {
 				/ (float) overviewImageHeight;
 		final float curRatio = (float) width / (float) height;
 		final StringBuilder buf = new StringBuilder();
+
 		if (curRatio >= stdRatio) {
 			buf.append("width:");
 			buf.append(overviewImageWidth);
@@ -128,6 +131,9 @@ public class MediaProviderImpl implements MediaProvider {
 			// Computing new height
 			final float newHeight = (((float) overviewImageWidth) * (float) height)
 					/ width;
+			if (fitAlways) {
+				buf.append("height:" + newHeight + "px;");
+			}
 			// Computing empty space left
 			int heightSpace = overviewImageHeight - (int) newHeight;
 			if (heightSpace > 2 * 35) {
@@ -140,6 +146,21 @@ public class MediaProviderImpl implements MediaProvider {
 			// buf.append("height:");
 			// buf.append(overviewImageHeight);
 			// buf.append("px;");
+		} else if (fitAlways) {
+			buf.append("height:");
+			buf.append(overviewImageHeight);
+			buf.append("px;");
+			// Computing new height
+			final float newWidth = (((float) overviewImageHeight) * (float) width)
+					/ height;
+			if (fitAlways) {
+				buf.append("width:" + newWidth + "px;");
+			}
+			// Computing empty space left
+			int widthSpace = overviewImageWidth - (int) newWidth;
+			buf.append("position: relative; left:");
+			buf.append(widthSpace / 2);
+			buf.append("px;");
 		}
 		return buf.toString();
 	}
@@ -171,4 +192,13 @@ public class MediaProviderImpl implements MediaProvider {
 		return MediaHelper.getSingleMedia(o);
 	}
 
+	@Override
+	public String getPreviewFitClass(Media media) {
+		return media.getOriginalWidth() > media.getOriginalHeight() ? "main-image"
+				: "main-image-portrait";
+	}
+
+	public void setFitAlways(boolean fitAlways) {
+		this.fitAlways = fitAlways;
+	}
 }

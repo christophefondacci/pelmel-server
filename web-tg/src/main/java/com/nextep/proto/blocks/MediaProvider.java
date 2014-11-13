@@ -115,4 +115,6 @@ public interface MediaProvider {
 	 *         available
 	 */
 	Media getMainMedia(CalmObject o);
+
+	String getPreviewFitClass(Media media);
 }

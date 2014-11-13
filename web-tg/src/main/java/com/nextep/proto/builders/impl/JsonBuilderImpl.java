@@ -306,6 +306,7 @@ public class JsonBuilderImpl implements JsonBuilder {
 
 	private JsonMessage buildJsonMessage(Message message) {
 		final JsonMessage json = new JsonMessage();
+		json.setKey(message.getKey().toString());
 		json.setFromKey(message.getFromKey().toString());
 		json.setToKey(message.getToKey().toString());
 		json.setTime(message.getMessageDate());
@@ -363,6 +364,7 @@ public class JsonBuilderImpl implements JsonBuilder {
 		for (Comment comment : comments) {
 			// Building a JSON message from our comment
 			final JsonMessage msg = new JsonMessage();
+			msg.setKey(comment.getKey().toString());
 			msg.setFromKey(comment.getAuthorItemKey().toString());
 			msg.setToKey(comment.getCommentedItemKey().toString());
 			msg.setTime(comment.getDate());

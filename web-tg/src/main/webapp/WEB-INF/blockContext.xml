@@ -162,6 +162,7 @@
 		<property name="overviewImageWidth" value="270"/>
 		<property name="overviewImageHeight" value="200"/>
 		<property name="urlService" ref="urlService"/>
+		<property name="fitAlways" value="true"/>
 	</bean>
 	<bean id="mediaPersistenceSupport"
 		class="com.nextep.proto.blocks.impl.MediaPersistenceSupportImpl"
@@ -192,10 +193,10 @@
 		<property name="defaultAutoCrop" value="false"/>
 	</bean>
 	<bean id="mobileMediaPersistenceSupport" parent="mediaPersistenceSupport">
-		<property name="defaultAutoCrop" value="true"/>
+		<property name="defaultAutoCrop" value="false"/>
 	</bean>
 	<bean id="autoCropMediaPersistenceSupport" parent="mediaPersistenceSupport">
-		<property name="defaultAutoCrop" value="true"/>
+		<property name="defaultAutoCrop" value="false"/>
 	</bean>
 	<bean id="commonOverviewSupport" class="com.nextep.proto.blocks.impl.CommonOverviewSupportImpl"
 		scope="prototype">

@@ -4,6 +4,7 @@ import java.util.Date;
 
 public class JsonMessage {
 	private long time;
+	private String key;
 	private String fromKey;
 	private String toKey;
 	private String message;
@@ -38,6 +39,14 @@ public class JsonMessage {
 
 	public void setMessage(String message) {
 		this.message = message;
+	}
+
+	public void setKey(String key) {
+		this.key = key;
+	}
+
+	public String getKey() {
+		return key;
 	}
 
 }
