@@ -5,3 +5,4 @@ tomcat
 .*
 !/.gitignore
 node_modules
+web-tg/dist/images

@@ -11,7 +11,9 @@ public enum SearchType {
 			UrlConstants.sEARCH_TYPE_RESTAURANT), ASSOCIATIONS("asso",
 			UrlConstants.SEARCH_TYPE_ASSOCIATION), EVENTS(
 			UrlConstants.SEARCH_TYPE_EVENTS), HOTELS("hotel",
-			UrlConstants.SEARCH_TYPE_HOTELS), MAP(UrlConstants.SEARCH_TYPE_MAP);
+			UrlConstants.SEARCH_TYPE_HOTELS), OUTDOORS("outdoors",
+			UrlConstants.SEARCH_TYPE_OUTDOORS), MAP(
+			UrlConstants.SEARCH_TYPE_MAP);
 
 	private String subtype;
 	private String urlAction;

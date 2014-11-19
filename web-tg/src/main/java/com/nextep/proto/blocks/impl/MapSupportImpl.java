@@ -57,7 +57,7 @@ public class MapSupportImpl implements MapSupport {
 		final StringBuilder buf = new StringBuilder();
 		final StringBuilder iconsBuf = new StringBuilder();
 		final Set<String> categories = new HashSet<String>();
-		iconsBuf.append("var shadowIcon = new google.maps.MarkerImage('/images/markers/shadow-marker.png',new google.maps.Size(40,36),new google.maps.Point(0,0),new google.maps.Point(12,36));\n");
+		// iconsBuf.append("var shadowIcon = new google.maps.MarkerImage('/images/markers/shadow-marker.png',new google.maps.Size(40,36),new google.maps.Point(0,0),new google.maps.Point(12,36));\n");
 		for (Localized l : allPoints) {
 			String type = null;
 			if (l instanceof Place) {
@@ -89,7 +89,7 @@ public class MapSupportImpl implements MapSupport {
 					+ DisplayHelper.getName((CalmObject) l).replace("\"", "")
 					+ "\",");
 			buf.append(icon);
-			buf.append(",shadowIcon,");
+			buf.append(",null,");
 			buf.append("'"
 					+ urlService.getMapInfoWindowUrl(((CalmObject) l).getKey())
 					+ "'");
@@ -122,9 +122,9 @@ public class MapSupportImpl implements MapSupport {
 	private String buildIconDeclaration(String category) {
 		return "var "
 				+ getIconVar(category)
-				+ " = new google.maps.MarkerImage('/images/markers/"
+				+ " = {url:'/images/markers/"
 				+ category
-				+ "-marker.png', new google.maps.Size(24,36),new google.maps.Point(0,0),new google.maps.Point(12,36));\n";
+				+ "Marker.png', size:new google.maps.Size(36,44),origin:new google.maps.Point(0,0),anchor:new google.maps.Point(18,44)};\n";
 	}
 
 	@Override

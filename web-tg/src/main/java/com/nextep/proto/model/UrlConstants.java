@@ -20,6 +20,7 @@ public interface UrlConstants {
 	String SEARCH_TYPE_NEWS = "n";
 	String SEARCH_TYPE_MAP = "m";
 	String SEARCH_TYPE_BARS = "b";
+	String SEARCH_TYPE_OUTDOORS = "t";
 	String SEARCH_TYPE_SAUNAS = "s";
 	String SEARCH_TYPE_CLUB = "c";
 	String SEARCH_TYPE_SEXCLUB = "x";

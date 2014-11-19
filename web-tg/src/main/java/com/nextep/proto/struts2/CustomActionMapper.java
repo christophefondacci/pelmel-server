@@ -126,6 +126,10 @@ public class CustomActionMapper implements ActionMapper {
 						.equals(searchArgs[0])) {
 					am.setName("searchPlace");
 					actionParams.put(SEARCH_TYPE, SearchType.HOTELS);
+				} else if (UrlConstants.SEARCH_TYPE_OUTDOORS
+						.equals(searchArgs[0])) {
+					am.setName("searchPlace");
+					actionParams.put(SEARCH_TYPE, SearchType.OUTDOORS);
 				} else if (UrlConstants.SEARCH_TYPE_EVENTS
 						.equals(searchArgs[0])) {
 					am.setName("searchEvent");

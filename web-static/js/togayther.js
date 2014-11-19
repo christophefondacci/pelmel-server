@@ -321,7 +321,7 @@ var Pelmel = {
 	},
 	zIndex:0,
 	addPoint : function (lat,lng,title,icon, shadowIcon,infoUrl,itemKey,ignoreFromList) {
-		var marker = new google.maps.Marker({position:new google.maps.LatLng(lat,lng), title :title,icon: icon, shadow : shadowIcon, map: Pelmel.map, pelmelItemKey:itemKey,zIndex:Pelmel.zIndex++});
+		var marker = new google.maps.Marker({position:new google.maps.LatLng(lat,lng), title :title,icon: icon, map: Pelmel.map, pelmelItemKey:itemKey,zIndex:Pelmel.zIndex++});
 		if(!ignoreFromList) {
 			Pelmel.markersarray.push(marker);
 		}

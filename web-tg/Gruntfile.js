@@ -46,7 +46,17 @@ module.exports = function(grunt) {
     	postBuild: {
     		files: [{expand:true, cwd: 'dist/',src: ['**/*.js','**/*.css'], dest:'../web-static/'}]
     	}
-    }
+    },
+    imagemin: {
+        dist: {
+          files: [{
+            expand: true,
+            cwd: '../web-static',
+            src: 'images/markers/**/*.{png,jpg,jpeg,gif}',
+            dest: 'dist'
+          }]
+        }
+      },
 //    	main: {
 //    		files: [
 //    		        {
