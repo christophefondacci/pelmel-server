@@ -18,6 +18,7 @@ import com.nextep.activities.model.impl.RequestTypeLatestActivities;
 import com.nextep.comments.model.Comment;
 import com.nextep.descriptions.model.Description;
 import com.nextep.events.model.Event;
+import com.nextep.geo.model.GeographicItem;
 import com.nextep.geo.model.Place;
 import com.nextep.json.model.impl.JsonEvent;
 import com.nextep.json.model.impl.JsonLightEvent;
@@ -80,6 +81,7 @@ public class MobileOverviewAction extends AbstractAction implements
 	// Constants declaration
 	private static final long serialVersionUID = 154177235838836337L;
 	private static final String APIS_ALIAS_PLACE = "p";
+	private static final String APIS_ALIAS_USER_CITY = "ucity";
 	private static final String APIS_ALIAS_USER_LIKERS = "ulikers";
 	private static final String APIS_ALIAS_USER_LIKED = "liked";
 	private static final String APIS_ALIAS_PLACE_LIKE = "plike";
@@ -168,6 +170,7 @@ public class MobileOverviewAction extends AbstractAction implements
 							ActivityType.LOCALIZATION, ActivityType.CHECKIN)));
 		} else if (User.CAL_TYPE.equals(itemKey.getType())) {
 			objCriterion
+					.with(SearchRestriction.with(GeographicItem.class))
 					.addCriterion(
 							(ApisCriterion) SearchRestriction
 									.adaptKey(userLocationAdapter)

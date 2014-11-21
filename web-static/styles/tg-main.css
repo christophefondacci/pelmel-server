@@ -1704,6 +1704,25 @@ input.asso:HOVER, a.asso:HOVER {
 	color: rgb(200,201,11)!important;
 	border-color: rgb(200,201,11)!important;
 }
+.outdoors-alpha {
+	background: rgba(0,115,58,0.7);
+}
+.outdoors {
+	background: rgb(0,115,58);
+}
+.outdoors-container {
+	border: 1px solid rgb(0,115,58);
+}
+.outdoors-filler {
+	background: rgb(123,170,88);
+}
+input.outdoors:HOVER, a.outdoors:HOVER {
+	background: rgb(123,170,88);
+}
+.outdoors-text {
+	color: rgb(0,115,58)!important;
+	border-color: rgb(0,115,58)!important;
+}
 .my-messages {
 	background: rgb(37,170,255);	
 }

@@ -124,7 +124,7 @@ public class MapSupportImpl implements MapSupport {
 				+ getIconVar(category)
 				+ " = {url:'/images/markers/"
 				+ category
-				+ "Marker.png', size:new google.maps.Size(36,44),origin:new google.maps.Point(0,0),anchor:new google.maps.Point(18,44)};\n";
+				+ "Marker.png', size:new google.maps.Size(28,34),origin:new google.maps.Point(0,0),anchor:new google.maps.Point(14,34)};\n";
 	}
 
 	@Override

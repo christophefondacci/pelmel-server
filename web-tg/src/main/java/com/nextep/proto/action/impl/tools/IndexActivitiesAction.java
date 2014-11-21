@@ -7,6 +7,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.nextep.activities.model.Activity;
+import com.nextep.activities.model.ActivityType;
 import com.nextep.proto.action.base.AbstractAction;
 import com.nextep.proto.apis.adapters.ApisActivityTargetKeyAdapter;
 import com.nextep.proto.spring.ContextHolder;
@@ -36,6 +37,7 @@ public class IndexActivitiesAction extends AbstractAction {
 	private SearchPersistenceService searchService;
 	private List<String> messages = new ArrayList<String>();
 	private TaskRunnerService taskRunnerService;
+	private String type = null;
 
 	@Override
 	protected String doExecute() throws Exception {
@@ -88,8 +90,16 @@ public class IndexActivitiesAction extends AbstractAction {
 						+ "' [" + item + " / " + itemCount + "]");
 				item++;
 				try {
-					searchService.storeCalmObject(activity,
-							SearchScope.CHILDREN);
+					if (type == null
+							|| (type != null && activity.getActivityType()
+									.name().equals(type))) {
+						if (activity.getActivityType() != ActivityType.LOCALIZATION) {
+							searchService.storeCalmObject(activity,
+									SearchScope.CHILDREN);
+						} else {
+							searchService.remove(activity);
+						}
+					}
 				} catch (SearchException e) {
 					LOGGER.error(" ==> FAILED : " + e.getMessage());
 				}
@@ -120,5 +130,13 @@ public class IndexActivitiesAction extends AbstractAction {
 
 	public void setTaskRunnerService(TaskRunnerService taskRunnerService) {
 		this.taskRunnerService = taskRunnerService;
+	}
+
+	public void setType(String type) {
+		this.type = type;
+	}
+
+	public String getType() {
+		return type;
 	}
 }

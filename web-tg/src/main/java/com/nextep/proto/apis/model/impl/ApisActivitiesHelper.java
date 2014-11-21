@@ -51,6 +51,13 @@ public final class ApisActivitiesHelper {
 
 	public static WithCriterion withUserActivities(int pageSize,
 			int pageOffset, ActivityType... activityTypes) throws ApisException {
+		if (activityTypes == null || activityTypes.length == 0) {
+			activityTypes = new ActivityType[] { ActivityType.CHECKIN,
+					ActivityType.COMMENT, ActivityType.CREATION,
+					ActivityType.HOURS, ActivityType.LIKE,
+					ActivityType.REGISTER, ActivityType.UNLIKE,
+					ActivityType.UPDATE };
+		}
 		final WithCriterion crit = SearchRestriction.with(Activity.class,
 				ActivityRequestTypes.fromUser(activityTypes)).paginatedBy(
 				pageSize, pageOffset);

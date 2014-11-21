@@ -52,7 +52,8 @@ module.exports = function(grunt) {
           files: [{
             expand: true,
             cwd: '../web-static',
-            src: 'images/markers/**/*.{png,jpg,jpeg,gif}',
+//            src: ['images/markers/**/*.{png,jpg,jpeg,gif}','images/V3/logoMob.{png,jpg,jpeg,gif}','images/V2/**/*.{png,jpg,jpeg,gif}'],
+            src: 'images/**/*.{png,jpg,jpeg,gif}',
             dest: 'dist'
           }]
         }

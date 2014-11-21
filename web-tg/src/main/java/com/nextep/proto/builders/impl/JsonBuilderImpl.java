@@ -90,6 +90,7 @@ public class JsonBuilderImpl implements JsonBuilder {
 			final Place p = (Place) o;
 			elt.setAddress(p.getAddress1());
 			elt.setType(p.getPlaceType());
+			elt.setCity(p.getCity().getName());
 		}
 
 		// Iterating over descriptions to generate JSON description bean
@@ -202,6 +203,16 @@ public class JsonBuilderImpl implements JsonBuilder {
 		json.setOnline(user.getOnlineTimeout().getTime() > System
 				.currentTimeMillis());
 
+		// Filling city
+		try {
+			final City city = user.getUnique(City.class);
+			if (city != null) {
+				json.setCity(city.getName());
+			}
+		} catch (CalException e) {
+			LOGGER.error("Unable to extract city from user '" + user.getKey()
+					+ "'");
+		}
 		// Filling descriptions
 		final List<? extends Description> descriptions = user
 				.get(Description.class);

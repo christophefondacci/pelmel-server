@@ -15,6 +15,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.nextep.activities.model.Activity;
+import com.nextep.activities.model.ActivityType;
 import com.nextep.advertising.model.AdvertisingBooster;
 import com.nextep.cal.util.services.CalPersistenceService;
 import com.nextep.descriptions.model.Description;
@@ -92,7 +93,7 @@ public class NearbyPlacesListAction extends AbstractAction implements
 
 	private static final int SORT_RANGE_DISTANCE = 2;
 	private static final int NEARBY_ACTIVITIES_COUNT = 20;
-	private static final int NEARBY_USERS_COUNT = 20;
+	private static final int NEARBY_USERS_COUNT = 50;
 
 	// Injected constants
 	private double radius;
@@ -177,7 +178,7 @@ public class NearbyPlacesListAction extends AbstractAction implements
 					// Adding users
 					final ApisCriterion usersCrit = (ApisCriterion) SearchRestriction
 							.searchNear(User.class, SearchScope.USERS,
-									searchLat, searchLng, radius,
+									searchLat, searchLng, Math.max(radius, 50),
 									NEARBY_USERS_COUNT, 0)
 							.aliasedBy(APIS_ALIAS_NEARBY_USERS)
 							.with(Media.class, MediaRequestTypes.THUMB);
@@ -530,11 +531,15 @@ public class NearbyPlacesListAction extends AbstractAction implements
 		activitySupport.initialize(getUrlService(), getLocale(),
 				activitiesPagination, activities);
 		for (Activity activity : activities) {
-			final JsonActivity jsonActivity = jsonBuilder.buildJsonActivity(
-					activity, highRes, getLocale());
-			final String text = activitySupport.getActivityHtmlLine(activity);
-			jsonActivity.setMessage(text);
-			jsonResponse.addNearbyActivity(jsonActivity);
+			if (activity.getActivityType() != ActivityType.LOCALIZATION
+					&& activity.getActivityType() != ActivityType.CITY_CHANGE) {
+				final JsonActivity jsonActivity = jsonBuilder
+						.buildJsonActivity(activity, highRes, getLocale());
+				final String text = activitySupport
+						.getActivityHtmlLine(activity);
+				jsonActivity.setMessage(text);
+				jsonResponse.addNearbyActivity(jsonActivity);
+			}
 		}
 
 		// JSONifying users

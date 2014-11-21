@@ -6,6 +6,7 @@ import java.util.List;
 
 public class JsonOverviewElement extends JsonLiker {
 	private final String key;
+	private String city;
 	private double lat, lng;
 	private String name, address, type;
 	private int users;
@@ -173,5 +174,13 @@ public class JsonOverviewElement extends JsonLiker {
 
 	public String getDescriptionLanguage() {
 		return descriptionLanguage;
+	}
+
+	public void setCity(String city) {
+		this.city = city;
+	}
+
+	public String getCity() {
+		return city;
 	}
 }
