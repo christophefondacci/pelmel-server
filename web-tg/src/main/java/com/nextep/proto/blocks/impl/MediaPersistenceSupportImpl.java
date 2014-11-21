@@ -200,7 +200,8 @@ public class MediaPersistenceSupportImpl implements MediaPersistenceSupport {
 					// Standard definition
 					thumbFileName = generateThumb(mutableMedia, srcImage,
 							localFile, resizedWidth, resizedHeight, null, null,
-							resizedWidth, resizedHeight);
+							null, null);
+					// resizedWidth, resizedHeight);
 					if (thumbFileName != null) {
 						mutableMedia.setMobileUrl(localMediaUrlPrefix
 								+ thumbFileName);
@@ -209,8 +210,8 @@ public class MediaPersistenceSupportImpl implements MediaPersistenceSupport {
 					// High definition
 					thumbFileName = generateThumb(mutableMedia, srcImage,
 							localFile, resizedWidthHighDef,
-							resizedHeightHighDef, null, null,
-							resizedWidthHighDef, resizedHeightHighDef);
+							resizedHeightHighDef, null, null, null, null);
+					// resizedWidthHighDef, resizedHeightHighDef);
 					if (thumbFileName != null) {
 						mutableMedia.setMobileUrlHighDef(localMediaUrlPrefix
 								+ thumbFileName);
