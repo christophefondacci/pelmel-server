@@ -38,7 +38,7 @@ public class ApisCityLocalizerAdapter implements ApisCustomAdapter {
 
 				// Normal use case, cities within small radius
 				if (cityDistance <= MAX_RADIUS) {
-					if (city.getPopulation() > selectedPopulation) {
+					if (city.getPopulation() > selectedPopulation * 20) {
 						selectedCity = city;
 						selectedPopulation = city.getPopulation();
 					}
