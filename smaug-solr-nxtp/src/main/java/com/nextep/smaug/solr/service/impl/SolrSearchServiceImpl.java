@@ -237,6 +237,7 @@ public class SolrSearchServiceImpl implements SearchService {
 			SearchTextSettings settings, SearchWindow window) {
 		final StringBuilder buf = new StringBuilder();
 		if (settings.getSuggestScope().contains(SuggestScope.GEO_FULLTEXT)) {
+			textToSearch = textToSearch.replaceAll(" ", " AND ");
 			buf.append("fulltextName:(" + textToSearch + ")");
 		} else {
 			buf.append("name:(" + textToSearch + ")");
