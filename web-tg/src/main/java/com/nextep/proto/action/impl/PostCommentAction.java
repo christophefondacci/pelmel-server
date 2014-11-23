@@ -5,6 +5,9 @@ import java.util.Date;
 
 import net.sf.json.JSONObject;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.nextep.activities.model.ActivityType;
 import com.nextep.activities.model.MutableActivity;
 import com.nextep.cal.util.services.CalPersistenceService;
@@ -16,6 +19,7 @@ import com.nextep.proto.action.model.CurrentUserAware;
 import com.nextep.proto.action.model.JsonProvider;
 import com.nextep.proto.blocks.CurrentUserSupport;
 import com.nextep.proto.helpers.GeoHelper;
+import com.nextep.proto.services.NotificationService;
 import com.nextep.proto.spring.ContextHolder;
 import com.nextep.smaug.service.SearchPersistenceService;
 import com.nextep.users.model.User;
@@ -34,11 +38,14 @@ public class PostCommentAction extends AbstractAction implements
 		CurrentUserAware, JsonProvider {
 
 	private static final long serialVersionUID = -3099028863871297662L;
+	private static final Log LOGGER = LogFactory
+			.getLog(PostCommentAction.class);
 	private static final String APIS_ALIAS_COMMENTED = "com";
 	private CalPersistenceService commentService;
 	private CurrentUserSupport currentUserSupport;
 	private CalPersistenceService activitiesService;
 	private SearchPersistenceService searchService;
+	private NotificationService notificationService;
 
 	private String commentItemKey;
 	private String comment;
@@ -92,6 +99,13 @@ public class PostCommentAction extends AbstractAction implements
 		activity.add(geoItem);
 		searchService.storeCalmObject(activity, SearchScope.CHILDREN);
 		getHeaderSupport().initialize(getLocale(), commentedItem, null, null);
+		try {
+			notificationService.sendCommentAddedEmailNotification(
+					commentedItem, currentUser, c);
+		} catch (Exception e) {
+			LOGGER.error(
+					"Unable to send comment notification: " + e.getMessage(), e);
+		}
 		success = true;
 		return SUCCESS;
 	}
@@ -139,5 +153,9 @@ public class PostCommentAction extends AbstractAction implements
 		final JsonStatus status = new JsonStatus();
 		status.setError(!success);
 		return JSONObject.fromObject(status).toString();
+	}
+
+	public void setNotificationService(NotificationService notificationService) {
+		this.notificationService = notificationService;
 	}
 }

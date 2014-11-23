@@ -580,6 +580,7 @@
 		<property name="activitiesService" ref="activitiesService"/>
 		<property name="searchService" ref="searchPersistenceService"/>
 		<property name="headerSupport" ref="overviewHeaderSupport"/>
+		<property name="notificationService" ref="notificationService"/>
 	</bean>
 	<bean id="ajaxCommentsAction" class="com.nextep.proto.action.impl.AjaxCommentsAction" parent="abstractAction" scope="request">
 		<property name="urlService" ref="urlService"/>

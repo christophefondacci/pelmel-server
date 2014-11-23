@@ -18,7 +18,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.web.util.HtmlUtils;
 
+import com.nextep.comments.model.Comment;
 import com.nextep.descriptions.model.Description;
+import com.nextep.events.model.Event;
 import com.nextep.geo.model.Place;
 import com.nextep.media.model.Media;
 import com.nextep.proto.helpers.DisplayHelper;
@@ -252,10 +254,16 @@ public class NotificationServiceImpl implements NotificationService {
 				+ actionType
 				+ " on <a href=\"http://www.pelmelguide.com\">PELMEL Guide</a>:<br><br>");
 		// buf.append("Hello administrators,<br><br>A place has been updated on PELMEL Guide:<br>");
-		buf.append("Place " + actionType + ": <a href=\"" + url + "\">"
+		String objectType = "place";
+		if (object instanceof User) {
+			objectType = "User";
+		} else if (object instanceof Event) {
+			objectType = "Event";
+		}
+		buf.append(objectType + " " + actionType + ": <a href=\"" + url + "\">"
 				+ DisplayHelper.getName(object) + "</a><br>");
-		buf.append("Place " + actionType + " by: <a href=\"" + userUrl + "\">"
-				+ user.getPseudo() + "</a><br><br>");
+		buf.append(objectType + " " + actionType + " by: <a href=\"" + userUrl
+				+ "\">" + user.getPseudo() + "</a><br><br>");
 	}
 
 	private void appendField(StringBuilder buf, String fieldName,
@@ -314,6 +322,17 @@ public class NotificationServiceImpl implements NotificationService {
 				+ "\">New photo</a><br>");
 		fillEmailFooterFor(buf, obj, user);
 		notifyAdminByEmail("Photo added to " + DisplayHelper.getName(obj)
+				+ " by " + user.getPseudo(), buf.toString());
+	}
+
+	@Override
+	public void sendCommentAddedEmailNotification(CalmObject obj, User user,
+			Comment comment) {
+		StringBuilder buf = new StringBuilder();
+		fillEmailHeaderFor(buf, obj, user, "commented");
+		buf.append("Comment added: <br><p>" + comment.getMessage() + "</p>");
+		fillEmailFooterFor(buf, obj, user);
+		notifyAdminByEmail("Comment added to " + DisplayHelper.getName(obj)
 				+ " by " + user.getPseudo(), buf.toString());
 	}
 

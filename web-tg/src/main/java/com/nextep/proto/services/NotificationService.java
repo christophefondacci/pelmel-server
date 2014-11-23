@@ -2,6 +2,7 @@ package com.nextep.proto.services;
 
 import java.util.List;
 
+import com.nextep.comments.model.Comment;
 import com.nextep.descriptions.model.Description;
 import com.nextep.geo.model.Place;
 import com.nextep.media.model.Media;
@@ -88,4 +89,17 @@ public interface NotificationService {
 	void sendReportEmailNotification(CalmObject obj, User user, int reportType);
 
 	void sendMediaAddedEmailNotification(CalmObject obj, User user, Media media);
+
+	/**
+	 * Notifies administrtor about a comment on a place
+	 * 
+	 * @param obj
+	 *            {@link CalmObject} being commented
+	 * @param user
+	 *            the {@link User} who wrote the comment
+	 * @param comment
+	 *            the comment added
+	 */
+	void sendCommentAddedEmailNotification(CalmObject obj, User user,
+			Comment comment);
 }
