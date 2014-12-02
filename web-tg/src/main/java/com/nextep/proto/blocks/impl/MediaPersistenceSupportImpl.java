@@ -135,7 +135,19 @@ public class MediaPersistenceSupportImpl implements MediaPersistenceSupport {
 	public void generateThumb(MutableMedia mutableMedia, File localFile) {
 		if (localFile != null) {
 			try {
-				final BufferedImage srcImage = ImageIO.read(localFile);
+				final BufferedImage srcImg = ImageIO.read(localFile);
+				final BufferedImage srcImage = new BufferedImage(
+						srcImg.getWidth(), srcImg.getHeight(),
+						BufferedImage.TYPE_INT_RGB);
+				long start = System.currentTimeMillis();
+				for (int x = 0; x < srcImg.getWidth(); x++) {
+					for (int y = 0; y < srcImg.getHeight(); y++) {
+						srcImage.setRGB(x, y, srcImg.getRGB(x, y));
+					}
+				}
+				long fillTime = System.currentTimeMillis() - start;
+				log.info("[" + fillTime + "ms] RGB conversion OK");
+
 				if (srcImage != null) {
 					mutableMedia.setOnline(true);
 					mutableMedia.setOriginalWidth(srcImage.getWidth());
