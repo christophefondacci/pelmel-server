@@ -167,7 +167,7 @@ public class MobileOverviewAction extends AbstractAction implements
 			objCriterion.with(ApisActivitiesHelper.withActivities(
 					MAX_LOCALIZATION_ACTIVITY, 0,
 					new RequestTypeLatestActivities(MAX_LOCALIZATION_ACTIVITY,
-							ActivityType.LOCALIZATION, ActivityType.CHECKIN)));
+							ActivityType.CHECKIN)));
 		} else if (User.CAL_TYPE.equals(itemKey.getType())) {
 			objCriterion
 					.with(SearchRestriction.with(GeographicItem.class))
@@ -199,8 +199,7 @@ public class MobileOverviewAction extends AbstractAction implements
 									.aliasedBy(APIS_ALIAS_PLACE_LIKE)
 									.with(Media.class, MediaRequestTypes.THUMB))
 					.with(ApisActivitiesHelper.withUserActivities(
-							MAX_LOCALIZATION_ACTIVITY, 0,
-							ActivityType.LOCALIZATION, ActivityType.CHECKIN)
+							MAX_LOCALIZATION_ACTIVITY, 0, ActivityType.CHECKIN)
 							.aliasedBy(APIS_ALIAS_ACTIVITIES_CHECKIN));
 			;
 		} else if (Event.CAL_ID.equals(itemKey.getType())) {
