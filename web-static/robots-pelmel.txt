@@ -1,0 +1,26 @@
+# Exclude Files From All Robots:
+
+User-agent: *
+
+Disallow: /userOverview.action
+Disallow: /searchUser.action
+Disallow: /ajax*
+Disallow: /add*
+Disallow: /user*
+Disallow: /s-search/u-*
+Disallow: /s-recherche/u-*
+Disallow: /s-search/m-map/*
+Disallow: /s-recherche/m-carte/*
+Disallow: /mapInfo.action*
+Disallow: /ilike.action
+Disallow: /s-search/n-*
+Disallow: /s-recherche/n-*
+Disallow: /o-aper%C3%A7u/u-*
+Disallow: /o-overview/u-*
+Disallow: /update*
+Disallow: /searchMap*
+
+#Sitemap: http://www.togayther.net/sitemap.xml
+
+# End robots.txt file
+

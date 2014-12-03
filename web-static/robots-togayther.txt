@@ -2,20 +2,22 @@
 
 User-agent: *
 
-Disallow: /userOverview*
-Disallow: /searchUser*
+#Disallow: *
+#Disallow: /
+Disallow: /userOverview.action
+Disallow: /searchUser.action
 Disallow: /ajax*
 Disallow: /add*
 Disallow: /s-search/u-*
 Disallow: /s-recherche/u-*
 Disallow: /s-search/m-map/*
 Disallow: /s-recherche/m-carte/*
-Disallow: /mapInfo*
-Disallow: /ilike*
+Disallow: /mapInfo.action*
+Disallow: /ilike.action
 Disallow: /s-search/n-*
 Disallow: /s-recherche/n-*
 
-Sitemap: http://www.pelmelguide.com/sitemap.xml
+#Sitemap: http://www.togayther.net/sitemap.xml
 
 # End robots.txt file
 
