@@ -77,10 +77,11 @@ public class AjaxSuggestUserAction extends AbstractAction implements
 			// Extracting image
 			String mediaUrl = "";
 			if (userMedia != null) {
-				mediaUrl = MediaHelper.getImageUrl(userMedia.getMiniThumbUrl());
+				mediaUrl = getUrlService().getMediaUrl(
+						userMedia.getMiniThumbUrl());
 			} else {
-				mediaUrl = MediaHelper.getImageUrl(getMessageSource()
-						.getMessage(
+				mediaUrl = getUrlService().getStaticUrl(
+						getMessageSource().getMessage(
 								KEY_PREFIX_ICON + object.getKey().getType(),
 								null, getLocale()));
 			}

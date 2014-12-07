@@ -86,7 +86,7 @@ public class CommonPopularCitiesSupportImpl implements PopularSupport {
 
 	@Override
 	public String getIconUrl(CalmObject element) {
-		return "/images/icon-city.gif";
+		return urlService.getStaticUrl("/images/icon-city.gif");
 	}
 
 	@Override

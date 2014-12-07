@@ -107,7 +107,7 @@ public class GetPlaceFormAction extends AbstractAction implements
 		placeEditionSupport.initialize(getLocale(), placeOrCity, placeType,
 				currentUser);
 		propertiesEditionSupport.initialize(getLocale(), p, Place.CAL_TYPE);
-		descriptionsEditionSupport.initialize(getLocale(), p);
+		descriptionsEditionSupport.initialize(getLocale(), p, getUrlService());
 
 		// Initializing tag supports
 		final List<Tag> tags = new ArrayList<Tag>();
@@ -193,6 +193,7 @@ public class GetPlaceFormAction extends AbstractAction implements
 		return amenitiesTagSupport;
 	}
 
+	@Override
 	public void setRightsManagementService(
 			RightsManagementService rightsManagementService) {
 		this.rightsManagementService = rightsManagementService;

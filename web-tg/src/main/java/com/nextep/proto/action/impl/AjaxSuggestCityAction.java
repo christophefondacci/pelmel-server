@@ -172,10 +172,12 @@ public class AjaxSuggestCityAction extends AbstractAction implements
 			if (type == null) {
 				cssClass = "suggest-header-item";
 			}
+			final String flagIconUrl = getUrlService().getStaticUrl(
+					"/images/flags/" + country.getKey().getId().toLowerCase()
+							+ ".png");
 			final String htmlName = "<span class=\"" + cssClass
-					+ "\"><img class=\"flag-icon\" src=\"/images/flags/"
-					+ country.getKey().getId().toLowerCase() + ".png\">"
-					+ localizationString + "</span>";
+					+ "\"><img class=\"flag-icon\" src=\"" + flagIconUrl
+					+ "\">" + localizationString + "</span>";
 			String url = "";
 			final UrlService urlService = getUrlService();
 			if (!Place.CAL_TYPE.equals(objType) && searchType != null
@@ -194,9 +196,11 @@ public class AjaxSuggestCityAction extends AbstractAction implements
 			// Adding image
 			Media media = MediaHelper.getSingleMedia(object);
 			if (media != null) {
-				suggest.setImageUrl(media.getMiniThumbUrl());
+				suggest.setImageUrl(urlService.getMediaUrl(media
+						.getMiniThumbUrl()));
 			} else {
-				suggest.setImageUrl(MediaHelper.getNoMiniThumbUrl(object));
+				suggest.setImageUrl(urlService.getMediaUrl(MediaHelper
+						.getNoMiniThumbUrl(object)));
 			}
 			// suggest.setImageUrl("/images/flags/"
 			// + country.getKey().getId().toLowerCase() + ".png");

@@ -265,7 +265,7 @@ public class HeaderOverviewSupportImpl implements HeaderSupport {
 	public String getThumbUrl() {
 		final Media m = MediaHelper.getSingleMedia(obj);
 		if (m != null) {
-			return MediaHelper.getImageUrl(m.getThumbUrl());
+			return urlService.getMediaUrl(m.getThumbUrl());
 		}
 		return null;
 	}

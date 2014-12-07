@@ -99,10 +99,12 @@ public class GetEventFormAction extends AbstractAction implements
 				eventEditionSupport.setCalendarType(formCalendarType);
 			}
 			descriptionsEditionSupport.initialize(getLocale(),
-					calObject instanceof Event ? calObject : null);
+					calObject instanceof Event ? calObject : null,
+					getUrlService());
 		} else {
 			eventEditionSupport.initialize(null, getLocale());
-			descriptionsEditionSupport.initialize(getLocale(), null);
+			descriptionsEditionSupport.initialize(getLocale(), null,
+					getUrlService());
 		}
 		return SUCCESS;
 	}

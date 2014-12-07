@@ -53,13 +53,9 @@ public class MediaProviderImpl implements MediaProvider {
 	public String getMediaMiniThumbUrl(Media m) {
 		if (m != null) {
 			final String relativeUrl = m.getMiniThumbUrl();
-			if (!relativeUrl.toLowerCase().startsWith("http://")) {
-				return baseUrl + relativeUrl;
-			} else {
-				return relativeUrl;
-			}
+			return urlService.getMediaUrl(relativeUrl);
 		} else {
-			return Constants.DEFAULT_IMAGE_PROFILE_URL;
+			return urlService.getStaticUrl(Constants.DEFAULT_IMAGE_PROFILE_URL);
 		}
 	}
 
@@ -99,7 +95,7 @@ public class MediaProviderImpl implements MediaProvider {
 			}
 		} else {
 			return "javascript:play('" + media.getUrl() + "','"
-					+ media.getThumbUrl() + "')";
+					+ urlService.getMediaUrl(media.getThumbUrl()) + "')";
 		}
 	}
 

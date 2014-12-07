@@ -112,7 +112,7 @@
 		<property name="overviewSupport" ref="routingOverviewSupport"/>
 		<property name="currentUserSupport" ref="currentUserSupport"/>
 		<property name="mediaProvider" ref="mediaProvider"/>
-		<property name="tagSupport" ref="mobileTagSupport"/>
+		<property name="tagSupport" ref="tagSupport"/>
 		<property name="descriptionSupport" ref="descriptionSupport"/>
 		<property name="urlService" ref="mobileUrlService"/>
 		<property name="jsonBuilder" ref="jsonBuilder"/>
@@ -239,8 +239,8 @@
 		<property name="geoPlaceTypesSupport" ref="geoPlaceTypesSupport"/>
 	</bean>
 	<bean id="mobileSearchPlaces" class="com.nextep.proto.action.mobile.impl.NearbyPlacesListAction" parent="abstractMobileAction" scope="request">
-		<property name="searchSupport" ref="mobilePlaceSearchSupport"/>
-		<property name="tagSupport" ref="mobileTagSupport"/>
+		<property name="searchSupport" ref="placeSearchSupport"/>
+		<property name="tagSupport" ref="tagSupport"/>
 		<property name="nearbySearchSupport" ref="nearbySearchSupport"/>
 		<property name="urlService" ref="mobileUrlService"/>
 		<property name="eventManagementService" ref="eventManagementService"/>
@@ -298,14 +298,6 @@
 		<property name="currentUserSupport" ref="currentUserSupport"/>
 		<property name="localizationService" ref="localizationService"/>
 		<property name="jsonBuilder" ref="jsonBuilder"/>
-	</bean>
-	<bean id="mobileUserListAction" class="com.nextep.proto.action.mobile.impl.MobileUserListAction" parent="abstractMobileAction" scope="request">
-		<property name="searchSupport" ref="mobileUserSearchSupport"/>
-		<property name="tagSupport" ref="mobileTagSupport"/>
-		<property name="urlService" ref="mobileUrlService"/>
-		<property name="pageSize">
-			<jee:jndi-lookup jndi-name="java:comp/env/mobile/usersListCount"></jee:jndi-lookup>
-		</property>
 	</bean>
 	<bean id="ajaxSearchPlaceAction" class="com.nextep.proto.action.impl.AjaxSearchPlaceAction" parent="abstractAction" scope="request">
 		<property name="localizationSupport" ref="placeLocalizationSupport"/>

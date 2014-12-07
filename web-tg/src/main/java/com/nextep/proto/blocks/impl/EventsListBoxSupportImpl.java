@@ -14,7 +14,6 @@ import com.nextep.events.model.Event;
 import com.nextep.media.model.Media;
 import com.nextep.proto.blocks.ItemsListBoxSupport;
 import com.nextep.proto.helpers.DisplayHelper;
-import com.nextep.proto.helpers.MediaHelper;
 import com.nextep.proto.services.UrlService;
 import com.videopolis.calm.model.CalmObject;
 
@@ -82,9 +81,10 @@ public class EventsListBoxSupportImpl implements ItemsListBoxSupport {
 	public String getItemIconUrl(CalmObject item) {
 		final List<? extends Media> media = item.get(Media.class);
 		if (media != null && !media.isEmpty()) {
-			return media.iterator().next().getThumbUrl();
+			return urlService
+					.getMediaUrl(media.iterator().next().getThumbUrl());
 		} else {
-			return MediaHelper.getImageUrl("/images/icon-event-48.png");
+			return urlService.getStaticUrl("/images/icon-event-48.png");
 		}
 	}
 

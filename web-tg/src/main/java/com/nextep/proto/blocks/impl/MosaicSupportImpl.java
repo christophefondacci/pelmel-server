@@ -175,7 +175,7 @@ public class MosaicSupportImpl implements MosaicSupport {
 			if (activityObj != null) {
 				final Media m = MediaHelper.getSingleMedia(activityObj);
 				if (m != null) {
-					return m.getMiniThumbUrl();
+					return urlService.getMediaUrl(m.getMiniThumbUrl());
 				} else {
 					return null;
 				}
@@ -184,12 +184,15 @@ public class MosaicSupportImpl implements MosaicSupport {
 			}
 
 		} else {
-			String url = MediaHelper.getSingleMediaUrl(obj);
+			String url = urlService.getMediaUrl(MediaHelper
+					.getSingleMediaUrl(obj));
 			if (url == null) {
 				if (User.CAL_TYPE.equals(obj.getKey().getType())) {
-					return "/images/V2/no-photo-profile-small.png";
+					return urlService
+							.getStaticUrl("/images/V2/no-photo-profile-small.png");
 				} else {
-					return "/images/V2/no-photo-small.png";
+					return urlService
+							.getStaticUrl("/images/V2/no-photo-small.png");
 				}
 			} else {
 				return url;

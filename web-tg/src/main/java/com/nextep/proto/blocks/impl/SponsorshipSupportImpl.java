@@ -189,8 +189,8 @@ public class SponsorshipSupportImpl implements SponsorshipSupport {
 	public String getSponsoredElementIcon(CalmObject object) {
 		final Media m = MediaHelper.getSingleMedia(object);
 		if (m != null) {
-			return m.getThumbUrl();
+			return urlService.getMediaUrl(m.getThumbUrl());
 		}
-		return "/images/V2/no-photo.png";
+		return urlService.getStaticUrl("/images/V2/no-photo.png");
 	}
 }

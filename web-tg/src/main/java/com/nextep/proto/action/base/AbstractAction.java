@@ -385,4 +385,8 @@ public abstract class AbstractAction extends ActionSupport implements
 		response.setStatus(statusCode);
 		return ERROR;
 	}
+
+	public final String getMediaUrl(String url) {
+		return urlService.getMediaUrl(url);
+	}
 }

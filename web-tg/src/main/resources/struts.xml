@@ -191,13 +191,6 @@
 			<result type="tiles">404</result>
 			<interceptor-ref name="default"/>	
 		</action>
-		<action name="getPlaces" class="mobileSearchPlaces">
-			<result>/jsp/mobile/block-place-list.jsp</result>
-		</action>
-		<action name="listUsers" class="mobileUserListAction">
-			<result>/jsp/mobile/block-place-list.jsp</result>
-		</action>
-		
 		<action name="mapPlaces" class="mobileSearchPlaces">
 			<result>/jsp/pages/json.jsp</result>
 	   		<result name="input">/jsp/pages/json.jsp</result>

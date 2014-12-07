@@ -4,11 +4,12 @@ import java.util.List;
 import java.util.Locale;
 
 import com.nextep.descriptions.model.Description;
+import com.nextep.proto.services.UrlService;
 import com.videopolis.calm.model.CalmObject;
 
 public interface DescriptionsEditionSupport {
 
-	void initialize(Locale locale, CalmObject parent);
+	void initialize(Locale locale, CalmObject parent, UrlService urlService);
 
 	String getParentId();
 

@@ -20,6 +20,7 @@ public class TagSupportImpl implements SelectableTagSupport {
 
 	private Locale locale;
 	private MessageSource messageSource;
+	private UrlService urlService;
 	private List<Tag> availableTags;
 	private List<Tag> selectedTags = Collections.emptyList();
 
@@ -50,8 +51,8 @@ public class TagSupportImpl implements SelectableTagSupport {
 
 	@Override
 	public String getTagIconUrl(Tag tag) {
-		return messageSource.getMessage(KEY_TAG_ICON_PREFIX
-				+ tag.getKey().toString(), null, locale);
+		return urlService.getStaticUrl(messageSource.getMessage(
+				KEY_TAG_ICON_PREFIX + tag.getKey().toString(), null, locale));
 	}
 
 	public void setMessageSource(MessageSource messageSource) {
@@ -81,5 +82,9 @@ public class TagSupportImpl implements SelectableTagSupport {
 	@Override
 	public String getRemoveTagUrl(Tag t) {
 		return null;
+	}
+
+	public void setUrlService(UrlService urlService) {
+		this.urlService = urlService;
 	}
 }

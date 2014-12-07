@@ -80,7 +80,8 @@ public class FavoriteEventsSupportImpl implements FavoritesSupport {
 
 	@Override
 	public String getFavoriteImageUrl(CalmObject favoriteObj) {
-		return MediaHelper.getSingleMediaUrl(favoriteObj);
+		return urlService.getMediaUrl(MediaHelper
+				.getSingleMediaUrl(favoriteObj));
 	}
 
 	@Override

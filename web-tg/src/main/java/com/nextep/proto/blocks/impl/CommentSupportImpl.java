@@ -70,7 +70,8 @@ public class CommentSupportImpl implements CommentSupport {
 	public String getCommentIconUrl(Comment comment) {
 		try {
 			final User user = comment.getUnique(User.class);
-			return MediaHelper.getSingleMedia(user).getMiniThumbUrl();
+			return urlService.getMediaUrl(MediaHelper.getSingleMedia(user)
+					.getMiniThumbUrl());
 		} catch (CalException e) {
 			LOGGER.error("Unable to retrieve comment's author for key "
 					+ comment.getAuthorItemKey());
@@ -133,7 +134,8 @@ public class CommentSupportImpl implements CommentSupport {
 
 	@Override
 	public String getCurrentUserThumbUrl() {
-		return MediaHelper.getSingleMedia(currentUser).getMiniThumbUrl();
+		return urlService.getMediaUrl(MediaHelper.getSingleMedia(currentUser)
+				.getMiniThumbUrl());
 	}
 
 	@Override

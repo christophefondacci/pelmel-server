@@ -7,7 +7,6 @@ import org.springframework.context.MessageSource;
 
 import com.nextep.geo.model.Country;
 import com.nextep.proto.blocks.PopularSupport;
-import com.nextep.proto.helpers.MediaHelper;
 import com.nextep.proto.model.SearchType;
 import com.nextep.proto.services.UrlService;
 import com.videopolis.calm.model.CalmObject;
@@ -17,7 +16,7 @@ public class PopularCountriesSupportImpl implements PopularSupport {
 	private static final String KEY_TITLE = "block.popular.countries";
 	private PopularSupport basePopularSupport;
 	private MessageSource messageSource;
-
+	private UrlService urlService;
 	private Locale locale;
 
 	@Override
@@ -25,6 +24,7 @@ public class PopularCountriesSupportImpl implements PopularSupport {
 			UrlService urlService, CalmObject parent,
 			List<? extends CalmObject> popularElements, Object countObject) {
 		this.locale = locale;
+		this.urlService = urlService;
 		basePopularSupport.initialize(searchType, locale, urlService, parent,
 				popularElements, countObject);
 	}
@@ -52,7 +52,7 @@ public class PopularCountriesSupportImpl implements PopularSupport {
 	@Override
 	public String getIconUrl(CalmObject element) {
 		final Country country = (Country) element;
-		return MediaHelper.getImageUrl("/images/flags/"
+		return urlService.getStaticUrl("/images/flags/"
 				+ country.getCode().toLowerCase() + ".png");
 	}
 

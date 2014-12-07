@@ -39,9 +39,9 @@ public class PopularEventsSupportImpl implements PopularSupport {
 	public String getIconUrl(CalmObject element) {
 		final Media m = MediaHelper.getSingleMedia(element);
 		if (m != null) {
-			return m.getMiniThumbUrl();
+			return urlService.getMediaUrl(m.getMiniThumbUrl());
 		}
-		return "/images/icon-event-24.png";
+		return urlService.getStaticUrl("/images/icon-event-24.png");
 	}
 
 	@Override

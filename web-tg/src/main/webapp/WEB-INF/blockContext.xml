@@ -22,6 +22,7 @@
 	</bean>
 	<bean id="indexHeaderSupport" class="com.nextep.proto.blocks.impl.HeaderIndexSupportImpl" scope="prototype">
 		<property name="messageSource" ref="globalMessages"/>
+		<property name="urlService" ref="urlService"/>
 		<property name="domainName">
 			<jee:jndi-lookup jndi-name="java:comp/env/togaytherDomain"/>
 		</property>
@@ -85,12 +86,6 @@
 		<property name="translationFacetTitle" value="block.facets.users.attends.title"/>
 		<property name="hideTitleWhenNoResult" value="true"/>
 	</bean>
-	<bean id="mobileUserSearchSupport" class="com.nextep.proto.blocks.mobile.impl.MobileSearchSupportImpl">
-		<property name="baseSearchSupport" ref="userSearchSupport"></property>
-		<property name="baseUrl">
-			<jee:jndi-lookup jndi-name="java:comp/env/togaytherBaseUrl"/>
-		</property>
-	</bean>
 	<bean id="userLocalSearchSupport" scope="prototype" parent="userSearchSupport">
 		<property name="translationFacetTitle" value="block.facets.usersLocal.title"/>
 	</bean>
@@ -98,12 +93,6 @@
 		scope="prototype">
 		<property name="messageSource" ref="globalMessages" />
 		<property name="commonSearchSupport" ref="commonSearchSupport"/>
-	</bean>
-	<bean id="mobilePlaceSearchSupport" class="com.nextep.proto.blocks.mobile.impl.MobileSearchSupportImpl">
-		<property name="baseSearchSupport" ref="placeSearchSupport"></property>
-		<property name="baseUrl">
-			<jee:jndi-lookup jndi-name="java:comp/env/togaytherBaseUrl"/>
-		</property>
 	</bean>
 	<bean id="eventSearchSupport" class="com.nextep.proto.blocks.impl.EventSearchSupportImpl" scope="prototype">
 		<property name="messageSource" ref="globalMessages"/>
@@ -135,7 +124,7 @@
 	<bean id="mediaProvider" class="com.nextep.proto.blocks.impl.MediaProviderImpl"
 		scope="prototype" >
 		<property name="baseUrl">
-			<jee:jndi-lookup jndi-name="java:comp/env/togaytherBaseUrl"/>
+			<jee:jndi-lookup jndi-name="java:comp/env/mediaBaseUrl"/>
 		</property>
 		<property name="overviewImageWidth" value="750"/>
 		<property name="overviewImageHeight" value="346"/>
@@ -168,6 +157,7 @@
 		class="com.nextep.proto.blocks.impl.MediaPersistenceSupportImpl"
 		scope="prototype">
 		<property name="mediaService" ref="mediaService" />
+		<property name="storageService" ref="googleStorageService" />
 		<property name="localMediaPath">
 			<jee:jndi-lookup jndi-name="java:comp/env/media/localPath"/>
 		</property>
@@ -237,6 +227,7 @@
 	<bean id="tagSupport" class="com.nextep.proto.blocks.impl.TagSupportImpl"
 		scope="prototype">
 		<property name="messageSource" ref="globalMessages" />
+		<property name="urlService" ref="urlService" />
 	</bean>
 	<bean id="mobileTagSupport" class="com.nextep.proto.blocks.mobile.impl.MobileTagSupportImpl">
 		<property name="baseTagSupport" ref="tagSupport"/>

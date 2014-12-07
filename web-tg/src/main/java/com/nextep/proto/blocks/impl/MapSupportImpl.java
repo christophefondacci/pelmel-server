@@ -94,14 +94,6 @@ public class MapSupportImpl implements MapSupport {
 					+ urlService.getMapInfoWindowUrl(((CalmObject) l).getKey())
 					+ "'");
 			buf.append(");\n");
-			// buf.append("new google.maps.Marker({position:new google.maps.LatLng(");
-			// buf.append(l.getLatitude());
-			// buf.append(',');
-			// buf.append(l.getLongitude());
-			// buf.append("), title : \"");
-			// buf.append(((Place) l).getName().replace("\"", ""));
-			// buf.append("\",icon: " + getIconVar(p.getPlaceType()));
-			// buf.append(", shadow : shadowIcon, map: map});\n");
 		}
 		if (mainPoint == null) {
 			buf.append("Pelmel.map.fitBounds(computeBounds(Pelmel.markersarray));\n");
@@ -120,11 +112,13 @@ public class MapSupportImpl implements MapSupport {
 	}
 
 	private String buildIconDeclaration(String category) {
+		final String imageUrl = urlService.getStaticUrl("/images/markers/"
+				+ category + "Marker.png");
 		return "var "
 				+ getIconVar(category)
-				+ " = {url:'/images/markers/"
-				+ category
-				+ "Marker.png', size:new google.maps.Size(28,34),origin:new google.maps.Point(0,0),anchor:new google.maps.Point(14,34)};\n";
+				+ " = {url:'"
+				+ imageUrl
+				+ "', size:new google.maps.Size(28,34),origin:new google.maps.Point(0,0),anchor:new google.maps.Point(14,34)};\n";
 	}
 
 	@Override

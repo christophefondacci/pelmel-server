@@ -103,6 +103,14 @@
 	<Environment name="push.production" type="java.lang.Boolean" value="false"/>
 	<Environment name="push.enabled" type="java.lang.Boolean" value="false"/>
 
-	<Environment name="notification.email" type="java.lang.String" value="cfondacci@gmail.com christophet49@gmail.com"/>
+	<Environment name="gcloud.appName" type="java.lang.String" value="PelMel"/>
+	<Environment name="gcloud.bucketName" type="java.lang.String" value="media.pelmelguide.com"/>
+	<Environment name="gcloud.accountId" type="java.lang.String" value="363040793981-u2h22k9ld1h90ohnnoe0nlmsu7nbbbar@developer.gserviceaccount.com"/>
+	<Environment name="gcloud.privateKeyPath" type="java.lang.String" value="/etc/PelMel-4d9471b7ca0b.p12"/>
+	<Environment name="mediaBaseUrl" type="java.lang.String"
+			value="http://media.pelmelguide.com" />
+	<Environment name="staticBaseUrl" type="java.lang.String"
+			value="http://static.pelmelguide.com" />
+	<Environment name="notification.email" type="java.lang.String" value="christophet49@gmail.com"/>
 </Context>
 

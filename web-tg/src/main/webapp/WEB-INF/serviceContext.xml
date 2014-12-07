@@ -9,7 +9,7 @@
 	
 
 	<bean id="apisTaskRunnerService" parent="abstractConcurrentJavaUtilTaskRunnerService">
-		<property name="timeout" value="3000" />
+<!-- 		<property name="timeout" value="3000" /> -->
 	</bean>
 	<bean id="apisRequestTaskRunnerService" parent="abstractConcurrentJavaUtilTaskRunnerService" />
 	<bean id="apisToolsTaskRunnerService" parent="abstractConcurrentJavaUtilTaskRunnerService">
@@ -101,6 +101,12 @@
 		<property name="domainName">
 			<jee:jndi-lookup jndi-name="java:comp/env/togaytherDomain"/>
 		</property>
+		<property name="mediaBaseUrl">
+			<jee:jndi-lookup jndi-name="java:comp/env/mediaBaseUrl"/>
+		</property>
+		<property name="staticBaseUrl">
+			<jee:jndi-lookup jndi-name="java:comp/env/staticBaseUrl"/>
+		</property>
 	</bean>
 	<bean id="mobileUrlService" class="com.nextep.proto.services.mobile.impl.MobileUrlServiceImpl">
 		<property name="baseUrlService" ref="urlService"/>
@@ -149,7 +155,7 @@
 		<property name="distanceDisplayService" ref="distanceDisplayService"/>
 		<property name="eventManagementService" ref="eventManagementService"/>
 		<property name="baseUrl">
-			<jee:jndi-lookup jndi-name="java:comp/env/togaytherBaseUrl"/>
+			<jee:jndi-lookup jndi-name="java:comp/env/mediaBaseUrl"/>
 		</property>
 	</bean>
 	
@@ -205,6 +211,20 @@
 		<property name="urlService" ref="urlService"/>
 		<property name="baseUrl">
 			<jee:jndi-lookup jndi-name="java:comp/env/togaytherBaseUrl"/>
+		</property>
+	</bean>
+	<bean id="googleStorageService" class="com.nextep.proto.services.impl.GoogleCloudStorageServiceImpl" init-method="init">
+		<property name="appName">
+			<jee:jndi-lookup jndi-name="java:comp/env/gcloud.appName"/>
+		</property>
+		<property name="bucketName">
+			<jee:jndi-lookup jndi-name="java:comp/env/gcloud.bucketName"/>
+		</property>
+		<property name="accountId">
+			<jee:jndi-lookup jndi-name="java:comp/env/gcloud.accountId"/>
+		</property>
+		<property name="privateKeyPath">
+			<jee:jndi-lookup jndi-name="java:comp/env/gcloud.privateKeyPath"/>
 		</property>
 	</bean>
 	<bean id="pngOptimizer" class="com.googlecode.pngtastic.core.PngOptimizer"/>

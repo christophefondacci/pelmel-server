@@ -79,8 +79,8 @@ public class HomeMapSupportImpl implements MapSupport {
 					// Adding icon place type declaration
 					final String iconName = "icon" + target.getKey().getId();
 					iconsBuf.append("var " + iconName
-							+ "=Pelmel.buildMapThumbMarker('" + photoUrl
-							+ "');");
+							+ "=Pelmel.buildMapThumbMarker('"
+							+ urlService.getMediaUrl(photoUrl) + "');");
 
 					// Computing info window URL
 					final String popupUrl = urlService

@@ -7,6 +7,7 @@ import java.util.Locale;
 
 import com.nextep.descriptions.model.Description;
 import com.nextep.proto.blocks.DescriptionsEditionSupport;
+import com.nextep.proto.services.UrlService;
 import com.videopolis.calm.model.CalmObject;
 
 public class DescriptionsEditionSupportImpl implements
@@ -14,11 +15,14 @@ public class DescriptionsEditionSupportImpl implements
 
 	private Locale locale;
 	private CalmObject parent;
+	private UrlService urlService;
 
 	@Override
-	public void initialize(Locale locale, CalmObject parent) {
+	public void initialize(Locale locale, CalmObject parent,
+			UrlService urlService) {
 		this.locale = locale;
 		this.parent = parent;
+		this.urlService = urlService;
 	}
 
 	@Override
@@ -58,8 +62,9 @@ public class DescriptionsEditionSupportImpl implements
 
 	@Override
 	public String getLanguageIcon(String languageCode) {
-		return "background-image: url('/images/flags/" + languageCode
-				+ ".png');";
+		final String langIcon = urlService.getStaticUrl("/images/flags/"
+				+ languageCode + ".png");
+		return "background-image: url('" + langIcon + "');";
 	}
 
 	@Override

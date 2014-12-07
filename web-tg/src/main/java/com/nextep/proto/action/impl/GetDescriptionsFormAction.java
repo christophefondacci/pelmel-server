@@ -66,7 +66,8 @@ public class GetDescriptionsFormAction extends AbstractAction implements
 		// Checking rights
 		if (rightsManagementService.canModify(user, parent)) {
 			// Initializing the support for description edition
-			descriptionsEditionSupport.initialize(getLocale(), parent);
+			descriptionsEditionSupport.initialize(getLocale(), parent,
+					getUrlService());
 
 			// Everything is OK
 			return SUCCESS;
@@ -96,6 +97,7 @@ public class GetDescriptionsFormAction extends AbstractAction implements
 		this.currentUserSupport = currentUserSupport;
 	}
 
+	@Override
 	public void setRightsManagementService(
 			RightsManagementService rightsManagementService) {
 		this.rightsManagementService = rightsManagementService;

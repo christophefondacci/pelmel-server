@@ -80,7 +80,7 @@
 					<s:iterator value="mediaProvider.media" var="media">
 						<div class="user-media">
 							<div class="media-actions"><div class="over-toolbox"><a class="but-right img-button" href="<s:property value="mediaProvider.getMoveUrl(#media,1)"/>"><img src="/images/right.png"/></a><a class="but-middle img-button"   data-toggle="modal" data-target="#myModal" href="<s:property value="mediaProvider.getDeletionUrl(#media)"/>"><img src="/images/delete.png"/></a><a class="but-left img-button" href="<s:property value="mediaProvider.getMoveUrl(#media,-1)"/>"><img src="/images/left.png"/></a></div></div>
-							<img class="thumb-inner box-shadow" src="<s:property value="#media.miniThumbUrl"/>" />
+							<img class="thumb-inner box-shadow" src="<s:property value="getMediaUrl(#media.miniThumbUrl)"/>" />
 						</div>
 					</s:iterator>
 				</div>

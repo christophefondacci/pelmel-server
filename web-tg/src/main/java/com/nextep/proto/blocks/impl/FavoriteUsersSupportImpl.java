@@ -79,9 +79,10 @@ public class FavoriteUsersSupportImpl implements FavoritesSupport {
 	public String getFavoriteImageUrl(CalmObject favoriteObj) {
 		final Media media = MediaHelper.getSingleMedia(favoriteObj);
 		if (media != null) {
-			return media.getThumbUrl();
+			return urlService.getMediaUrl(media.getThumbUrl());
 		} else {
-			return MediaHelper.getNoThumbUrl(favoriteObj);
+			return urlService.getStaticUrl(MediaHelper
+					.getNoThumbUrl(favoriteObj));
 		}
 	}
 

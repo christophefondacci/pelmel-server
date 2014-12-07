@@ -9,7 +9,7 @@
 	<s:set value="0" var="image"/>
 	<s:iterator value="#mediaProvider.getMedia()" var="media">
 		.image-<s:property value="#image"/> {
-			background: url('<s:property value="#media.url"/>') no-repeat center center;
+			background: url('<s:property value="urlService.getMediaUrl(#media.url)"/>') no-repeat center center;
 		}
 		<s:set value="#image+1" var="image"/>
 	</s:iterator>

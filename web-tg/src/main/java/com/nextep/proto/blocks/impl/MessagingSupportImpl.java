@@ -220,10 +220,10 @@ public class MessagingSupportImpl implements MessagingSupport,
 						+ " has media " + m.getKey().toString());
 			}
 			if (m != null) {
-				return m.getMiniThumbUrl();
+				return urlService.getMediaUrl(m.getMiniThumbUrl());
 			}
 		}
-		return Constants.DEFAULT_IMAGE_PROFILE_URL;
+		return urlService.getStaticUrl(Constants.DEFAULT_IMAGE_PROFILE_URL);
 	}
 
 	private int getFirstMessageIndex() {

@@ -126,7 +126,7 @@ public class EventOverviewSupportImpl implements OverviewSupport {
 
 	@Override
 	public String getTitleIconUrl(CalmObject o) {
-		return baseUrl + "/images/icon-event-24.png";
+		return urlService.getStaticUrl("/images/icon-event-24.png");
 	}
 
 	public void setBaseUrl(String baseUrl) {

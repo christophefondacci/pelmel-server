@@ -167,7 +167,7 @@ public class ActivitiesSupportImpl implements ActivitySupport {
 		String imageUrl = null;
 		if (a != null) {
 			if (a.getActivityType() == ActivityType.SEO_OPEN) {
-				imageUrl = "/images/V2/logo-thumb.png";
+				imageUrl = urlService.getStaticUrl("/images/V2/logo-thumb.png");
 			} else {
 				final User user = getUser(a);
 				final List<? extends Media> mediaList = user.get(Media.class);
@@ -176,9 +176,10 @@ public class ActivitiesSupportImpl implements ActivitySupport {
 					media = mediaList.iterator().next();
 				}
 				if (media != null) {
-					imageUrl = media.getMiniThumbUrl();
+					imageUrl = urlService.getMediaUrl(media.getMiniThumbUrl());
 				} else {
-					imageUrl = "/images/V2/no-photo-profile-small.png";
+					imageUrl = urlService
+							.getStaticUrl("/images/V2/no-photo-profile-small.png");
 				}
 			}
 		}

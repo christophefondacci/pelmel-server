@@ -180,7 +180,7 @@ public class CommonSearchSupportImpl implements SearchSupport {
 	public String getResultThumbnailUrl(CalmObject searchResult) {
 		final Media media = MediaHelper.getSingleMedia(searchResult);
 		if (media != null) {
-			return media.getThumbUrl();
+			return urlService.getMediaUrl(media.getThumbUrl());
 		} else {
 			// No photo is handled by CSS for bars, saunas and clubs
 			final Place p = (Place) searchResult;
@@ -200,9 +200,9 @@ public class CommonSearchSupportImpl implements SearchSupport {
 			}
 		}
 		if (searchResult instanceof User) {
-			return "/images/V2/no-photo-user.png";
+			return urlService.getStaticUrl("/images/V2/no-photo-user.png");
 		} else {
-			return "/images/V2/no-photo.png";
+			return urlService.getStaticUrl("/images/V2/no-photo.png");
 		}
 	}
 
@@ -210,7 +210,7 @@ public class CommonSearchSupportImpl implements SearchSupport {
 	public String getResultMiniThumbUrl(CalmObject searchResult) {
 		final Media m = MediaHelper.getSingleMedia(searchResult);
 		if (m != null) {
-			return m.getMiniThumbUrl();
+			return urlService.getMediaUrl(m.getMiniThumbUrl());
 		}
 		return null;
 	}
@@ -277,8 +277,8 @@ public class CommonSearchSupportImpl implements SearchSupport {
 
 	@Override
 	public String getFacetIconUrl(String itemKey) {
-		return messageSource
-				.getMessage(KEY_ICON_PREFIX + itemKey, null, locale);
+		return urlService.getStaticUrl(messageSource.getMessage(KEY_ICON_PREFIX
+				+ itemKey, null, locale));
 	}
 
 	@Override

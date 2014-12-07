@@ -302,4 +302,22 @@ public interface UrlService {
 	 * @return the activation URL
 	 */
 	String getSponsorshipActivationUrl();
+
+	/**
+	 * Generates an absolute media URL for the given URL
+	 * 
+	 * @param url
+	 *            the URL to transform to an absolute media URL
+	 * @return the absolute media URL
+	 */
+	String getMediaUrl(String url);
+
+	/**
+	 * Provides the base URL for static resources
+	 * 
+	 * @param url
+	 *            the relative URL of the static resource
+	 * @return the static absolute URL
+	 */
+	String getStaticUrl(String url);
 }

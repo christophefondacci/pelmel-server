@@ -8,9 +8,9 @@ import org.springframework.context.MessageSource;
 import com.nextep.proto.blocks.HeaderSupport;
 import com.nextep.proto.blocks.SearchSupport;
 import com.nextep.proto.helpers.LocalizationHelper;
-import com.nextep.proto.helpers.MediaHelper;
 import com.nextep.proto.helpers.SeoHelper;
 import com.nextep.proto.model.SearchType;
+import com.nextep.proto.services.UrlService;
 import com.videopolis.calm.model.CalmObject;
 
 public class HeaderIndexSupportImpl implements HeaderSupport {
@@ -21,6 +21,7 @@ public class HeaderIndexSupportImpl implements HeaderSupport {
 	private MessageSource messageSource;
 	private String domainName;
 	private CalmObject obj;
+	private UrlService urlService;
 
 	@Override
 	public void initialize(Locale locale, CalmObject element,
@@ -91,7 +92,7 @@ public class HeaderIndexSupportImpl implements HeaderSupport {
 
 	@Override
 	public String getThumbUrl() {
-		return MediaHelper.getImageUrl("/images/fb-logo.png");
+		return urlService.getStaticUrl("/images/fb-logo.png");
 	}
 
 	@Override
@@ -107,5 +108,9 @@ public class HeaderIndexSupportImpl implements HeaderSupport {
 	@Override
 	public String getPageTypeLabel() {
 		return null;
+	}
+
+	public void setUrlService(UrlService urlService) {
+		this.urlService = urlService;
 	}
 }

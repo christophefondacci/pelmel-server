@@ -228,4 +228,14 @@ public class MobileUrlServiceImpl implements UrlService {
 	public String getSponsorshipActivationUrl() {
 		return baseUrlService.getSponsorshipActivationUrl();
 	}
+
+	@Override
+	public String getMediaUrl(String url) {
+		return baseUrlService.getMediaUrl(url);
+	}
+
+	@Override
+	public String getStaticUrl(String url) {
+		return baseUrlService.getStaticUrl(url);
+	}
 }

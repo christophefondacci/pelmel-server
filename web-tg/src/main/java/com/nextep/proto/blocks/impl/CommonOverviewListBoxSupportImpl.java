@@ -81,7 +81,7 @@ public class CommonOverviewListBoxSupportImpl implements OverviewListSupport {
 	public String getItemIconUrl(CalmObject item) {
 		final Media m = MediaHelper.getSingleMedia(item);
 		if (m != null) {
-			return m.getThumbUrl();
+			return urlService.getMediaUrl(m.getThumbUrl());
 		} else {
 			return null;
 		}

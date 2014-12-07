@@ -47,6 +47,8 @@ public class UrlServiceImpl implements UrlService {
 	private boolean isAjaxSearch, isAjaxOverview;
 	private boolean addJSCalls;
 	private String domainName;
+	private String mediaBaseUrl;
+	private String staticBaseUrl;
 
 	@Override
 	public String buildSearchUrl(String targetHtmlElementId,
@@ -550,7 +552,33 @@ public class UrlServiceImpl implements UrlService {
 		return "/activateSponsorship";
 	}
 
+	@Override
+	public String getMediaUrl(String url) {
+		String resultUrl = url;
+		if (!url.startsWith("http://")) {
+			resultUrl = mediaBaseUrl + url;
+		}
+		return resultUrl;
+	}
+
+	@Override
+	public String getStaticUrl(String url) {
+		String resultUrl = url;
+		if (!url.startsWith("http://")) {
+			resultUrl = staticBaseUrl + url;
+		}
+		return resultUrl;
+	}
+
 	public void setDomainName(String domainName) {
 		this.domainName = domainName;
+	}
+
+	public void setMediaBaseUrl(String mediaBaseUrl) {
+		this.mediaBaseUrl = mediaBaseUrl;
+	}
+
+	public void setStaticBaseUrl(String staticBaseUrl) {
+		this.staticBaseUrl = staticBaseUrl;
 	}
 }

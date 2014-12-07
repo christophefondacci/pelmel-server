@@ -81,7 +81,8 @@ public class UserActivitiesSupportImpl implements ActivitySupport {
 		final CalmObject o = getTarget(activity);
 		final List<? extends Media> media = o.get(Media.class);
 		if (media != null && !media.isEmpty()) {
-			return media.iterator().next().getMiniThumbUrl();
+			return urlService.getMediaUrl(media.iterator().next()
+					.getMiniThumbUrl());
 		} else {
 			return DisplayHelper.getNoMiniThumbUrl();
 		}

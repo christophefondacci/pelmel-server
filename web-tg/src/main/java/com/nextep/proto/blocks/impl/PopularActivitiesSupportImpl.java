@@ -108,9 +108,9 @@ public class PopularActivitiesSupportImpl implements PopularSupportSubtitled {
 		final CalmObject obj = getObjectFromActivity(element);
 		final Media m = MediaHelper.getSingleMedia(obj);
 		if (m != null) {
-			return m.getMiniThumbUrl();
+			return urlService.getMediaUrl(m.getMiniThumbUrl());
 		} else {
-			return "/images/V2/no-photo-small.png";
+			return urlService.getStaticUrl("/images/V2/no-photo-small.png");
 		}
 	}
 

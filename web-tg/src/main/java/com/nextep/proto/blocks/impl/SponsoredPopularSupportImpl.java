@@ -67,7 +67,7 @@ public class SponsoredPopularSupportImpl implements PopularSupport {
 					KEY_DEFAULT_ICON_PREFIX + place.getPlaceType(), null,
 					locale);
 		} else {
-			return m.getThumbUrl();
+			return urlService.getMediaUrl(m.getThumbUrl());
 		}
 	}
 

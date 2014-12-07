@@ -2,125 +2,110 @@
 
 module.exports = function(grunt) {
 
-  // Project configuration.
-  grunt.initConfig({
-    // Metadata.
-    pkg: grunt.file.readJSON('package.json'),
-    banner: '/*! <%= pkg.title || pkg.name %> - v<%= pkg.version %> - ' +
-      '<%= grunt.template.today("yyyy-mm-dd") %>\n' +
-      '<%= pkg.homepage ? "* " + pkg.homepage + "\\n" : "" %>' +
-      '* Copyright (c) <%= grunt.template.today("yyyy") %> <%= pkg.author.name %>;' +
-      ' Licensed <%= _.pluck(pkg.licenses, "type").join(", ") %> */\n',
-    // Task configuration.
-    clean: {
-      src: ['dist/']
-    },
-    useminPrepare: {
-    	html:'target/web-proto/jsp/structure/default.jsp'
-    },
-    usemin: {
-    	html:'target/web-proto/jsp/structure/default.jsp',
-    	options: {
-            flow: {
-              html: {
-                steps: {
-                  js: ['concat', 'uglifyjs'],
-                  css: ['cssmin']
-                },
-                post: {}
-              }
-            },
-            assetsDirs: ['dist','dist/styles','dist/js']
-          }
-    },
-    // Renames files for browser caching purposes
-    filerev: {
-      dist: {
-        src: [
-          'dist/js/pelmel.min.js',
-          'dist/styles/pelmel.min.css',
-        ]
-      }
-    },
-    copy: {
-    	postBuild: {
-    		files: [{expand:true, cwd: 'dist/',src: ['**/*.js','**/*.css'], dest:'../web-static/'}]
-    	}
-    },
-    imagemin: {
-        dist: {
-          files: [{
-            expand: true,
-            cwd: '../web-static',
-//            src: ['images/markers/**/*.{png,jpg,jpeg,gif}','images/V3/logoMob.{png,jpg,jpeg,gif}','images/V2/**/*.{png,jpg,jpeg,gif}'],
-            src: 'images/**/*.{png,jpg,jpeg,gif}',
-            dest: 'dist'
-          }]
-        }
-      },
-//    	main: {
-//    		files: [
-//    		        {
-//    		        	expand:true, src: [
-//    		                            'js/bootstrap/**',
-//    		                            'js/crypto/**',
-//    		                            'js/jquery/**',
-//    		                            'js/openlayers/**',
-//    		                            'angular/**',
-//    		                            'css/**',
-//    		                            'fonts/**',
-//    		                            'img/**',
-//    		                            'partials/**',
-//    		                            'config.js'],
-//    		                     dest:'dist/'
-//    		        },
-//    		        {	expand:true, flatten:true, src: ['index.html'],dest:'dist/'}
-//    		        ]
-//    	}
-//    },
-//    qunit: {
-//      files: ['test/**/*.html']
-//    },
-//    jshint: {
-//      gruntfile: {
-//        options: {
-//          jshintrc: '.jshintrc'
-//        },
-//        src: 'Gruntfile.js'
-//      },
-//      src: {
-//        options: {
-//          jshintrc: 'js/.jshintrc'
-//        },
-//        src: ['js/**/*.js']
-//      }
-//    },
-//    watch: {
-//      gruntfile: {
-//        files: '<%= jshint.gruntfile.src %>',
-//        tasks: ['jshint:gruntfile']
-//      },
-//      src: {
-//        files: '<%= jshint.src.src %>',
-//        tasks: ['jshint:src', 'qunit']
-//      },
-//      test: {
-//        files: '<%= jshint.test.src %>',
-//        tasks: ['jshint:test', 'qunit']
-//      },
-//    },
-  });
+	// Project configuration.
+	grunt
+			.initConfig({
+				// Metadata.
+				pkg : grunt.file.readJSON('package.json'),
+				banner : '/*! <%= pkg.title || pkg.name %> - v<%= pkg.version %> - '
+						+ '<%= grunt.template.today("yyyy-mm-dd") %>\n'
+						+ '<%= pkg.homepage ? "* " + pkg.homepage + "\\n" : "" %>'
+						+ '* Copyright (c) <%= grunt.template.today("yyyy") %> <%= pkg.author.name %>;'
+						+ ' Licensed <%= _.pluck(pkg.licenses, "type").join(", ") %> */\n',
+				// Task configuration.
+				clean : {
+					src : [ 'dist/' ]
+				},
+				useminPrepare : {
+					html : 'target/web-proto/jsp/structure/default.jsp'
+				},
+				usemin : {
+					html : 'target/web-proto/jsp/structure/default.jsp',
+					options : {
+						flow : {
+							html : {
+								steps : {
+									js : [ 'concat', 'uglifyjs' ],
+									css : [ 'cssmin' ]
+								},
+								post : {}
+							}
+						},
+						assetsDirs : [ 'dist', 'dist/styles', 'dist/js' ]
+					}
+				},
+				// Renames files for browser caching purposes
+				filerev : {
+					dist : {
+						src : [ 'dist/js/pelmel.min.js',
+								'dist/styles/pelmel.min.css', ]
+					}
+				},
+				copy : {
+					resources: {
+						files : [ {
+							expand : true,
+							cwd : '../web-static/',
+							src : ['fonts/**/*','images/**/*'],
+							dest : 'dist/'
+						}] 
+					} ,
+					postBuild : {
+						files : [ {
+							expand : true,
+							cwd : 'dist/',
+							src : [ '**/*' ],
+							dest : '../web-static/dist'
+						}]
+					}
+				},
+				imagemin : {
+					dist : {
+						files : [ {
+							expand : true,
+							cwd : 'dist',
+							src : 'images/**/*.{png,jpg,jpeg,gif}',
+							dest : 'dist'
+						} ]
+					}
+				},
+				cdnify : {
+					pelmel : {
+						options : {
+							// base: '//static.pelmelguide.com/',
+							rewriter : function(url) {
+								if (url.indexOf('/images') === 0
+										|| url.indexOf('/styles') === 0
+										|| url.indexOf('/fonts') === 0
+										|| url.indexOf('/icons') === 0
+										|| url.indexOf('/js') === 0) {
+									return '//static.pelmelguide.com' + url; // add
+																				// query
+																				// string
+																				// to
+																				// all
+																				// other
+																				// URLs
+								} else {
+									return url; // leave data URIs untouched
+								}
+							}
+						},
+						files : [ {
+							expand : true,
+							cwd : 'target/web-proto',
+							src : '**/*.{css,html,jsp}',
+							dest : 'target/web-proto'
+						} ]
+					}
+				}
+			});
 
-  // These plugins provide necessary tasks.
-//  grunt.loadNpmTasks('grunt-contrib-clean');
-//  grunt.loadNpmTasks('grunt-contrib-concat');
-//  grunt.loadNpmTasks('grunt-contrib-uglify');
-//  grunt.loadNpmTasks('grunt-contrib-copy');
-//  grunt.loadNpmTasks('grunt-usemin');
-//  grunt.loadNpmTasks('grunt-contrib-cssmin');
-  require('load-grunt-tasks')(grunt);
+	// These plugins provide necessary tasks.
+	require('load-grunt-tasks')(grunt);
 
-  // Default task.
-  grunt.registerTask('default', ['clean', 'useminPrepare','concat','cssmin','uglify','filerev','usemin','copy:postBuild']);
+	// Default task.
+	grunt.registerTask('default', [ 'clean', 'useminPrepare', 'concat',
+			'cssmin', 'uglify', 'filerev', 'usemin', 'copy:resources', 'imagemin','cdnify:pelmel','copy:postBuild' ]);
 
 };

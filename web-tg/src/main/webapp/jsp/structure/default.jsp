@@ -6,8 +6,8 @@
 <head>
 	<tiles:insertAttribute name="meta-header"/>
 	<meta name="apple-itunes-app" content="app-id=603515989, app-argument=<s:property value="headerSupport.canonical"/>">
-    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300,600,700' rel='stylesheet' type='text/css'>
 	<!-- build:css(../web-static) /styles/pelmel.min.css -->
+    <link href='/fonts/opensans.css' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" href="/styles/bootstrap-3.1.1/css/bootstrap.min.css" type="text/css">
     <link rel="stylesheet" href="/styles/typeahead.min.css" type="text/css">
     <link href="/styles/jquery.Jcrop.min.css" rel="stylesheet" type="text/css" media="all"/>
@@ -78,7 +78,7 @@
 				<ul class="nav navbar-nav navbar-right">
 					<s:set value="currentUserSupport.currentUser" var="currentUser"/>
 					<li class="nav-login">
-						<a href="/myProfile" rel="nofollow"><img class="thumb-logged-user" src="<s:property value="currentUserSupport.currentUserMedia.miniThumbUrl"/>" alt="<s:property value="#currentUser.pseudo"/>"><span class="logged hidden-sm hidden-md"><s:property value="#currentUser.pseudo.length() < 20 ? #currentUser.pseudo : #currentUser.pseudo.substring(0,17)+'...'"/></span></a>
+						<a href="/myProfile" rel="nofollow"><img class="thumb-logged-user" src="<s:property value="getMediaUrl(currentUserSupport.currentUserMedia.miniThumbUrl)"/>" alt="<s:property value="#currentUser.pseudo"/>"><span class="logged hidden-sm hidden-md"><s:property value="#currentUser.pseudo.length() < 20 ? #currentUser.pseudo : #currentUser.pseudo.substring(0,17)+'...'"/></span></a>
 					</li>
 					<li class="nav-login">
 						<a class="profile-section-link" href="/myMessages" rel="nofollow"><img class="nav-profile-icon" src="/images/V3/navMessg.png" alt="<s:text name="nav.menu.myMessages"/>"><span class="hidden-sm hidden-md hidden-lg"><s:text name="nav.menu.myMessages"/></span></a>

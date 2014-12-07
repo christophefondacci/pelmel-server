@@ -1,8 +1,12 @@
 package com.nextep.proto.blocks.impl;
 
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Date;
 import java.util.Iterator;
 
@@ -14,9 +18,7 @@ import javax.imageio.plugins.jpeg.JPEGImageWriteParam;
 import javax.imageio.spi.IIORegistry;
 import javax.imageio.spi.ImageWriterSpi;
 import javax.imageio.spi.ServiceRegistry;
-import javax.imageio.stream.FileImageOutputStream;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.context.MessageSource;
@@ -26,6 +28,7 @@ import com.nextep.cal.util.services.CalPersistenceService;
 import com.nextep.media.model.Media;
 import com.nextep.media.model.MutableMedia;
 import com.nextep.proto.blocks.MediaPersistenceSupport;
+import com.nextep.proto.services.StorageService;
 import com.nextep.proto.spring.ContextHolder;
 import com.nextep.users.model.User;
 import com.opensymphony.xwork2.ActionContext;
@@ -41,9 +44,11 @@ public class MediaPersistenceSupportImpl implements MediaPersistenceSupport {
 	private static final String KEY_MEDIA_DEFAULT_TITLE = "media.panel.mediaDescDefault";
 	private MessageSource messageSource;
 	private CalPersistenceService mediaService;
+	private StorageService storageService;
 	private PngOptimizer pngOptimizer;
 	private String localMediaPath;
 	private String localMediaUrlPrefix;
+
 	private int thumbMaxWidth;
 	private int thumbMaxHeight;
 	private int miniThumbMaxWidth, miniThumbMaxHeight;
@@ -95,17 +100,16 @@ public class MediaPersistenceSupportImpl implements MediaPersistenceSupport {
 		if (dotIndex > 0) {
 			ext = filename.substring(dotIndex);
 		}
-		// Copying media
-		File localDir = new File(getLocalMediaPath(parentItemKey));
-		localDir.mkdirs();
 
-		File localFile = new File(getLocalMediaPath(parentItemKey),
-				parentItemKey.toString() + System.currentTimeMillis() + ext);
-		FileUtils.copyFile(tmpFile, localFile);
+		// Copying media
+		FileInputStream inputStream = new FileInputStream(tmpFile);
+		final String originalFileName = writeStream(inputStream, parentItemKey,
+				ext, contentType);
+
 		final MutableMedia mutableMedia = (MutableMedia) mediaService
 				.createTransientObject();
 		mutableMedia.setOriginalUrl(getLocalMediaUrlPrefix(parentItemKey)
-				+ localFile.getName());
+				+ originalFileName);
 		mutableMedia.setVideo(isVideo);
 		mutableMedia.setRelatedItemKey(parentItemKey);
 		mutableMedia.setAuthorKey(author.getKey());
@@ -124,7 +128,7 @@ public class MediaPersistenceSupportImpl implements MediaPersistenceSupport {
 		if (isVideo) {
 			mutableMedia.setThumbUrl(localMediaUrlPrefix + "mpg.png");
 		} else {
-			generateThumb(mutableMedia, localFile);
+			generateThumb(mutableMedia, tmpFile);
 		}
 		ContextHolder.toggleWrite();
 		mediaService.saveItem(mutableMedia);
@@ -373,28 +377,9 @@ public class MediaPersistenceSupportImpl implements MediaPersistenceSupport {
 					media.setWidth(thumb.getWidth());
 					media.setHeight(thumb.getHeight());
 				}
-				final File thumbFile = new File(
-						getLocalMediaPath(parentItemKey),
-						parentItemKey.toString() + System.currentTimeMillis()
-								+ ".jpg");
-				new File(getLocalMediaPath(parentItemKey)).mkdirs();
-				// thumbFile.mkdirs();
 
-				// specifies where the jpg image has to be written
-				ImageWriter writer = getJpegWriter();
-				writer.setOutput(new FileImageOutputStream(thumbFile));
-
-				// writes the file with given compression level
-				// from your JPEGImageWriteParam instance
-				final JPEGImageWriteParam jpegParams = new JPEGImageWriteParam(
-						null);
-				jpegParams.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
-				jpegParams.setCompressionQuality(0.9f);
-				writer.write(null, new IIOImage(thumb, null, null), jpegParams);
-
-				// ImageIO.write(thumb, "jpg", thumbFile);
-
-				return thumbFile.getName();
+				final String filename = writeFile(thumb, parentItemKey);
+				return filename;
 				// Optimizing PNG
 				// PngImage pngImage = new
 				// PngImage(thumbFile.getCanonicalPath());
@@ -414,6 +399,67 @@ public class MediaPersistenceSupportImpl implements MediaPersistenceSupport {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Writes the given buffered image to the underlying storage.
+	 * 
+	 * @param thumb
+	 *            the {@link BufferedImage} to write
+	 * @param parentItemKey
+	 *            the {@link ItemKey} of the item owning this photo
+	 * @return the location of the stored image in the current storage
+	 * @throws IOException
+	 */
+	private String writeFile(BufferedImage thumb, ItemKey parentItemKey)
+			throws IOException {
+
+		// Writing to our byte array
+		final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+		final ImageWriter writer = getJpegWriter();
+		writer.setOutput(ImageIO.createImageOutputStream(outputStream));
+
+		// writes the file with given compression level
+		// from your JPEGImageWriteParam instance
+		final JPEGImageWriteParam jpegParams = new JPEGImageWriteParam(null);
+		jpegParams.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
+		jpegParams.setCompressionQuality(0.9f);
+		writer.write(null, new IIOImage(thumb, null, null), jpegParams);
+
+		return writeStream(
+				new ByteArrayInputStream(outputStream.toByteArray()),
+				parentItemKey, ".jpg");
+	}
+
+	/**
+	 * Writes the provided input stream using the storage service
+	 * 
+	 * @param stream
+	 *            the input to stream contents from
+	 * @param parentItemKey
+	 *            the {@link ItemKey} of the parent information (to compute
+	 *            target location)
+	 * @return the name of the information in the underlying storage
+	 * @throws IOException
+	 */
+	private String writeStream(InputStream stream, ItemKey parentItemKey,
+			String extension) throws IOException {
+		return writeStream(stream, parentItemKey, extension, null);
+	}
+
+	private String writeStream(InputStream stream, ItemKey parentItemKey,
+			String extension, String contentType) throws IOException {
+		// Getting relative path
+		final String path = getLocalMediaUrlPrefix(parentItemKey);
+		final String filename = parentItemKey.toString()
+				+ System.currentTimeMillis() + extension;
+
+		// Now storing through storage
+		final String fullPath = path.substring(1) + filename;
+
+		storageService.writeStream(fullPath, contentType, stream);
+
+		return filename;
 	}
 
 	@Override
@@ -462,6 +508,7 @@ public class MediaPersistenceSupportImpl implements MediaPersistenceSupport {
 			m.setCropY(cropY);
 			m.setCropWidth(finalCropWidth);
 			m.setCropHeight(finalCropHeight);
+
 			final String mediaPath = getLocalMediaPath(m.getRelatedItemKey());
 			final String mediaName = m.getRelatedItemKey().toString()
 					+ System.currentTimeMillis() + ".png";
@@ -612,5 +659,9 @@ public class MediaPersistenceSupportImpl implements MediaPersistenceSupport {
 
 	public void setPngOptimizer(PngOptimizer pngOptimizer) {
 		this.pngOptimizer = pngOptimizer;
+	}
+
+	public void setStorageService(StorageService storageService) {
+		this.storageService = storageService;
 	}
 }

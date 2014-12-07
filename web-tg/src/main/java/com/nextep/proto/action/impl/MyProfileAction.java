@@ -117,7 +117,8 @@ public class MyProfileAction extends AbstractAction implements TagAware,
 				response.getPaginationInfo(Message.class), user.getKey(),
 				getHeaderSupport().getPageStyle());
 		propertiesEditionSupport.initialize(getLocale(), user, User.CAL_TYPE);
-		descriptionsEditionSupport.initialize(getLocale(), user);
+		descriptionsEditionSupport.initialize(getLocale(), user,
+				getUrlService());
 		mediaProvider.initialize(user.getKey(), user.get(Media.class));
 		localizationSupport.initialize(SearchType.MEN, getUrlService(),
 				getLocale(), user.getUnique(City.class), null);

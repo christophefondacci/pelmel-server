@@ -286,7 +286,7 @@ public class HeaderSearchSupportImpl implements HeaderSearchSupport {
 		// have images for localities (future support)
 		final Media m = MediaHelper.getSingleMedia(obj);
 		if (m != null) {
-			return MediaHelper.getImageUrl(m.getThumbUrl());
+			return urlService.getMediaUrl(m.getThumbUrl());
 		}
 		return null;
 	}

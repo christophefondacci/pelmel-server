@@ -7,6 +7,7 @@ import org.springframework.context.MessageSource;
 import com.nextep.descriptions.model.Description;
 import com.nextep.geo.model.GeographicItem;
 import com.nextep.geo.model.Place;
+import com.nextep.media.model.Media;
 import com.nextep.proto.blocks.QuickInfoSupport;
 import com.nextep.proto.helpers.DisplayHelper;
 import com.nextep.proto.helpers.MediaHelper;
@@ -51,13 +52,18 @@ public class MapQuickInfoSupportImpl implements QuickInfoSupport {
 
 	@Override
 	public String getTagIconUrl(Tag tag) {
-		return messageSource.getMessage(KEY_TAG_ICON_PREFIX
-				+ tag.getKey().toString(), null, null);
+		return urlService.getStaticUrl(messageSource.getMessage(
+				KEY_TAG_ICON_PREFIX + tag.getKey().toString(), null, null));
 	}
 
 	@Override
 	public String getThumbnailUrl() {
-		return MediaHelper.getSingleMedia(object).getMiniThumbUrl();
+		final Media m = MediaHelper.getSingleMedia(object);
+		if (m != null) {
+			return urlService.getMediaUrl(m.getMiniThumbUrl());
+		} else {
+			return urlService.getStaticUrl(MediaHelper.getNoThumbUrl(object));
+		}
 	}
 
 	@Override
