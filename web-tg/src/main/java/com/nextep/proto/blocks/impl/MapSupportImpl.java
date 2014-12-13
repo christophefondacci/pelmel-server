@@ -25,6 +25,7 @@ public class MapSupportImpl implements MapSupport {
 	private Collection<? extends Localized> allPoints;
 	private Double customZoomLevel = null;
 
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
 	public void initialize(Localized mainPoint,
 			Collection<? extends CalmObject> allPoints) {

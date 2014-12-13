@@ -16,7 +16,7 @@
 	<div class="col-xs-18"><s:property value="message"/></div>
 </s:if><s:else>
 	<div class="col-xs-6">
-		<img src="<s:property value="media.thumbUrl"/>"/>
+		<img src="<s:property value="getMediaUrl(media.thumbUrl)"/>"/>
 	</div>
 	<div class="col-xs-18">
 		<s:text name="media.deletion.text"/>

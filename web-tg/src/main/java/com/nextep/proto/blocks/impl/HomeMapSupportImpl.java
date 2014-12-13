@@ -73,9 +73,15 @@ public class HomeMapSupportImpl implements MapSupport {
 					// Constants.ALIAS_ACTIVITY_USER);
 					// final Media userPhoto = MediaHelper.getSingleMedia(user);
 					final Media placePhoto = MediaHelper.getSingleMedia(target);
-					final String photoUrl = placePhoto != null ? placePhoto
-							.getMiniThumbUrl() : MediaHelper
-							.getNoMiniThumbUrl();
+					String photoUrl;
+					if (placePhoto != null) {
+						photoUrl = urlService.getMediaUrl(placePhoto
+								.getMiniThumbUrl());
+					} else {
+						photoUrl = urlService.getStaticUrl(MediaHelper
+								.getNoMiniThumbUrl(target));
+					}
+
 					// Adding icon place type declaration
 					final String iconName = "icon" + target.getKey().getId();
 					iconsBuf.append("var " + iconName

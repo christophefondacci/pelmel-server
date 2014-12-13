@@ -71,11 +71,11 @@ function lookup( callUrl ) {
 	jQuery.get(callUrl,null,function(data) { document.getElementById('cityDefinition').innerHTML = data; });
 }
 function like(url,target) {
-	$('#likeaction').attr("src","/images/loading.gif");
+	$('#likeaction').attr("src","//static.pelmelguide.com/images/loading.gif");
 	call(url, target);
 }
 function waitCall(url, target, loadTarget ) {
-	$(loadTarget).html("<img border='0' height='24' src='/images/loading.gif' alt='Loading...'/>");
+	$(loadTarget).html("<img border='0' height='24' src='//static.pelmelguide.com/images/loading.gif' alt='Loading....'/>");
 	call(url,target);
 }
 // Geocoding and map features
@@ -85,7 +85,7 @@ var geocoder;
 var placeMarker;
 var placeMap;
 function createGMap() {
-	shadowIcon = new google.maps.MarkerImage('/images/markers/shadow-marker.png',new google.maps.Size(40,36),new google.maps.Point(0,0),new google.maps.Point(12,32));
+	shadowIcon = new google.maps.MarkerImage('//static.pelmelguide.com/images/markers/shadow-marker.png',new google.maps.Size(40,36),new google.maps.Point(0,0),new google.maps.Point(12,32));
 	geocoder = new google.maps.Geocoder();
 	var lat = document.getElementById("place-edit-lat").value;
 	var lng = document.getElementById("place-edit-lng").value;
@@ -100,7 +100,7 @@ function createGMap() {
     };
 	placeMap = new google.maps.Map(document.getElementById("place-map"),
             myOptions);
-	var icon = new google.maps.MarkerImage('/images/markers/' + placeType + '-marker.png', new google.maps.Size(24,32),new google.maps.Point(0,0),new google.maps.Point(12,32));
+	var icon = new google.maps.MarkerImage('//static.pelmelguide.com/images/markers/' + placeType + '-marker.png', new google.maps.Size(24,32),new google.maps.Point(0,0),new google.maps.Point(12,32));
 	placeMarker = new google.maps.Marker({position:new google.maps.LatLng(lat, lng), icon : icon, shadow : shadowIcon, map : placeMap, draggable: true});
 	google.maps.event.addListener(placeMarker,"dragend",function() {
 		document.getElementById("place-edit-lat").value=placeMarker.getPosition().lat();
@@ -111,7 +111,7 @@ function createGMap() {
 }
 function geocode(callback) {
 	geocoder = new google.maps.Geocoder();
-	$('#place-edit-spinner').html("<img border='0' height='15' src='/images/loading.gif' alt='Loading...'/>");
+	$('#place-edit-spinner').html("<img border='0' height='15' src='//static.pelmelguide.com/images/loading.gif' alt='Loading...'/>");
 	var address= $('#place-address').val();
 	var city = $('#city').val();
 	var fullAddr = address + ", " + city;
@@ -250,7 +250,7 @@ function initOverlays() {
 
 function handleMyMessages() {
 	$(".msg-user").click(function() {
-		$("#msg-contents").html("<img border='0' height='15' src='/images/loading.gif' alt='Loading...'/>");
+		$("#msg-contents").html("<img border='0' height='15' src='//static.pelmelguide.com/images/loading.gif' alt='Loading...'/>");
 		var url = $(this).attr('href');
 		jQuery.get(url,null, function(data) {
 			$("#msg-contents").html(data);
@@ -259,7 +259,7 @@ function handleMyMessages() {
 		return false;
 	});
 	$(".pagination").click(function() {
-		$(this).html("<img border='0' height='15' src='/images/loading.gif' alt='Loading...'/>");
+		$(this).html("<img border='0' height='15' src='//static.pelmelguide.com/images/loading.gif' alt='Loading...'/>");
 		var url = $(this).attr('href');
 		jQuery.get(url,null, function(data) {
 			$("#msg-list").html(data);
@@ -546,7 +546,7 @@ var Pelmel = {
 		options = {
 				target: '#instantUserMsg',
 				beforeSubmit: function(arr,$form,options) {
-					$("#instant-post-spinner").html("<img class='nextIcon' height='15' src='/images/loading.gif' alt='Loading...'/>");
+					$("#instant-post-spinner").html("<img class='nextIcon' height='15' src='//static.pelmelguide.com/images/loading.gif' alt='Loading...'/>");
 				},
 				url: '/ajaxSendInstantMsg.action',
 				success: function(responseText,statusText, xhr,$form) {
@@ -558,7 +558,7 @@ var Pelmel = {
 				target : "#comments-contents",
 				url: "/postComment.action",
 				beforeSubmit: function(arr,$form,options) {
-					$("#comment-post-spinner").html("<img border='0' height='15' src='/images/loading.gif' alt='Loading...'/>");
+					$("#comment-post-spinner").html("<img border='0' height='15' src='//static.pelmelguide.com/images/loading.gif' alt='Loading...'/>");
 				},
 				success: function(responseText,statusText, xhr,$form) {
 					Pelmel.bindForms();
@@ -738,7 +738,7 @@ var Pelmel = {
 			target : "#mainContent",
 			url:"postMessage.action",
 			beforeSubmit: function(arr,$form,options) {
-				$("#message-post-spinner").html("<img border='0' height='15' src='/images/loading.gif' alt='Loading...'/>");
+				$("#message-post-spinner").html("<img border='0' height='15' src='//static.pelmelguide.com/images/loading.gif' alt='Loading...'/>");
 			},
 			success: function(responseText,statusText, xhr,$form) {
 				Pelmel.bindForms();
@@ -825,7 +825,7 @@ var Pelmel = {
 				Pelmel.noSearchMarkers = Pelmel.allMarkers.slice(0);
 			}
 			// Displaying wait animation
-			activityContents.html("<div class='wait'><img src='/images/V3/wait.gif'></div>");
+			activityContents.html("<div class='wait'><img src='//static.pelmelguide.com/images/V3/wait.gif'></div>");
 			// Querying
 			jQuery.get("/ajaxSuggestCity?filterEmptyCities=true&term=" + encodeURIComponent(searchText),null,function(data) {
 				var html = "";
@@ -850,7 +850,7 @@ var Pelmel = {
 							if(suggest.imageUrl) {
 								imageUrl =suggest.imageUrl;
 							} else {
-								imageUrl ="/images/V2/no-photo-small.png";
+								imageUrl ="//static.pelmelguide.com/images/V2/no-photo-small.png";
 							}
 							html+=imageUrl;
 							html+='"></a>';
@@ -900,6 +900,6 @@ var Pelmel = {
     	return {url:thumbUrl,size:new google.maps.Size(50, 50),origin:new google.maps.Point(0,0),anchor: new google.maps.Point(15, 20),scaledSize: new google.maps.Size(30, 30)};
     }, 
     buildMapPointer: function() {
-    	return {url:'/images/V3/mapMarkerFg.png',size:new google.maps.Size(34, 40),origin:new google.maps.Point(0,0),anchor: new google.maps.Point(17,20)}; //,scaledSize: new google.maps.Size(24, 30)};
+    	return {url:'//static.pelmelguide.com/images/V3/mapMarkerFg.png',size:new google.maps.Size(34, 40),origin:new google.maps.Point(0,0),anchor: new google.maps.Point(17,20)}; //,scaledSize: new google.maps.Size(24, 30)};
     }
 };

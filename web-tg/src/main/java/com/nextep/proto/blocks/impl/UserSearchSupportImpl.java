@@ -143,7 +143,9 @@ public class UserSearchSupportImpl implements SearchSupport {
 				.getResultThumbnailUrl(searchResult);
 		// Adding user default thumb
 		if (thumbUrl == null) {
-			return messageSource.getMessage(KEY_DEFAULT_ICON, null, locale);
+			final String url = urlService.getStaticUrl(messageSource
+					.getMessage(KEY_DEFAULT_ICON, null, locale));
+			return url;
 		} else {
 			return thumbUrl;
 		}
@@ -369,7 +371,7 @@ public class UserSearchSupportImpl implements SearchSupport {
 
 	@Override
 	public String getResultThumbnailStyle(CalmObject searchResult) {
-		return commonSearchSupport.getResultThumbnailStyle(searchResult);
+		return SearchType.MEN.name().toLowerCase();
 	}
 
 	public void setHideTitleWhenNoResult(boolean hideTitleWhenNoResult) {

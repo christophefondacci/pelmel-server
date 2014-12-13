@@ -1,6 +1,5 @@
 <%@taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles" %>
 <%@taglib prefix="s" uri="/struts-tags"%>
-<script type="text/javascript" src="/js/togayther-search.js"></script>
 <tiles:insertTemplate template="/jsp/footer/map-footer.jsp"/>
 <tiles:insertTemplate template="/jsp/footer/common-footer.jsp"/>
 <div class="fb-like" id="fb-root"></div>

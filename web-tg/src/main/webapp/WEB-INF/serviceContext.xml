@@ -175,6 +175,12 @@
 		<property name="domainName">
 			<jee:jndi-lookup jndi-name="java:comp/env/togaytherDomain"/>
 		</property>
+		<property name="mediaBaseUrl">
+			<jee:jndi-lookup jndi-name="java:comp/env/mediaBaseUrl"/>
+		</property>
+		<property name="staticBaseUrl">
+			<jee:jndi-lookup jndi-name="java:comp/env/staticBaseUrl"/>
+		</property>
 	</bean>
 	<bean id="sitemapService" class="com.nextep.proto.services.impl.SitemapServiceImpl"/>
 	<bean id="eventManagementService" class="com.nextep.proto.services.impl.EventManagementServiceImpl">

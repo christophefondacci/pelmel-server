@@ -36,7 +36,7 @@ public final class LocalizationHelper {
 		if (subdomain == null) {
 			subdomain = "www";
 		}
-		return (secured ? "https" : "http") + "://" + subdomain + "."
+		return (secured ? "http" : "http") + "://" + subdomain + "."
 				+ domainName + "." + domainExt + url;
 	}
 

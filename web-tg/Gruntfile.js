@@ -74,6 +74,36 @@ module.exports = function(grunt) {
 						options : {
 							// base: '//static.pelmelguide.com/',
 							rewriter : function(url) {
+								console.log('Processing URL \'' + url + '\'');
+								if (url.indexOf('/images') === 0
+										|| url.indexOf('/styles') === 0
+										|| url.indexOf('/fonts') === 0
+										|| url.indexOf('/icons') === 0
+										|| url.indexOf('/js') === 0) {
+									return 'http://static.pelmelguide.com' + url; // add
+																				// query
+																				// string
+																				// to
+																				// all
+																				// other
+																				// URLs
+								} else {
+									return url; // leave data URIs untouched
+								}
+							}
+						},
+						files : [ {
+							expand : true,
+							cwd : 'target/web-proto',
+							src : '**/*.{css,html,jsp,js}',
+							dest : 'target/web-proto'
+						}]
+					},
+					css: {
+						options : {
+							// base: '//static.pelmelguide.com/',
+							rewriter : function(url) {
+								console.log('Processing URL \'' + url + '\'');
 								if (url.indexOf('/images') === 0
 										|| url.indexOf('/styles') === 0
 										|| url.indexOf('/fonts') === 0
@@ -91,12 +121,12 @@ module.exports = function(grunt) {
 								}
 							}
 						},
-						files : [ {
-							expand : true,
-							cwd : 'target/web-proto',
-							src : '**/*.{css,html,jsp}',
-							dest : 'target/web-proto'
-						} ]
+						files : [{
+							expand:true,
+							cwd : 'dist/',
+							src : '**/*.css',
+							dest : 'dist'
+						}]
 					}
 				}
 			});
@@ -106,6 +136,6 @@ module.exports = function(grunt) {
 
 	// Default task.
 	grunt.registerTask('default', [ 'clean', 'useminPrepare', 'concat',
-			'cssmin', 'uglify', 'filerev', 'usemin', 'copy:resources', 'imagemin','cdnify:pelmel','copy:postBuild' ]);
+			'cssmin', 'uglify', 'cdnify:css', 'filerev', 'usemin', 'copy:resources', 'imagemin','cdnify:pelmel','copy:postBuild' ]);
 
 };

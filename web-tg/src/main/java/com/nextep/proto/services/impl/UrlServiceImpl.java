@@ -555,7 +555,7 @@ public class UrlServiceImpl implements UrlService {
 	@Override
 	public String getMediaUrl(String url) {
 		String resultUrl = url;
-		if (!url.startsWith("http://")) {
+		if (!url.startsWith("http://") && !url.startsWith("//")) {
 			resultUrl = mediaBaseUrl + url;
 		}
 		return resultUrl;
@@ -564,7 +564,7 @@ public class UrlServiceImpl implements UrlService {
 	@Override
 	public String getStaticUrl(String url) {
 		String resultUrl = url;
-		if (!url.startsWith("http://")) {
+		if (!url.startsWith("http://") && !url.startsWith("//")) {
 			resultUrl = staticBaseUrl + url;
 		}
 		return resultUrl;

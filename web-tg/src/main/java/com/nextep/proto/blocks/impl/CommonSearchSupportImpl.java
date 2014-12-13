@@ -181,7 +181,7 @@ public class CommonSearchSupportImpl implements SearchSupport {
 		final Media media = MediaHelper.getSingleMedia(searchResult);
 		if (media != null) {
 			return urlService.getMediaUrl(media.getThumbUrl());
-		} else {
+		} else if (searchResult instanceof Place) {
 			// No photo is handled by CSS for bars, saunas and clubs
 			final Place p = (Place) searchResult;
 			try {

@@ -26,4 +26,5 @@ public class ReadWriteDataSourceRouter extends AbstractRoutingDataSource {
 	public Logger getParentLogger() throws SQLFeatureNotSupportedException {
 		throw new SQLFeatureNotSupportedException();
 	}
+
 }

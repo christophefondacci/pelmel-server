@@ -9,7 +9,6 @@ import com.nextep.geo.model.Place;
 import com.nextep.media.model.Media;
 import com.nextep.proto.model.PlaceType;
 import com.nextep.users.model.User;
-import com.opensymphony.xwork2.ActionContext;
 import com.videopolis.calm.model.CalmObject;
 
 /**
@@ -22,6 +21,8 @@ public final class MediaHelper {
 
 	private static final Log LOGGER = LogFactory.getLog(MediaHelper.class);
 	private static String domainName;
+	private static String mediaBaseUrl;
+	private static String staticBaseUrl;
 
 	/**
 	 * No visible constructor, this is a static helper bean
@@ -40,7 +41,7 @@ public final class MediaHelper {
 	public static String getSingleMediaUrl(CalmObject object) {
 		final Media m = getSingleMedia(object);
 		if (m != null) {
-			return m.getThumbUrl();
+			return mediaBaseUrl + m.getThumbUrl();
 		} else {
 			return getNoThumbUrl(object);
 		}
@@ -65,8 +66,7 @@ public final class MediaHelper {
 
 	public static String getImageUrl(String relativeUrl) {
 		if (!relativeUrl.toLowerCase().startsWith("http://")) {
-			return LocalizationHelper.buildUrl(ActionContext.getContext()
-					.getLocale(), domainName, relativeUrl);
+			return mediaBaseUrl + relativeUrl;
 		} else {
 			return relativeUrl;
 		}
@@ -76,13 +76,21 @@ public final class MediaHelper {
 		MediaHelper.domainName = domainName;
 	}
 
+	public void setStaticBaseUrl(String staticBaseUrl) {
+		MediaHelper.staticBaseUrl = staticBaseUrl;
+	}
+
+	public void setMediaBaseUrl(String mediaBaseUrl) {
+		MediaHelper.mediaBaseUrl = mediaBaseUrl;
+	}
+
 	/**
 	 * @deprecated please use the parametized method instead
 	 * @return
 	 */
 	@Deprecated
 	public static String getNoThumbUrl() {
-		return "/images/V2/no-photo.png";
+		return staticBaseUrl + "/images/V2/no-photo.png";
 	}
 
 	/**
@@ -112,11 +120,11 @@ public final class MediaHelper {
 						+ "' for place " + p.getKey());
 			}
 		}
-		return "/images/V2/no-photo.png";
+		return staticBaseUrl + "/images/V2/no-photo.png";
 	}
 
 	public static String getNoThumbUserUrl() {
-		return "/images/V2/no-photo-user.png";
+		return staticBaseUrl + "/images/V2/no-photo-user.png";
 	}
 
 	/**
@@ -125,7 +133,7 @@ public final class MediaHelper {
 	 */
 	@Deprecated
 	public static String getNoMiniThumbUrl() {
-		return "/images/V2/no-photo-small.png";
+		return staticBaseUrl + "/images/V2/no-photo-small.png";
 	}
 
 	public static String getNoMiniThumbUrl(CalmObject obj) {
@@ -134,11 +142,11 @@ public final class MediaHelper {
 		} else if (obj instanceof Place) {
 
 		}
-		return "/images/V2/no-photo-small.png";
+		return staticBaseUrl + "/images/V2/no-photo-small.png";
 	}
 
 	public static String getNoMiniThumbUserUrl() {
-		return "/images/V2/no-photo-profile-small.png";
+		return staticBaseUrl + "/images/V2/no-photo-profile-small.png";
 	}
 
 }
