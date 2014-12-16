@@ -111,6 +111,12 @@
 			value="http://media.pelmelguide.com" />
 	<Environment name="staticBaseUrl" type="java.lang.String"
 			value="http://static.pelmelguide.com" />
-	<Environment name="notification.email" type="java.lang.String" value="christophet49@gmail.com"/>
+	<Environment name="notification.email" type="java.lang.String" value="cfondacci@gmail.com christophet49@gmail.com"/>
+	<Environment name="notification.enabled" type="java.lang.Boolean" value="true"/>
+	<Environment name="smtpHostName" type="java.lang.String" value="smtp.pelmelguide.com"/>
+	<Environment name="smtpAuthUser" type="java.lang.String" value="christophe@pelmelguide.com"/>
+	<Environment name="smtpAuthPassword" type="java.lang.String" value="tdk;1558"/>
+	<Environment name="smtpAuthPort" type="java.lang.Integer" value="25"/>
+	
 </Context>
 

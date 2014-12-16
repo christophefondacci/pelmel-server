@@ -3,7 +3,17 @@ package com.nextep.proto.services.impl;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
+import javax.annotation.Resource;
+import javax.mail.Authenticator;
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.PasswordAuthentication;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 import javax.net.ssl.SSLHandshakeException;
 
 import org.apache.commons.logging.Log;
@@ -42,10 +52,20 @@ public class NotificationServiceImpl implements NotificationService {
 
 	private static Log LOGGER = LogFactory.getLog("notifications");
 
+	@Resource(mappedName = "smtpHostName")
+	private String smtpHostName;
+	@Resource(mappedName = "smtpAuthUser")
+	private String smtpAuthUser;
+	@Resource(mappedName = "smtpAuthPassword")
+	private String smtpAuthPassword;
+	@Resource(mappedName = "smtpAuthPort")
+	private Integer smtpPort;
+	@Resource(mappedName = "notification.enabled")
+	private Boolean emailEnabled;
+
 	// Injected services
 	private UrlService urlService;
 	private String baseUrl;
-
 	private PushManager<SimpleApnsPushNotification> pushManager;
 	// Push information
 	private String pushKeyPath;
@@ -132,47 +152,62 @@ public class NotificationServiceImpl implements NotificationService {
 		}
 	}
 
+	// Authenticates to SendGrid
+	private class SMTPAuthenticator extends javax.mail.Authenticator {
+		@Override
+		public PasswordAuthentication getPasswordAuthentication() {
+			String username = smtpAuthUser;
+			String password = smtpAuthPassword;
+			return new PasswordAuthentication(username, password);
+		}
+	}
+
 	@Override
 	public void notifyAdminByEmail(String title, String html) {
 		LOGGER.info("<br>=================<br>" + title + "<br>" + html);
-		//
-		// if (adminEmailAlias == null || adminEmailAlias.trim().isEmpty()) {
-		// return;
-		// }
-		// // Get a Properties object
-		// Properties props = System.getProperties();
-		// props.setProperty("mail.smtp.host", "smtp.pelmelguide.com");
-		// props.put("mail.smtp.auth", "true");
-		//
-		// Session session = Session.getDefaultInstance(props);
-		//
-		// // -- Create a new message --
-		// final MimeMessage msg = new MimeMessage(session);
-		//
-		// // -- Set the FROM and TO fields --
-		// try {
-		// msg.setFrom(new InternetAddress("no-reply@pelmelguide.com"));
-		// msg.setRecipients(Message.RecipientType.TO,
-		// InternetAddress.parse("christophe@pelmelguide.com", false));
-		// msg.setRecipients(Message.RecipientType.BCC,
-		// InternetAddress.parse(adminEmailAlias, false));
-		//
-		// msg.setSubject("[PELMEL Guide] " + title);
-		// msg.setContent(html, "text/html");
-		// msg.setSentDate(new Date());
-		//
-		// Transport tr = session.getTransport("smtp");
-		// tr.connect("smtp.pelmelguide.com", "christophe@pelmelguide.com",
-		// "tdk;1558");
-		// msg.saveChanges();
-		// tr.sendMessage(msg, msg.getAllRecipients());
-		// tr.close();
-		// // Transport.send(msg);
-		// LOGGER.info("SUCCESS: Sent email notification");
-		// } catch (MessagingException e) {
-		// LOGGER.error(
-		// "Unable to send email notification: " + e.getMessage(), e);
-		// }
+
+		if (adminEmailAlias == null || adminEmailAlias.trim().isEmpty()
+				|| !emailEnabled) {
+			return;
+		}
+		try {
+			Properties props = new Properties();
+			props.put("mail.transport.protocol", "smtp");
+			props.put("mail.smtp.auth", "true");
+
+			Authenticator auth = new SMTPAuthenticator();
+			Session mailSession = Session.getDefaultInstance(props, auth);
+			Transport transport = mailSession.getTransport();
+
+			MimeMessage message = new MimeMessage(mailSession);
+
+			message.setContent(html, "text/html");
+			message.setFrom(new InternetAddress("no-reply@pelmelguide.com"));
+			message.setSubject(title);
+			message.addRecipient(Message.RecipientType.TO, new InternetAddress(
+					"christophe@pelmelguide.com"));
+			final String[] emails = adminEmailAlias.split(" ");
+			for (String email : emails) {
+				try {
+					message.addRecipient(Message.RecipientType.BCC,
+							new InternetAddress(email));
+				} catch (MessagingException e) {
+					LOGGER.error("Unable to add recepient to email: " + email
+							+ " reason '" + e.getMessage() + "'", e);
+				}
+			}
+
+			// Sends the email
+			transport.connect(smtpHostName, smtpPort, smtpAuthUser,
+					smtpAuthPassword);
+			transport.sendMessage(message, message.getAllRecipients());
+			transport.close();
+			LOGGER.info("SUCCESS: Sent email notification");
+		} catch (MessagingException e) {
+			LOGGER.error(
+					"Unable to send email notification: " + e.getMessage(), e);
+		}
+
 	}
 
 	@Override
