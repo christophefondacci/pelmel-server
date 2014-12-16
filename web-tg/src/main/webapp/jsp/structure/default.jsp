@@ -8,7 +8,7 @@
 	<meta name="apple-itunes-app" content="app-id=603515989, app-argument=<s:property value="headerSupport.canonical"/>">
 	<link href='http://fonts.googleapis.com/css?family=Open+Sans:300,600,700' rel='stylesheet' type='text/css'>
 	<!-- build:css(../web-static) /styles/pelmel.min.css -->
-    <link rel="stylesheet" href="/styles/bootstrap-3.1.1/css/bootstrap.min.css" type="text/css">
+    <link rel="stylesheet" href="/styles/bootstrap-3.3.1/css/bootstrap.min.css" type="text/css">
     <link rel="stylesheet" href="/styles/typeahead.min.css" type="text/css">
     <link href="/styles/jquery.Jcrop.min.css" rel="stylesheet" type="text/css" media="all"/>
     <link href="/styles/datepicker3.min.css" rel="stylesheet" type="text/css" media="all"/>
@@ -247,7 +247,7 @@
 <script type='text/javascript' src="/js/jquery.form.min.js"></script>
 <script type='text/javascript' src="/js/jquery.hoverIntent.min.js"></script>
 <script type='text/javascript' src="/js/jquery.Jcrop.min.js"></script>
-<script src="/styles/bootstrap-3.1.1/js/bootstrap.min.js"></script>
+<script src="/styles/bootstrap-3.3.1/js/bootstrap.min.js"></script>
 <script src="/js/typeahead.min.js"></script>
 <script src="/js/bootstrap-slider.min.js"></script>
 <script src="/js/bootstrap-datepicker.min.js"></script>
