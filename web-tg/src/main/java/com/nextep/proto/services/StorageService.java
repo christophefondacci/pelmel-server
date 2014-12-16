@@ -26,4 +26,15 @@ public interface StorageService {
 
 	void writeStream(String name, String contentType, InputStream inputStream)
 			throws IOException;
+
+	/**
+	 * Reads the given file from the underlying storage and returns the stream
+	 * to use to grab contents
+	 * 
+	 * @param name
+	 *            name of the element in the underlying storage
+	 * @return the {@link InputStream} to read contents from
+	 * @throws IOException
+	 */
+	InputStream readStream(String name) throws IOException;
 }

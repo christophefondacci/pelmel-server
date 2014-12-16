@@ -2,6 +2,7 @@ package com.nextep.proto.blocks;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 
 import com.nextep.media.model.Media;
 import com.nextep.media.model.MutableMedia;
@@ -15,6 +16,8 @@ public interface MediaPersistenceSupport {
 			Integer firstMediaPriority) throws IOException;
 
 	void generateThumb(MutableMedia mutableMedia, File localFile);
+
+	void generateThumb(MutableMedia mutableMedia, InputStream stream);
 
 	/**
 	 * Crops the provided image of the given media with information provided

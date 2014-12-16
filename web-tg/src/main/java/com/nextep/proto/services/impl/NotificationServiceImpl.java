@@ -1,17 +1,9 @@
 package com.nextep.proto.services.impl;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
-import javax.mail.Message;
-import javax.mail.MessagingException;
-import javax.mail.Session;
-import javax.mail.Transport;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
 import javax.net.ssl.SSLHandshakeException;
 
 import org.apache.commons.logging.Log;
@@ -48,8 +40,7 @@ import com.videopolis.calm.model.ItemKey;
  */
 public class NotificationServiceImpl implements NotificationService {
 
-	private static Log LOGGER = LogFactory
-			.getLog(NotificationServiceImpl.class);
+	private static Log LOGGER = LogFactory.getLog("notifications");
 
 	// Injected services
 	private UrlService urlService;
@@ -143,46 +134,45 @@ public class NotificationServiceImpl implements NotificationService {
 
 	@Override
 	public void notifyAdminByEmail(String title, String html) {
-		// Security.addProvider(new com.sun.net.ssl.internal.ssl.Provider());
-		// final String SSL_FACTORY = "javax.net.ssl.SSLSocketFactory";
-
-		if (adminEmailAlias == null || adminEmailAlias.trim().isEmpty()) {
-			return;
-		}
-		// Get a Properties object
-		Properties props = System.getProperties();
-		props.setProperty("mail.smtp.host", "smtp.pelmelguide.com");
-		props.put("mail.smtp.auth", "true");
-
-		Session session = Session.getDefaultInstance(props);
-
-		// -- Create a new message --
-		final MimeMessage msg = new MimeMessage(session);
-
-		// -- Set the FROM and TO fields --
-		try {
-			msg.setFrom(new InternetAddress("no-reply@pelmelguide.com"));
-			msg.setRecipients(Message.RecipientType.TO,
-					InternetAddress.parse("christophe@pelmelguide.com", false));
-			msg.setRecipients(Message.RecipientType.BCC,
-					InternetAddress.parse(adminEmailAlias, false));
-
-			msg.setSubject("[PELMEL Guide] " + title);
-			msg.setContent(html, "text/html");
-			msg.setSentDate(new Date());
-
-			Transport tr = session.getTransport("smtp");
-			tr.connect("smtp.pelmelguide.com", "christophe@pelmelguide.com",
-					"tdk;1558");
-			msg.saveChanges();
-			tr.sendMessage(msg, msg.getAllRecipients());
-			tr.close();
-			// Transport.send(msg);
-			LOGGER.info("SUCCESS: Sent email notification");
-		} catch (MessagingException e) {
-			LOGGER.error(
-					"Unable to send email notification: " + e.getMessage(), e);
-		}
+		LOGGER.info("<br>=================<br>" + title + "<br>" + html);
+		//
+		// if (adminEmailAlias == null || adminEmailAlias.trim().isEmpty()) {
+		// return;
+		// }
+		// // Get a Properties object
+		// Properties props = System.getProperties();
+		// props.setProperty("mail.smtp.host", "smtp.pelmelguide.com");
+		// props.put("mail.smtp.auth", "true");
+		//
+		// Session session = Session.getDefaultInstance(props);
+		//
+		// // -- Create a new message --
+		// final MimeMessage msg = new MimeMessage(session);
+		//
+		// // -- Set the FROM and TO fields --
+		// try {
+		// msg.setFrom(new InternetAddress("no-reply@pelmelguide.com"));
+		// msg.setRecipients(Message.RecipientType.TO,
+		// InternetAddress.parse("christophe@pelmelguide.com", false));
+		// msg.setRecipients(Message.RecipientType.BCC,
+		// InternetAddress.parse(adminEmailAlias, false));
+		//
+		// msg.setSubject("[PELMEL Guide] " + title);
+		// msg.setContent(html, "text/html");
+		// msg.setSentDate(new Date());
+		//
+		// Transport tr = session.getTransport("smtp");
+		// tr.connect("smtp.pelmelguide.com", "christophe@pelmelguide.com",
+		// "tdk;1558");
+		// msg.saveChanges();
+		// tr.sendMessage(msg, msg.getAllRecipients());
+		// tr.close();
+		// // Transport.send(msg);
+		// LOGGER.info("SUCCESS: Sent email notification");
+		// } catch (MessagingException e) {
+		// LOGGER.error(
+		// "Unable to send email notification: " + e.getMessage(), e);
+		// }
 	}
 
 	@Override

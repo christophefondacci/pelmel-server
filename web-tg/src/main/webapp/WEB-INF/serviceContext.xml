@@ -232,6 +232,9 @@
 		<property name="privateKeyPath">
 			<jee:jndi-lookup jndi-name="java:comp/env/gcloud.privateKeyPath"/>
 		</property>
+		<property name="mediaBaseUrl">
+			<jee:jndi-lookup jndi-name="java:comp/env/mediaBaseUrl"/>
+		</property>
 	</bean>
 	<bean id="pngOptimizer" class="com.googlecode.pngtastic.core.PngOptimizer"/>
 </beans>

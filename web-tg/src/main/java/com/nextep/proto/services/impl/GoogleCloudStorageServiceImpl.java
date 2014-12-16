@@ -3,6 +3,7 @@ package com.nextep.proto.services.impl;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.net.URLConnection;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
@@ -33,6 +34,7 @@ public class GoogleCloudStorageServiceImpl implements StorageService {
 	private String privateKeyPath;
 	private String appName;
 	private String bucketName;
+	private String mediaBaseUrl;
 
 	public void init() throws IOException, GeneralSecurityException {
 		HttpTransport httpTransport = new NetHttpTransport();
@@ -57,6 +59,12 @@ public class GoogleCloudStorageServiceImpl implements StorageService {
 	public void writeStream(String name, InputStream stream) throws IOException {
 
 		writeStream(name, null, stream);
+	}
+
+	@Override
+	public InputStream readStream(String name) throws IOException {
+		final URL url = new URL(mediaBaseUrl + name);
+		return url.openStream();
 	}
 
 	@Override
@@ -110,5 +118,9 @@ public class GoogleCloudStorageServiceImpl implements StorageService {
 
 	public void setBucketName(String bucketName) {
 		this.bucketName = bucketName;
+	}
+
+	public void setMediaBaseUrl(String mediaBaseUrl) {
+		this.mediaBaseUrl = mediaBaseUrl;
 	}
 }

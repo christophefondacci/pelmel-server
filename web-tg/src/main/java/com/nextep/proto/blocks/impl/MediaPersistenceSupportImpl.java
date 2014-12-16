@@ -5,6 +5,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
@@ -139,130 +140,130 @@ public class MediaPersistenceSupportImpl implements MediaPersistenceSupport {
 	public void generateThumb(MutableMedia mutableMedia, File localFile) {
 		if (localFile != null) {
 			try {
-				final BufferedImage srcImg = ImageIO.read(localFile);
-				final BufferedImage srcImage = new BufferedImage(
-						srcImg.getWidth(), srcImg.getHeight(),
-						BufferedImage.TYPE_INT_RGB);
-				long start = System.currentTimeMillis();
-				for (int x = 0; x < srcImg.getWidth(); x++) {
-					for (int y = 0; y < srcImg.getHeight(); y++) {
-						srcImage.setRGB(x, y, srcImg.getRGB(x, y));
-					}
-				}
-				long fillTime = System.currentTimeMillis() - start;
-				log.info("[" + fillTime + "ms] RGB conversion OK");
-
-				if (srcImage != null) {
-					mutableMedia.setOnline(true);
-					mutableMedia.setOriginalWidth(srcImage.getWidth());
-					mutableMedia.setOriginalHeight(srcImage.getHeight());
-
-					// Generating image file, cropping as the user requested
-					Integer cropX = mutableMedia.getCropX();
-					Integer cropY = mutableMedia.getCropY();
-					Integer cropW;
-					Integer cropH;
-					if (defaultAutoCrop) {
-						cropW = mutableMedia.getCropWidth() == null ? maxWidth
-								: mutableMedia.getCropWidth();
-						cropH = mutableMedia.getCropHeight() == null ? maxHeight
-								: mutableMedia.getCropHeight();
-					} else {
-						cropW = mutableMedia.getCropWidth();
-						cropH = mutableMedia.getCropHeight();
-					}
-					String filename = generateThumb(mutableMedia, srcImage,
-							localFile, maxWidth, maxHeight, cropX, cropY,
-							cropW, cropH);
-					final String localMediaUrlPrefix = getLocalMediaUrlPrefix(mutableMedia
-							.getRelatedItemKey());
-					if (filename != null) {
-						mutableMedia.setUrl(localMediaUrlPrefix + filename);
-					}
-
-					// Generating thumb (croping if needed)
-					String thumbFileName = generateThumb(mutableMedia,
-							srcImage, localFile, thumbMaxWidth, thumbMaxHeight,
-							null, null, thumbMaxWidth, thumbMaxHeight);
-					if (thumbFileName != null) {
-						mutableMedia.setThumbUrl(localMediaUrlPrefix
-								+ thumbFileName);
-					}
-
-					// Generating mini thumb (cropping if needed)
-					thumbFileName = generateThumb(mutableMedia, srcImage,
-							localFile, miniThumbMaxWidth, miniThumbMaxHeight,
-							null, null, miniThumbMaxWidth, miniThumbMaxHeight);
-					if (thumbFileName != null) {
-						mutableMedia.setMiniThumbUrl(localMediaUrlPrefix
-								+ thumbFileName);
-					}
-					// Generating mobile optimized file
-					final int imgWidth = srcImage.getWidth();
-					final int imgHeight = srcImage.getHeight();
-					int resizedWidth, resizedHeight;
-					int resizedWidthHighDef, resizedHeightHighDef;
-					if (imgWidth < imgHeight) {
-						resizedWidth = mobileMaxWidth;
-						resizedHeight = mobileMaxHeight;
-						resizedWidthHighDef = mobileMaxWidthHighDef;
-						resizedHeightHighDef = mobileMaxHeightHighDef;
-					} else {
-						resizedWidth = mobileMaxWidthLandscape;
-						resizedHeight = mobileMaxHeightLandscape;
-						resizedWidthHighDef = mobileMaxWidthHighDefLandscape;
-						resizedHeightHighDef = mobileMaxHeightHighDefLandscape;
-					}
-					// Standard definition
-					thumbFileName = generateThumb(mutableMedia, srcImage,
-							localFile, resizedWidth, resizedHeight, null, null,
-							null, null);
-					// resizedWidth, resizedHeight);
-					if (thumbFileName != null) {
-						mutableMedia.setMobileUrl(localMediaUrlPrefix
-								+ thumbFileName);
-					}
-
-					// High definition
-					thumbFileName = generateThumb(mutableMedia, srcImage,
-							localFile, resizedWidthHighDef,
-							resizedHeightHighDef, null, null, null, null);
-					// resizedWidthHighDef, resizedHeightHighDef);
-					if (thumbFileName != null) {
-						mutableMedia.setMobileUrlHighDef(localMediaUrlPrefix
-								+ thumbFileName);
-					}
-
-				} else {
-					log.error("Source image was NULL");
-					mutableMedia.setOnline(false);
-				}
-			} catch (IOException e) {
-				log.error("Unable to generate thumb for parent item '"
-						+ mutableMedia.getRelatedItemKey().toString() + "': "
-						+ e.getMessage(), e);
-				mutableMedia.setOnline(false);
+				generateThumb(mutableMedia, new FileInputStream(localFile));
+			} catch (FileNotFoundException e) {
+				log.error("File not found: " + localFile.getAbsolutePath());
 			}
 		}
 	}
 
-	private String generateThumb(MutableMedia media, BufferedImage srcImage,
-			File localFile, int width, int height) throws IOException {
-		return generateThumb(media, srcImage, localFile, width, height, null,
-				null, null, null);
+	@Override
+	public void generateThumb(MutableMedia mutableMedia, InputStream stream) {
+		try {
+			final BufferedImage srcImg = ImageIO.read(stream);
+			final BufferedImage srcImage = new BufferedImage(srcImg.getWidth(),
+					srcImg.getHeight(), BufferedImage.TYPE_INT_RGB);
+			long start = System.currentTimeMillis();
+			for (int x = 0; x < srcImg.getWidth(); x++) {
+				for (int y = 0; y < srcImg.getHeight(); y++) {
+					srcImage.setRGB(x, y, srcImg.getRGB(x, y));
+				}
+			}
+			long fillTime = System.currentTimeMillis() - start;
+			log.info("[" + fillTime + "ms] RGB conversion OK");
+
+			mutableMedia.setOnline(true);
+			mutableMedia.setOriginalWidth(srcImage.getWidth());
+			mutableMedia.setOriginalHeight(srcImage.getHeight());
+
+			// Generating image file, cropping as the user requested
+			Integer cropX = mutableMedia.getCropX();
+			Integer cropY = mutableMedia.getCropY();
+			Integer cropW;
+			Integer cropH;
+			if (defaultAutoCrop) {
+				cropW = mutableMedia.getCropWidth() == null ? maxWidth
+						: mutableMedia.getCropWidth();
+				cropH = mutableMedia.getCropHeight() == null ? maxHeight
+						: mutableMedia.getCropHeight();
+			} else {
+				cropW = mutableMedia.getCropWidth();
+				cropH = mutableMedia.getCropHeight();
+			}
+			String filename = generateThumb(mutableMedia, srcImage, maxWidth,
+					maxHeight, cropX, cropY, cropW, cropH);
+			final String localMediaUrlPrefix = getLocalMediaUrlPrefix(mutableMedia
+					.getRelatedItemKey());
+			if (filename != null) {
+				mutableMedia.setUrl(localMediaUrlPrefix + filename);
+			}
+
+			// Generating thumb (croping if needed)
+			String thumbFileName = generateThumb(mutableMedia, srcImage,
+					thumbMaxWidth, thumbMaxHeight, null, null, thumbMaxWidth,
+					thumbMaxHeight);
+			if (thumbFileName != null) {
+				mutableMedia.setThumbUrl(localMediaUrlPrefix + thumbFileName);
+			}
+
+			// Generating mini thumb (cropping if needed)
+			thumbFileName = generateThumb(mutableMedia, srcImage,
+					miniThumbMaxWidth, miniThumbMaxHeight, null, null,
+					miniThumbMaxWidth, miniThumbMaxHeight);
+			if (thumbFileName != null) {
+				mutableMedia.setMiniThumbUrl(localMediaUrlPrefix
+						+ thumbFileName);
+			}
+			// Generating mobile optimized file
+			final int imgWidth = srcImage.getWidth();
+			final int imgHeight = srcImage.getHeight();
+			int resizedWidth, resizedHeight;
+			int resizedWidthHighDef, resizedHeightHighDef;
+			if (imgWidth < imgHeight) {
+				resizedWidth = mobileMaxWidth;
+				resizedHeight = mobileMaxHeight;
+				resizedWidthHighDef = mobileMaxWidthHighDef;
+				resizedHeightHighDef = mobileMaxHeightHighDef;
+			} else {
+				resizedWidth = mobileMaxWidthLandscape;
+				resizedHeight = mobileMaxHeightLandscape;
+				resizedWidthHighDef = mobileMaxWidthHighDefLandscape;
+				resizedHeightHighDef = mobileMaxHeightHighDefLandscape;
+			}
+			// Standard definition
+			thumbFileName = generateThumb(mutableMedia, srcImage, resizedWidth,
+					resizedHeight, null, null, null, null);
+			// resizedWidth, resizedHeight);
+			if (thumbFileName != null) {
+				mutableMedia.setMobileUrl(localMediaUrlPrefix + thumbFileName);
+			}
+
+			// High definition
+			thumbFileName = generateThumb(mutableMedia, srcImage,
+					resizedWidthHighDef, resizedHeightHighDef, null, null,
+					null, null);
+			// resizedWidthHighDef, resizedHeightHighDef);
+			if (thumbFileName != null) {
+				mutableMedia.setMobileUrlHighDef(localMediaUrlPrefix
+						+ thumbFileName);
+			}
+
+		} catch (IOException e) {
+			log.error(
+					"Unable to generate thumb for parent item '"
+							+ mutableMedia.getRelatedItemKey().toString()
+							+ "': " + e.getMessage(), e);
+			mutableMedia.setOnline(false);
+		}
 	}
 
 	private String generateThumb(MutableMedia media, BufferedImage srcImage,
-			File localFile, int width, int height, Integer cX, Integer cY,
-			Integer cropWidth, Integer cropHeight) throws IOException {
+			int width, int height) throws IOException {
+		return generateThumb(media, srcImage, width, height, null, null, null,
+				null);
+	}
+
+	private String generateThumb(MutableMedia media, BufferedImage srcImage,
+			int width, int height, Integer cX, Integer cY, Integer cropWidth,
+			Integer cropHeight) throws IOException {
 		// Generating thumbnail
 		int myWidth = width;
 		int myHeight = height;
 		final ItemKey parentItemKey = media.getRelatedItemKey();
 
-		if (localFile != null && srcImage != null) {
-			log.info("Generating thumb for file '" + localFile.getPath()
-					+ "' for item " + parentItemKey.toString() + "'");
+		if (srcImage != null) {
+			log.info("Generating thumb for item '" + parentItemKey.toString()
+					+ "'");
 			final int imgWidth = srcImage.getWidth();
 			final int imgHeight = srcImage.getHeight();
 			final double imgRatio = (double) imgWidth / (double) imgHeight;
@@ -519,7 +520,7 @@ public class MediaPersistenceSupportImpl implements MediaPersistenceSupport {
 
 			// Setting media width and height
 			final String resizedFileName = generateThumb(m, resultImg,
-					resultingFile, maxWidth, maxHeight);
+					maxWidth, maxHeight);
 			final File resizedFile = new File(mediaPath, resizedFileName);
 
 			return resizedFile;

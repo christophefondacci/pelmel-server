@@ -1,6 +1,7 @@
 package com.nextep.proto.action.impl.tools;
 
-import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -8,12 +9,14 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.nextep.cal.util.services.CalPersistenceService;
 import com.nextep.media.model.Media;
 import com.nextep.media.model.MutableMedia;
 import com.nextep.proto.action.base.AbstractAction;
 import com.nextep.proto.blocks.MediaPersistenceSupport;
+import com.nextep.proto.services.StorageService;
 import com.nextep.proto.spring.ContextHolder;
 import com.nextep.users.model.User;
 import com.videopolis.apis.exception.ApisException;
@@ -45,6 +48,8 @@ public class GenerateMissingThumbsAction extends AbstractAction {
 	private MediaPersistenceSupport mediaPersistenceSupport;
 	private CalPersistenceService mediaService;
 	private TaskRunnerService taskRunnerService;
+	@Autowired
+	private StorageService storageService;
 	private String localMediaDirectory;
 	private boolean force = false;
 	private boolean offline = false;
@@ -123,18 +128,22 @@ public class GenerateMissingThumbsAction extends AbstractAction {
 					mediaUrl = m.getUrl();
 					((MutableMedia) m).setOriginalUrl(m.getUrl());
 				}
-				// We compute local location
-				final String mediaLocation = mediaUrl.replace("/media/",
-						localMediaDirectory);
-				final File mediaFile = new File(mediaLocation);
-				// We regenerate
-				mediaPersistenceSupport.generateThumb((MutableMedia) m,
-						mediaFile);
-				// Saving changes
-				mediaService.saveItem(m);
-				// Message
-				LOGGER.info("Generated thumb for media " + m.getUrl() + " -> "
-						+ m.getThumbUrl() + "[OK]");
+
+				// Getting stream
+				try {
+					final InputStream inputStream = storageService
+							.readStream(mediaUrl);
+					mediaPersistenceSupport.generateThumb((MutableMedia) m,
+							inputStream);
+					// Saving changes
+					mediaService.saveItem(m);
+					// Message
+					LOGGER.info("Generated thumb for media " + m.getUrl()
+							+ " -> " + m.getThumbUrl() + "[OK]");
+				} catch (IOException e) {
+					LOGGER.error("Unable to read file from URL '" + mediaUrl
+							+ "'");
+				}
 			}
 		}
 	}
