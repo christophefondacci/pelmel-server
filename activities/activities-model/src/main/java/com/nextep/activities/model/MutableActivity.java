@@ -46,4 +46,15 @@ public interface MutableActivity extends Activity {
 	 */
 	void setActivityType(ActivityType activityType);
 
+	/**
+	 * Changes the visibility state of this activity. Setting this flag to false
+	 * will prevent it from being returned by the database and by the SOLR
+	 * index.
+	 * 
+	 * @param visible
+	 *            <code>true</code> (the default) when visible, else
+	 *            <code>false</code>
+	 */
+	void setVisible(boolean visible);
+
 }

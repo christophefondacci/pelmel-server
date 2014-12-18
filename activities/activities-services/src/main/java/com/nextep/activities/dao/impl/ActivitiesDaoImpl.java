@@ -69,7 +69,7 @@ public class ActivitiesDaoImpl extends AbstractCalDao<Activity> implements
 			int pageOffset) {
 		return entityManager
 				.createQuery(
-						"from ActivityImpl where loggedItemKey=:key order by date DESC")
+						"from ActivityImpl where loggedItemKey=:key and visible=true order by date DESC")
 				.setParameter("key", key.toString())
 				.setFirstResult(pageOffset * resultsPerPage)
 				.setMaxResults(resultsPerPage).getResultList();
@@ -86,7 +86,7 @@ public class ActivitiesDaoImpl extends AbstractCalDao<Activity> implements
 		// Querying all activities
 		final List<Activity> activities = entityManager
 				.createQuery(
-						"from ActivityImpl where loggedItemKey in (:itemKeys) order by date DESC")
+						"from ActivityImpl where loggedItemKey in (:itemKeys) and visible=true order by date DESC")
 				.setParameter("itemKeys", loggedItemKeys).getResultList();
 
 		// Preparing our resulting structure
@@ -113,20 +113,23 @@ public class ActivitiesDaoImpl extends AbstractCalDao<Activity> implements
 	public List<Activity> getActivitiesCreatedByUser(ItemKey userKey,
 			int resultsPerPage, int pageOffset, ActivityType... activityTypes) {
 		final List<String> types = unwrapActivityTypes(activityTypes);
-		return entityManager
+		final Query query = entityManager
 				.createQuery(
 						"from ActivityImpl where userKey=:key and activityType in (:activityTypes) order by date DESC")
 				.setParameter("key", userKey.toString())
-				.setParameter("activityTypes", types)
-				.setFirstResult(pageOffset * resultsPerPage)
-				.setMaxResults(resultsPerPage).getResultList();
+				.setParameter("activityTypes", types);
+		if (resultsPerPage > 0) {
+			query.setFirstResult(pageOffset * resultsPerPage).setMaxResults(
+					resultsPerPage);
+		}
+		return query.getResultList();
 	}
 
 	@Override
 	public int getActivitiesForCount(ItemKey itemKey) {
 		return ((BigInteger) entityManager
 				.createNativeQuery(
-						"select count(1) from ACTIVITIES where ITEM_KEY=:itemKey")
+						"select count(1) from ACTIVITIES where ITEM_KEY=:itemKey and IS_VISIBLE='Y'")
 				.setParameter("itemKey", itemKey.toString()).getSingleResult())
 				.intValue();
 	}
@@ -144,7 +147,7 @@ public class ActivitiesDaoImpl extends AbstractCalDao<Activity> implements
 
 		return ((BigInteger) entityManager
 				.createNativeQuery(
-						"select count(1) from ACTIVITIES where ITEM_KEY=:itemKey and ACTIVITY_TYPE in (:activityTypes)")
+						"select count(1) from ACTIVITIES where ITEM_KEY=:itemKey and ACTIVITY_TYPE in (:activityTypes) and IS_VISIBLE='Y'")
 				.setParameter("itemKey", itemKey.toString())
 				.setParameter("activityTypes", types).getSingleResult())
 				.intValue();
@@ -156,7 +159,7 @@ public class ActivitiesDaoImpl extends AbstractCalDao<Activity> implements
 		final List<String> types = unwrapActivityTypes(activityTypes);
 		return ((BigInteger) entityManager
 				.createNativeQuery(
-						"select count(1) from ACTIVITIES where USER_KEY=:itemKey and ACTIVITY_TYPE in (:types)")
+						"select count(1) from ACTIVITIES where USER_KEY=:itemKey and ACTIVITY_TYPE in (:types) and IS_VISIBLE='Y'")
 				.setParameter("itemKey", itemKey.toString())
 				.setParameter("types", types).getSingleResult()).intValue();
 	}
@@ -197,7 +200,7 @@ public class ActivitiesDaoImpl extends AbstractCalDao<Activity> implements
 
 			return entityManager
 					.createQuery(
-							"from ActivityImpl where activityType in (:activityTypes) "
+							"from ActivityImpl where activityType in (:activityTypes) and visible=true "
 									+ (rt.includeUserDirectActivity() ? ""
 											: "and loggedItemKey not like 'USER%'")
 									+ " order by date desc")
@@ -247,7 +250,7 @@ public class ActivitiesDaoImpl extends AbstractCalDao<Activity> implements
 		// Querying all activities
 		final Query query = entityManager
 				.createQuery(
-						"from ActivityImpl where loggedItemKey=:itemKey and activityType in (:activityTypes) order by date DESC")
+						"from ActivityImpl where loggedItemKey=:itemKey and activityType in (:activityTypes) and visible=true order by date DESC")
 				.setParameter("itemKey", itemKey.toString())
 				.setParameter("activityTypes", typesList);
 

@@ -156,7 +156,7 @@ public class GeoDaoImpl implements CalDao<CalmObject>, GeoDao {
 						.getSingleResult();
 				return itemCity;
 			} catch (RuntimeException e) {
-				log.error("Unable to retrieve item tag for id "
+				log.error("Unable to retrieve city for item id "
 						+ key.toString() + ": " + e.getMessage());
 				return null;
 			}

@@ -59,7 +59,6 @@ public class SolrSearchPersistenceServiceImpl implements
 
 	private final static Log log = LogFactory
 			.getLog(SolrSearchPersistenceServiceImpl.class);
-	private final static String TAG_DISPLAY_FACET = "FACET";
 	private final static String TAG_DISPLAY_CHECKBOX = "CHECKBOX";
 	private String userSolrUrl;
 	private String placesSolrUrl;
@@ -203,14 +202,9 @@ public class SolrSearchPersistenceServiceImpl implements
 	@Override
 	public void updateRating(ItemKey itemKey, int rating) {
 		CommonsHttpSolrServer server = null;
-		Class<? extends SearchItemImpl> c = null;
 		final String itemType = itemKey.getType();
 		if (Place.CAL_TYPE.equals(itemType)) {
 			server = placesSolrServer;
-			// } else if (Event.CAL_ID.equals(itemType)) {
-			// server = eventsSolrServer;
-			// } else if (User.CAL_TYPE.equals(itemType)) {
-			// server = userSolrServer;
 		}
 
 		if (server != null) {
@@ -222,57 +216,72 @@ public class SolrSearchPersistenceServiceImpl implements
 	}
 
 	private void storeActivity(Activity activity) throws SearchException {
-		final ActivitySearchItemImpl searchItem = new ActivitySearchItemImpl();
-		try {
-			final GeographicItem location = activity
-					.getUnique(GeographicItem.class);
-			searchItem.setKey(activity.getKey());
-			searchItem.setActivityDate(activity.getDate());
-			searchItem.setTargetType(activity.getLoggedItemKey().getType());
-			if (activity.getUserKey() != null) {
-				searchItem.setUserKey(activity.getUserKey().toString());
-			}
-			if (activity.getLoggedItemKey() != null) {
-				searchItem.setPlaceKey(activity.getLoggedItemKey().toString());
-			}
-			searchItem.setActivityType(activity.getActivityType().getCode());
-
-			if (location instanceof Place) {
-				fillLocalization(searchItem, ((Place) location).getCity());
-			} else if (location instanceof City) {
-				fillLocalization(searchItem, (City) location);
-				searchItem.setLat(((City) location).getLatitude());
-				searchItem.setLng(((City) location).getLongitude());
-			} else {
-				log.error("Activity '"
-						+ activity.getKey()
-						+ "' does not have PLACE or CITY localization, skipping");
-				return;
-			}
-			if (location instanceof Localized) {
-				searchItem.setLat(((Localized) location).getLatitude());
-				searchItem.setLng(((Localized) location).getLongitude());
-			} else {
-				log.warn("Null activity localization for "
-						+ activity.getKey().toString());
-			}
-			// Updating SOLR
-			if (location != null) {
+		if (!activity.isVisible()) {
+			// Getting place entry
+			if (activity != null) {
 				try {
-					activitiesSolrServer.addBean(searchItem);
-					activitiesSolrServer.commit();
-				} catch (SolrServerException e) {
-					throw new SearchException("Unable to store calm object: "
-							+ e, e);
-				} catch (IOException e) {
-					throw new SearchException("Unable to store calm object: "
-							+ e, e);
+					activitiesSolrServer.deleteById(activity.getKey()
+							.toString());
+				} catch (SolrServerException | IOException e) {
+					// Not deleting an activity is OK
+					log.error("Unable to delete activity: " + e.getMessage(), e);
 				}
 			}
-		} catch (CalException e) {
-			throw new SearchException(
-					"Unable to extract activity localization: "
-							+ e.getMessage(), e);
+		} else {
+			final ActivitySearchItemImpl searchItem = new ActivitySearchItemImpl();
+			try {
+				final GeographicItem location = activity
+						.getUnique(GeographicItem.class);
+				searchItem.setKey(activity.getKey());
+				searchItem.setActivityDate(activity.getDate());
+				searchItem.setTargetType(activity.getLoggedItemKey().getType());
+				if (activity.getUserKey() != null) {
+					searchItem.setUserKey(activity.getUserKey().toString());
+				}
+				if (activity.getLoggedItemKey() != null) {
+					searchItem.setPlaceKey(activity.getLoggedItemKey()
+							.toString());
+				}
+				searchItem
+						.setActivityType(activity.getActivityType().getCode());
+
+				if (location instanceof Place) {
+					fillLocalization(searchItem, ((Place) location).getCity());
+				} else if (location instanceof City) {
+					fillLocalization(searchItem, (City) location);
+					searchItem.setLat(((City) location).getLatitude());
+					searchItem.setLng(((City) location).getLongitude());
+				} else {
+					log.error("Activity '"
+							+ activity.getKey()
+							+ "' does not have PLACE or CITY localization, skipping");
+					return;
+				}
+				if (location instanceof Localized) {
+					searchItem.setLat(((Localized) location).getLatitude());
+					searchItem.setLng(((Localized) location).getLongitude());
+				} else {
+					log.warn("Null activity localization for "
+							+ activity.getKey().toString());
+				}
+				// Updating SOLR
+				if (location != null) {
+					try {
+						activitiesSolrServer.addBean(searchItem);
+						activitiesSolrServer.commit();
+					} catch (SolrServerException e) {
+						throw new SearchException(
+								"Unable to store calm object: " + e, e);
+					} catch (IOException e) {
+						throw new SearchException(
+								"Unable to store calm object: " + e, e);
+					}
+				}
+			} catch (CalException e) {
+				throw new SearchException(
+						"Unable to extract activity localization: "
+								+ e.getMessage(), e);
+			}
 		}
 	}
 

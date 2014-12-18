@@ -10,6 +10,7 @@ import javax.persistence.Table;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.annotations.Type;
 
 import com.nextep.activities.model.Activity;
 import com.nextep.activities.model.ActivityType;
@@ -41,6 +42,9 @@ public class ActivityImpl extends AbstractCalmObject implements Activity,
 	private String extraInformation;
 	@Column(name = "ACTIVITY_TYPE")
 	private String activityType;
+	@Column(name = "IS_VISIBLE")
+	@Type(type = "yes_no")
+	private boolean visible = true;
 
 	public ActivityImpl() {
 		super(null);
@@ -153,5 +157,15 @@ public class ActivityImpl extends AbstractCalmObject implements Activity,
 			LOGGER.error("Unable to create item key for activity '" + id + "'");
 			return null;
 		}
+	}
+
+	@Override
+	public void setVisible(boolean visible) {
+		this.visible = visible;
+	}
+
+	@Override
+	public boolean isVisible() {
+		return visible;
 	}
 }

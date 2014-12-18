@@ -2,9 +2,12 @@ package com.nextep.proto.action.impl;
 
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 import net.sf.json.JSONObject;
 
+import com.nextep.activities.model.Activity;
+import com.nextep.activities.model.ActivityRequestTypes;
 import com.nextep.activities.model.ActivityType;
 import com.nextep.activities.model.MutableActivity;
 import com.nextep.cal.util.services.CalPersistenceService;
@@ -68,8 +71,12 @@ public class ILikeAction extends AbstractAction implements CurrentUserAware,
 		final ApisRequest userRequest = (ApisRequest) ApisFactory
 				.createCompositeRequest()
 				.addCriterion(
-						currentUserSupport.createApisCriterionFor(
-								getNxtpUserToken(), true))
+						(ApisCriterion) currentUserSupport
+								.createApisCriterionFor(getNxtpUserToken(),
+										true).with(
+										Activity.class,
+										ActivityRequestTypes.fromUser(-1,
+												ActivityType.LIKE)))
 				.addCriterion(
 						(ApisCriterion) SearchRestriction
 								.uniqueKeys(Arrays.asList(likedKey))
@@ -99,14 +106,6 @@ public class ILikeAction extends AbstractAction implements CurrentUserAware,
 		}
 
 		ContextHolder.toggleWrite();
-		// If we liked a user, then generate a message for this
-		final MutableMessage msg = (MutableMessage) messageService
-				.createTransientObject();
-		msg.setFromKey(currentUser.getKey());
-		msg.setToKey(likedKey);
-		msg.setMessage("This user likes you!");
-		msg.setMessageDate(new Date());
-		messageService.saveItem(msg);
 
 		// We load user to update search information
 		likeResult = searchPersistenceService.toggleLike(currentUser.getKey(),
@@ -114,20 +113,44 @@ public class ILikeAction extends AbstractAction implements CurrentUserAware,
 		likes = likedItem.get(User.class, APIS_ALIAS_USER_LIKERS).size();
 		if (likeResult.wasLiked()) {
 			likes++;
+			// Initializing our activity entry
+			final MutableActivity activity = (MutableActivity) activitiesService
+					.createTransientObject();
+			activity.setUserKey(currentUser.getKey());
+			activity.setLoggedItemKey(likedKey);
+			activity.setActivityType(likeResult.wasLiked() ? ActivityType.LIKE
+					: ActivityType.UNLIKE);
+			activity.setDate(new Date());
+
+			// Saving it
+			activitiesService.saveItem(activity);
+			searchPersistenceService.storeCalmObject(activity,
+					SearchScope.CHILDREN);
+
+			// If we liked a user, then generate a message for this
+			if (User.CAL_TYPE.equals(likedKey.getType())) {
+				final MutableMessage msg = (MutableMessage) messageService
+						.createTransientObject();
+				msg.setFromKey(currentUser.getKey());
+				msg.setToKey(likedKey);
+				msg.setMessage("This user likes you!");
+				msg.setMessageDate(new Date());
+				messageService.saveItem(msg);
+			}
+
 		} else {
 			likes--;
+			final List<? extends Activity> activities = currentUser
+					.get(Activity.class);
+			for (Activity activity : activities) {
+				if (activity.getLoggedItemKey().equals(likedKey)) {
+					((MutableActivity) activity).setVisible(false);
+					activitiesService.saveItem(activity);
+					searchPersistenceService.storeCalmObject(activity,
+							SearchScope.CHILDREN);
+				}
+			}
 		}
-
-		// Initializing our activity entry
-		final MutableActivity activity = (MutableActivity) activitiesService
-				.createTransientObject();
-		activity.setUserKey(currentUser.getKey());
-		activity.setLoggedItemKey(likedKey);
-		activity.setActivityType(likeResult.wasLiked() ? ActivityType.LIKE
-				: ActivityType.UNLIKE);
-		activity.setDate(new Date());
-		// Saving it
-		activitiesService.saveItem(activity);
 
 		// Querying back the new number of liker
 		final ApisRequest request = (ApisRequest) ApisFactory

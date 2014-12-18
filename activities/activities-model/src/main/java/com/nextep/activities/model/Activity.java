@@ -54,4 +54,13 @@ public interface Activity extends CalmObject {
 	 */
 	ActivityType getActivityType();
 
+	/**
+	 * Whether or not this activity is visible on the website. This flag will
+	 * generally always be true as non visible activities will generally not be
+	 * provided by the database
+	 * 
+	 * @return <code>true</code> when visible, else <code>false</code> when
+	 *         hidden and unindexed
+	 */
+	boolean isVisible();
 }

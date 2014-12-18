@@ -88,7 +88,8 @@ public class ActivitiesServiceImpl extends AbstractDaoBasedCalServiceImpl
 		if (requestType instanceof ActivityRequestTypeFromUser) {
 			final ActivityRequestTypeFromUser userType = (ActivityRequestTypeFromUser) requestType;
 			final List<Activity> activities = ((ActivitiesDao) getCalDao())
-					.getActivitiesCreatedByUser(itemKey, 30, 0,
+					.getActivitiesCreatedByUser(itemKey,
+							userType.getMaxActivities(), 0,
 							userType.getActivityTypes());
 			final ItemsResponseImpl response = new ItemsResponseImpl();
 			response.setItems(activities);
