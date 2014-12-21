@@ -2,7 +2,7 @@
     pageEncoding="UTF-8" trimDirectiveWhitespaces="true"%>
 <%@taglib prefix="s" uri="/struts-tags"%>
 <%@taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles" %>
-<s:set value="#spanclass==null || 'col-sm-6'.equals(#spanclass) ? 132 : 104" var="descheight"/>
+<s:set value="#spanclass==null || 'col-sm-6'.equals(#spanclass) ? 212 : 184" var="descheight"/>
 <div>
 	<span id="desc-add-<s:property value="#descheight"/>" class="control-add <s:property value="headerSupport.getPageStyle()"/>-add"><!-- --></span>
 	<label><s:text name="place.form.description"/></label>

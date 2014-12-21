@@ -2195,7 +2195,7 @@ textarea {
 }
 textarea#description {
 /* 	margin-top: 0px; */
-	height: 80px;
+	height: 160px;
 /* 	margin-bottom:20px; */
 }
 label {
@@ -3021,6 +3021,7 @@ label.text-right {
 .pelmel-slogan {
 	font-weight:bold;
 	font-size:21px;
+	margin-bottom:0;
 }
 
 @media (min-width: 992px) {

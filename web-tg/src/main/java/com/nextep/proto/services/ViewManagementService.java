@@ -1,5 +1,7 @@
 package com.nextep.proto.services;
 
+import java.util.concurrent.Future;
+
 import com.nextep.geo.model.GeographicItem;
 import com.nextep.proto.model.SearchType;
 import com.nextep.users.model.User;
@@ -22,7 +24,7 @@ public interface ViewManagementService {
 	 * @param user
 	 *            the optional {@link User} who viewed this page
 	 */
-	void logViewedOverview(CalmObject overviewItem, User user);
+	Future<CalmObject> logViewedOverview(CalmObject overviewItem, User user);
 
 	/**
 	 * Counts one view on a search page
@@ -34,8 +36,8 @@ public interface ViewManagementService {
 	 * @param user
 	 *            the optional {@link User} who viewed this page
 	 */
-	void logViewedSearch(GeographicItem geographicItem, SearchType searchType,
-			User user);
+	Future<CalmObject> logViewedSearch(GeographicItem geographicItem,
+			SearchType searchType, User user);
 
 	/**
 	 * Generic view count logging
@@ -47,5 +49,6 @@ public interface ViewManagementService {
 	 * @param viewType
 	 *            an optional type information about the context
 	 */
-	void logViewCount(CalmObject viewedObject, User user, String viewType);
+	Future<CalmObject> logViewCount(CalmObject viewedObject, User user,
+			String viewType);
 }

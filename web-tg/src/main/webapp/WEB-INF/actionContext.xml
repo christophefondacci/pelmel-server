@@ -442,10 +442,6 @@
 	</bean>
 	<bean id="generateThumbsAction" class="com.nextep.proto.action.impl.tools.GenerateMissingThumbsAction" parent="abstractAction" scope="request">
 		<property name="mediaPersistenceSupport" ref="autoCropMediaPersistenceSupport" />
-		<property name="taskRunnerService" ref="apisToolsTaskRunnerService"/>
-		<property name="localMediaDirectory">
-			<jee:jndi-lookup jndi-name="java:comp/env/media/localPath"/>
-		</property>
 		<property name="mediaService" ref="mediaService"/>
 	</bean>
 	<bean id="reindexUsersAction" class="com.nextep.proto.action.impl.tools.ReIndexUsersAction" parent="abstractAction" scope="request">

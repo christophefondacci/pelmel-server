@@ -5,17 +5,22 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
+import java.util.concurrent.Future;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.TaskScheduler;
+import org.springframework.scheduling.annotation.AsyncResult;
 
 import com.nextep.cal.util.services.CalPersistenceService;
 import com.nextep.media.model.Media;
 import com.nextep.media.model.MutableMedia;
 import com.nextep.proto.action.base.AbstractAction;
 import com.nextep.proto.blocks.MediaPersistenceSupport;
+import com.nextep.proto.model.impl.TaskResult;
 import com.nextep.proto.services.StorageService;
 import com.nextep.proto.spring.ContextHolder;
 import com.nextep.users.model.User;
@@ -31,10 +36,6 @@ import com.videopolis.calm.factory.CalmFactory;
 import com.videopolis.calm.model.CalmObject;
 import com.videopolis.calm.model.ItemKey;
 import com.videopolis.cals.factory.ContextFactory;
-import com.videopolis.concurrent.exception.TaskExecutionException;
-import com.videopolis.concurrent.model.TaskExecutionContext;
-import com.videopolis.concurrent.model.base.AbstractTask;
-import com.videopolis.concurrent.service.TaskRunnerService;
 
 public class GenerateMissingThumbsAction extends AbstractAction {
 
@@ -44,13 +45,15 @@ public class GenerateMissingThumbsAction extends AbstractAction {
 	private static final long serialVersionUID = 4951636441112839644L;
 	private static final Log LOGGER = LogFactory
 			.getLog(GenerateMissingThumbsAction.class);
+	private static TaskResult taskResult;
 
+	@Autowired
+	private TaskScheduler taskScheduler;
 	private MediaPersistenceSupport mediaPersistenceSupport;
 	private CalPersistenceService mediaService;
-	private TaskRunnerService taskRunnerService;
 	@Autowired
 	private StorageService storageService;
-	private String localMediaDirectory;
+
 	private boolean force = false;
 	private boolean offline = false;
 	private String itemKey;
@@ -58,31 +61,40 @@ public class GenerateMissingThumbsAction extends AbstractAction {
 
 	@Override
 	protected String doExecute() throws Exception {
-		taskRunnerService.execute(new AbstractTask() {
-			@Override
-			public Object execute(TaskExecutionContext context)
-					throws TaskExecutionException, InterruptedException {
-				try {
-					generateThumbs();
-				} catch (ApisException e) {
-					LOGGER.error(
-							"Problem while generating thumbs : "
-									+ e.getMessage(), e);
-					throw new TaskExecutionException(e);
-				} catch (Exception e) {
-					LOGGER.error(
-							"Problem while generating thumbs : "
-									+ e.getMessage(), e);
-					throw new TaskExecutionException(e);
+
+		if (taskResult == null) {
+			taskResult = new TaskResult();
+			taskScheduler.schedule(new Runnable() {
+
+				@Override
+				public void run() {
+					try {
+						generateThumbs();
+					} catch (Exception e) {
+						LOGGER.error(
+								"Problem while generating thumbs : "
+										+ e.getMessage(), e);
+						taskResult.setFinished(true);
+						taskResult.setSuccess(false);
+						taskResult.setMessage(e.getMessage());
+					}
 				}
-				return null;
-			};
-		});
-		messages.add("Generate thumbs process has been successfully started.");
+			}, new Date());
+
+			messages.add("Generate thumbs process has been successfully started.");
+		} else if (taskResult.isFinished()) {
+			messages.add("Generation finished: "
+					+ (taskResult.isSuccess() ? "SUCCESS" : "FAILURE") + " - "
+					+ taskResult.getMessage());
+			taskResult = null;
+		} else {
+			messages.add("Generation in progress: " + taskResult.getMessage());
+		}
 		return SUCCESS;
 	}
 
-	private void generateThumbs() throws ApisException, CalException {
+	private Future<TaskResult> generateThumbs() throws ApisException,
+			CalException {
 
 		List<? extends Media> media = Collections.emptyList();
 
@@ -105,7 +117,13 @@ public class GenerateMissingThumbsAction extends AbstractAction {
 			media = obj.get(Media.class);
 		}
 		ContextHolder.toggleWrite();
+		final int totalCount = media.size();
+		int current = 0;
+		int failure = 0;
 		for (Media m : media) {
+			taskResult.setMessage("Processing media [" + current + "/"
+					+ totalCount + "] - " + failure + " failures");
+			current++;
 			// Checking offline state
 			if (!m.isOnline()) {
 				// We only process offline media if requested and if not a user
@@ -143,9 +161,15 @@ public class GenerateMissingThumbsAction extends AbstractAction {
 				} catch (IOException e) {
 					LOGGER.error("Unable to read file from URL '" + mediaUrl
 							+ "'");
+					failure++;
 				}
 			}
 		}
+		taskResult.setFinished(true);
+		taskResult.setSuccess(true);
+		taskResult.setMessage("Generated " + current + " media, " + failure
+				+ " failures");
+		return new AsyncResult<TaskResult>(taskResult);
 	}
 
 	public List<String> getMessages() {
@@ -157,16 +181,8 @@ public class GenerateMissingThumbsAction extends AbstractAction {
 		this.mediaPersistenceSupport = mediaPersistenceSupport;
 	}
 
-	public void setLocalMediaDirectory(String localMediaDirectory) {
-		this.localMediaDirectory = localMediaDirectory;
-	}
-
 	public void setMediaService(CalPersistenceService mediaService) {
 		this.mediaService = mediaService;
-	}
-
-	public void setTaskRunnerService(TaskRunnerService taskRunnerService) {
-		this.taskRunnerService = taskRunnerService;
 	}
 
 	public void setForce(boolean force) {

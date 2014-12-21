@@ -1,9 +1,12 @@
 package com.nextep.proto.services.impl;
 
 import java.util.Date;
+import java.util.concurrent.Future;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.AsyncResult;
 
 import com.nextep.cal.util.services.CalPersistenceService;
 import com.nextep.geo.model.GeographicItem;
@@ -21,12 +24,17 @@ public class ViewManagementServiceImpl implements ViewManagementService {
 	private CalPersistenceService viewsService;
 
 	@Override
-	public void logViewedOverview(CalmObject overviewItem, User user) {
+	@Async
+	public Future<CalmObject> logViewedOverview(CalmObject overviewItem,
+			User user) {
 		logViewCount(overviewItem, user, null);
+		return new AsyncResult<CalmObject>(overviewItem);
 	}
 
 	@Override
-	public void logViewCount(CalmObject viewedObject, User user, String viewType) {
+	@Async
+	public Future<CalmObject> logViewCount(CalmObject viewedObject, User user,
+			String viewType) {
 		// Counting views
 		try {
 			ContextHolder.toggleWrite();
@@ -44,15 +52,17 @@ public class ViewManagementServiceImpl implements ViewManagementService {
 		} catch (Throwable t) {
 			LOGGER.error("Unable to store view stat : " + t.getMessage(), t);
 		}
-
+		return new AsyncResult<CalmObject>(viewedObject);
 	}
 
 	@Override
-	public void logViewedSearch(GeographicItem geographicItem,
+	@Async
+	public Future<CalmObject> logViewedSearch(GeographicItem geographicItem,
 			SearchType searchType, User user) {
 		// For the moment, routing to standard overview
 		logViewCount(geographicItem, user,
 				searchType != null ? searchType.name() : null);
+		return new AsyncResult<CalmObject>(geographicItem);
 	}
 
 	public void setViewsService(CalPersistenceService viewsService) {
