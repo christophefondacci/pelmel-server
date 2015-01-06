@@ -75,7 +75,8 @@ public class UsersServiceImpl extends AbstractDaoBasedCalServiceImpl implements
 		final User user = dao.getUser(email, password);
 		Assert.notNull(user, "Invalid email or password");
 		((MutableUser) user).setPushDeviceId(deviceId);
-		if (pushProvider != null) {
+		if (pushProvider != null
+				&& !pushProvider.equals(user.getPushProvider())) {
 			try {
 				final PushProvider provider = PushProvider
 						.valueOf(pushProvider);

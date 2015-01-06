@@ -7,7 +7,7 @@
 	<tiles:insertAttribute name="meta-header"/>
 	<meta name="apple-itunes-app" content="app-id=603515989, app-argument=<s:property value="headerSupport.canonical"/>">
 	<link href='http://fonts.googleapis.com/css?family=Open+Sans:300,600,700' rel='stylesheet' type='text/css'>
-	<!-- build:css(../web-static) /styles/pelmel.min.css -->
+	<!-- build:css(../web-static) /styles/pelmel.min.css -->	
     <link rel="stylesheet" href="/styles/bootstrap-3.3.1/css/bootstrap.min.css" type="text/css">
     <link rel="stylesheet" href="/styles/typeahead.min.css" type="text/css">
     <link href="/styles/jquery.Jcrop.min.css" rel="stylesheet" type="text/css" media="all"/>
@@ -17,8 +17,8 @@
     <!-- endbuild -->
     <tiles:insertAttribute name="header"/>
     <!--[if lt IE 9]>
-	  <script src="js/html5shiv.js"></script>
-	  <script src="js/respond.min.js"></script>
+	  <script src="/js/html5shiv.js"></script>
+	  <script src="/js/respond.min.js"></script>
 	<![endif]-->
 </head>
 <body id="page-home" class="<tiles:insertAttribute name="background"/>">

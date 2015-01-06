@@ -486,6 +486,11 @@
 			</result>
 			<interceptor-ref name="defaultAndCookiesProvider"></interceptor-ref>
 		</action>
+		<action name="mobileFacebookLogin" class="facebookLoginAction"> 
+			<result>/jsp/pages/json.jsp</result>
+			<result name="error">/jsp/pages/json.jsp</result>
+			<result name="input">/jsp/pages/json.jsp</result>
+		</action>
 		<action name="mobileLogin" class="mobileUserLoginAction">
 			<result>/jsp/pages/json.jsp</result>
 			<result name="error">/jsp/pages/json.jsp</result>

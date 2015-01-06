@@ -11,6 +11,7 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -25,6 +26,7 @@ import net.sf.json.JSONSerializer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.nextep.activities.model.ActivityType;
 import com.nextep.activities.model.MutableActivity;
@@ -33,8 +35,11 @@ import com.nextep.geo.model.Admin;
 import com.nextep.geo.model.City;
 import com.nextep.geo.model.Country;
 import com.nextep.geo.model.GeographicItem;
+import com.nextep.json.model.impl.JsonUser;
 import com.nextep.media.model.MutableMedia;
 import com.nextep.proto.action.base.AbstractAction;
+import com.nextep.proto.action.model.JsonProvider;
+import com.nextep.proto.builders.JsonBuilder;
 import com.nextep.proto.helpers.DisplayHelper;
 import com.nextep.proto.helpers.LocalizationHelper;
 import com.nextep.proto.model.Constants;
@@ -48,9 +53,11 @@ import com.videopolis.apis.exception.ApisException;
 import com.videopolis.apis.exception.ApisNoSuchElementException;
 import com.videopolis.apis.factory.ApisFactory;
 import com.videopolis.apis.factory.SearchRestriction;
+import com.videopolis.apis.model.ApisCriterion;
 import com.videopolis.apis.model.ApisRequest;
 import com.videopolis.apis.service.ApiCompositeResponse;
-import com.videopolis.apis.service.ApiResponse;
+import com.videopolis.calm.exception.CalException;
+import com.videopolis.calm.factory.CalmFactory;
 import com.videopolis.calm.model.CalmObject;
 import com.videopolis.cals.factory.ContextFactory;
 import com.videopolis.smaug.common.model.SearchScope;
@@ -58,12 +65,14 @@ import com.videopolis.smaug.common.model.SuggestScope;
 import com.videopolis.smaug.exception.SearchException;
 
 public class FacebookLoginAction extends AbstractAction implements
-		CookieProvider {
+		CookieProvider, JsonProvider {
 
 	private static final long serialVersionUID = -2932724792527026339L;
 	private static final Log LOGGER = LogFactory
 			.getLog(FacebookLoginAction.class);
 	private static final String APIS_ALIAS_CITY = "city";
+	private static final String APIS_ALIAS_FB = "fb";
+	private static final String APIS_ALIAS_EMAIL = "email";
 	private static final String facebookAppId = "302478486488872";
 	private static final String facebookSecret = "f16e1ba84008262848fccc07f2bb7a38";
 	private static final String PARAM_ACCESS_TOKEN = "access_token";
@@ -74,12 +83,16 @@ public class FacebookLoginAction extends AbstractAction implements
 	private CalPersistenceService geoService;
 	private SearchPersistenceService searchService;
 	private CalPersistenceService activitiesService;
+	@Autowired
+	private JsonBuilder jsonBuilder;
 
 	private String state;
 	private String code;
 	private String redirectUrl;
 	private boolean forceRedirect;
 	private User user;
+
+	private String fbAccessToken = null;
 
 	@Override
 	protected String doExecute() throws Exception {
@@ -88,143 +101,201 @@ public class FacebookLoginAction extends AbstractAction implements
 		getLoginSupport().setForceRedirect(forceRedirect);
 		final String callbackUrl = URLEncoder.encode(getLoginSupport()
 				.getFacebookCallbackUrl(redirectUrl), "UTF-8");
-		String fbUrl = "https://graph.facebook.com/oauth/access_token?client_id="
-				+ facebookAppId
-				+ "&client_secret="
-				+ facebookSecret
-				+ "&code="
-				+ code + "&redirect_uri=" + callbackUrl;
-		final URL url = new URL(fbUrl);
-		final HttpURLConnection connection = (HttpURLConnection) url
-				.openConnection();
-		final InputStream is = connection.getInputStream();
-		if (connection.getResponseCode() == 200) {
-			final StringWriter writer = new StringWriter();
-			try {
-				final Reader reader = new BufferedReader(new InputStreamReader(
-						is, "UTF-8"));
-				char[] buffer = new char[10240];
-				int i = 0;
-				while ((i = reader.read(buffer)) != -1) {
-					writer.write(buffer, 0, i);
-				}
-			} finally {
-				is.close();
-			}
-			final String accessStr = URLDecoder.decode(writer.toString(),
-					"UTF-8");
-			final Map<String, String> accessMap = decodeAccess(accessStr);
-			final String accessToken = accessMap.get(PARAM_ACCESS_TOKEN);
-			final JSONObject jsonUser = getJsonUser(accessToken);
-			if (jsonUser != null) {
-				final String id = jsonUser.getString("id");
-				// Looking for existing user
-				final ApisRequest request = ApisFactory.createRequest(
-						User.class).alternateKey(User.FACEBOOK_TYPE, id);
+		String accessToken = fbAccessToken;
+
+		// Getting token from Facebook API if we don't have it
+		if (accessToken == null) {
+			String fbUrl = "https://graph.facebook.com/oauth/access_token?client_id="
+					+ facebookAppId
+					+ "&client_secret="
+					+ facebookSecret
+					+ "&code=" + code + "&redirect_uri=" + callbackUrl;
+			final URL url = new URL(fbUrl);
+			final HttpURLConnection connection = (HttpURLConnection) url
+					.openConnection();
+			final InputStream is = connection.getInputStream();
+			if (connection.getResponseCode() == 200) {
+				final StringWriter writer = new StringWriter();
 				try {
-					final ApiResponse response = getApiService().execute(
-							request, ContextFactory.createContext(getLocale()));
-					user = (User) response.getUniqueElement();
-				} catch (ApisNoSuchElementException e) {
-					final MutableUser newUser = (MutableUser) getUsersService()
-							.createTransientObject();
-					String username = null;
-					if (jsonUser.containsKey("username")) {
-						username = jsonUser.getString("username");
-					} else {
-						username = jsonUser.getString("name");
+					final Reader reader = new BufferedReader(
+							new InputStreamReader(is, "UTF-8"));
+					char[] buffer = new char[10240];
+					int i = 0;
+					while ((i = reader.read(buffer)) != -1) {
+						writer.write(buffer, 0, i);
 					}
-					final String email = jsonUser.getString("email");
-					String birthday = null;
-					if (jsonUser.containsKey("birthday_date")) {
-						birthday = jsonUser.getString("birthday_date");
+				} finally {
+					is.close();
+				}
+				final String accessStr = URLDecoder.decode(writer.toString(),
+						"UTF-8");
+				final Map<String, String> accessMap = decodeAccess(accessStr);
+				accessToken = accessMap.get(PARAM_ACCESS_TOKEN);
+			}
+		}
+		final JSONObject jsonUser = getJsonUser(accessToken);
+		if (jsonUser != null) {
+			final String id = jsonUser.getString("id");
+			final String email = jsonUser.getString("email");
+			// Looking for existing user
+			final ApisRequest request = (ApisRequest) ApisFactory
+					.createCompositeRequest().addCriterion(
+							(ApisCriterion) SearchRestriction
+									.alternateKey(
+											User.class,
+											CalmFactory.createKey(
+													User.FACEBOOK_TYPE, id))
+									.aliasedBy(APIS_ALIAS_FB)
+									.addCriterion(
+											SearchRestriction.alternateKey(
+													User.class,
+													CalmFactory.createKey(
+															User.EMAIL_TYPE,
+															email)).aliasedBy(
+													APIS_ALIAS_EMAIL)));
+			try {
+				final ApiCompositeResponse response = (ApiCompositeResponse) getApiService()
+						.execute(request,
+								ContextFactory.createContext(getLocale()));
+				user = response.getUniqueElement(User.class, APIS_ALIAS_FB);
+				if (user == null) {
+					user = response.getUniqueElement(User.class,
+							APIS_ALIAS_EMAIL);
+					if (user != null) {
+						// Connecting existing user to facebook account
+						((MutableUser) user).setFacebookId(id);
+						((MutableUser) user).setFacebookToken(accessToken);
+						ContextHolder.toggleWrite();
+						getUsersService().saveItem(user);
 					} else {
-						birthday = jsonUser.getString("birthday");
-					}
-					final Date birthDate = FACEBOOK_DATE_FORMAT.parse(birthday);
-					// Setting a media using the facebook profile URLs
-					final String mediaUrl = "http://graph.facebook.com/" + id
-							+ "/picture?type=large";
-					final String thumbUrl = "http://graph.facebook.com/" + id
-							+ "/picture?type=normal";
-					final String smallUrl = "http://graph.facebook.com/" + id
-							+ "/picture?type=square";
-					final MutableMedia media = (MutableMedia) mediaService
-							.createTransientObject();
-					media.setUrl(mediaUrl);
-					media.setThumbUrl(thumbUrl);
-					media.setMiniThumbUrl(smallUrl);
-					media.setOnline(true);
-					media.setUploadDate(new Date());
-					media.setTitle(getMessageSource().getMessage(
-							"login.facebook.photoTitle", null, getLocale()));
-					newUser.setPseudo(username);
-					newUser.setEmail(email);
-					newUser.setBirthday(birthDate);
-					newUser.setFacebookId(id);
-					newUser.setFacebookToken(accessToken);
-					ContextHolder.toggleWrite();
-					getUsersService().saveItem(newUser);
-					user = newUser;
-					// Setting user location
-					String location = null;
-					GeographicItem city = null;
-					if (jsonUser.containsKey("location")) {
-						JSONObject jsonLocation = jsonUser
-								.getJSONObject("location");
-						location = jsonLocation.getString("name");
-						String userLocaleStr = jsonUser.getString("locale");
-						city = findLocation(location, userLocaleStr);
-						if (city != null) {
-							final List<? extends CalmObject> cities = geoService
-									.setItemFor(user.getKey(), city.getKey());
-							user.addAll(cities);
+						// Creating a new user from facebook info
+						try {
+							user = buildUserFromFacebookUser(accessToken,
+									jsonUser);
+						} catch (SearchException ex) {
+							setErrorMessage("login.facebook.error");
+							LOGGER.error(
+									"Facebook login exception during search registration: "
+											+ ex.getMessage(), ex);
+							return error();
 						}
 					}
-					media.setRelatedItemKey(user.getKey());
-					ContextHolder.toggleWrite();
-					mediaService.saveItem(media);
-					try {
-						searchService.storeCalmObject(newUser,
-								SearchScope.CHILDREN);
-					} catch (SearchException ex) {
-						setErrorMessage("login.facebook.error");
-						LOGGER.error(
-								"Facebook login exception during search registration: "
-										+ ex.getMessage(), ex);
-						return error();
-					}
-					// Generating activity
-					final MutableActivity activity = (MutableActivity) activitiesService
-							.createTransientObject();
-					activity.setActivityType(ActivityType.REGISTER);
-					activity.setDate(new Date());
-					activity.setUserKey(user.getKey());
-					activity.setLoggedItemKey(user.getKey());
-					ContextHolder.toggleWrite();
-					activitiesService.saveItem(activity);
-					// Localizing activity and storing in search
-					activity.add(city);
-					searchService.storeCalmObject(activity,
-							SearchScope.CHILDREN);
 				}
-				// Updating togayther token
-				ContextHolder.toggleWrite();
-				((UsersService) getUsersService()).refreshUserOnlineTimeout(
-						user, ((UsersService) getUsersService())
-								.generateUniqueToken());
+			} catch (ApisNoSuchElementException e) {
+
 			}
-			// Generating redirection URL if needed
-			if (forceRedirect) {
-				redirectUrl = getUrlService().getOverviewUrl(
-						DisplayHelper.getDefaultAjaxContainer(), user);
-			}
+			// Updating PELMEL token
+			ContextHolder.toggleWrite();
+			((UsersService) getUsersService()).refreshUserOnlineTimeout(user,
+					((UsersService) getUsersService()).generateUniqueToken());
+		}
+		// Generating redirection URL if needed
+		if (forceRedirect) {
+			redirectUrl = getUrlService().getOverviewUrl(
+					DisplayHelper.getDefaultAjaxContainer(), user);
 		}
 		if (redirectUrl != null) {
 			return "redirect";
 		} else {
 			return SUCCESS;
 		}
+	}
+
+	@Override
+	public String getJson() {
+		if (user != null) {
+			final JsonUser json = jsonBuilder.buildJsonUser(user, true, null);
+			return JSONObject.fromObject(json).toString();
+		} else {
+			return "";
+		}
+	}
+
+	private User buildUserFromFacebookUser(String accessToken,
+			JSONObject jsonUser) throws ApisException, CalException,
+			SearchException {
+		final String id = jsonUser.getString("id");
+		final MutableUser newUser = (MutableUser) getUsersService()
+				.createTransientObject();
+		String username = null;
+		if (jsonUser.containsKey("username")) {
+			username = jsonUser.getString("username");
+		} else {
+			username = jsonUser.getString("name");
+		}
+		final String email = jsonUser.getString("email");
+		String birthday = null;
+		if (jsonUser.containsKey("birthday_date")) {
+			birthday = jsonUser.getString("birthday_date");
+		} else {
+			birthday = jsonUser.getString("birthday");
+		}
+		Date birthDate;
+		try {
+			birthDate = FACEBOOK_DATE_FORMAT.parse(birthday);
+			newUser.setBirthday(birthDate);
+		} catch (ParseException e) {
+			LOGGER.error(
+					"Unable to parse facebook birthdate: " + e.getMessage(), e);
+		}
+		// Setting a media using the facebook profile URLs
+		final String mediaUrl = "http://graph.facebook.com/" + id
+				+ "/picture?type=large";
+		final String thumbUrl = "http://graph.facebook.com/" + id
+				+ "/picture?type=normal";
+		final String smallUrl = "http://graph.facebook.com/" + id
+				+ "/picture?type=square";
+		final MutableMedia media = (MutableMedia) mediaService
+				.createTransientObject();
+		media.setUrl(mediaUrl);
+		media.setThumbUrl(thumbUrl);
+		media.setMiniThumbUrl(smallUrl);
+		media.setOnline(true);
+		media.setUploadDate(new Date());
+		media.setTitle(getMessageSource().getMessage(
+				"login.facebook.photoTitle", null, getLocale()));
+		newUser.setPseudo(username);
+		newUser.setEmail(email);
+
+		newUser.setFacebookId(id);
+		newUser.setFacebookToken(accessToken);
+
+		ContextHolder.toggleWrite();
+		getUsersService().saveItem(user);
+
+		// Setting user location
+		String location = null;
+		GeographicItem city = null;
+		if (jsonUser.containsKey("location")) {
+			JSONObject jsonLocation = jsonUser.getJSONObject("location");
+			location = jsonLocation.getString("name");
+			String userLocaleStr = jsonUser.getString("locale");
+			city = findLocation(location, userLocaleStr);
+			if (city != null) {
+				final List<? extends CalmObject> cities = geoService
+						.setItemFor(user.getKey(), city.getKey());
+				user.addAll(cities);
+			}
+		}
+		media.setRelatedItemKey(user.getKey());
+		ContextHolder.toggleWrite();
+		mediaService.saveItem(media);
+		searchService.storeCalmObject(newUser, SearchScope.CHILDREN);
+
+		// Generating activity
+		final MutableActivity activity = (MutableActivity) activitiesService
+				.createTransientObject();
+		activity.setActivityType(ActivityType.REGISTER);
+		activity.setDate(new Date());
+		activity.setUserKey(user.getKey());
+		activity.setLoggedItemKey(user.getKey());
+		ContextHolder.toggleWrite();
+		activitiesService.saveItem(activity);
+		// Localizing activity and storing in search
+		activity.add(city);
+		searchService.storeCalmObject(activity, SearchScope.CHILDREN);
+
+		return newUser;
 	}
 
 	private GeographicItem findLocation(String location, String userLocaleStr)
@@ -460,5 +531,13 @@ public class FacebookLoginAction extends AbstractAction implements
 
 	public void setActivitiesService(CalPersistenceService activitiesService) {
 		this.activitiesService = activitiesService;
+	}
+
+	public void setFbAccessToken(String fbAccessToken) {
+		this.fbAccessToken = fbAccessToken;
+	}
+
+	public String getFbAccessToken() {
+		return fbAccessToken;
 	}
 }

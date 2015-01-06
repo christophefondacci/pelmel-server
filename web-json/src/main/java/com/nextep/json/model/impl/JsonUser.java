@@ -181,4 +181,5 @@ public class JsonUser extends JsonLiker {
 	public void addCheckedInPlace(JsonLightPlace checkedInPlace) {
 		this.checkedInPlaces.add(checkedInPlace);
 	}
+
 }
