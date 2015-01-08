@@ -55,7 +55,7 @@
 <!-- 	<Environment name="togaytherBaseUrl" type="java.lang.String" -->
 <!-- 		value="http://local.togayther.net" /> -->
 	<Environment name="togaytherBaseUrl" type="java.lang.String"
-		value="http://192.168.1.25" />
+		value="http://10.11.1.15" />
 	<Environment name="togaytherDomain" type="java.lang.String"
 		value="pelmelguide" />
 	<Environment name="mobile/localizationDistance" type="java.lang.Double"

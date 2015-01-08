@@ -28,6 +28,17 @@ public interface UsersDao {
 	User getUser(String email, String password);
 
 	/**
+	 * Finds the user from his email, this method is not designed for
+	 * authentication and further authentication and security checks must be
+	 * made.
+	 * 
+	 * @param email
+	 *            the email address of the user to look for
+	 * @return the {@link User} or <code>null</code> if not found
+	 */
+	User getUserFromEmail(String email);
+
+	/**
 	 * Retrieves a user from an authentication token. The user is returned if
 	 * and only if the following conditions are met :<br>
 	 * - The token is uniquely assigned to a user<br>
@@ -72,6 +83,18 @@ public interface UsersDao {
 	 *            the new password to set for this user
 	 */
 	void savePassword(ItemKey userKey, String oldPassword, String newPassword);
+
+	/**
+	 * Saves the user password from the current valid token
+	 * 
+	 * @param userKey
+	 *            the {@link ItemKey} of the user to alter
+	 * @param nxtpUserToken
+	 *            the current authentication token
+	 * @param newPassword
+	 *            the new password to set
+	 */
+	void resetPassword(ItemKey userKey, String nxtpUserToken, String newPassword);
 
 	/**
 	 * Assigns a timeout for the user

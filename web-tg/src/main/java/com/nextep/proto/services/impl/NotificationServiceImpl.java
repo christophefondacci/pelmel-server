@@ -164,6 +164,12 @@ public class NotificationServiceImpl implements NotificationService {
 
 	@Override
 	public void notifyAdminByEmail(String title, String html) {
+		notifyByEmail(title, html, "christophe@pelmelguide.com",
+				adminEmailAlias);
+	}
+
+	private void notifyByEmail(String title, String html, String toAddress,
+			String bccAddress) {
 		LOGGER.info("<br>=================<br>" + title + "<br>" + html);
 
 		if (adminEmailAlias == null || adminEmailAlias.trim().isEmpty()
@@ -184,9 +190,12 @@ public class NotificationServiceImpl implements NotificationService {
 			message.setContent(html, "text/html");
 			message.setFrom(new InternetAddress("no-reply@pelmelguide.com"));
 			message.setSubject(title);
-			message.addRecipient(Message.RecipientType.TO, new InternetAddress(
-					"christophe@pelmelguide.com"));
-			final String[] emails = adminEmailAlias.split(" ");
+			String[] emails = toAddress.split(" ");
+			for (String email : emails) {
+				message.addRecipient(Message.RecipientType.TO,
+						new InternetAddress(email));
+			}
+			emails = bccAddress.split(" ");
 			for (String email : emails) {
 				try {
 					message.addRecipient(Message.RecipientType.BCC,
@@ -359,6 +368,22 @@ public class NotificationServiceImpl implements NotificationService {
 		fillEmailFooterFor(buf, obj, user);
 		notifyAdminByEmail("Comment added to " + DisplayHelper.getName(obj)
 				+ " by " + user.getPseudo(), buf.toString());
+	}
+
+	@Override
+	public void sendChangePasswordEmail(User user) {
+
+		final StringBuilder buf = new StringBuilder();
+		buf.append("Hello " + user.getPseudo() + ",<br><br>");
+		buf.append("Please follow this link to change your password:<br>");
+		final String url = urlService.getResetPasswordUrl(user);
+		buf.append("<a href=\"" + url + "\">" + url + "</a><br><br>");
+		buf.append("If the link does not work try to copy / paste it in a new web browser window.");
+		fillEmailFooterFor(buf, user, user);
+
+		notifyByEmail("[PELMEL Guide] Lost password link", buf.toString(),
+				user.getEmail(), "cfondacci@gmail.com");
+
 	}
 
 	public void setPushKeyPath(String pushKeyPath) {

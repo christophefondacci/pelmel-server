@@ -5,6 +5,7 @@ import java.util.Locale;
 import com.nextep.events.model.CalendarType;
 import com.nextep.geo.model.GeographicItem;
 import com.nextep.proto.model.SearchType;
+import com.nextep.users.model.User;
 import com.videopolis.apis.model.FacetInformation;
 import com.videopolis.calm.model.CalmObject;
 import com.videopolis.calm.model.ItemKey;
@@ -320,4 +321,13 @@ public interface UrlService {
 	 * @return the static absolute URL
 	 */
 	String getStaticUrl(String url);
+
+	/**
+	 * Generates the URL pointing to the reset password action
+	 * 
+	 * @param user
+	 *            the {@link User} for which we generate the link
+	 * @return the absolute URL
+	 */
+	String getResetPasswordUrl(User user);
 }

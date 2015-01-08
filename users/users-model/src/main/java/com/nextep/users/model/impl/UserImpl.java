@@ -357,4 +357,5 @@ public class UserImpl extends AbstractCalmObject implements User, MutableUser {
 	public void setPushDeviceId(String pushDeviceId) {
 		this.pushDeviceId = pushDeviceId;
 	}
+	
 }

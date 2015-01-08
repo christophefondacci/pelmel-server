@@ -45,6 +45,20 @@ public interface UsersService {
 	 */
 	void savePassword(ItemKey userKey, String oldPassword, String newPassword);
 
+	/**
+	 * Saves the user password from a current valid authentication token. The
+	 * user will be altered if and only if the current authentication token for
+	 * that user matches the one provided.
+	 * 
+	 * @param userKey
+	 *            the {@link ItemKey} of the {@link User} to modify
+	 * @param userToken
+	 *            the valid authentication token for this user
+	 * @param newPassword
+	 *            the new password to set
+	 */
+	void resetPassword(ItemKey userKey, String userToken, String newPassword);
+
 	String getEmailFromToken(String token);
 
 	void refreshUserOnlineTimeout(User user, String token);

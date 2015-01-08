@@ -51,6 +51,12 @@
 		<property name="canonical" value="/about"/>
 		<property name="robotsTags" value="INDEX,FOLLOW"/>
 	</bean>
+	<bean id="resetPasswordHeaderSupport" parent="titledHeaderSupport" scope="prototype">
+		<property name="titleMessageKey" value="header.title.resetPassword"/>
+		<property name="pageStyle" value="bar"/>
+		<property name="canonical" value="/resetPassword"/>
+		<property name="robotsTags" value="NOINDEX,NOFOLLOW"/>
+	</bean>
 	<bean id="partnersHeaderSupport" parent="titledHeaderSupport" scope="prototype">
 		<property name="titleMessageKey" value="partners.title"/>
 		<property name="pageStyle" value="profile"/>

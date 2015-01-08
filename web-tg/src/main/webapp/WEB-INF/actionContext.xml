@@ -463,6 +463,13 @@
 		<property name="headerSupport" ref="overviewHeaderSupport"/> 
 		<property name="messageService" ref="messagesService"/> 
 	</bean>
+	<bean id="lostPasswordAction" class="com.nextep.proto.action.impl.tools.LostPasswordAction" parent="abstractAction" scope="request">
+		<property name="urlService" ref="urlService"/>
+	</bean>
+	<bean id="resetPasswordAction" class="com.nextep.proto.action.impl.tools.ResetPasswordAction" parent="abstractAction" scope="request">
+		<property name="urlService" ref="urlService"/>
+		<property name="headerSupport" ref="resetPasswordHeaderSupport"/>
+	</bean>
 	<bean id="ajaxGetMediaFormAction" class="com.nextep.proto.action.impl.GetMediaFormAction" parent="abstractAction" scope="request">
 		<property name="urlService" ref="urlService"/>
 		<property name="currentUserSupport" ref="currentUserSupport"/>

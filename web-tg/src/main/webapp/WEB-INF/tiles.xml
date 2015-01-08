@@ -244,6 +244,12 @@
 	<definition name="partners" extends="static">
 		<put-attribute name="page-top" value="/jsp/top/top-partners.jsp"/>
 	</definition>
+	<definition name="resetPassword" extends="static">
+		<put-attribute name="page-top" value="/jsp/top/top-reset-password.jsp"/>
+	</definition>
+	<definition name="simpleResult" extends="static">
+		<put-attribute name="page-top" value="/jsp/top/top-text.jsp"/>
+	</definition>
 	<definition name="promote" extends="static">
 		<put-attribute name="header" value="/jsp/header/payment-header.jsp" />
 		<put-attribute name="footer" value="/jsp/footer/payment-footer.jsp" />

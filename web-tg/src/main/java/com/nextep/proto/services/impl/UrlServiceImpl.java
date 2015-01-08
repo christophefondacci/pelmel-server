@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import javax.annotation.Resource;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.context.MessageSource;
@@ -46,9 +48,14 @@ public class UrlServiceImpl implements UrlService {
 	private String webappPrefix = "";
 	private boolean isAjaxSearch, isAjaxOverview;
 	private boolean addJSCalls;
+	@Resource(mappedName = "togaytherDomain")
 	private String domainName;
+	@Resource(mappedName = "mediaBaseUrl")
 	private String mediaBaseUrl;
+	@Resource(mappedName = "staticBaseUrl")
 	private String staticBaseUrl;
+	@Resource(mappedName = "togaytherBaseUrl")
+	private String baseUrl;
 
 	@Override
 	public String buildSearchUrl(String targetHtmlElementId,
@@ -580,5 +587,10 @@ public class UrlServiceImpl implements UrlService {
 
 	public void setStaticBaseUrl(String staticBaseUrl) {
 		this.staticBaseUrl = staticBaseUrl;
+	}
+
+	@Override
+	public String getResetPasswordUrl(User user) {
+		return baseUrl + "/resetPassword?nxtpUserToken=" + user.getToken();
 	}
 }

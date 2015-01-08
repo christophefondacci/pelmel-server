@@ -102,4 +102,12 @@ public interface NotificationService {
 	 */
 	void sendCommentAddedEmailNotification(CalmObject obj, User user,
 			Comment comment);
+
+	/**
+	 * Sends an email to the user that offers him to change his password
+	 * 
+	 * @param user
+	 *            the {@link User} to send the email to
+	 */
+	void sendChangePasswordEmail(User user);
 }

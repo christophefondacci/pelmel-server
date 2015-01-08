@@ -6,6 +6,7 @@ import com.nextep.events.model.CalendarType;
 import com.nextep.geo.model.GeographicItem;
 import com.nextep.proto.model.SearchType;
 import com.nextep.proto.services.UrlService;
+import com.nextep.users.model.User;
 import com.videopolis.apis.model.FacetInformation;
 import com.videopolis.calm.model.CalmObject;
 import com.videopolis.calm.model.ItemKey;
@@ -237,5 +238,10 @@ public class MobileUrlServiceImpl implements UrlService {
 	@Override
 	public String getStaticUrl(String url) {
 		return baseUrlService.getStaticUrl(url);
+	}
+
+	@Override
+	public String getResetPasswordUrl(User user) {
+		return baseUrlService.getResetPasswordUrl(user);
 	}
 }

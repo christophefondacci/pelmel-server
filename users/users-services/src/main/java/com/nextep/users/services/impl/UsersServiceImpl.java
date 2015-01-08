@@ -32,7 +32,6 @@ public class UsersServiceImpl extends AbstractDaoBasedCalServiceImpl implements
 	private static final Log LOGGER = LogFactory.getLog(UsersServiceImpl.class);
 	private static ThreadLocal<Random> random = new ThreadLocal<Random>();
 	private int connectionTimeoutInMinutes;
-	private static final User FAKE_USER = new UserImpl();
 
 	@Override
 	public Class<? extends CalmObject> getProvidedClass() {
@@ -60,6 +59,7 @@ public class UsersServiceImpl extends AbstractDaoBasedCalServiceImpl implements
 		return new UserImpl();
 	}
 
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public List<CalmObject> setItemFor(ItemKey contributedItemKey,
 			ItemKey... internalItemKeys) {
@@ -99,6 +99,12 @@ public class UsersServiceImpl extends AbstractDaoBasedCalServiceImpl implements
 	}
 
 	@Override
+	public void resetPassword(ItemKey userKey, String userToken,
+			String newPassword) {
+		((UsersDao) getCalDao()).resetPassword(userKey, userToken, newPassword);
+	}
+
+	@Override
 	public String generateUniqueToken() {
 		Random generator = random.get();
 		if (generator == null) {
@@ -124,13 +130,11 @@ public class UsersServiceImpl extends AbstractDaoBasedCalServiceImpl implements
 				return response;
 			} else if (User.EMAIL_TYPE.equals(id.getType())) {
 				// We check if it exists
-				final boolean userExists = ((UsersDao) getCalDao())
-						.userExists(id.getId());
+				final User user = ((UsersDao) getCalDao()).getUserFromEmail(id
+						.getId());
 				final ItemsResponseImpl response = new ItemsResponseImpl();
 				// If so we add a fake user
-				if (userExists) {
-					response.addItem(FAKE_USER);
-				}
+				response.addItem(user);
 				return response;
 			} else if (User.FACEBOOK_TYPE.equals(id.getType())) {
 				final User user = ((UsersDao) getCalDao()).getFacebookUser(id

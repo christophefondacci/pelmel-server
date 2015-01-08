@@ -6,38 +6,38 @@
 
 <struts>
 	<constant name="struts.i18n.encoding" value="UTF-8" />
-	<package name="myPackage" extends="tiles-default" >
+	<package name="myPackage" extends="tiles-default">
 		<interceptors>
-	       <interceptor name="cookieprovider"
-	           class="com.nextep.proto.struts2.CookieProviderInterceptor">
-	       </interceptor>
-	       <interceptor name="localeprovider"
-	           class="com.nextep.proto.struts2.LocaleInterceptor">
-	       </interceptor>
-	       <interceptor-stack name="default">
-			   <interceptor-ref name="localeprovider" />
-	           <interceptor-ref name="cookie">
-				<param name="cookiesName">nxtpUserToken</param>
-			   </interceptor-ref>
-	           <interceptor-ref name="defaultStack" />
-	       </interceptor-stack>
-	       <interceptor-stack name="defaultAndCookiesProvider">
-	           <interceptor-ref name="default" />
-	           <interceptor-ref name="cookieprovider" />
-	       </interceptor-stack>
-	   </interceptors>
-	   <global-results>
-	   		<result name="input" type="tiles">login</result>
+			<interceptor name="cookieprovider"
+				class="com.nextep.proto.struts2.CookieProviderInterceptor">
+			</interceptor>
+			<interceptor name="localeprovider"
+				class="com.nextep.proto.struts2.LocaleInterceptor">
+			</interceptor>
+			<interceptor-stack name="default">
+				<interceptor-ref name="localeprovider" />
+				<interceptor-ref name="cookie">
+					<param name="cookiesName">nxtpUserToken</param>
+				</interceptor-ref>
+				<interceptor-ref name="defaultStack" />
+			</interceptor-stack>
+			<interceptor-stack name="defaultAndCookiesProvider">
+				<interceptor-ref name="default" />
+				<interceptor-ref name="cookieprovider" />
+			</interceptor-stack>
+		</interceptors>
+		<global-results>
+			<result name="input" type="tiles">login</result>
 			<result name="error" type="tiles">error</result>
 			<result name="notfound" type="tiles">404</result>
-	   </global-results>
-	    <action name="404" class="staticNotFoundAction">
+		</global-results>
+		<action name="404" class="staticNotFoundAction">
 			<result type="tiles">404</result>
-			<interceptor-ref name="default"/>
+			<interceptor-ref name="default" />
 		</action>
 		<action name="index" class="indexAction">
 			<result type="tiles">homepage</result>
-			<interceptor-ref name="default"/>
+			<interceptor-ref name="default" />
 		</action>
 		<action name="disconnect" class="disconnectAction">
 			<result type="redirectAction">
@@ -45,7 +45,7 @@
 				<param name="namespace">/</param>
 				<param name="prependServletContext">false</param>
 			</result>
-			<interceptor-ref name="default"/>
+			<interceptor-ref name="default" />
 		</action>
 		<action name="mobileDisconnect" class="disconnectAction">
 			<result>/jsp/structure/empty.jsp</result>
@@ -53,28 +53,28 @@
 			<result name="error">/jsp/pages/json.jsp</result>
 		</action>
 		<!-- USER OVERVIEW -->
-		<action name="userOverview" class="userOverviewAction"> 
+		<action name="userOverview" class="userOverviewAction">
 			<result type="tiles">userOverview</result>
-			<interceptor-ref name="default"/>
+			<interceptor-ref name="default" />
 		</action>
-		<action name="ajaxUserOverview" class="userOverviewAction"> 
+		<action name="ajaxUserOverview" class="userOverviewAction">
 			<result type="tiles">ajaxUserOverview</result>
-			<interceptor-ref name="default"/>
+			<interceptor-ref name="default" />
 		</action>
 		<!-- PLACE OVERVIEW -->
-		<action name="placeOverview" class="placeOverviewAction"> 
+		<action name="placeOverview" class="placeOverviewAction">
 			<result type="tiles">placeOverview</result>
-			<interceptor-ref name="default"/>
+			<interceptor-ref name="default" />
 		</action>
-		<action name="ajaxPlaceOverview" class="placeOverviewAction"> 
+		<action name="ajaxPlaceOverview" class="placeOverviewAction">
 			<result name="input" type="tiles">login</result>
 			<result type="tiles">ajaxPlaceOverview</result>
-			<interceptor-ref name="default"/>
+			<interceptor-ref name="default" />
 		</action>
 		<!-- EVENT OVERVIEW -->
-		<action name="eventOverview" class="eventOverviewAction"> 
+		<action name="eventOverview" class="eventOverviewAction">
 			<result type="tiles">eventOverview</result>
-			<interceptor-ref name="default"/>
+			<interceptor-ref name="default" />
 		</action>
 		<action name="mobileOverview" class="mobileOverviewAction">
 			<result>/jsp/pages/json.jsp</result>
@@ -91,36 +91,36 @@
 			<result name="input">/jsp/pages/json.jsp</result>
 			<result name="error">/jsp/pages/json.jsp</result>
 		</action>
-		<action name="ajaxEventOverview" class="eventOverviewAction"> 
+		<action name="ajaxEventOverview" class="eventOverviewAction">
 			<result name="input" type="tiles">login</result>
 			<result type="tiles">ajaxEventOverview</result>
-			<interceptor-ref name="default"/>
+			<interceptor-ref name="default" />
 		</action>
 		<!-- ILIKE ACTION -->
 		<action name="ilike" class="ilikeAction">
-			<result name="input">/jsp/blocks/block-ilike-button.jsp</result> 
+			<result name="input">/jsp/blocks/block-ilike-button.jsp</result>
 			<result>/jsp/blocks/block-ilike-button.jsp</result>
-			<interceptor-ref name="default"/>
+			<interceptor-ref name="default" />
 		</action>
 		<action name="mobileIlike" class="ilikeAction">
 			<result>/jsp/pages/json.jsp</result>
 			<result name="input">/jsp/pages/json.jsp</result>
 			<result name="error">/jsp/pages/json.jsp</result>
 		</action>
-		<action name="myMedia" class="myMediaAction"> 
+		<action name="myMedia" class="myMediaAction">
 			<result type="tiles">myMedia</result>
-			<interceptor-ref name="default"/>
+			<interceptor-ref name="default" />
 		</action>
-		<action name="ajaxMyMedia" class="myMediaAction"> 
+		<action name="ajaxMyMedia" class="myMediaAction">
 			<result>/jsp/pages/user-media.jsp</result>
-			<interceptor-ref name="default"/>
+			<interceptor-ref name="default" />
 		</action>
-		<action name="deleteMedia" class="deleteMediaAction"> 
-<!-- 			<result name="success" type="redirectAction"> -->
-<!-- 				<param name="actionName">myProfile</param> -->
-<!-- 				<param name="prependServletContext">false</param> -->
-<!-- 				<param name="namespace">/</param> -->
-<!-- 			</result> -->
+		<action name="deleteMedia" class="deleteMediaAction">
+			<!-- <result name="success" type="redirectAction"> -->
+			<!-- <param name="actionName">myProfile</param> -->
+			<!-- <param name="prependServletContext">false</param> -->
+			<!-- <param name="namespace">/</param> -->
+			<!-- </result> -->
 			<result name="success" type="redirectAction">
 				<param name="actionName">${redirectAction}</param>
 				<param name="namespace">/</param>
@@ -130,7 +130,7 @@
 			</result>
 			<result name="confirm">/jsp/blocks/block-confirm-delmedia.jsp</result>
 			<result name="forbidden">/jsp/blocks/block-confirm-delmedia.jsp</result>
-			<interceptor-ref name="default"/>
+			<interceptor-ref name="default" />
 		</action>
 		<action name="mobileDeleteMedia" class="deleteMediaAction">
 			<result name="success">/jsp/pages/json.jsp</result>
@@ -140,7 +140,7 @@
 			<result name="input">/jsp/pages/json.jsp</result>
 			<result name="error">/jsp/pages/json.jsp</result>
 		</action>
-		<action name="deleteItem" class="deleteCalObjectAction"> 
+		<action name="deleteItem" class="deleteCalObjectAction">
 			<result name="success" type="redirectAction">
 				<param name="actionName">${redirectAction}</param>
 				<param name="namespace">/</param>
@@ -150,7 +150,7 @@
 			</result>
 			<result name="confirm">/jsp/blocks/block-confirm-delobject.jsp</result>
 			<result name="forbidden">/jsp/blocks/block-confirm-delobject.jsp</result>
-			<interceptor-ref name="default"/>
+			<interceptor-ref name="default" />
 		</action>
 		<action name="mobileDeleteItem" class="deleteCalObjectAction">
 			<result name="success">/jsp/pages/json.jsp</result>
@@ -160,90 +160,100 @@
 			<result name="input">/jsp/pages/json.jsp</result>
 			<result name="error">/jsp/pages/json.jsp</result>
 		</action>
-		<action name="myProfile" class="myProfileAction"> 
+		<action name="myProfile" class="myProfileAction">
 			<result type="tiles">myProfile</result>
-			<interceptor-ref name="default"/>
+			<interceptor-ref name="default" />
 		</action>
-		<action name="ajaxMedia" class="ajaxMediaAction"> 
+		<action name="ajaxMedia" class="ajaxMediaAction">
 			<result name="error">/jsp/ajax/ajax-error-dialog.jsp</result>
 			<result>/jsp/ajax/ajax-media.jsp</result>
 		</action>
-		<action name="ajaxSearchUser" class="ajaxSearchUserAction"> 
+		<action name="ajaxSearchUser" class="ajaxSearchUserAction">
 			<result type="tiles">ajaxSearchUsers</result>
 			<interceptor-ref name="cookie">
 				<param name="cookiesName">nxtpUserToken</param>
 			</interceptor-ref>
-			<interceptor-ref name="defaultStack"/>
+			<interceptor-ref name="defaultStack" />
 		</action>
-		<action name="searchUser" class="searchUserAction"> 
+		<action name="searchUser" class="searchUserAction">
 			<result type="tiles">searchUsers</result>
-			<interceptor-ref name="default"/>			
+			<interceptor-ref name="default" />
 		</action>
-		<action name="searchPlace" class="searchPlaceAction"> 
+		<action name="searchPlace" class="searchPlaceAction">
 			<result type="tiles">searchPlaces</result>
-			<interceptor-ref name="default"/>	
+			<interceptor-ref name="default" />
 		</action>
-		<action name="searchEvent" class="searchEventAction"> 
+		<action name="searchEvent" class="searchEventAction">
 			<result type="tiles">searchEvents</result>
-			<interceptor-ref name="default"/>	
+			<interceptor-ref name="default" />
 		</action>
-		<action name="searchNews" class="staticNotFoundAction"> 
+		<action name="searchNews" class="staticNotFoundAction">
 			<result type="tiles">404</result>
-			<interceptor-ref name="default"/>	
+			<interceptor-ref name="default" />
 		</action>
 		<action name="mapPlaces" class="mobileSearchPlaces">
 			<result>/jsp/pages/json.jsp</result>
-	   		<result name="input">/jsp/pages/json.jsp</result>
+			<result name="input">/jsp/pages/json.jsp</result>
 			<result name="error">/jsp/pages/json.jsp</result>
 		</action>
 		<action name="mobileEvents" class="mobileSearchEvents">
 			<result>/jsp/pages/json.jsp</result>
-	   		<result name="input">/jsp/pages/json.jsp</result>
+			<result name="input">/jsp/pages/json.jsp</result>
 			<result name="error">/jsp/pages/json.jsp</result>
+		</action>
+		<action name="lostPassword" class="lostPasswordAction">
+			<result>/jsp/pages/json.jsp</result>
+			<result name="input">/jsp/pages/json.jsp</result>
+			<result name="error">/jsp/pages/json.jsp</result>
+		</action>
+		<action name="resetPassword" class="resetPasswordAction">
+			<result name="input" type="tiles">resetPassword</result>
+			<result type="tiles">simpleResult</result>
+			<interceptor-ref name="default" />
 		</action>
 		<action name="ajaxGeoList" class="ajaxGeoListAction">
 			<result>/jsp/pages/json.jsp</result>
-			<interceptor-ref name="default"/>
-	   		<result name="input">/jsp/pages/json.jsp</result>
+			<interceptor-ref name="default" />
+			<result name="input">/jsp/pages/json.jsp</result>
 			<result name="error">/jsp/pages/json.jsp</result>
 		</action>
-		<action name="searchMap" class="placeMapAction"> 
+		<action name="searchMap" class="placeMapAction">
 			<result type="tiles">searchMap</result>
-			<interceptor-ref name="default"/>	
+			<interceptor-ref name="default" />
 		</action>
 		<action name="mapInfo" class="ajaxMapInfoAction">
 			<result name="error">/jsp/ajax/ajax-error-dialog.jsp</result>
 			<result>/jsp/ajax/ajax-map-infowindow.jsp</result>
 		</action>
-		<action name="ajaxSearchPlace" class="ajaxSearchPlaceAction"> 
+		<action name="ajaxSearchPlace" class="ajaxSearchPlaceAction">
 			<result type="tiles">ajaxSearchPlaces</result>
 		</action>
-		<action name="ajaxSuggestCity" class="ajaxSuggestCityAction"> 
+		<action name="ajaxSuggestCity" class="ajaxSuggestCityAction">
 			<result>/jsp/ajax/ajax-suggest.jsp</result>
-			<interceptor-ref name="default"/>
+			<interceptor-ref name="default" />
 		</action>
-<!-- 		<action name="ajaxSuggestPlace" class="ajaxSuggestPlaceAction">  -->
-<!-- 			<result>/jsp/ajax/ajax-suggest.jsp</result> -->
-<!-- 			<interceptor-ref name="default"/> -->
-<!-- 		</action> -->
-		<action name="ajaxSuggestUser" class="ajaxSuggestUserAction"> 
+		<!-- <action name="ajaxSuggestPlace" class="ajaxSuggestPlaceAction"> -->
+		<!-- <result>/jsp/ajax/ajax-suggest.jsp</result> -->
+		<!-- <interceptor-ref name="default"/> -->
+		<!-- </action> -->
+		<action name="ajaxSuggestUser" class="ajaxSuggestUserAction">
 			<result>/jsp/ajax/ajax-suggest.jsp</result>
-			<interceptor-ref name="default"/>
-		</action>		
-		<action name="ajaxCityDefinition" class="ajaxCityDefinitionAction"> 
+			<interceptor-ref name="default" />
+		</action>
+		<action name="ajaxCityDefinition" class="ajaxCityDefinitionAction">
 			<result>/jsp/ajax/ajax-city-definition.jsp</result>
-			<interceptor-ref name="default"/>
+			<interceptor-ref name="default" />
 		</action>
-		<action name="ajaxSendMsg" class="ajaxSendMessageAction"> 
+		<action name="ajaxSendMsg" class="ajaxSendMessageAction">
 			<result name="error">/jsp/ajax/ajax-error-dialog.jsp</result>
 			<result>/jsp/ajax/ajax-send-message.jsp</result>
-			<interceptor-ref name="default"/>
+			<interceptor-ref name="default" />
 		</action>
-		<action name="mobileSendMsg" class="ajaxSendMessageAction"> 
+		<action name="mobileSendMsg" class="ajaxSendMessageAction">
 			<result name="error">/jsp/ajax/ajax-send-message.jsp</result>
 			<result>/jsp/ajax/ajax-send-message.jsp</result>
 		</action>
-		<action name="ajaxSendFullMsg" class="ajaxSendMessageAction"> 
+		<action name="ajaxSendFullMsg" class="ajaxSendMessageAction">
 			<result name="error">/jsp/ajax/ajax-error-dialog.jsp</result>
 			<result type="redirectAction">
 				<param name="actionName">myMessageReply</param>
@@ -252,7 +262,7 @@
 				<param name="parse">true</param>
 				<param name="from">${to}</param>
 			</result>
-			<interceptor-ref name="default"/>
+			<interceptor-ref name="default" />
 		</action>
 		<action name="postMessage" class="ajaxSendMessageAction">
 			<result type="redirectAction">
@@ -262,61 +272,61 @@
 				<param name="parse">true</param>
 				<param name="from">${to}</param>
 			</result>
-			
-			<interceptor-ref name="default"/>
+
+			<interceptor-ref name="default" />
 		</action>
-		<action name="ajaxSendInstantMsg" class="ajaxInstantMessagesAction"> 
+		<action name="ajaxSendInstantMsg" class="ajaxInstantMessagesAction">
 			<result name="error">/jsp/ajax/ajax-error-dialog.jsp</result>
 			<result>/jsp/blocks/block-messaging.jsp</result>
-			<interceptor-ref name="default"/>
-		</action>	
-		<action name="ajaxInstantMessages" class="ajaxInstantMessagesAction"> 
-			<result>/jsp/blocks/block-messaging.jsp</result>
-			<interceptor-ref name="default"/>
+			<interceptor-ref name="default" />
 		</action>
-		<action name="ajaxInstantRefreshBody" class="ajaxInstantMessagesAction"> 
+		<action name="ajaxInstantMessages" class="ajaxInstantMessagesAction">
+			<result>/jsp/blocks/block-messaging.jsp</result>
+			<interceptor-ref name="default" />
+		</action>
+		<action name="ajaxInstantRefreshBody" class="ajaxInstantMessagesAction">
 			<result name="input">/jsp/structure/empty.jsp</result>
 			<result name="error">/jsp/structure/empty.jsp</result>
 			<result>/jsp/ajax/ajax-messaging-body.jsp</result>
-			<interceptor-ref name="default"/>
+			<interceptor-ref name="default" />
 		</action>
-		<action name="ajaxInstantRefreshTitle" class="ajaxInstantMessagesAction"> 
+		<action name="ajaxInstantRefreshTitle" class="ajaxInstantMessagesAction">
 			<result name="input">/jsp/structure/empty.jsp</result>
 			<result name="error">/jsp/structure/empty.jsp</result>
 			<result>/jsp/ajax/ajax-messaging-title.jsp</result>
-			<interceptor-ref name="default"/>
+			<interceptor-ref name="default" />
 		</action>
 		<action name="ajaxAddMediaDialog" class="ajaxGetMediaFormAction">
 			<result name="error">/jsp/ajax/ajax-error-dialog.jsp</result>
 			<result name="forbidden">/jsp/blocks/block-forbidden.jsp</result>
 			<result name="input">/jsp/ajax/ajax-login-dialog.jsp</result>
 			<result>/jsp/blocks/block-add-media.jsp</result>
-			<interceptor-ref name="default"/>
+			<interceptor-ref name="default" />
 		</action>
 		<action name="ajaxWriteMsgDialog" class="ajaxGetMessageFormAction">
 			<result name="error">/jsp/ajax/ajax-error-dialog.jsp</result>
 			<result>/jsp/blocks/block-write-message.jsp</result>
-			<interceptor-ref name="default"/>	
+			<interceptor-ref name="default" />
 		</action>
 		<action name="ajaxGetEventForm" class="ajaxGetEventFormAction">
 			<result name="error">/jsp/ajax/ajax-error-dialog.jsp</result>
 			<result name="input">/jsp/ajax/ajax-login-dialog.jsp</result>
 			<result>/jsp/blocks/block-edit-event.jsp</result>
-			<interceptor-ref name="default"/>
+			<interceptor-ref name="default" />
 		</action>
 		<action name="ajaxGetPlaceForm" class="ajaxGetPlaceFormAction">
 			<result name="error">/jsp/ajax/ajax-error-dialog.jsp</result>
 			<result name="forbidden">/jsp/blocks/block-forbidden.jsp</result>
 			<result>/jsp/blocks/block-edit-place.jsp</result>
 			<result name="input">/jsp/ajax/ajax-login-dialog.jsp</result>
-			<interceptor-ref name="default"/>
+			<interceptor-ref name="default" />
 		</action>
 		<action name="ajaxGetDescForm" class="ajaxGetDescriptionsFormAction">
 			<result name="error">/jsp/ajax/ajax-error-dialog.jsp</result>
 			<result name="forbidden">/jsp/blocks/block-forbidden.jsp</result>
 			<result>/jsp/blocks/block-edit-desc.jsp</result>
 			<result name="input">/jsp/ajax/ajax-login-dialog.jsp</result>
-			<interceptor-ref name="default"/>
+			<interceptor-ref name="default" />
 		</action>
 		<action name="updateDescription" class="updateDescriptionAction">
 			<result name="error">/jsp/ajax/ajax-error-dialog.jsp</result>
@@ -327,13 +337,13 @@
 				<param name="prependServletContext">false</param>
 			</result>
 			<result name="input">/jsp/ajax/ajax-login-dialog.jsp</result>
-			<interceptor-ref name="default"/>
+			<interceptor-ref name="default" />
 		</action>
 		<action name="ajaxGetSponsorForm" class="sponsorshipAction">
 			<result name="error">/jsp/ajax/ajax-error-dialog.jsp</result>
 			<result>/jsp/blocks/block-sponsorship.jsp</result>
 			<result name="input">/jsp/ajax/ajax-login-dialog.jsp</result>
-			<interceptor-ref name="default"/>
+			<interceptor-ref name="default" />
 		</action>
 		<action name="generateThumbs" class="generateThumbsAction">
 			<result>/jsp/tools/messages.jsp</result>
@@ -371,8 +381,8 @@
 		<action name="rankPlaces" class="rankPlacesAction">
 			<result>/jsp/tools/messages.jsp</result>
 		</action>
-		
-		<action name="userRegister" class="userRegisterAction"> 
+
+		<action name="userRegister" class="userRegisterAction">
 			<result type="redirectAction">
 				<param name="actionName">myProfile</param>
 				<param name="namespace">/</param>
@@ -381,18 +391,18 @@
 			</result>
 			<interceptor-ref name="defaultAndCookiesProvider"></interceptor-ref>
 		</action>
-		
+
 		<action name="mobileRegister" class="userRegisterAction">
 			<result>/jsp/pages/json.jsp</result>
 			<result name="input">/jsp/pages/json.jsp</result>
 			<result name="error">/jsp/pages/json.jsp</result>
 		</action>
-		<action name="addMedia" class="addMediaAction"> 
+		<action name="addMedia" class="addMediaAction">
 			<result name="input">/jsp/pages/user-profile.jsp</result>
 			<result>/jsp/ajax/ajax-media-preview.jsp</result>
 			<interceptor-ref name="default"></interceptor-ref>
 		</action>
-		<action name="mobileAddMedia" class="mobileAddMediaAction"> 
+		<action name="mobileAddMedia" class="mobileAddMediaAction">
 			<result>/jsp/pages/json.jsp</result>
 			<result name="input">/jsp/pages/json.jsp</result>
 			<result name="error">/jsp/pages/json.jsp</result>
@@ -402,7 +412,7 @@
 				<param name="location">${redirectUrl}</param>
 				<param name="parse">true</param>
 				<param name="prependServletContext">false</param>
-			</result> 
+			</result>
 		</action>
 		<action name="moveMedia" class="moveMediaAction">
 			<result name="forbidden">/jsp/blocks/block-confirm-delmedia.jsp</result>
@@ -425,7 +435,7 @@
 				<param name="parse">true</param>
 				<param name="id">${eventPlaceId}</param>
 			</result>
-			
+
 			<interceptor-ref name="default"></interceptor-ref>
 		</action>
 		<action name="updatePlace" class="placeUpdateAction">
@@ -440,14 +450,14 @@
 			<interceptor-ref name="cookie">
 				<param name="cookiesName">nxtpUserToken</param>
 			</interceptor-ref>
-			<interceptor-ref name="defaultStack"/>
+			<interceptor-ref name="defaultStack" />
 		</action>
 		<action name="mobileUpdatePlace" class="mobilePlaceUpdateAction">
 			<result type="redirectAction">
 				<param name="actionName">mobileOverview</param>
 				<param name="namespace">/</param>
 				<!-- CHANGE ME TO FALSE WHEN RELEASING -->
-				<param name="prependServletContext">false</param> 
+				<param name="prependServletContext">false</param>
 				<param name="parse">true</param>
 				<param name="id">${newPlaceId}</param>
 				<param name="nxtpUserToken">${nxtpUserToken}</param>
@@ -455,13 +465,13 @@
 			<result name="input">/jsp/pages/json.jsp</result>
 			<result name="error">/jsp/pages/json.jsp</result>
 		</action>
-		<action name="userLogin" class="userLoginAction"> 
+		<action name="userLogin" class="userLoginAction">
 			<result name="input" type="tiles">login-error</result>
 			<result name="redirect" type="redirect">
 				<param name="location">${redirectUrl}</param>
 				<param name="parse">true</param>
 				<param name="prependServletContext">false</param>
-			</result> 
+			</result>
 			<result type="redirectAction">
 				<param name="actionName">userOverview</param>
 				<param name="namespace">/</param>
@@ -471,12 +481,12 @@
 			</result>
 			<interceptor-ref name="defaultAndCookiesProvider"></interceptor-ref>
 		</action>
-		<action name="facebookLogin" class="facebookLoginAction"> 
+		<action name="facebookLogin" class="facebookLoginAction">
 			<result name="redirect" type="redirect">
 				<param name="location">${redirectUrl}</param>
 				<param name="parse">true</param>
 				<param name="prependServletContext">false</param>
-			</result> 
+			</result>
 			<result type="redirectAction">
 				<param name="actionName">userOverview</param>
 				<param name="namespace">/</param>
@@ -486,7 +496,7 @@
 			</result>
 			<interceptor-ref name="defaultAndCookiesProvider"></interceptor-ref>
 		</action>
-		<action name="mobileFacebookLogin" class="facebookLoginAction"> 
+		<action name="mobileFacebookLogin" class="facebookLoginAction">
 			<result>/jsp/pages/json.jsp</result>
 			<result name="error">/jsp/pages/json.jsp</result>
 			<result name="input">/jsp/pages/json.jsp</result>
@@ -496,7 +506,7 @@
 			<result name="error">/jsp/pages/json.jsp</result>
 			<result name="input">/jsp/pages/json.jsp</result>
 		</action>
-		<action name="postComment" class="postCommentAction"> 
+		<action name="postComment" class="postCommentAction">
 			<result type="redirectAction">
 				<param name="actionName">ajaxComments</param>
 				<param name="namespace">/</param>
@@ -505,27 +515,27 @@
 				<param name="id">${commentItemKey}</param>
 				<param name="page">0</param>
 			</result>
-			<interceptor-ref name="default"/>	
+			<interceptor-ref name="default" />
 		</action>
-		<action name="ajaxComments" class="ajaxCommentsAction"> 
+		<action name="ajaxComments" class="ajaxCommentsAction">
 			<result>/jsp/ajax/ajax-comments-contents.jsp</result>
 			<result name="error">/jsp/structure/empty.jsp</result>
 			<result name="input">/jsp/structure/empty.jsp</result>
-			<interceptor-ref name="default"/>	
+			<interceptor-ref name="default" />
 		</action>
-		<action name="ajaxActivities" class="ajaxActivitiesAction"> 
+		<action name="ajaxActivities" class="ajaxActivitiesAction">
 			<result>/jsp/ajax/ajax-activities-contents.jsp</result>
 			<result name="error">/jsp/structure/empty.jsp</result>
 			<result name="input">/jsp/structure/empty.jsp</result>
-			<interceptor-ref name="default"/>	
+			<interceptor-ref name="default" />
 		</action>
-		<action name="toggleUserTag" class="toggleUserTagAction"> 
+		<action name="toggleUserTag" class="toggleUserTagAction">
 			<result>/jsp/structure/empty.jsp</result>
-			<interceptor-ref name="default"/>	
+			<interceptor-ref name="default" />
 		</action>
 		<action name="myMessages" class="myMessagesAction">
 			<result type="tiles">myMessages</result>
-			<interceptor-ref name="default"/>
+			<interceptor-ref name="default" />
 		</action>
 		<action name="mobileMyMessages" class="myMessagesAction">
 			<result>/jsp/pages/json.jsp</result>
@@ -534,15 +544,15 @@
 		</action>
 		<action name="ajaxMyMessages" class="myMessagesAction">
 			<result>/jsp/ajax/ajax-message-mini-list.jsp</result>
-			<interceptor-ref name="default"/>
+			<interceptor-ref name="default" />
 		</action>
 		<action name="myMessageReply" class="myMessageReplyAction">
 			<result>/jsp/ajax/ajax-message-list.jsp</result>
-			<interceptor-ref name="default"/>
+			<interceptor-ref name="default" />
 		</action>
 		<action name="ajaxMyMessageReply" class="myMessageReplyAction">
 			<result>/jsp/pages/user-message-reply.jsp</result>
-			<interceptor-ref name="default"/>
+			<interceptor-ref name="default" />
 		</action>
 		<action name="mobileMyMessagesReply" class="myMessageReplyAction">
 			<result>/jsp/pages/json.jsp</result>
@@ -554,7 +564,7 @@
 			<result name="input">/jsp/pages/json.jsp</result>
 			<result name="error">/jsp/pages/json.jsp</result>
 		</action>
-		<action name="mobileComments" class="ajaxCommentsAction"> 
+		<action name="mobileComments" class="ajaxCommentsAction">
 			<result>/jsp/pages/json.jsp</result>
 			<result name="input">/jsp/pages/json.jsp</result>
 			<result name="error">/jsp/pages/json.jsp</result>
@@ -580,15 +590,15 @@
 		</action>
 		<action name="about" class="aboutAction">
 			<result type="tiles">about</result>
-			<interceptor-ref name="default"/>
+			<interceptor-ref name="default" />
 		</action>
 		<action name="ajaxGetLoginForm" class="aboutAction">
 			<result>/jsp/ajax/ajax-nav-login-dialog.jsp</result>
-			<interceptor-ref name="default"/>
+			<interceptor-ref name="default" />
 		</action>
 		<action name="ajaxGetRegisterForm" class="aboutAction">
 			<result>/jsp/ajax/ajax-nav-register-dialog.jsp</result>
-			<interceptor-ref name="default"/>
+			<interceptor-ref name="default" />
 		</action>
 		<action name="processPayment" class="paymentAction">
 			<result name="success" type="redirectAction">
@@ -596,38 +606,38 @@
 				<param name="prependServletContext">false</param>
 				<param name="namespace">/</param>
 			</result>
-			<interceptor-ref name="default"/>
+			<interceptor-ref name="default" />
 		</action>
 		<action name="partners" class="partnersAction">
 			<result type="tiles">partners</result>
-			<interceptor-ref name="default"/>
+			<interceptor-ref name="default" />
 		</action>
 		<action name="promote" class="promoteAction">
 			<result type="tiles">promote</result>
-			<interceptor-ref name="default"/>
+			<interceptor-ref name="default" />
 		</action>
 		<action name="sitemaproot" class="XMLSitemapRootIndexAction">
 			<result>
 				<param name="contentType">text/xml</param>
 				<param name="location">/jsp/structure/xml-sitemapindex.jsp</param>
 			</result>
-			<interceptor-ref name="default"/>
+			<interceptor-ref name="default" />
 		</action>
 		<action name="sitemapindex" class="XMLSitemapIndexAction">
 			<result>
 				<param name="contentType">text/xml</param>
 				<param name="location">/jsp/structure/xml-sitemapindex.jsp</param>
 			</result>
-			<interceptor-ref name="default"/>
+			<interceptor-ref name="default" />
 		</action>
 		<action name="sitemap" class="XMLSitemapAction">
 			<result>
 				<param name="contentType">text/xml</param>
 				<param name="location">/jsp/structure/xml-sitemap.jsp</param>
 			</result>
-			<interceptor-ref name="default"/>
+			<interceptor-ref name="default" />
 		</action>
-		<action name="activateSponsorship" class="sponsorshipActivationAction"> 
+		<action name="activateSponsorship" class="sponsorshipActivationAction">
 			<result type="redirectAction" name="success">
 				<param name="actionName">myProfile</param>
 				<param name="namespace">/</param>

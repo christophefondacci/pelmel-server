@@ -58,6 +58,7 @@ public class UsersDaoImpl extends AbstractCalDao<User> implements UsersDao {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public List<User> getByIds(List<Long> idList) {
 		if (idList.isEmpty()) {
@@ -103,6 +104,18 @@ public class UsersDaoImpl extends AbstractCalDao<User> implements UsersDao {
 	}
 
 	@Override
+	public User getUserFromEmail(String email) {
+		try {
+			return (User) entityManager
+					.createQuery("from UserImpl where email=:email")
+					.setParameter("email", email).setMaxResults(1)
+					.getSingleResult();
+		} catch (NoResultException e) {
+			return null;
+		}
+	}
+
+	@Override
 	public User getFacebookUser(String facebookId) {
 		try {
 			return (User) entityManager
@@ -113,6 +126,7 @@ public class UsersDaoImpl extends AbstractCalDao<User> implements UsersDao {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public List<User> listItems(RequestType requestType,
 			RequestSettings requestSettings) {
@@ -145,6 +159,19 @@ public class UsersDaoImpl extends AbstractCalDao<User> implements UsersDao {
 					.setParameter("userId", userKey.getNumericId())
 					.executeUpdate();
 		}
+	}
+
+	@Override
+	public void resetPassword(ItemKey userKey, String nxtpUserToken,
+			String newPassword) {
+		final String newSha1 = getSha1(newPassword);
+		// Changing password of user that matches the authentication token
+		entityManager
+				.createNativeQuery(
+						"update USERS set password=:password where user_id=:userId and TOKEN=:token")
+				.setParameter("password", newSha1)
+				.setParameter("userId", userKey.getNumericId())
+				.setParameter("token", nxtpUserToken).executeUpdate();
 	}
 
 	/**
@@ -268,6 +295,7 @@ public class UsersDaoImpl extends AbstractCalDao<User> implements UsersDao {
 	 *            the {@link ItemKey} of element to get users for
 	 * @return the list of places for this item
 	 */
+	@SuppressWarnings("unchecked")
 	private List<ItemUserImpl> findItemUsersFor(ItemKey key, int pageSize,
 			int pageOffset) {
 		if (key == null) {
@@ -296,6 +324,7 @@ public class UsersDaoImpl extends AbstractCalDao<User> implements UsersDao {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public boolean userExists(String email) {
 		final List<User> users = entityManager
