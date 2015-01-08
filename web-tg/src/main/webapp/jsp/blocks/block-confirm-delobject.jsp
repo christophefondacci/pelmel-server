@@ -1,6 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" trimDirectiveWhitespaces="true" %>
 <%@taglib prefix="s" uri="/struts-tags" %>
-<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
 <form method="post" action="/deleteItem">
 
 <input type="hidden" name="confirmed" value="true">

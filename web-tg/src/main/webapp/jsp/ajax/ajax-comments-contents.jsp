@@ -10,7 +10,7 @@
 			<input type="hidden" name="commentItemKey" value="<s:property value="#commentSupport.commentedItemKey"/>"/>
 			<img class="comment-thumb pull-left" src="<s:property value="#commentSupport.currentUserThumbUrl"/>" alt="<s:property value="#commentSupport.getAuthor(#comment)"/> comment">
 			<div class="media-body">
-				<textarea id="comment-text" class="form-control <s:property value="#headerSupport.getPageStyle()"/>-container" name="comment" placeholder="<s:text name="comment.default.text"/>" onfocus="Pelmel.focusComment(this);" onblur="Pelmel.blurComment(this);"></textarea>
+				<textarea id="comment-text" class="form-control col-xs-24 <s:property value="#headerSupport.getPageStyle()"/>-container" name="comment" placeholder="<s:text name="comment.default.text"/>" onfocus="Pelmel.focusComment(this);" onblur="Pelmel.blurComment(this);"></textarea>
 				<div id="comment-post-spinner" class="invisible">&nbsp;</div>
 				<input id="comment-submit" type="submit" class="button <s:property value="#headerSupport.getPageStyle()"/> right" value="<s:text name="comment.submit.label"/>">
 			</div>	

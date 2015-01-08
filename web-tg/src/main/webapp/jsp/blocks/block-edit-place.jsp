@@ -2,7 +2,7 @@
     pageEncoding="UTF-8" trimDirectiveWhitespaces="true"%>
 <%@taglib prefix="s" uri="/struts-tags"%>
 <%@taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles" %>
-  <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+  <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
 <form action="/updatePlace.action" id="update-place-form" method="post">
 <s:set value="placeEditionSupport" var="editionSupport"/>
 <input type="hidden" name="placeId" value="<s:property value="#editionSupport.placeId"/>"/>

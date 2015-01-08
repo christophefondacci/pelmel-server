@@ -2,7 +2,7 @@
     pageEncoding="UTF-8"%>
 <%@taglib prefix="s" uri="/struts-tags"%>
 
-  	<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+  	<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
 <form id="addMediaForm" action="/addMedia.action" method="post" enctype="multipart/form-data">
 <input type="hidden" id="redirectUrl" name="redirectUrl" value="<s:property value="redirectUrl"/>">
 <input type="hidden" name="parentKey" value="<s:property value="currentObjectKey"/>">

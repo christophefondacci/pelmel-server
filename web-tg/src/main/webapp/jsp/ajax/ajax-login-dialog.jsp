@@ -2,7 +2,7 @@
 	pageEncoding="UTF-8" trimDirectiveWhitespaces="true"%>
 <%@taglib prefix="s" uri="/struts-tags"%>
 <%@taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles" %>
-<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
 <h1 id="popup-title" class="section-title category-title <s:property value="headerSupport.getPageStyle()"/>"><s:text name="nav.login.dialog.title"/></h1>
 <div id="mini-dialog">
 	<div class="row">
