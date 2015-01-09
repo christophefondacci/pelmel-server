@@ -90,10 +90,8 @@ public class UrlServiceImpl implements UrlService {
 		if (locale == null) {
 			locale = ActionContext.getContext().getLocale();
 		}
-		final String seoPage = encode(messageSource.getMessage(
-				UrlConstants.KEY_SEARCH_PAGE, null, locale));
+		final String seoPage = encode(DisplayHelper.getName(geoItem, locale));
 		// Building URL
-
 		buf.append("/" + UrlConstants.SEARCH_PAGE + "-" + seoPage + "/"
 				+ action + "-");
 		// Appending SEO representation
@@ -106,11 +104,9 @@ public class UrlServiceImpl implements UrlService {
 					+ UrlConstants.KEY_SEO_ACTION_PREFIX + action);
 		}
 		// Appending geo name and ID
-		String geoName = "";
 		if (geoItem != null) {
 			final ItemKey geoKey = geoItem.getKey();
-			geoName = encode(DisplayHelper.getName(geoItem, locale));
-			buf.append("/" + geoKey.toString() + "-" + geoName);
+			buf.append("/" + geoKey.toString());
 		}
 
 		// handling facetting
@@ -318,11 +314,13 @@ public class UrlServiceImpl implements UrlService {
 			if (locale == null) {
 				locale = ActionContext.getContext().getLocale();
 			}
-			final String seoPage = encode(messageSource.getMessage(
+			String seoPage = encode(messageSource.getMessage(
 					UrlConstants.KEY_OVERVIEW_PAGE, null, locale));
 			String seoObjTypeKey = key.getType();
 			if (item instanceof Place) {
-				seoObjTypeKey = ((Place) item).getPlaceType();
+				final Place place = (Place) item;
+				seoObjTypeKey = place.getPlaceType();
+				seoPage = encode(place.getCity().getName());
 			}
 			final String seoObjType = encode(messageSource.getMessage(
 					UrlConstants.KEY_SEO_TYPE_PREFIX + seoObjTypeKey, null,
