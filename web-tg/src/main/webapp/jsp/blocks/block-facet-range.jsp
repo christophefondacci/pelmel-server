@@ -25,31 +25,19 @@
 <s:if test="#ageRange!=null && #weightRange!=null && #heightRange!=null">
 	<div class="options-container">
 		<label class="col-xs-12"><s:text name="facets.section.age"/></label>
-		<span class="col-xs-12 align-right"><span id="age-min-label"><s:property value="#ageRange.lowerBound"/></span> to <span id="age-max-label"><s:property value="#ageRange.higherBound"/></span></span>
-		<input type="hidden" id="ageMin" value="<s:property value="#ageRange.lowerBound"/>">
-		<input type="hidden" id="ageMax" value="<s:property value="#ageRange.higherBound"/>">
-		<input type="hidden" id="ageCurrentMin" value="<s:property value="#ageCurrentRange.lowerBound"/>">
-		<input type="hidden" id="ageCurrentMax" value="<s:property value="#ageCurrentRange.higherBound"/>">
+		<span class="col-xs-12 align-right"><span id="age-min-label"><s:property value="#ageCurrentRange.lowerBound"/></span> to <span id="age-max-label"><s:property value="#ageCurrentRange.higherBound"/></span></span>
 		<input type="hidden" id="ageUrl" value="<s:property value='#searchSupport.getFacetRangeUrl("age","_min_","_max_")'/>">
-		<div id="age-slider"></div>
+		<div id="age-slider" data-slider-min="<s:property value="#ageRange.lowerBound"/>" data-slider-max="<s:property value="#ageRange.higherBound"/>" data-slider-value="[<s:property value="#ageCurrentRange.lowerBound"/>,<s:property value="#ageCurrentRange.higherBound"/>]" data-slider-tooltip="hide"></div>
 		
 		<label class="col-xs-12"><s:text name="facets.section.weight"/></label>
-		<span class="col-xs-12 align-right"><span id="weight-min-label"><s:property value="#weightRange.lowerBound"/></span> to <span id="weight-max-label"><s:property value="#weightRange.higherBound"/></span>kg</span>
-		<input type="hidden" id="weightMin" value="<s:property value="#weightRange.lowerBound"/>">
-		<input type="hidden" id="weightMax" value="<s:property value="#weightRange.higherBound"/>">
-		<input type="hidden" id="weightCurrentMin" value="<s:property value="#weightCurrentRange.lowerBound"/>">
-		<input type="hidden" id="weightCurrentMax" value="<s:property value="#weightCurrentRange.higherBound"/>">
+		<span class="col-xs-12 align-right"><span id="weight-min-label"><s:property value="#weightCurrentRange.lowerBound"/></span> to <span id="weight-max-label"><s:property value="#weightCurrentRange.higherBound"/></span>kg</span>
 		<input type="hidden" id="weightUrl" value="<s:property value='#searchSupport.getFacetRangeUrl("weight_kg","_min_","_max_")'/>">
-		<div id="weight-slider"></div>
+		<div id="weight-slider" data-slider-min="<s:property value="#weightRange.lowerBound"/>" data-slider-max="<s:property value="#weightRange.higherBound"/>" data-slider-value="[<s:property value="#weightCurrentRange.lowerBound"/>,<s:property value="#weightCurrentRange.higherBound"/>]" data-slider-tooltip="hide"></div>
 		
 		<label class="col-xs-12"><s:text name="facets.section.size"/></label>
-		<span class="col-xs-12 last align-right"><span id="height-min-label"><s:property value="#heightRange.lowerBound"/></span> to <span id="height-max-label"><s:property value="#heightRange.higherBound"/></span>cm</span>
-		<input type="hidden" id="heightMin" value="<s:property value="#heightRange.lowerBound"/>">
-		<input type="hidden" id="heightMax" value="<s:property value="#heightRange.higherBound"/>">
-		<input type="hidden" id="heightCurrentMin" value="<s:property value="#heightCurrentRange.lowerBound"/>">
-		<input type="hidden" id="heightCurrentMax" value="<s:property value="#heightCurrentRange.higherBound"/>">
+		<span class="col-xs-12 last align-right"><span id="height-min-label"><s:property value="#heightCurrentRange.lowerBound"/></span> to <span id="height-max-label"><s:property value="#heightCurrentRange.higherBound"/></span>cm</span>
 		<input type="hidden" id="heightUrl" value="<s:property value='#searchSupport.getFacetRangeUrl("height_cm","_min_","_max_")'/>">
-		<div id="height-slider"></div>
+		<div id="height-slider" data-slider-min="<s:property value="#heightRange.lowerBound"/>" data-slider-max="<s:property value="#heightRange.higherBound"/>" data-slider-value="[<s:property value="#heightCurrentRange.lowerBound"/>,<s:property value="#heightCurrentRange.higherBound"/>]" data-slider-tooltip="hide"></div>
 	</div>
 </s:if>
 

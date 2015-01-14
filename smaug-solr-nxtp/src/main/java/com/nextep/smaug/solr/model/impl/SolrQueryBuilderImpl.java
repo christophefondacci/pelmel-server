@@ -7,8 +7,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.common.params.StatsParams;
 
@@ -27,43 +25,10 @@ import com.videopolis.smaug.model.SearchWindow;
  * @since 04 Jan 2011
  */
 public class SolrQueryBuilderImpl implements QueryBuilder {
-	private static final Log LOGGER = LogFactory
-			.getLog(SolrQueryBuilderImpl.class);
+	// private static final Log LOGGER = LogFactory
+	// .getLog(SolrQueryBuilderImpl.class);
 
-	/** The field for amenity faceting. */
-	private static final String AMENITY_FIELD = "amenity";
-	/** The field for star faceting. */
-	private static final String STAR_FIELD = "star";
-	/** The field for style faceting. */
-	private static final String STYLE_FIELD = "style";
-	/** The field for brand faceting. */
-	private static final String BRAND_FIELD = "brand";
-	/** The limit label for brand faceting. */
-	private static final String BRAND_FACET_LIMIT = "f.brand.facet.limit";
-	/** The limit value for brand faceting. */
-	private static final String BRAND_FACET_LIMIT_VALUE = "15";
-	/** The sort label for brand faceting. */
-	private static final String BRAND_FACET_SORT = "f.brand.facet.sort";
-	/** The sort value for brand faceting. */
-	private static final String BRAND_FACET_SORT_VALUE = "count";
-	/** The field for neighborhood faceting. */
-	private static final String NEIGHBORHOOD_FIELD = "neighborhood";
-	/** The field for price faceting. */
-	private static final String PRICE_FIELD = "price";
-	/** The field for first letter sorting. */
-	private static final String BEGIN_WITH_FIELD = "beginWith";
-	/** The field for name sorting. */
-	private static final String NAME_SORT_FIELD = "name_sort";
-	/** The field for hotel name search. */
-	private static final String HOTEL_NAME_FIELD = "hotelName";
-	/** The field for category faceting. */
-	private static final String CATEGORY_FIELD = "category";
-
-	/**
-	 * This represents the price grouping strategy for solr. It should be RANGE
-	 * (given as input) but it's OR operator for solr.
-	 */
-	private static final String PRICE_GROUPING_STRATEGY = "OR";
+	private boolean noFacetLimit = false;
 
 	/**
 	 * a constant for test purpose used to handle default value for search
@@ -160,7 +125,11 @@ public class SolrQueryBuilderImpl implements QueryBuilder {
 		if (facetedCategories != null && !facetedCategories.isEmpty()) {
 			solrQuery.add("facet.mincount", "1");
 			// if (searchSettings.getSearchScope() == SearchScope.CITY) {
-			solrQuery.add("facet.limit", "-1");
+			// solrQuery.add("facet.limit", "-1");
+			if (noFacetLimit) {
+				solrQuery.add("facet.limit", "-1");
+			}
+			solrQuery.add("facet.sort", "count");
 			// }
 			solrQuery.setFacet(true);
 			final String excludedRangeTags = buildRangeExclusions(searchSettings
@@ -311,4 +280,7 @@ public class SolrQueryBuilderImpl implements QueryBuilder {
 
 	}
 
+	public void setNoFacetLimit(boolean noFacetLimit) {
+		this.noFacetLimit = noFacetLimit;
+	}
 }

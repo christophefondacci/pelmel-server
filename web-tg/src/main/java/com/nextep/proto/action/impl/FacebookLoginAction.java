@@ -31,14 +31,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.nextep.activities.model.ActivityType;
 import com.nextep.activities.model.MutableActivity;
 import com.nextep.cal.util.services.CalPersistenceService;
+import com.nextep.descriptions.model.Description;
 import com.nextep.geo.model.Admin;
 import com.nextep.geo.model.City;
 import com.nextep.geo.model.Country;
 import com.nextep.geo.model.GeographicItem;
 import com.nextep.json.model.impl.JsonUser;
+import com.nextep.media.model.Media;
+import com.nextep.media.model.MediaRequestTypes;
 import com.nextep.media.model.MutableMedia;
+import com.nextep.messages.model.Message;
+import com.nextep.messages.model.impl.MessageRequestTypeFactory;
 import com.nextep.proto.action.base.AbstractAction;
 import com.nextep.proto.action.model.JsonProvider;
+import com.nextep.proto.apis.adapters.ApisMessageFromUserAdapter;
+import com.nextep.proto.apis.adapters.ApisUserLocationItemKeyAdapter;
 import com.nextep.proto.builders.JsonBuilder;
 import com.nextep.proto.helpers.DisplayHelper;
 import com.nextep.proto.helpers.LocalizationHelper;
@@ -46,6 +53,7 @@ import com.nextep.proto.model.Constants;
 import com.nextep.proto.model.CookieProvider;
 import com.nextep.proto.spring.ContextHolder;
 import com.nextep.smaug.service.SearchPersistenceService;
+import com.nextep.tags.model.Tag;
 import com.nextep.users.model.MutableUser;
 import com.nextep.users.model.User;
 import com.nextep.users.services.UsersService;
@@ -54,7 +62,9 @@ import com.videopolis.apis.exception.ApisNoSuchElementException;
 import com.videopolis.apis.factory.ApisFactory;
 import com.videopolis.apis.factory.SearchRestriction;
 import com.videopolis.apis.model.ApisCriterion;
+import com.videopolis.apis.model.ApisItemKeyAdapter;
 import com.videopolis.apis.model.ApisRequest;
+import com.videopolis.apis.model.WithCriterion;
 import com.videopolis.apis.service.ApiCompositeResponse;
 import com.videopolis.calm.exception.CalException;
 import com.videopolis.calm.factory.CalmFactory;
@@ -77,6 +87,9 @@ public class FacebookLoginAction extends AbstractAction implements
 	private static final String facebookSecret = "f16e1ba84008262848fccc07f2bb7a38";
 	private static final String PARAM_ACCESS_TOKEN = "access_token";
 
+	private static final ApisItemKeyAdapter userLocationAdapter = new ApisUserLocationItemKeyAdapter();
+	private static final ApisItemKeyAdapter messageFromUserAdapter = new ApisMessageFromUserAdapter();
+
 	private static final DateFormat FACEBOOK_DATE_FORMAT = new SimpleDateFormat(
 			"MM/dd/yyyy");
 	private CalPersistenceService mediaService;
@@ -91,11 +104,13 @@ public class FacebookLoginAction extends AbstractAction implements
 	private String redirectUrl;
 	private boolean forceRedirect;
 	private User user;
+	private boolean newUser = false;
 
 	private String fbAccessToken = null;
 
 	@Override
 	protected String doExecute() throws Exception {
+		newUser = false;
 		getLoginSupport().initialize(getLocale(), getUrlService(),
 				getHeaderSupport(), redirectUrl);
 		getLoginSupport().setForceRedirect(forceRedirect);
@@ -139,20 +154,40 @@ public class FacebookLoginAction extends AbstractAction implements
 			final String email = jsonUser.getString("email");
 			// Looking for existing user
 			final ApisRequest request = (ApisRequest) ApisFactory
-					.createCompositeRequest().addCriterion(
+					.createCompositeRequest()
+					.addCriterion(
 							(ApisCriterion) SearchRestriction
 									.alternateKey(
 											User.class,
 											CalmFactory.createKey(
 													User.FACEBOOK_TYPE, id))
 									.aliasedBy(APIS_ALIAS_FB)
+									.with(Media.class)
+									.with(SearchRestriction
+											.with(GeographicItem.class))
+									.with((WithCriterion) SearchRestriction
+											.with(Message.class,
+													MessageRequestTypeFactory.UNREAD)
+											.addCriterion(
+													(ApisCriterion) SearchRestriction
+															.adaptKey(
+																	messageFromUserAdapter)
+															.with(Media.class)))
+									.with(Description.class)
+									.with(Tag.class)
 									.addCriterion(
-											SearchRestriction.alternateKey(
-													User.class,
-													CalmFactory.createKey(
-															User.EMAIL_TYPE,
-															email)).aliasedBy(
-													APIS_ALIAS_EMAIL)));
+											(ApisCriterion) SearchRestriction
+													.adaptKey(
+															userLocationAdapter)
+													.aliasedBy(
+															Constants.APIS_ALIAS_USER_LOCATION)
+													.with(Media.class,
+															MediaRequestTypes.THUMB)))
+					.addCriterion(
+							SearchRestriction.alternateKey(
+									User.class,
+									CalmFactory.createKey(User.EMAIL_TYPE,
+											email)).aliasedBy(APIS_ALIAS_EMAIL));
 			try {
 				final ApiCompositeResponse response = (ApiCompositeResponse) getApiService()
 						.execute(request,
@@ -172,6 +207,7 @@ public class FacebookLoginAction extends AbstractAction implements
 						try {
 							user = buildUserFromFacebookUser(accessToken,
 									jsonUser);
+							newUser = true;
 						} catch (SearchException ex) {
 							setErrorMessage("login.facebook.error");
 							LOGGER.error(
@@ -205,6 +241,7 @@ public class FacebookLoginAction extends AbstractAction implements
 	public String getJson() {
 		if (user != null) {
 			final JsonUser json = jsonBuilder.buildJsonUser(user, true, null);
+			json.setNewUser(newUser);
 			return JSONObject.fromObject(json).toString();
 		} else {
 			return "";
@@ -217,6 +254,7 @@ public class FacebookLoginAction extends AbstractAction implements
 		final String id = jsonUser.getString("id");
 		final MutableUser newUser = (MutableUser) getUsersService()
 				.createTransientObject();
+		user = newUser;
 		String username = null;
 		if (jsonUser.containsKey("username")) {
 			username = jsonUser.getString("username");
@@ -505,6 +543,7 @@ public class FacebookLoginAction extends AbstractAction implements
 		this.redirectUrl = redirectUrl;
 	}
 
+	@Override
 	public String getRedirectUrl() {
 		return redirectUrl;
 	}

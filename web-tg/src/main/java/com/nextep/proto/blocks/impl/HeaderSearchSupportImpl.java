@@ -220,7 +220,8 @@ public class HeaderSearchSupportImpl implements HeaderSearchSupport {
 		return getAlternate(language, true);
 	}
 
-	private String getAlternate(String language, boolean facetted) {
+	@Override
+	public String getAlternate(String language, boolean facetted) {
 		String url = null;
 		final Locale locale = new Locale(language);
 		final FacetInformation facetInfo = facetted ? searchSupport

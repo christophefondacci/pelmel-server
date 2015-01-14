@@ -38,6 +38,13 @@
 	<bean id="mobileSearchService" parent="searchService">
 		<property name="filterSeo" value="false"/>
 	</bean>
+	<bean id="noLimitQueryBuilder" class="com.nextep.smaug.solr.model.impl.SolrQueryBuilderImpl" scope="prototype">
+		<property name="noFacetLimit" value="true"></property>
+	</bean>
+	<bean id="sitemapSearchService" parent="searchService">
+		<property name="queryBuilder" ref="noLimitQueryBuilder"/>
+	</bean>
+	
 	<bean id="searchPersistenceService" class="com.nextep.smaug.solr.service.impl.SolrSearchPersistenceServiceImpl" init-method="init">
 		<property name="userSolrUrl">
 			<jee:jndi-lookup jndi-name="java:comp/env/smaug/masterUsersSolrServer"/>
@@ -94,6 +101,7 @@
 	</bean>
 	<bean id="toolsApiService" parent="apiService">
 		<property name="taskRunnerService" ref="apisToolsTaskRunnerService"/>
+		<property name="searchService" ref="sitemapSearchService"/>
 	</bean>
 	<bean id="urlService" class="com.nextep.proto.services.impl.UrlServiceImpl">
 		<property name="webappPrefix" value=""/>

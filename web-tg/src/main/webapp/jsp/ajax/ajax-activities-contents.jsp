@@ -8,7 +8,7 @@
 	<s:set value="#activitySupport.getActivityIconUrl(#activity)" var="imgUrl"/>
 	<div class="media" id="activity-<s:property value="#activity.key"/>">
 			<s:if test="#imgUrl!=null && !''.equals(#imgUrl)">
-				<a class="pull-left" href="<s:property value="#activitySupport.getActivityIconLinkUrl(#activity)"/>"><img class="activity-thumb" src="<s:property value="#activitySupport.getActivityIconUrl(#activity)"/>" alt='<s:property value="#activitySupport.getFrom(#activity)"/>'></a>
+				<a class="pull-left" href="<s:property value="#activitySupport.getActivityIconLinkUrl(#activity)"/>" rel="nofollow"><img class="activity-thumb" src="<s:property value="#activitySupport.getActivityIconUrl(#activity)"/>" alt='<s:property value="#activitySupport.getFrom(#activity)"/>'></a>
 			</s:if><s:else>
 				<span class="pull-left activity-thumb">&nbsp;</span>
 			</s:else>

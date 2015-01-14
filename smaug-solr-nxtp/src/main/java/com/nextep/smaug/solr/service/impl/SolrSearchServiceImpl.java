@@ -4,6 +4,7 @@ import java.net.MalformedURLException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -30,6 +31,7 @@ import com.nextep.geo.model.City;
 import com.nextep.geo.model.Country;
 import com.nextep.geo.model.Place;
 import com.nextep.smaug.solr.model.QueryBuilder;
+import com.nextep.smaug.solr.model.impl.ActivitySearchItemImpl;
 import com.nextep.smaug.solr.model.impl.SearchItemImpl;
 import com.nextep.smaug.solr.model.impl.SearchResponseImpl;
 import com.nextep.smaug.solr.model.impl.SearchTextItemImpl;
@@ -299,6 +301,8 @@ public class SolrSearchServiceImpl implements SearchService {
 	@Override
 	public SearchResponse searchAll(SearchSettings settings, SearchWindow window) {
 		final SolrQuery query = queryBuilder.buildQuery(settings, window);
+		final StringBuilder queryBuf = new StringBuilder();
+		String prefix = "";
 
 		// Selecting SOLR server
 		SolrServer server = userSolrServer;
@@ -310,26 +314,36 @@ public class SolrSearchServiceImpl implements SearchService {
 			server = userSolrServer;
 		} else if (Activity.CAL_TYPE.equals(settings.getReturnedType())) {
 			server = activitiesSolrServer;
+			if (settings.getSearchScope() == SearchScope.USERS) {
+				// A week = 60 x 60 x 24 x 7 x 1000 millis
+				final Calendar cal = Calendar.getInstance();
+				cal.add(Calendar.DAY_OF_YEAR, -7);
+				final long lastWeekDate = Long
+						.valueOf(ActivitySearchItemImpl.DATE_FORMAT.format(cal
+								.getTime()));
+				queryBuf.append("activityDate:[" + lastWeekDate + " TO *]");
+				prefix = " AND ";
+			}
 		}
+
 		if (settings.getSearchScope() == SearchScope.USER_LOCALIZATION) {
 			// Getting current time
 			final long currentTime = System.currentTimeMillis();
 			// Restricting SOLR query to get users
-			final StringBuilder queryBuf = new StringBuilder();
-			queryBuf.append("currentPlaceTimeout: [" + currentTime + " TO *]");
-			// Adding optional SEO filter
-			if (filterSeo && Place.CAL_TYPE.equals(settings.getReturnedType())) {
-				queryBuf.append(" AND seoIndexed:1");
-			}
-			// Setting query
-			query.setQuery(queryBuf.toString());
-		} else {
-			if (filterSeo && Place.CAL_TYPE.equals(settings.getReturnedType())) {
-				query.setQuery("seoIndexed:1");
-			} else {
-				query.setQuery("*:*");
-			}
+			queryBuf.append(prefix + "currentPlaceTimeout: [" + currentTime
+					+ " TO *]");
+			prefix = " AND ";
 		}
+		// Adding optional SEO filter
+		if (filterSeo && Place.CAL_TYPE.equals(settings.getReturnedType())) {
+			queryBuf.append(prefix + "seoIndexed:1");
+			prefix = " AND ";
+		}
+		if (queryBuf.length() == 0) {
+			queryBuf.append("*:*");
+		}
+		// Setting query
+		query.setQuery(queryBuf.toString());
 		log.info("Solr ALL query ["
 				+ ((CommonsHttpSolrServer) server).getBaseURL() + "] = "
 				+ query);

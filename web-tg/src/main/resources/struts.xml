@@ -30,6 +30,7 @@
 			<result name="input" type="tiles">login</result>
 			<result name="error" type="tiles">error</result>
 			<result name="notfound" type="tiles">404</result>
+			<result name="301">/jsp/pages/301.jsp</result>
 		</global-results>
 		<action name="404" class="staticNotFoundAction">
 			<result type="tiles">404</result>

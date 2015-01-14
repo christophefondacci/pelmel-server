@@ -3,11 +3,13 @@ package com.nextep.proto.action.base;
 import java.util.Date;
 import java.util.Locale;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpStatus;
 import org.apache.struts2.ServletActionContext;
 import org.springframework.context.MessageSource;
 
@@ -16,6 +18,7 @@ import com.nextep.proto.action.model.AdBannerAware;
 import com.nextep.proto.action.model.HeaderAware;
 import com.nextep.proto.action.model.LoginAware;
 import com.nextep.proto.blocks.AdBannerSupport;
+import com.nextep.proto.blocks.HeaderSearchSupport;
 import com.nextep.proto.blocks.HeaderSupport;
 import com.nextep.proto.blocks.LoginSupport;
 import com.nextep.proto.exceptions.UserLoginTimeoutException;
@@ -51,6 +54,7 @@ public abstract class AbstractAction extends ActionSupport implements
 	protected static final String NOT_FOUND = "notfound";
 	protected static final String CONFIRM = "confirm";
 	protected static final String REDIRECT = "redirect";
+	protected static final String REDIRECT_PERMANENTLY = "301";
 	private static final String MESSAGE_KEY_LANG = "language.";
 
 	// Injected information & services
@@ -68,10 +72,14 @@ public abstract class AbstractAction extends ActionSupport implements
 	private boolean googleEnabled = true;
 	private AdBannerSupport adBannerSupport;
 
+	@Resource(mappedName = "redirectEnabled")
+	private Boolean redirectEnabled;
+
 	// Dynamic variables
 	private String nxtpUserToken;
 	private String errorMessage;
 	private String url;
+	private String redirectUrl;
 	private String queryParams;
 	private String userEmail;
 	private String language;
@@ -104,6 +112,75 @@ public abstract class AbstractAction extends ActionSupport implements
 		}
 		return error();
 	}
+
+	/**
+	 * Handles redirection if needed and returns whether or not the page is
+	 * redirected
+	 * 
+	 * @return <code>true</code> when redirection was done, else
+	 *         <code>false</code>
+	 */
+	protected boolean handleRedirect() {
+		if (redirectEnabled) {
+			final HttpServletRequest request = ServletActionContext
+					.getRequest();
+			final String url = request.getRequestURL().toString()
+					.replace(request.getContextPath() + "/", "");
+			final String language = getHeaderSupport().getLanguage();
+			String officialUrl = null;
+			if (getHeaderSupport() instanceof HeaderSearchSupport) {
+				officialUrl = ((HeaderSearchSupport) getHeaderSupport())
+						.getAlternate(language, true);
+			} else {
+				officialUrl = getHeaderSupport().getAlternate(language);
+			}
+			if (!officialUrl.equals(url)) {
+				if (url.startsWith(officialUrl)) {
+					LOGGER.warn("REDIRECT ignored for:   " + url + " -> "
+							+ officialUrl);
+				} else {
+					// Last chance, ignoring everything in the last SEO part
+					try {
+						int lastSlash = url.lastIndexOf("/");
+						int lastSep = url.indexOf("-", lastSlash);
+						if (url.substring(0, lastSep).equals(
+								officialUrl.substring(0, lastSep))) {
+							LOGGER.warn("REDIRECT ignored (last SEO unmatch) for:   "
+									+ url + " -> " + officialUrl);
+							return false;
+						}
+					} catch (Exception e) {
+						LOGGER.error(
+								"REDIRECT: Error while trying to remove last SEO part",
+								e);
+					}
+					LOGGER.warn("REDIRECT:   " + url + " -> " + officialUrl);
+					LOGGER.warn("REDIRECT: ->" + officialUrl);
+					final HttpServletResponse servletResponse = ServletActionContext
+							.getResponse();
+					servletResponse.setStatus(HttpStatus.SC_MOVED_PERMANENTLY);
+					servletResponse.setHeader("Location", officialUrl);
+					servletResponse.setHeader("Cache-Control",
+							"max-age=3600, must-revalidate");
+					redirectUrl = officialUrl;
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	// /**
+	// * By default redirect is not supported unless explicitely activated
+	// *
+	// * @return whether or not this page supports 301 redirect if canonical
+	// does
+	// * not match request URL
+	// *
+	// */
+	// protected boolean isRedirectSupported() {
+	// return false;
+	// }
 
 	protected String notFoundStatus() {
 		final HttpServletResponse response = ServletActionContext.getResponse();
@@ -383,10 +460,14 @@ public abstract class AbstractAction extends ActionSupport implements
 	protected String response(String code, int statusCode) {
 		final HttpServletResponse response = ServletActionContext.getResponse();
 		response.setStatus(statusCode);
-		return ERROR;
+		return code;
 	}
 
 	public final String getMediaUrl(String url) {
 		return urlService.getMediaUrl(url);
+	}
+
+	public String getRedirectUrl() {
+		return redirectUrl;
 	}
 }

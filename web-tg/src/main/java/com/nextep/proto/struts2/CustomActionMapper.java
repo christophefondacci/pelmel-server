@@ -148,8 +148,8 @@ public class CustomActionMapper implements ActionMapper {
 					if (searchKeys.length >= 1) {
 						final String geoKey = searchKeys[0];
 						actionParams.put(SEARCH_GEO_KEY, geoKey);
-						if (searchKeys.length > 2) {
-							for (int i = 2; i < searchKeys.length; i++) {
+						if (searchKeys.length >= 2) {
+							for (int i = 1; i < searchKeys.length; i++) {
 								final String searchArg = searchKeys[i];
 								processArg(actionParams, searchArg);
 							}

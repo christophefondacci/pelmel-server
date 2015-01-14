@@ -340,6 +340,8 @@ public class UserImpl extends AbstractCalmObject implements User, MutableUser {
 			return PushProvider.valueOf(pushProvider);
 		} catch (IllegalArgumentException e) {
 			return null;
+		} catch (RuntimeException e) {
+			return null;
 		}
 	}
 
@@ -357,5 +359,5 @@ public class UserImpl extends AbstractCalmObject implements User, MutableUser {
 	public void setPushDeviceId(String pushDeviceId) {
 		this.pushDeviceId = pushDeviceId;
 	}
-	
+
 }

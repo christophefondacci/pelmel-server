@@ -55,7 +55,7 @@
 <!-- 	<Environment name="togaytherBaseUrl" type="java.lang.String" -->
 <!-- 		value="http://local.togayther.net" /> -->
 	<Environment name="togaytherBaseUrl" type="java.lang.String"
-		value="http://10.11.1.15" />
+		value="http://local.pelmelguide.com" />
 	<Environment name="togaytherDomain" type="java.lang.String"
 		value="pelmelguide" />
 	<Environment name="mobile/localizationDistance" type="java.lang.Double"
@@ -117,6 +117,9 @@
 	<Environment name="smtpAuthUser" type="java.lang.String" value="christophe@pelmelguide.com"/>
 	<Environment name="smtpAuthPassword" type="java.lang.String" value="tdk;1558"/>
 	<Environment name="smtpAuthPort" type="java.lang.Integer" value="25"/>
+
+
+	<Environment name="redirectEnabled" type="java.lang.Boolean" value="true"/>
 	
 </Context>
 

@@ -17,7 +17,7 @@
 		<div class="row edit-form">
 			<div class="form-group">
 				<label class="prepend-top col-xs-24"><s:text name="index.register.username"/></label>
-				<input class="form-control" type="text" name="name" value="<s:property value="#currentUser.pseudo"/>">
+				<input class="form-control col-xs-24" type="text" name="name" value="<s:property value="#currentUser.pseudo"/>">
 			</div>
 			<div class="form-group">
 				<label class="col-xs-24"><s:text name="index.register.city"/></label>
@@ -58,15 +58,17 @@
 			<div class="container-padding">
 				<div class="row">
 					<label class="prepend-top col-xs-24"><s:text name="index.register.weight"/></label>
-					<input type="hidden" id="weightMin" value="40"/><input type="hidden" id="weightMax" value="200"/><s:if test="#currentUser==null"><input type="hidden" id="weightCurrentValue" value="70"></s:if><s:else><input type="hidden" id="weightCurrentValue" value="<s:property value="#currentUser.weightInKg"/>"></s:else>
 					<input id="inputWeight" type="hidden" name="weight">
-					<div id="weight-slider"></div>
+					<div class="col-xs-24">
+						<div id="weight-slider" data-slider-min="40" data-slider-max="200" data-slider-value="<s:property value="#currentUser ? 70 : #currentUser.weightInKg"/>" data-slider-tooltip="hide"></div>
+					</div>
 					<span id="weightValue" class="col-xs-24 align-right"><s:property value="#currentUser.weightInKg"/></span>
 					
 					<label class="col-xs-24"><s:text name="index.register.height"/></label>
-					<input type="hidden" id="heightMin" value="120"/><input type="hidden" id="heightMax" value="220"/><s:if test="#currentUser==null"><input type="hidden" id="heightCurrentValue" value="172"></s:if><s:else><input type="hidden" id="heightCurrentValue" value="<s:property value="#currentUser.heightInCm"/>"></s:else>
 					<input id="inputHeight" type="hidden" name="height">
-					<div id="height-slider"></div>
+					<div class="col-xs-24">
+						<div id="height-slider" data-slider-min="120" data-slider-max="220" data-slider-value="<s:property value="#currentUser==null ? 172 : #currentUser.heightInCm"/>" data-slider-tooltip="hide"></div>
+					</div>
 					<span id="heightValue" class="col-xs-24 align-right"><s:property value="#currentUser.heightInCm"/></span>
 				</div>
 			</div>

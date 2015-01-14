@@ -1,5 +1,6 @@
 package com.nextep.proto.blocks;
 
+import com.videopolis.apis.model.FacetInformation;
 
 /**
  * A small extension to the header support allowing to define whether we are in
@@ -39,4 +40,5 @@ public interface HeaderSearchSupport extends HeaderSupport {
 	 */
 	// void setGeoFacetting(FacetInformation geoFacets);
 
+	String getAlternate(String language, boolean facetted);
 }

@@ -272,6 +272,10 @@ public class PlaceOverviewAction extends AbstractAction implements
 				.getPlaceType());
 		getHeaderSupport().initialize(getLocale(), place, null, searchType);
 
+		if (handleRedirect()) {
+			return REDIRECT_PERMANENTLY;
+		}
+
 		// Initializing components
 		final User user = response.getUniqueElement(User.class,
 				CurrentUserSupport.APIS_ALIAS_CURRENT_USER);

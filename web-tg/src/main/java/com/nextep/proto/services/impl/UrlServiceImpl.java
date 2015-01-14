@@ -320,7 +320,7 @@ public class UrlServiceImpl implements UrlService {
 			if (item instanceof Place) {
 				final Place place = (Place) item;
 				seoObjTypeKey = place.getPlaceType();
-				seoPage = encode(place.getCity().getName());
+				seoPage = encode(DisplayHelper.getName(place.getCity()));
 			}
 			final String seoObjType = encode(messageSource.getMessage(
 					UrlConstants.KEY_SEO_TYPE_PREFIX + seoObjTypeKey, null,

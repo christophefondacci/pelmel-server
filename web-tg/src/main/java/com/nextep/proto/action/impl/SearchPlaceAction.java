@@ -143,6 +143,7 @@ public class SearchPlaceAction extends AbstractAction implements SearchAware,
 		if (geopoint == null) {
 			return notFoundStatus();
 		}
+
 		// Checking whether or not we have results
 		Collection<? extends Place> places = null;
 
@@ -201,6 +202,10 @@ public class SearchPlaceAction extends AbstractAction implements SearchAware,
 						DisplayHelper.getName(geopoint), facetInfo,
 						response.getPaginationInfo(Place.class),
 						Collections.EMPTY_LIST);
+
+		if (handleRedirect()) {
+			return REDIRECT_PERMANENTLY;
+		}
 
 		// Localization support
 		localizationSupport.initialize(searchType, getUrlService(),

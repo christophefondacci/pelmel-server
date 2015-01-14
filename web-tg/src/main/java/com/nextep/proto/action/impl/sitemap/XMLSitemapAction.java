@@ -138,13 +138,7 @@ public class XMLSitemapAction extends AbstractAction implements
 							DisplayHelper.getDefaultAjaxContainer(),
 							(GeographicItem) element, SearchType.MAP);
 					break;
-				case ASSOCIATIONS:
-				case BARS:
-				case CLUBS:
-				case RESTAURANTS:
-				case SAUNAS:
-				case SEXCLUBS:
-				case SHOPS:
+				default:
 					// for (String subtype : subtypes) {
 					url = getUrlService().buildSearchUrl(
 							DisplayHelper.getDefaultAjaxContainer(), element,

@@ -7,7 +7,7 @@ import java.util.Date;
 import org.apache.solr.client.solrj.beans.Field;
 
 public class ActivitySearchItemImpl extends SearchItemImpl {
-	private static final DateFormat DATE_FORMAT = new SimpleDateFormat(
+	public static final DateFormat DATE_FORMAT = new SimpleDateFormat(
 			"yyyyMMddHHmmss");
 
 	@Field

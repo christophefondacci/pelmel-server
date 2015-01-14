@@ -25,6 +25,7 @@ public class JsonUser extends JsonLiker {
 	private int checkedInPlacesCount;
 	private JsonLightPlace lastLocation;
 	private Long lastLocationTime;
+	private boolean newUser;
 
 	public String getKey() {
 		return key;
@@ -182,4 +183,11 @@ public class JsonUser extends JsonLiker {
 		this.checkedInPlaces.add(checkedInPlace);
 	}
 
+	public boolean isNewUser() {
+		return newUser;
+	}
+
+	public void setNewUser(boolean newUser) {
+		this.newUser = newUser;
+	}
 }
