@@ -76,9 +76,10 @@ public class TagsDaoImpl implements TagsDao {
 		if (key == null) {
 			return Collections.emptyList();
 		} else {
-			final Query query = entityManager.createQuery(
-					"from ItemTagImpl where itemKey=:key").setParameter("key",
-					key.toString());
+			final Query query = entityManager
+					.createQuery(
+							"from ItemTagImpl it left join fetch it.tag where it.itemKey=:key")
+					.setParameter("key", key.toString());
 			try {
 				// Retrieving from DB
 				final List<ItemTag> itemTags = query.getResultList();
@@ -186,7 +187,7 @@ public class TagsDaoImpl implements TagsDao {
 	private List<UserTaggedItem> getUserTagsFor(ItemKey userKey, ItemKey itemKey) {
 		List<UserTaggedItem> userTaggedItems = entityManager
 				.createQuery(
-						"from UserTaggedItemImpl where userItemKey=:userItemKey and taggedItemKey=:taggedItemKey")
+						"from UserTaggedItemImpl uti left join fetch uti.tag where uti.userItemKey=:userItemKey and uti.taggedItemKey=:taggedItemKey")
 				.setParameter("userItemKey", userKey.toString())
 				.setParameter("taggedItemKey", itemKey.toString())
 				.getResultList();
@@ -227,9 +228,10 @@ public class TagsDaoImpl implements TagsDao {
 				itemKeys.add(itemKey.toString());
 			}
 			// Building our batch query
-			final Query query = entityManager.createQuery(
-					"from ItemTagImpl where itemKey in (:keys)").setParameter(
-					"keys", itemKeys);
+			final Query query = entityManager
+					.createQuery(
+							"from ItemTagImpl it left join fetch it.tag where it.itemKey in (:keys)")
+					.setParameter("keys", itemKeys);
 			try {
 				// Retrieving from DB
 				final List<ItemTag> itemTags = query.getResultList();
@@ -262,7 +264,7 @@ public class TagsDaoImpl implements TagsDao {
 		for (ItemKey userKey : items) {
 			final List<UserTaggedItem> userTags = entityManager
 					.createQuery(
-							"from UserTaggedItemImpl where userItemKey=:userItemKey and taggedItemKey=:taggedItemKey")
+							"from UserTaggedItemImpl uti left join fetch uti.tag where uti.userItemKey=:userItemKey and uti.taggedItemKey=:taggedItemKey")
 					.setParameter("userItemKey", userKey.toString())
 					.setParameter("taggedItemKey", taggedItemKey.toString())
 					.getResultList();

@@ -12,6 +12,8 @@ import javax.persistence.Table;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.Type;
 
 import com.nextep.cal.util.helpers.CalHelper;
@@ -51,6 +53,7 @@ public class PlaceImpl extends AbstractCalmObject implements MutablePlace {
 
 	@ManyToOne(targetEntity = CityImpl.class)
 	@JoinColumn(name = "CITY_ID")
+	@Fetch(FetchMode.JOIN)
 	private City city;
 
 	@Column(name = "ADDRESS1")

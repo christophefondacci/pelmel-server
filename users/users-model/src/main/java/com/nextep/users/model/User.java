@@ -16,6 +16,7 @@ public interface User extends CalmObject, Localized {
 
 	String CAL_TYPE = "USER";
 	String TOKEN_TYPE = "TOKN";
+	String PUSH_TOKEN_TYPE = "PTKN";
 	String FACEBOOK_TYPE = "FCBK";
 	String EMAIL_TYPE = "EMAL";
 

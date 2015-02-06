@@ -7,6 +7,9 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
+
 import com.nextep.geo.model.Admin;
 import com.nextep.geo.model.City;
 import com.nextep.geo.model.Country;
@@ -29,14 +32,17 @@ public class CityImpl extends AbstractCalmObject implements City {
 	private String name;
 
 	@ManyToOne(optional = false, targetEntity = CountryImpl.class)
+	@Fetch(FetchMode.JOIN)
 	@JoinColumn(name = "COUNTRY_CODE")
 	private Country country;
 
 	@ManyToOne(optional = true, targetEntity = AdmImpl.class)
+	@Fetch(FetchMode.JOIN)
 	@JoinColumn(name = "ADM1_ID")
 	private Admin adm1;
 
 	@ManyToOne(optional = true, targetEntity = AdmImpl.class)
+	@Fetch(FetchMode.JOIN)
 	@JoinColumn(name = "ADM2_ID")
 	private Admin adm2;
 

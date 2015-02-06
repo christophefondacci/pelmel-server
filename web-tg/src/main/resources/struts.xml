@@ -346,42 +346,6 @@
 			<result name="input">/jsp/ajax/ajax-login-dialog.jsp</result>
 			<interceptor-ref name="default" />
 		</action>
-		<action name="generateThumbs" class="generateThumbsAction">
-			<result>/jsp/tools/messages.jsp</result>
-		</action>
-		<action name="cleanPastEvents" class="cleanPastEventsAction">
-			<result>/jsp/tools/messages.jsp</result>
-		</action>
-		<action name="refreshEventSeries" class="refreshEventSeriesAction">
-			<result>/jsp/tools/messages.jsp</result>
-		</action>
-		<action name="reindexUsers" class="reindexUsersAction">
-			<result>/jsp/tools/messages.jsp</result>
-		</action>
-		<action name="indexEvents" class="indexEventsAction">
-			<result>/jsp/tools/messages.jsp</result>
-		</action>
-		<action name="indexPlaces" class="indexPlacesAction">
-			<result>/jsp/tools/messages.jsp</result>
-		</action>
-		<action name="openPlacesSEO" class="openPlacesSeoAction">
-			<result>/jsp/tools/messages.jsp</result>
-		</action>
-		<action name="indexCities" class="indexCitiesAction">
-			<result>/jsp/tools/messages.jsp</result>
-		</action>
-		<action name="indexActivities" class="indexActivitiesAction">
-			<result>/jsp/tools/messages.jsp</result>
-		</action>
-		<action name="indexGeoCities" class="indexGeoCitiesAction">
-			<result>/jsp/tools/messages.jsp</result>
-		</action>
-		<action name="geocodePlaces" class="geocodePlacesAction">
-			<result>/jsp/tools/messages.jsp</result>
-		</action>
-		<action name="rankPlaces" class="rankPlacesAction">
-			<result>/jsp/tools/messages.jsp</result>
-		</action>
 
 		<action name="userRegister" class="userRegisterAction">
 			<result type="redirectAction">
@@ -648,5 +612,47 @@
 			<result name="error" type="tiles">error</result>
 			<interceptor-ref name="default"></interceptor-ref>
 		</action>
+	</package>
+	<package name="tools" extends="myPackage" namespace="/tools">
+		<action name="processPushFeedbacks" class="processPushFeedbackAction">
+			<result>/jsp/tools/messages.jsp</result>
+		</action>
+		<action name="generateThumbs" class="generateThumbsAction">
+			<result>/jsp/tools/messages.jsp</result>
+		</action>
+		<action name="cleanPastEvents" class="cleanPastEventsAction">
+			<result>/jsp/tools/messages.jsp</result>
+		</action>
+		<action name="refreshEventSeries" class="refreshEventSeriesAction">
+			<result>/jsp/tools/messages.jsp</result>
+		</action>
+		<action name="reindexUsers" class="reindexUsersAction">
+			<result>/jsp/tools/messages.jsp</result>
+		</action>
+		<action name="indexEvents" class="indexEventsAction">
+			<result>/jsp/tools/messages.jsp</result>
+		</action>
+		<action name="indexPlaces" class="indexPlacesAction">
+			<result>/jsp/tools/messages.jsp</result>
+		</action>
+		<action name="openPlacesSEO" class="openPlacesSeoAction">
+			<result>/jsp/tools/messages.jsp</result>
+		</action>
+		<action name="indexCities" class="indexCitiesAction">
+			<result>/jsp/tools/messages.jsp</result>
+		</action>
+		<action name="indexActivities" class="indexActivitiesAction">
+			<result>/jsp/tools/messages.jsp</result>
+		</action>
+		<action name="indexGeoCities" class="indexGeoCitiesAction">
+			<result>/jsp/tools/messages.jsp</result>
+		</action>
+		<action name="geocodePlaces" class="geocodePlacesAction">
+			<result>/jsp/tools/messages.jsp</result>
+		</action>
+		<action name="rankPlaces" class="rankPlacesAction">
+			<result>/jsp/tools/messages.jsp</result>
+		</action>
+		
 	</package>
 </struts>

@@ -92,7 +92,12 @@ public class GeoDaoImpl implements CalDao<CalmObject>, GeoDao {
 	@Override
 	public List<CalmObject> getByIds(final List<Long> idList) {
 		final List<CalmObject> objList = entityManager
-				.createQuery("from CityImpl where id in (:ids)")
+				.createQuery(
+						"from CityImpl c left join fetch c.adm1 "
+								+ "left join fetch c.adm2 "
+								+ "left join fetch c.country country "
+								+ "left join fetch country.continent "
+								+ "where c.id in (:ids) ")
 				.setParameter("ids", idList).getResultList();
 		return objList;
 
@@ -101,7 +106,8 @@ public class GeoDaoImpl implements CalDao<CalmObject>, GeoDao {
 	@Override
 	public List<Country> getCountries(List<Long> ids) {
 		final List<Country> objList = entityManager
-				.createQuery("from CountryImpl where id in (:ids)")
+				.createQuery(
+						"from CountryImpl c left join fetch c.continent where c.id in (:ids)")
 				.setParameter("ids", ids).getResultList();
 		return objList;
 	}
@@ -495,7 +501,14 @@ public class GeoDaoImpl implements CalDao<CalmObject>, GeoDao {
 			return Collections.emptyList();
 		} else {
 			return entityManager
-					.createQuery("from PlaceImpl where id in (:placeIds)")
+					.createQuery(
+							"from PlaceImpl p "
+									+ "left join fetch p.city city "
+									+ "left join fetch city.adm1 "
+									+ "left join fetch city.adm2 "
+									+ "left join fetch city.country country "
+									+ "left join fetch country.continent "
+									+ "where p.id in (:placeIds)")
 					.setParameter("placeIds", placeIds).getResultList();
 		}
 	}

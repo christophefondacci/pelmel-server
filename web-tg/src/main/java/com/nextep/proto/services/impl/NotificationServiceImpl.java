@@ -1,10 +1,14 @@
 package com.nextep.proto.services.impl;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 
+import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
 import javax.mail.Authenticator;
 import javax.mail.Message;
@@ -18,8 +22,11 @@ import javax.net.ssl.SSLHandshakeException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.util.HtmlUtils;
 
+import com.nextep.cal.util.services.CalPersistenceService;
 import com.nextep.comments.model.Comment;
 import com.nextep.descriptions.model.Description;
 import com.nextep.events.model.Event;
@@ -29,8 +36,12 @@ import com.nextep.proto.helpers.DisplayHelper;
 import com.nextep.proto.model.Constants;
 import com.nextep.proto.services.NotificationService;
 import com.nextep.proto.services.UrlService;
+import com.nextep.proto.spring.ContextHolder;
+import com.nextep.users.model.MutableUser;
 import com.nextep.users.model.User;
 import com.relayrides.pushy.apns.ApnsEnvironment;
+import com.relayrides.pushy.apns.ExpiredToken;
+import com.relayrides.pushy.apns.ExpiredTokenListener;
 import com.relayrides.pushy.apns.FailedConnectionListener;
 import com.relayrides.pushy.apns.PushManager;
 import com.relayrides.pushy.apns.PushManagerConfiguration;
@@ -39,8 +50,17 @@ import com.relayrides.pushy.apns.util.MalformedTokenStringException;
 import com.relayrides.pushy.apns.util.SSLContextUtil;
 import com.relayrides.pushy.apns.util.SimpleApnsPushNotification;
 import com.relayrides.pushy.apns.util.TokenUtil;
+import com.videopolis.apis.exception.ApisException;
+import com.videopolis.apis.factory.ApisFactory;
+import com.videopolis.apis.factory.SearchRestriction;
+import com.videopolis.apis.model.ApisRequest;
+import com.videopolis.apis.service.ApiCompositeResponse;
+import com.videopolis.apis.service.ApiService;
+import com.videopolis.calm.exception.CalException;
+import com.videopolis.calm.factory.CalmFactory;
 import com.videopolis.calm.model.CalmObject;
 import com.videopolis.calm.model.ItemKey;
+import com.videopolis.cals.factory.ContextFactory;
 
 /**
  * Default implementation of notification service using push messages
@@ -50,7 +70,8 @@ import com.videopolis.calm.model.ItemKey;
  */
 public class NotificationServiceImpl implements NotificationService {
 
-	private static Log LOGGER = LogFactory.getLog("notifications");
+	private static final Log LOGGER = LogFactory.getLog("notifications");
+	private static final String APIS_ALIAS_USER = "user";
 
 	@Resource(mappedName = "smtpHostName")
 	private String smtpHostName;
@@ -66,7 +87,15 @@ public class NotificationServiceImpl implements NotificationService {
 	// Injected services
 	private UrlService urlService;
 	private String baseUrl;
+	@Autowired
+	@Qualifier("apiService")
+	private ApiService apiService;
+	@Autowired
+	@Qualifier("usersService")
+	private CalPersistenceService usersService;
+
 	private PushManager<SimpleApnsPushNotification> pushManager;
+
 	// Push information
 	private String pushKeyPath;
 	private String pushKeyPassword;
@@ -97,6 +126,56 @@ public class NotificationServiceImpl implements NotificationService {
 		}
 	}
 
+	private class MyExpiredTokenListener implements
+			ExpiredTokenListener<SimpleApnsPushNotification> {
+
+		@Override
+		public void handleExpiredTokens(
+				final PushManager<? extends SimpleApnsPushNotification> pushManager,
+				final Collection<ExpiredToken> expiredTokens) {
+			if (expiredTokens == null) {
+				return;
+			}
+			LOGGER.info("PUSH: Processing " + expiredTokens.size()
+					+ " expired tokens");
+			for (final ExpiredToken expiredToken : expiredTokens) {
+				final String token = Arrays.toString(expiredToken.getToken());
+				LOGGER.info("PUSH: Processing expired token '" + token + "'");
+				// Stop sending push notifications to each expired token if the
+				// expiration
+				// time is after the last time the app registered that token.
+				try {
+					ApisRequest request = ApisFactory.createCompositeRequest();
+					request.addCriterion(SearchRestriction.alternateKey(
+							User.class,
+							CalmFactory.createKey(User.PUSH_TOKEN_TYPE, token))
+							.aliasedBy(APIS_ALIAS_USER));
+					final ApiCompositeResponse response = (ApiCompositeResponse) apiService
+							.execute(request, ContextFactory
+									.createContext(Locale.getDefault()));
+					final User user = response.getUniqueElement(User.class,
+							APIS_ALIAS_USER);
+					if (user != null) {
+						if (user.getOnlineTimeout().compareTo(
+								expiredToken.getExpiration()) < 0) {
+							ContextHolder.toggleWrite();
+							((MutableUser) user).setPushDeviceId(null);
+							usersService.saveItem(user);
+							LOGGER.info("PUSH: unregistering device ID for user "
+									+ user.getKey()
+									+ " - "
+									+ Arrays.toString(expiredToken.getToken()));
+						}
+					}
+				} catch (CalException | ApisException e) {
+					LOGGER.error(
+							"PUSH: unable to create APIS criterion to fetch token ["
+									+ expiredToken + "]", e);
+				}
+			}
+		}
+	}
+
 	public void init() throws Exception {
 		if (pushEnabled) {
 			final ApnsEnvironment apnsEnv = production ? ApnsEnvironment
@@ -109,13 +188,21 @@ public class NotificationServiceImpl implements NotificationService {
 			pushManager.start();
 			pushManager
 					.registerFailedConnectionListener(new MyFailedConnectionListener());
+			pushManager
+					.registerExpiredTokenListener(new MyExpiredTokenListener());
 		}
 	}
 
+	@PreDestroy
 	public void shutdown() throws Exception {
 		if (pushManager != null) {
 			pushManager.shutdown();
 		}
+	}
+
+	@Override
+	public void checkExpiredPushDevices() {
+		pushManager.requestExpiredTokens();
 	}
 
 	@Override
@@ -413,4 +500,5 @@ public class NotificationServiceImpl implements NotificationService {
 	public void setBaseUrl(String baseUrl) {
 		this.baseUrl = baseUrl;
 	}
+
 }

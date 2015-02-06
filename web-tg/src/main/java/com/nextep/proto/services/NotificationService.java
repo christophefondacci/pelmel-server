@@ -34,6 +34,12 @@ public interface NotificationService {
 			String sound);
 
 	/**
+	 * Queries the various push providers feedback services to check for any app
+	 * uninstall, and unregisters the app id accordingly
+	 */
+	void checkExpiredPushDevices();
+
+	/**
 	 * Notifies administrators of the given information expressed as html
 	 * 
 	 * @param html

@@ -91,9 +91,9 @@
 					
 			</s:if><s:else>
 				<ul class="col-xs-24 col-sm-6 right nav navbar-nav navbar-right">
-			        <li><a href="/ajaxGetRegisterForm" data-toggle="modal" data-target="#myModal">Sign up</a></li>
+			        <li><a href="/ajaxGetRegisterForm" data-toggle="modal" data-target="#myModal" rel="nofollow">Sign up</a></li>
 			        <li><img class="login-separator" src="/images/V3/separator.png" alt="separator"></li>
-			        <li><a href="/ajaxGetLoginForm<s:property value="headerSupport.getElement() ? '?key=' + headerSupport.getElement().getKey() : ''"/>" data-toggle="modal" data-target="#overlayLogin">Login</a></li>
+			        <li><a href="/ajaxGetLoginForm<s:property value="headerSupport.getElement() ? '?key=' + headerSupport.getElement().getKey() : ''"/>"  rel="nofollow" data-toggle="modal" data-target="#overlayLogin">Login</a></li>
 		      	</ul>
 	        </s:else>
 	    </div><!-- /.navbar-collapse -->

@@ -143,16 +143,17 @@ public abstract class AbstractAction extends ActionSupport implements
 					try {
 						int lastSlash = url.lastIndexOf("/");
 						int lastSep = url.indexOf("-", lastSlash);
-						if (url.substring(0, lastSep).equals(
-								officialUrl.substring(0, lastSep))) {
+						if (lastSep > 0
+								&& url.substring(0, lastSep).equals(
+										officialUrl.substring(0, lastSep))) {
 							LOGGER.warn("REDIRECT ignored (last SEO unmatch) for:   "
 									+ url + " -> " + officialUrl);
 							return false;
 						}
 					} catch (Exception e) {
 						LOGGER.error(
-								"REDIRECT: Error while trying to remove last SEO part",
-								e);
+								"REDIRECT: Error while trying to remove last SEO part from '"
+										+ url + "'", e);
 					}
 					LOGGER.warn("REDIRECT:   " + url + " -> " + officialUrl);
 					LOGGER.warn("REDIRECT: ->" + officialUrl);

@@ -227,6 +227,7 @@ public class UserLoginAction extends AbstractAction implements CookieProvider,
 		this.queryParams = queryParams;
 	}
 
+	@Override
 	public String getRedirectUrl() {
 		if (queryParams != null && !"".equals(queryParams)) {
 			return url + "?" + queryParams;
