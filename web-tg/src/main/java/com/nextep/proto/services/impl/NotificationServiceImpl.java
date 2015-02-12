@@ -45,6 +45,8 @@ import com.relayrides.pushy.apns.ExpiredTokenListener;
 import com.relayrides.pushy.apns.FailedConnectionListener;
 import com.relayrides.pushy.apns.PushManager;
 import com.relayrides.pushy.apns.PushManagerConfiguration;
+import com.relayrides.pushy.apns.RejectedNotificationListener;
+import com.relayrides.pushy.apns.RejectedNotificationReason;
 import com.relayrides.pushy.apns.util.ApnsPayloadBuilder;
 import com.relayrides.pushy.apns.util.MalformedTokenStringException;
 import com.relayrides.pushy.apns.util.SSLContextUtil;
@@ -126,6 +128,19 @@ public class NotificationServiceImpl implements NotificationService {
 		}
 	}
 
+	private class MyRejectedNotificationListener implements
+			RejectedNotificationListener<SimpleApnsPushNotification> {
+		@Override
+		public void handleRejectedNotification(
+				PushManager<? extends SimpleApnsPushNotification> pushManager,
+				SimpleApnsPushNotification notification,
+				RejectedNotificationReason rejectionReason) {
+			LOGGER.error("PUSH: Notification rejected (reason: "
+					+ rejectionReason.getErrorCode() + ") '"
+					+ notification.getPayload() + "'");
+		}
+	}
+
 	private class MyExpiredTokenListener implements
 			ExpiredTokenListener<SimpleApnsPushNotification> {
 
@@ -190,6 +205,8 @@ public class NotificationServiceImpl implements NotificationService {
 					.registerFailedConnectionListener(new MyFailedConnectionListener());
 			pushManager
 					.registerExpiredTokenListener(new MyExpiredTokenListener());
+			pushManager
+					.registerRejectedNotificationListener(new MyRejectedNotificationListener());
 		}
 	}
 
