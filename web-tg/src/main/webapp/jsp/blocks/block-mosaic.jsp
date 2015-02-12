@@ -26,8 +26,8 @@
 					<s:set value="#mosaicSupport.getTooltipText(#row,#col)" var="tooltip"/>
 					<s:if test="#tooltip!=null">
 						<div id="info-<s:property value="#row + '-' + #col"/>" class="tile-info">
-							<img id="img-<s:property value="#row + '-' + #col"/>" class="tile-info-arrow" src="/images/V2/pointe_boule.gif">
-							<div id="content-<s:property value="#row + '-' + #col"/>" class="tile-info-content"><s:property value="#tooltip" escapeHtml="false"/></div>
+							<img class="tile-info-arrow" src="/images/V2/pointe_boule.gif">
+							<div class="tile-info-content"><s:property value="#tooltip" escapeHtml="false"/></div>
 						</div>
 					</s:if>	
 				</s:if>

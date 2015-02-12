@@ -46,7 +46,7 @@ module.exports = function(grunt) {
 						files : [ {
 							expand : true,
 							cwd : '../web-static/',
-							src : ['fonts/**/*','images/**/*'],
+							src : ['fonts/**/*','images/**/*','js/html5shiv.js','js/respond.min.js'],
 							dest : 'dist/'
 						}] 
 					} ,

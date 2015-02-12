@@ -49,6 +49,7 @@ import com.nextep.users.model.MutableUser;
 import com.nextep.users.model.User;
 import com.nextep.users.model.impl.UserImpl;
 import com.nextep.users.services.UsersService;
+import com.opensymphony.xwork2.ActionContext;
 import com.opensymphony.xwork2.conversion.annotations.Conversion;
 import com.videopolis.apis.factory.ApisFactory;
 import com.videopolis.apis.factory.SearchRestriction;
@@ -437,7 +438,11 @@ public class UserRegistrationAction extends AbstractAction implements
 				for (String domainExt : domainExts) {
 					final Cookie c = new Cookie(Constants.USER_COOKIE_NAME,
 							user.getToken().toString());
-					c.setDomain("." + getDomainName() + "." + domainExt);
+					final String subdomain = (String) ActionContext
+							.getContext().get(
+									Constants.ACTION_CONTEXT_SUBDOMAIN);
+					c.setDomain(subdomain + "." + getDomainName() + "."
+							+ domainExt);
 					cookies.add(c);
 				}
 			}

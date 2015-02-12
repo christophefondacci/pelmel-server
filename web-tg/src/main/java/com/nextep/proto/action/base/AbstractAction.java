@@ -468,6 +468,10 @@ public abstract class AbstractAction extends ActionSupport implements
 		return urlService.getMediaUrl(url);
 	}
 
+	public final String getStaticUrl(String url) {
+		return urlService.getStaticUrl(url);
+	}
+
 	public String getRedirectUrl() {
 		return redirectUrl;
 	}
