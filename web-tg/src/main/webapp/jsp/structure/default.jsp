@@ -15,10 +15,16 @@
     <link href="/styles/slider.min.css" rel="stylesheet" type="text/css" media="all"/>
     <link href="/styles/tg-main.css" rel="stylesheet" type="text/css" media="all"/>
     <!-- endbuild -->
+    <link rel="stylesheet" href="<s:property value="getStaticUrl('/images/favicon.ico?v=5')"/>" />
+    <link rel="icon" type="image/png" href="<s:property value="getStaticUrl('/images/favicon-32x32.png')"/>" sizes="32x32">
+	<link rel="icon" type="image/png" href="<s:property value="getStaticUrl('/images/android-chrome-192x192.png')"/>" sizes="192x192">
+	<link rel="icon" type="image/png" href="<s:property value="getStaticUrl('/images/favicon-96x96.png')"/>" sizes="96x96">
+	<link rel="icon" type="image/png" href="<s:property value="getStaticUrl('/images/favicon-16x16.png')"/>" sizes="16x16">
+	<link rel="shortcut icon" href="<s:property value="getStaticUrl('/images/favicon.ico?v=5')"/>">
     <tiles:insertAttribute name="header"/>
     <!--[if lt IE 9]>
-	  <script src="/js/html5shiv.js"></script>
-	  <script src="/js/respond.min.js"></script>
+	  <script src="http://static.pelmelguide.com/js/html5shiv.js"></script>
+	  <script src="http://static.pelmelguide.com/js/respond.min.js"></script>
 	<![endif]-->
 </head>
 <body id="page-home" class="<tiles:insertAttribute name="background"/>">

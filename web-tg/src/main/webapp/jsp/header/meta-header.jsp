@@ -16,6 +16,5 @@
 <link rel="alternate" hreflang="<s:property value="#lang"/>" href="<s:property value="#hs.getAlternate(#lang)"/>"/>
 </s:if>
 </s:iterator>
-<link rel="shortcut icon" href="<s:property value="buildSecuredUrl('/images/favicon.ico?version=4')"/>">
 <tiles:insertTemplate template="/jsp/header/meta-fb-header.jsp"/>
 <tiles:insertTemplate template="/jsp/header/analytics-header.jsp"/>
