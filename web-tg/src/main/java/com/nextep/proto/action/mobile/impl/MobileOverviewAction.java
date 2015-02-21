@@ -18,6 +18,7 @@ import com.nextep.activities.model.impl.RequestTypeLatestActivities;
 import com.nextep.comments.model.Comment;
 import com.nextep.descriptions.model.Description;
 import com.nextep.events.model.Event;
+import com.nextep.events.model.EventSeries;
 import com.nextep.geo.model.GeographicItem;
 import com.nextep.geo.model.Place;
 import com.nextep.json.model.impl.JsonEvent;
@@ -160,6 +161,8 @@ public class MobileOverviewAction extends AbstractAction implements
 													Constants.APIS_ALIAS_EVENT_PLACE)
 											.with(Media.class,
 													MediaRequestTypes.THUMB)));
+			objCriterion
+					.addCriterion(SearchRestriction.with(EventSeries.class));
 			// Getting comments count
 			objCriterion.addCriterion(SearchRestriction.with(Comment.class, 1,
 					0).aliasedBy(APIS_ALIAS_COMMENTS));
@@ -400,10 +403,12 @@ public class MobileOverviewAction extends AbstractAction implements
 			final List<? extends Event> events = overviewObject
 					.get(Event.class);
 			for (Event event : events) {
-				final JsonLightEvent jsonEvent = new JsonLightEvent();
-				jsonBuilder.fillJsonEvent(jsonEvent, event, highRes,
-						getLocale(), response);
-				jsonElement.addEvent(jsonEvent);
+				if (!(event instanceof EventSeries)) {
+					final JsonLightEvent jsonEvent = new JsonLightEvent();
+					jsonBuilder.fillJsonEvent(jsonEvent, event, highRes,
+							getLocale(), response);
+					jsonElement.addEvent(jsonEvent);
+				}
 			}
 
 			// Filling number of comments

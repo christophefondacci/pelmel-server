@@ -11,6 +11,8 @@ public enum CalendarType {
 	OPENING(false),
 	/** Happy hour calendar */
 	HAPPY_HOUR(false),
+	/** Theme nights */
+	THEME(false),
 	/** Default event */
 	EVENT(true);
 

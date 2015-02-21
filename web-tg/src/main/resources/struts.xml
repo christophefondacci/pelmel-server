@@ -403,6 +403,17 @@
 
 			<interceptor-ref name="default"></interceptor-ref>
 		</action>
+		<action name="mobileUpdateEvent" class="eventUpdateAction">
+			<result>/jsp/pages/json.jsp</result>
+			<result name="input">/jsp/pages/json.jsp</result>
+			<result name="error">/jsp/pages/json.jsp</result>
+			<result name="placeRedirect">/jsp/pages/json.jsp</result>
+		</action>
+		<action name="mobileDeleteEvent" class="eventDeleteAction">
+			<result>/jsp/pages/json.jsp</result>
+			<result name="input">/jsp/pages/json.jsp</result>
+			<result name="error">/jsp/pages/json.jsp</result>
+		</action>
 		<action name="updatePlace" class="placeUpdateAction">
 			<result name="input">/jsp/blocks/block-edit-place.jsp</result>
 			<result type="redirectAction">

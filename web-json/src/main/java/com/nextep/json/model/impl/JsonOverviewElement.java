@@ -1,6 +1,7 @@
 package com.nextep.json.model.impl;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -21,8 +22,8 @@ public class JsonOverviewElement extends JsonLiker {
 	private int closedReportsCount = 0;
 	private List<JsonLightUser> inUsers = new ArrayList<JsonLightUser>();
 	private List<String> tags = new ArrayList<String>();
-
 	private List<JsonLightEvent> events = new ArrayList<JsonLightEvent>();
+	private Collection<JsonHour> hours = new ArrayList<JsonHour>();
 
 	public JsonOverviewElement(String key) {
 		this.key = key;
@@ -182,5 +183,13 @@ public class JsonOverviewElement extends JsonLiker {
 
 	public String getCity() {
 		return city;
+	}
+
+	public void setHours(Collection<JsonHour> hours) {
+		this.hours = hours;
+	}
+
+	public Collection<JsonHour> getHours() {
+		return hours;
 	}
 }

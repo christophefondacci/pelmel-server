@@ -140,6 +140,8 @@
 		<property name="descriptionsManagementService" ref="descriptionsManagementService"/>
 		<property name="eventManagementService" ref="eventManagementService"/>
 	</bean>
+	<bean id="eventDeleteAction" class="com.nextep.proto.action.impl.EventDeleteAction" parent="abstractAction" scope="request">
+	</bean>
 	<bean id="placeUpdateAction" class="com.nextep.proto.action.impl.PlaceUpdateAction" parent="abstractAction" scope="request">
 		<property name="placeService" ref="placesService"/>
 		<property name="activitiesService" ref="activitiesService"/>

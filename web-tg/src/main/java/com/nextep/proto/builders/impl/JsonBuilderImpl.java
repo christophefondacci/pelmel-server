@@ -1,6 +1,7 @@
 package com.nextep.proto.builders.impl;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -10,7 +11,6 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.context.MessageSource;
 
 import com.nextep.activities.model.Activity;
 import com.nextep.advertising.model.AdvertisingBooster;
@@ -27,6 +27,7 @@ import com.nextep.json.model.impl.JsonActivity;
 import com.nextep.json.model.impl.JsonDescription;
 import com.nextep.json.model.impl.JsonEvent;
 import com.nextep.json.model.impl.JsonFacet;
+import com.nextep.json.model.impl.JsonHour;
 import com.nextep.json.model.impl.JsonLightCity;
 import com.nextep.json.model.impl.JsonLightPlace;
 import com.nextep.json.model.impl.JsonLightUser;
@@ -67,10 +68,6 @@ import com.videopolis.smaug.model.FacetCount;
 public class JsonBuilderImpl implements JsonBuilder {
 
 	private static final Log LOGGER = LogFactory.getLog(JsonBuilderImpl.class);
-	private static final String KEY_FACET_ICON_PREFIX = "facet.icon.";
-	private static final String KEY_FACET_LABEL_PREFIX = "facet.label.";
-	private static final String KEY_ICON_LOCALE_PREFIX = "locale.icon.";
-	private MessageSource messageSource;
 	private DistanceDisplayService distanceDisplayService;
 	private EventManagementService eventManagementService;
 	private String baseUrl;
@@ -83,7 +80,6 @@ public class JsonBuilderImpl implements JsonBuilder {
 		final JsonOverviewElement elt = new JsonOverviewElement(o.getKey()
 				.toString());
 		elt.setName(DisplayHelper.getName(o));
-		final Media m = MediaHelper.getSingleMedia(o);
 
 		// Place specific information
 		if (o instanceof Place) {
@@ -91,6 +87,13 @@ public class JsonBuilderImpl implements JsonBuilder {
 			elt.setAddress(p.getAddress1());
 			elt.setType(p.getPlaceType());
 			elt.setCity(p.getCity().getName());
+
+			// Filling hours
+			final List<? extends EventSeries> events = p.get(EventSeries.class);
+			if (events != null) {
+				final Collection<JsonHour> hours = buildJsonHours(events);
+				elt.setHours(hours);
+			}
 		}
 
 		// Iterating over descriptions to generate JSON description bean
@@ -128,10 +131,6 @@ public class JsonBuilderImpl implements JsonBuilder {
 		}
 
 		return selectedDesc;
-	}
-
-	public void setMessageSource(MessageSource messageSource) {
-		this.messageSource = messageSource;
 	}
 
 	public void setBaseUrl(String baseUrl) {
@@ -683,5 +682,33 @@ public class JsonBuilderImpl implements JsonBuilder {
 			jsonCity.setMedia(jsonMedia);
 		}
 		return jsonCity;
+	}
+
+	@Override
+	public Collection<JsonHour> buildJsonHours(
+			Collection<? extends EventSeries> eventSeries) {
+		final List<JsonHour> jsonHours = new ArrayList<JsonHour>();
+
+		for (EventSeries event : eventSeries) {
+			final JsonHour hour = new JsonHour();
+			hour.setKey(event.getKey() != null ? event.getKey().toString()
+					: null);
+			hour.setName(event.getName());
+			hour.setStartHour(event.getStartHour());
+			hour.setStartMinute(event.getStartMinute());
+			hour.setEndHour(event.getEndHour());
+			hour.setEndMinute(event.getEndMinute());
+			hour.setMonday(event.isMonday());
+			hour.setTuesday(event.isTuesday());
+			hour.setWednesday(event.isWednesday());
+			hour.setThursday(event.isThursday());
+			hour.setFriday(event.isFriday());
+			hour.setSaturday(event.isSaturday());
+			hour.setSunday(event.isSunday());
+			hour.setType(event.getCalendarType().name());
+			hour.setRecurrency(event.getWeekOfMonthOffset());
+			jsonHours.add(hour);
+		}
+		return jsonHours;
 	}
 }

@@ -18,4 +18,12 @@ public interface EventSeriesDao extends CalDaoExt<EventSeries> {
 	 *         corresponding keys
 	 */
 	Map<ItemKey, List<EventSeries>> getEventsSeriesFor(List<ItemKey> itemKeys);
+
+	/**
+	 * Deletes an {@link EventSeries} from the database
+	 * 
+	 * @param itemKey
+	 *            the {@link ItemKey} of the series to remove
+	 */
+	void delete(ItemKey itemKey);
 }

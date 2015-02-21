@@ -103,10 +103,11 @@ public abstract class AbstractAction extends ActionSupport implements
 		try {
 			return doExecute();
 		} catch (ApisNoSuchElementException e) {
-
+			response.setStatus(HttpStatus.SC_NOT_FOUND);
 		} catch (UserLoginTimeoutException e) {
 			return loginTimeoutError(e.getMessage());
 		} catch (Exception e) {
+			response.setStatus(HttpStatus.SC_INTERNAL_SERVER_ERROR);
 			LOGGER.error(
 					"Error while executing the action : " + e.getMessage(), e);
 		}

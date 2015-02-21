@@ -5,11 +5,15 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Locale;
 
+import net.sf.json.JSONObject;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.nextep.activities.model.ActivityType;
 import com.nextep.activities.model.MutableActivity;
@@ -23,9 +27,12 @@ import com.nextep.events.model.MutableEventSeries;
 import com.nextep.geo.model.City;
 import com.nextep.geo.model.GeographicItem;
 import com.nextep.geo.model.Place;
+import com.nextep.json.model.impl.JsonHour;
 import com.nextep.proto.action.base.AbstractAction;
 import com.nextep.proto.action.model.DescriptionsUpdateAware;
+import com.nextep.proto.action.model.JsonProvider;
 import com.nextep.proto.apis.model.ApisCriterionFactory;
+import com.nextep.proto.builders.JsonBuilder;
 import com.nextep.proto.model.ActivityConstants;
 import com.nextep.proto.model.Constants;
 import com.nextep.proto.services.DescriptionsManagementService;
@@ -46,7 +53,7 @@ import com.videopolis.cals.model.CalContext;
 import com.videopolis.smaug.common.model.SearchScope;
 
 public class EventUpdateAction extends AbstractAction implements
-		DescriptionsUpdateAware {
+		DescriptionsUpdateAware, JsonProvider {
 
 	private static final long serialVersionUID = 381306118736563049L;
 	private static final Log LOGGER = LogFactory
@@ -84,6 +91,8 @@ public class EventUpdateAction extends AbstractAction implements
 	private SearchPersistenceService searchService;
 	private PuffService puffService;
 	private EventManagementService eventManagementService;
+	@Autowired
+	private JsonBuilder jsonBuilder;
 
 	private String eventId;
 	private String name;
@@ -99,6 +108,8 @@ public class EventUpdateAction extends AbstractAction implements
 	private String newEventId;
 	private String eventPlaceId;
 	private String calendarType;
+
+	private Event updatedEvent;
 
 	@Override
 	protected String doExecute() throws Exception {
@@ -160,46 +171,54 @@ public class EventUpdateAction extends AbstractAction implements
 		// Updating information
 		event.setName(name);
 		event.setLocationKey(placeKey);
-		// Trying to parse event start date
 		Date eventStartDate = null;
-		final String startStr = startDate + " " + startHour + ":" + startMinute;
-		try {
-			if (startStr != null) {
-				eventStartDate = dateFormat.parse(startStr);
-			}
-		} catch (ParseException e) {
-			LOGGER.error("Unable to parse date of event " + eventId + " ["
-					+ startStr + "]: " + e.getMessage());
-		}
-		// Trying to parse event end date
-		Date eventEndDate = null;
-		final String endStr = endDate + " " + endHour + ":" + endMinute;
-		try {
-			if (endStr != null) {
-				eventEndDate = dateFormat.parse(endStr);
-			}
-		} catch (ParseException e) {
-			if (startDate != null) {
-				try {
-					Date eventStartNoon = dateFormat
-							.parse(startDate + " 00:00");
-					Calendar c = Calendar.getInstance();
-					c.setTime(eventStartNoon);
-					c.add(Calendar.DATE, 1);
-					eventEndDate = c.getTime();
-				} catch (ParseException ex) {
-					LOGGER.error("Unable to parse GENERATED end date of event "
-							+ eventId + " [" + startDate + " 00:00" + "]: "
-							+ ex.getMessage());
+		if (startDate != null) {
+			// Trying to parse event start date
+			final String startStr = startDate + " " + startHour + ":"
+					+ startMinute;
+			try {
+				if (startStr != null) {
+					eventStartDate = dateFormat.parse(startStr);
 				}
-			} else {
-				LOGGER.error("Unable to parse end date of event " + eventId
-						+ " [" + endStr + "]: " + e.getMessage());
+			} catch (ParseException e) {
+				LOGGER.error("Unable to parse date of event " + eventId + " ["
+						+ startStr + "]: " + e.getMessage());
 			}
+			event.setStartDate(eventStartDate);
 		}
-		event.setStartDate(eventStartDate);
-		event.setEndDate(eventEndDate);
-
+		Date eventEndDate = null;
+		if (endDate != null) {
+			// Trying to parse event end date
+			final String endStr = endDate + " " + endHour + ":" + endMinute;
+			try {
+				if (endStr != null) {
+					eventEndDate = dateFormat.parse(endStr);
+				}
+			} catch (ParseException e) {
+				if (startDate != null) {
+					try {
+						Date eventStartNoon = dateFormat.parse(startDate
+								+ " 00:00");
+						Calendar c = Calendar.getInstance();
+						c.setTime(eventStartNoon);
+						c.add(Calendar.DATE, 1);
+						eventEndDate = c.getTime();
+					} catch (ParseException ex) {
+						LOGGER.error("Unable to parse GENERATED end date of event "
+								+ eventId
+								+ " ["
+								+ startDate
+								+ " 00:00"
+								+ "]: "
+								+ ex.getMessage());
+					}
+				} else {
+					LOGGER.error("Unable to parse end date of event " + eventId
+							+ " [" + endStr + "]: " + e.getMessage());
+				}
+			}
+			event.setEndDate(eventEndDate);
+		}
 		// Now setting any event series specific information
 		if (event instanceof EventSeries) {
 			final MutableEventSeries series = (MutableEventSeries) event;
@@ -356,12 +375,14 @@ public class EventUpdateAction extends AbstractAction implements
 			searchService.storeCalmObject(activity, SearchScope.CHILDREN);
 		}
 
+		updatedEvent = event;
 		if (EventSeries.SERIES_CAL_ID.equals(fullEvent.getKey().getType())) {
 			if (((EventSeries) fullEvent).getCalendarType() != CalendarType.EVENT) {
 				eventPlaceId = fullEvent.getLocationKey().toString();
 				return ACTION_RESULT_PLACE;
 			}
 		}
+
 		return SUCCESS;
 	}
 
@@ -389,6 +410,18 @@ public class EventUpdateAction extends AbstractAction implements
 			separator = ActivityConstants.SEPARATOR;
 		}
 		return buf.toString();
+	}
+
+	@Override
+	public String getJson() {
+		if (updatedEvent instanceof EventSeries) {
+			final Collection<JsonHour> hours = jsonBuilder
+					.buildJsonHours(Arrays.asList((EventSeries) updatedEvent));
+			return JSONObject.fromObject(hours.iterator().next()).toString();
+		} else {
+			throw new UnsupportedOperationException(
+					"JSON update of events not yet supported");
+		}
 	}
 
 	public String getEventId() {

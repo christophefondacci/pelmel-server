@@ -1,5 +1,6 @@
 package com.nextep.proto.builders;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -7,11 +8,13 @@ import java.util.Map;
 import com.nextep.activities.model.Activity;
 import com.nextep.comments.model.Comment;
 import com.nextep.events.model.Event;
+import com.nextep.events.model.EventSeries;
 import com.nextep.geo.model.City;
 import com.nextep.geo.model.GeographicItem;
 import com.nextep.geo.model.Place;
 import com.nextep.json.model.IJsonLightEvent;
 import com.nextep.json.model.impl.JsonActivity;
+import com.nextep.json.model.impl.JsonHour;
 import com.nextep.json.model.impl.JsonLightCity;
 import com.nextep.json.model.impl.JsonLightPlace;
 import com.nextep.json.model.impl.JsonLightUser;
@@ -181,4 +184,17 @@ public interface JsonBuilder {
 	 * @return the JSON light representation of the city
 	 */
 	JsonLightCity buildJsonLightCity(City city, boolean highRes, Locale l);
+
+	/**
+	 * Translates a collection of {@link EventSeries} into a collection of
+	 * serializable {@link JsonHour} information.
+	 * 
+	 * @param eventSeries
+	 *            the collection of events to translate, as {@link EventSeries}
+	 *            beans
+	 * @return a corresponding collection of {@link JsonHour} beans
+	 */
+	Collection<JsonHour> buildJsonHours(
+			Collection<? extends EventSeries> eventSeries);
+
 }

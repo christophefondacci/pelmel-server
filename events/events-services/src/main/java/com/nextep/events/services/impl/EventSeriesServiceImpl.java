@@ -4,7 +4,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import com.nextep.cal.util.services.CalPersistenceService;
+import com.nextep.cal.util.services.CalExtendedPersistenceService;
 import com.nextep.cal.util.services.base.AbstractDaoBasedCalServiceImpl;
 import com.nextep.events.dao.EventSeriesDao;
 import com.nextep.events.model.EventSeries;
@@ -18,7 +18,7 @@ import com.videopolis.cals.model.MultiKeyItemsResponse;
 import com.videopolis.cals.model.impl.MultiKeyItemsResponseImpl;
 
 public class EventSeriesServiceImpl extends AbstractDaoBasedCalServiceImpl
-		implements CalPersistenceService {
+		implements CalExtendedPersistenceService {
 
 	@Override
 	public Class<? extends CalmObject> getProvidedClass() {
@@ -69,5 +69,10 @@ public class EventSeriesServiceImpl extends AbstractDaoBasedCalServiceImpl
 
 		// Response is ready
 		return response;
+	}
+
+	@Override
+	public void delete(ItemKey itemKey) {
+		((EventSeriesDao) getCalDao()).delete(itemKey);
 	}
 }

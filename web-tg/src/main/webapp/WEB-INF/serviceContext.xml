@@ -150,7 +150,7 @@
 		</property>
 	</bean>
 	<bean id="jsonBuilder" class="com.nextep.proto.builders.impl.JsonBuilderImpl">
-		<property name="messageSource" ref="globalMessages"/>
+<!-- 		<property name="messageSource" ref="globalMessages"/> -->
 		<property name="distanceDisplayService" ref="distanceDisplayService"/>
 		<property name="eventManagementService" ref="eventManagementService"/>
 		<property name="baseUrl">
