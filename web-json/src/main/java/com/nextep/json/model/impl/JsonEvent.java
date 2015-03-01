@@ -115,4 +115,14 @@ public class JsonEvent extends JsonLiker implements IJsonLightEvent {
 	public int getCommentsCount() {
 		return commentsCount;
 	}
+
+	@Override
+	public void setParticipants(int participants) {
+		this.participants = participants;
+	}
+
+	@Override
+	public int getParticipants() {
+		return participants;
+	}
 }

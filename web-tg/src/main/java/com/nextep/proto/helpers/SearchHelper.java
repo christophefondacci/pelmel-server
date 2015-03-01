@@ -4,9 +4,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
@@ -33,6 +35,7 @@ import com.videopolis.smaug.common.model.FacetRange;
 import com.videopolis.smaug.common.model.SearchScope;
 import com.videopolis.smaug.common.model.impl.FacetCategoryImpl;
 import com.videopolis.smaug.common.model.impl.FacetImpl;
+import com.videopolis.smaug.model.FacetCount;
 
 public final class SearchHelper {
 
@@ -465,5 +468,28 @@ public final class SearchHelper {
 			}
 		}
 		return searchType;
+	}
+
+	/**
+	 * Unwraps the facet information structure into a map of facet counts hashed
+	 * by their facet codes represented as plain string.
+	 * 
+	 * @param facetInfo
+	 *            the {@link FacetInformation} to unwrap
+	 * @param category
+	 *            the {@link FacetCategory} to unwrap
+	 * @return the corresponding {@link Map}
+	 */
+	public static Map<String, Integer> unwrapFacets(FacetInformation facetInfo,
+			FacetCategory category) {
+		final Map<String, Integer> facetMap = new HashMap<String, Integer>();
+		if (facetInfo != null) {
+			final List<FacetCount> facetCounts = facetInfo
+					.getFacetCounts(category);
+			for (FacetCount c : facetCounts) {
+				facetMap.put(c.getFacet().getFacetCode(), c.getCount());
+			}
+		}
+		return facetMap;
 	}
 }

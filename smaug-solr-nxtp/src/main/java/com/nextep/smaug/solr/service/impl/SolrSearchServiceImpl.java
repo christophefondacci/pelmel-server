@@ -255,6 +255,10 @@ public class SolrSearchServiceImpl implements SearchService {
 			buf.append(separator + "type:" + Place.CAL_TYPE);
 			separator = " OR ";
 		}
+		if (settings.getSuggestScope().contains(SuggestScope.EVENT)) {
+			buf.append(separator + "type:" + Event.CAL_ID);
+			separator = " OR ";
+		}
 		if (settings.getSuggestScope().contains(SuggestScope.USER)) {
 			buf.append(separator + "type:" + User.CAL_TYPE);
 			separator = " OR ";

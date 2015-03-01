@@ -426,14 +426,16 @@ public class UrlServiceImpl implements UrlService {
 			ItemKey element, CalendarType calendarType) {
 		final StringBuilder buf = new StringBuilder();
 		if (element != null) {
-			buf.append(webappPrefix + "/ajaxGetEventForm.action?id="
+			buf.append(webappPrefix + "/ajaxGetEventForm?id="
 					+ element.toString());
 		} else {
-			buf.append(webappPrefix + "/ajaxGetEventForm.action");
+			buf.append(webappPrefix + "/ajaxGetEventForm");
 		}
-		if (calendarType != null) {
-			buf.append("&calendarType=" + calendarType.name());
+		// Default calendar type is EVENT
+		if (calendarType == null) {
+			calendarType = CalendarType.EVENT;
 		}
+		buf.append("&calendarType=" + calendarType.name());
 		return buf.toString();
 	}
 

@@ -249,9 +249,6 @@
 		<property name="distanceDisplayService" ref="distanceDisplayService"/>
 		<property name="activitySupport" ref="activitySupport"/>
 		<property name="geoService" ref="geoService"/>
-		<property name="baseUrl">
-			<jee:jndi-lookup jndi-name="java:comp/env/togaytherBaseUrl"/>
-		</property>
 		<property name="pageSize">
 			<jee:jndi-lookup jndi-name="java:comp/env/mobile/nearbyPlacesCount"></jee:jndi-lookup>
 		</property>

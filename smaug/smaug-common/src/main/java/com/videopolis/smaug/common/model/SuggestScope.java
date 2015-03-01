@@ -10,7 +10,7 @@ public enum SuggestScope {
 	/** The destination scope for suggest queries. */
 	DESTINATION,
 	/** The hotel scope for suggest queries. */
-	PLACE, USER,
+	PLACE, USER, EVENT,
 	/** Fulltext search on every name / geo name */
 	GEO_FULLTEXT
 }

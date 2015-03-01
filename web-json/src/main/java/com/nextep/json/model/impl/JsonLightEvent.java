@@ -98,10 +98,12 @@ public class JsonLightEvent implements IJsonLightEvent {
 		this.rawDistance = rawDistance;
 	}
 
+	@Override
 	public void setParticipants(int participants) {
 		this.participants = participants;
 	}
 
+	@Override
 	public int getParticipants() {
 		return participants;
 	}

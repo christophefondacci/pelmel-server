@@ -10,6 +10,7 @@ public class JsonNearbyPlacesResponse {
 	private JsonLightCity localizedCity;
 	private List<JsonActivity> nearbyActivities = new ArrayList<JsonActivity>();
 	private List<JsonLightUser> nearbyUsers = new ArrayList<JsonLightUser>();
+	private List<JsonLightEvent> nearbyEvents = new ArrayList<JsonLightEvent>();
 
 	public void setPlaces(List<JsonPlace> places) {
 		this.places = places;
@@ -57,5 +58,13 @@ public class JsonNearbyPlacesResponse {
 
 	public List<JsonLightUser> getNearbyUsers() {
 		return nearbyUsers;
+	}
+
+	public List<JsonLightEvent> getNearbyEvents() {
+		return nearbyEvents;
+	}
+
+	public void setNearbyEvents(List<JsonLightEvent> nearbyEvents) {
+		this.nearbyEvents = nearbyEvents;
 	}
 }

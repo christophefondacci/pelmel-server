@@ -2,7 +2,6 @@ package com.nextep.proto.action.mobile.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -19,12 +18,14 @@ import com.nextep.activities.model.ActivityType;
 import com.nextep.advertising.model.AdvertisingBooster;
 import com.nextep.cal.util.services.CalPersistenceService;
 import com.nextep.descriptions.model.Description;
+import com.nextep.events.model.Event;
 import com.nextep.events.model.EventSeries;
 import com.nextep.geo.model.City;
 import com.nextep.geo.model.GeographicItem;
 import com.nextep.geo.model.Place;
 import com.nextep.json.model.impl.JsonActivity;
 import com.nextep.json.model.impl.JsonLightCity;
+import com.nextep.json.model.impl.JsonLightEvent;
 import com.nextep.json.model.impl.JsonLightUser;
 import com.nextep.json.model.impl.JsonMedia;
 import com.nextep.json.model.impl.JsonNearbyPlacesResponse;
@@ -36,6 +37,7 @@ import com.nextep.proto.action.model.JsonProvider;
 import com.nextep.proto.action.model.NearbySearchAware;
 import com.nextep.proto.action.model.SearchAware;
 import com.nextep.proto.action.model.TagAware;
+import com.nextep.proto.apis.adapters.ApisEventLocationAdapter;
 import com.nextep.proto.apis.adapters.ApisFacetToItemKeyAdapter;
 import com.nextep.proto.apis.model.impl.ApisActivitiesHelper;
 import com.nextep.proto.apis.model.impl.ApisLocalizationHelper;
@@ -62,6 +64,7 @@ import com.nextep.users.model.User;
 import com.videopolis.apis.factory.ApisFactory;
 import com.videopolis.apis.factory.SearchRestriction;
 import com.videopolis.apis.model.ApisCriterion;
+import com.videopolis.apis.model.ApisItemKeyAdapter;
 import com.videopolis.apis.model.ApisRequest;
 import com.videopolis.apis.model.FacetInformation;
 import com.videopolis.apis.model.SearchStatistic;
@@ -86,20 +89,22 @@ public class NearbyPlacesListAction extends AbstractAction implements
 			.getLog(NearbyPlacesListAction.class);
 
 	private static String APIS_ALIAS_NEARBY_PLACES = "np";
+	private static String APIS_ALIAS_NEARBY_EVENTS = "ne";
 	private static String APIS_ALIAS_NEARBY_ACTIVITIES = "na";
 	private static String APIS_ALIAS_NEARBY_USERS = "nu";
 	private static String APIS_ALIAS_CITY = "parentCity";
-	private static String APIS_ALIAS_PLACES_FACETS = "unused";
 
 	private static final int SORT_RANGE_DISTANCE = 2;
 	private static final int NEARBY_ACTIVITIES_COUNT = 20;
 	private static final int NEARBY_USERS_COUNT = 50;
+	private static final int NEARBY_EVENTS_COUNT = 50;
+
+	private static final ApisItemKeyAdapter eventLocationAdapter = new ApisEventLocationAdapter();
 
 	// Injected constants
 	private double radius;
 	private double cityRadius;
 	private int pageSize;
-	private String baseUrl;
 
 	// Injected supports & services
 	private CurrentUserSupport currentUserSupport;
@@ -129,8 +134,6 @@ public class NearbyPlacesListAction extends AbstractAction implements
 
 	@Override
 	protected String doExecute() throws Exception {
-		final Collection<FacetCategory> facetCategories = SearchHelper
-				.buildUserPlacesCategories();
 		// Processing lat/lng when search differs from user
 		Double searchLat, searchLng;
 		if (searchLatStr == null && searchLngStr == null) {
@@ -183,6 +186,22 @@ public class NearbyPlacesListAction extends AbstractAction implements
 							.aliasedBy(APIS_ALIAS_NEARBY_USERS)
 							.with(Media.class, MediaRequestTypes.THUMB);
 					request.addCriterion(usersCrit);
+
+					// Adding events
+					final ApisCriterion eventsCrit = (ApisCriterion) SearchRestriction
+							.searchNear(Event.class, SearchScope.EVENTS,
+									searchLat, searchLng, radius,
+									NEARBY_EVENTS_COUNT, 0)
+							.aliasedBy(APIS_ALIAS_NEARBY_EVENTS)
+							.with(Media.class, MediaRequestTypes.THUMB)
+							.addCriterion(
+									(ApisCriterion) SearchRestriction
+											.adaptKey(eventLocationAdapter)
+											.aliasedBy(
+													Constants.APIS_ALIAS_EVENT_PLACE)
+											.with(Media.class,
+													MediaRequestTypes.THUMB));
+					request.addCriterion(eventsCrit);
 				} else {
 					// Building every city having places by using facets of a
 					// place search
@@ -202,21 +221,29 @@ public class NearbyPlacesListAction extends AbstractAction implements
 				placesCriterion = SearchRestriction.withContained(Place.class,
 						SearchScope.NEARBY_BLOCK, pageSize, page).aliasedBy(
 						APIS_ALIAS_NEARBY_PLACES);
+				// Adding users
+				final ApisCriterion usersCrit = (ApisCriterion) SearchRestriction
+						.withContained(User.class, SearchScope.USERS,
+								NEARBY_USERS_COUNT, 0)
+						.aliasedBy(APIS_ALIAS_NEARBY_USERS)
+						.with(Media.class, MediaRequestTypes.THUMB);
+				request.addCriterion(usersCrit);
 			}
 		} else {
 			List<SuggestScope> scopes = new ArrayList<SuggestScope>();
 			scopes.add(SuggestScope.DESTINATION);
 			scopes.add(SuggestScope.PLACE);
+			scopes.add(SuggestScope.EVENT);
 			scopes.add(SuggestScope.GEO_FULLTEXT);
 			placesCriterion = SearchRestriction.searchFromText(
 					GeographicItem.class, scopes, searchText, pageSize)
 					.aliasedBy(APIS_ALIAS_NEARBY_PLACES);
 
-			FacetCategory cityCategory = SearchHelper.getCityFacetCategory();
-			request.addCriterion(SearchRestriction
-					.searchAll(Place.class, SearchScope.CITY, 10, 0)
-					.facettedBy(Arrays.asList(cityCategory))
-					.aliasedBy(APIS_ALIAS_PLACES_FACETS));
+			// FacetCategory cityCategory = SearchHelper.getCityFacetCategory();
+			// request.addCriterion(SearchRestriction
+			// .searchAll(Place.class, SearchScope.CITY, 10, 0)
+			// .facettedBy(Arrays.asList(cityCategory))
+			// .aliasedBy(APIS_ALIAS_PLACES_FACETS));
 		}
 
 		// Adding default places information
@@ -265,6 +292,11 @@ public class NearbyPlacesListAction extends AbstractAction implements
 								SearchScope.CHILDREN, 0, 0).facettedBy(
 								Arrays.asList(SearchHelper
 										.getUserPlacesCategory())))
+				.addCriterion(
+						SearchRestriction.searchAll(User.class,
+								SearchScope.EVENTS, 0, 0).facettedBy(
+								Arrays.asList(SearchHelper
+										.getUserEventsCategory())))
 				.addCriterion(
 						ApisLocalizationHelper.buildNearestCityCriterion(lat,
 								lng, cityRadius));
@@ -315,9 +347,11 @@ public class NearbyPlacesListAction extends AbstractAction implements
 		// Hashing liked user places by place key
 		final FacetInformation facetInfo = response
 				.getFacetInformation(SearchScope.CHILDREN);
-		Map<String, Integer> likedPlacesMap = unwrapFacets(facetInfo,
-				SearchHelper.getUserPlacesCategory());
+		Map<String, Integer> likedPlacesMap = SearchHelper.unwrapFacets(
+				facetInfo, SearchHelper.getUserPlacesCategory());
+
 		List<? extends Place> places;
+		List<? extends Event> events;
 		List<? extends Activity> activities;
 		List<? extends User> users;
 		if (parentKey == null) {
@@ -334,6 +368,13 @@ public class NearbyPlacesListAction extends AbstractAction implements
 			places = city.get(Place.class, APIS_ALIAS_NEARBY_PLACES);
 			activities = city.get(Activity.class, APIS_ALIAS_NEARBY_ACTIVITIES);
 			users = city.get(User.class, APIS_ALIAS_NEARBY_USERS);
+		}
+		if (searchText != null) {
+			events = response
+					.getElements(Event.class, APIS_ALIAS_NEARBY_PLACES);
+		} else {
+			events = response
+					.getElements(Event.class, APIS_ALIAS_NEARBY_EVENTS);
 		}
 		// final FacetInformation facetInfo = response
 		// .getFacetInformation(SearchScope.NEARBY_BLOCK);
@@ -433,7 +474,7 @@ public class NearbyPlacesListAction extends AbstractAction implements
 				APIS_ALIAS_NEARBY_PLACES);
 		final FacetInformation citiesFacetInfo = response
 				.getFacetInformation(SearchScope.CITY);
-		final Map<String, Integer> citiesPlacesMap = unwrapFacets(
+		final Map<String, Integer> citiesPlacesMap = SearchHelper.unwrapFacets(
 				citiesFacetInfo, SearchHelper.getCityFacetCategory());
 		final List<JsonLightCity> jsonCities = new ArrayList<JsonLightCity>();
 		for (City city : cities) {
@@ -483,10 +524,27 @@ public class NearbyPlacesListAction extends AbstractAction implements
 			}
 		});
 
+		// Preparing events
+		final List<JsonLightEvent> jsonEvents = new ArrayList<JsonLightEvent>();
+		for (Event event : events) {
+			final JsonLightEvent jsonEvent = new JsonLightEvent();
+			jsonBuilder.fillJsonEvent(jsonEvent, event, highRes, getLocale(),
+					response);
+
+			jsonEvents.add(jsonEvent);
+		}
+		// Sorting by date
+		Collections.sort(jsonEvents, new Comparator<JsonLightEvent>() {
+			@Override
+			public int compare(JsonLightEvent o1, JsonLightEvent o2) {
+				return (int) (o1.getStartTime() - o2.getStartTime());
+			}
+		});
 		// Preparing response
 		jsonResponse = new JsonNearbyPlacesResponse();
 		jsonResponse.setPlaces(jsonPlaces);
 		jsonResponse.setCities(jsonCities);
+		jsonResponse.setNearbyEvents(jsonEvents);
 
 		// Special SEARCH TEXT filtering when a single city returns 60% of
 		// results
@@ -556,29 +614,6 @@ public class NearbyPlacesListAction extends AbstractAction implements
 			jsonResponse.setLocalizedCity(jsonCity);
 		}
 		return SUCCESS;
-	}
-
-	/**
-	 * Unwraps the facet information structure into a map of facet counts hashed
-	 * by their facet codes represented as plain string.
-	 * 
-	 * @param facetInfo
-	 *            the {@link FacetInformation} to unwrap
-	 * @param category
-	 *            the {@link FacetCategory} to unwrap
-	 * @return the corresponding {@link Map}
-	 */
-	private Map<String, Integer> unwrapFacets(FacetInformation facetInfo,
-			FacetCategory category) {
-		final Map<String, Integer> facetMap = new HashMap<String, Integer>();
-		if (facetInfo != null) {
-			final List<FacetCount> facetCounts = facetInfo
-					.getFacetCounts(category);
-			for (FacetCount c : facetCounts) {
-				facetMap.put(c.getFacet().getFacetCode(), c.getCount());
-			}
-		}
-		return facetMap;
 	}
 
 	@Override
@@ -668,10 +703,6 @@ public class NearbyPlacesListAction extends AbstractAction implements
 	public void setDistanceDisplayService(
 			DistanceDisplayService distanceDisplayService) {
 		this.distanceDisplayService = distanceDisplayService;
-	}
-
-	public void setBaseUrl(String baseUrl) {
-		this.baseUrl = baseUrl;
 	}
 
 	public void setCityRadius(double cityRadius) {

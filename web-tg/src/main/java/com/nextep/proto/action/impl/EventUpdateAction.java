@@ -27,6 +27,7 @@ import com.nextep.events.model.MutableEventSeries;
 import com.nextep.geo.model.City;
 import com.nextep.geo.model.GeographicItem;
 import com.nextep.geo.model.Place;
+import com.nextep.json.model.impl.JsonEvent;
 import com.nextep.json.model.impl.JsonHour;
 import com.nextep.proto.action.base.AbstractAction;
 import com.nextep.proto.action.model.DescriptionsUpdateAware;
@@ -108,6 +109,7 @@ public class EventUpdateAction extends AbstractAction implements
 	private String newEventId;
 	private String eventPlaceId;
 	private String calendarType;
+	private boolean highRes;
 
 	private Event updatedEvent;
 
@@ -418,6 +420,13 @@ public class EventUpdateAction extends AbstractAction implements
 			final Collection<JsonHour> hours = jsonBuilder
 					.buildJsonHours(Arrays.asList((EventSeries) updatedEvent));
 			return JSONObject.fromObject(hours.iterator().next()).toString();
+		} else if (updatedEvent instanceof Event) {
+			final JsonEvent e = new JsonEvent();
+
+			// Filling the JSON structure
+			jsonBuilder.fillJsonEvent(e, updatedEvent, highRes, getLocale(),
+					null);
+			return JSONObject.fromObject(e).toString();
 		} else {
 			throw new UnsupportedOperationException(
 					"JSON update of events not yet supported");
@@ -659,5 +668,13 @@ public class EventUpdateAction extends AbstractAction implements
 
 	public String getCalendarType() {
 		return calendarType;
+	}
+
+	public void setHighRes(boolean highRes) {
+		this.highRes = highRes;
+	}
+
+	public boolean isHighRes() {
+		return highRes;
 	}
 }

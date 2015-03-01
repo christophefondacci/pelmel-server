@@ -40,4 +40,7 @@ public interface IJsonLightEvent {
 
 	void setRawDistance(double rawDistance);
 
+	void setParticipants(int participants);
+
+	int getParticipants();
 }

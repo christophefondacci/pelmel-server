@@ -421,9 +421,9 @@ public class SolrSearchPersistenceServiceImpl implements
 			for (Tag tag : event.get(Tag.class)) {
 				searchItem.addTag(tag.getKey().toString());
 			}
+			City city = null;
 			try {
 				final Place place = event.getUnique(Place.class);
-				City city = null;
 				if (place != null) {
 					city = place.getCity();
 					searchItem.setLat(place.getLatitude());
@@ -464,6 +464,7 @@ public class SolrSearchPersistenceServiceImpl implements
 				throw new SearchException("Unable to store calm object: " + e,
 						e);
 			}
+			storeSuggest(event.getKey(), Arrays.asList(event.getName()), city);
 		}
 	}
 

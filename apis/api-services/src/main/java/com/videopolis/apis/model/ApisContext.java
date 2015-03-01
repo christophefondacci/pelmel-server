@@ -17,30 +17,52 @@ import com.videopolis.smaug.service.SearchService;
  */
 public interface ApisContext {
 
-    /**
-     * Retrieves the {@link CalContext} to use when calling {@link CalService}
-     * 
-     * @return the {@link CalContext} to pass to {@link CalService} calls
-     */
-    CalContext getCalContext();
+	/**
+	 * Retrieves the {@link CalContext} to use when calling {@link CalService}
+	 * 
+	 * @return the {@link CalContext} to pass to {@link CalService} calls
+	 */
+	CalContext getCalContext();
 
-    /**
-     * Retrieves the {@link ApiResponse} which had been initialized to
-     * <i>hold</i> all items which will be return to the caller when the
-     * processing will be finished.<br>
-     * It typically allows criterion tasks to fill meta-information in the
-     * response since the returned interface is mutable and therefore provides
-     * access to response setters.
-     * 
-     * @return the {@link ApiMutableResponse} which will be returned to the
-     *         client
-     */
-    ApiMutableResponse getApiResponse();
+	/**
+	 * Retrieves the {@link ApiResponse} which had been initialized to
+	 * <i>hold</i> all items which will be return to the caller when the
+	 * processing will be finished.<br>
+	 * It typically allows criterion tasks to fill meta-information in the
+	 * response since the returned interface is mutable and therefore provides
+	 * access to response setters.
+	 * 
+	 * @return the {@link ApiMutableResponse} which will be returned to the
+	 *         client
+	 */
+	ApiMutableResponse getApiResponse();
 
-    /**
-     * Retrieves the {@link SearchService} to use when needed.
-     * 
-     * @return the {@link SearchService} implementation
-     */
-    SearchService getSearchService();
+	/**
+	 * Retrieves the {@link SearchService} to use when needed.
+	 * 
+	 * @return the {@link SearchService} implementation
+	 */
+	SearchService getSearchService();
+
+	/**
+	 * Register a CAL object in the current APIS execution pipeline. Registering
+	 * a CAL object makes "getItem()" calls faster as an already resolved bean
+	 * can be return.
+	 * 
+	 * @param itemKey
+	 *            the {@link ItemKey} of the object to register
+	 * @param object
+	 *            the corresponding {@link CalmObject}
+	 */
+	// void registerCalObject(ItemKey itemKey, CalmObject object);
+
+	/**
+	 * Performs a lookup in the APIS cache to look for an object registered
+	 * under the given item key.
+	 * 
+	 * @param itemKey
+	 *            the {@link ItemKey} of the object to retrieve
+	 * @return the corresponding {@link CalmObject}
+	 */
+	// CalmObject lookupCalObject(ItemKey itemKey);
 }

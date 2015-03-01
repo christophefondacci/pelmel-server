@@ -57,6 +57,7 @@ import com.videopolis.calm.exception.CalException;
 import com.videopolis.calm.model.CalmObject;
 import com.videopolis.calm.model.ItemKey;
 import com.videopolis.smaug.common.model.FacetCategory;
+import com.videopolis.smaug.common.model.SearchScope;
 import com.videopolis.smaug.model.FacetCount;
 
 /**
@@ -449,16 +450,17 @@ public class JsonBuilderImpl implements JsonBuilder {
 		}
 
 		// Distance
-		final ItemKey eventKey = event.getKey();
-		final String distanceString = distanceDisplayService
-				.getDistanceFromItem(eventKey, response, l);
-		e.setDistance(distanceString);
-		final SearchStatistic distanceStat = response.getStatistic(eventKey,
-				SearchStatistic.DISTANCE);
-		if (distanceStat != null) {
-			e.setRawDistance(distanceStat.getNumericValue().doubleValue());
+		if (response != null) {
+			final ItemKey eventKey = event.getKey();
+			final String distanceString = distanceDisplayService
+					.getDistanceFromItem(eventKey, response, l);
+			e.setDistance(distanceString);
+			final SearchStatistic distanceStat = response.getStatistic(
+					eventKey, SearchStatistic.DISTANCE);
+			if (distanceStat != null) {
+				e.setRawDistance(distanceStat.getNumericValue().doubleValue());
+			}
 		}
-
 		// Image & thumb
 		for (Media media : event.get(Media.class)) {
 			final JsonMedia jsonMedia = buildJsonMedia(media, highRes);
@@ -479,6 +481,19 @@ public class JsonBuilderImpl implements JsonBuilder {
 			}
 			if (desc != null) {
 				((JsonEvent) e).setDescription(desc.getDescription());
+			}
+		}
+
+		// Participants
+		if (response != null) {
+			final FacetInformation facetInfo = response
+					.getFacetInformation(SearchScope.EVENTS);
+
+			Map<String, Integer> likedEventsMap = SearchHelper.unwrapFacets(
+					facetInfo, SearchHelper.getUserEventsCategory());
+			final Integer likes = likedEventsMap.get(event.getKey().toString());
+			if (likes != null) {
+				e.setParticipants(likes);
 			}
 		}
 	}

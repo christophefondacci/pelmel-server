@@ -206,16 +206,29 @@ public class MobileOverviewAction extends AbstractAction implements
 							.aliasedBy(APIS_ALIAS_ACTIVITIES_CHECKIN));
 			;
 		} else if (Event.CAL_ID.equals(itemKey.getType())) {
-			objCriterion.addCriterion((WithCriterion) SearchRestriction
-					.withContained(User.class, SearchScope.CHILDREN,
-							maxRelatedElements, 0)
-					.aliasedBy(APIS_ALIAS_USER_LIKERS).with(Media.class));
+			objCriterion.addCriterion(
+					(WithCriterion) SearchRestriction
+							.withContained(User.class, SearchScope.CHILDREN,
+									maxRelatedElements, 0)
+							.aliasedBy(APIS_ALIAS_USER_LIKERS)
+							.with(Media.class)).addCriterion(
+					(ApisCriterion) SearchRestriction
+							.adaptKey(eventLocationAdapter)
+							.aliasedBy(Constants.APIS_ALIAS_EVENT_PLACE)
+							.with(Media.class, MediaRequestTypes.THUMB));
 			// Getting comments count
 			objCriterion.addCriterion(SearchRestriction.with(Comment.class, 1,
 					0).aliasedBy(APIS_ALIAS_COMMENTS));
 		}
 		final ApisRequest request = (ApisRequest) ApisFactory
-				.createCompositeRequest().addCriterion(objCriterion);
+				.createCompositeRequest()
+				.addCriterion(objCriterion)
+				.addCriterion(
+						SearchRestriction.searchAll(User.class,
+								SearchScope.EVENTS, 0, 0).facettedBy(
+								Arrays.asList(
+										SearchHelper.getUserPlacesCategory(),
+										SearchHelper.getUserEventsCategory())));
 		if (getNxtpUserToken() != null) {
 			// Fetching user if defined with liked elements
 			final ApisCriterion userCriterion = (ApisCriterion) currentUserSupport

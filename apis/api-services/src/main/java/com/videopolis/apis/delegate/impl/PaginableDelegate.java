@@ -25,37 +25,37 @@ import com.videopolis.apis.model.impl.PaginationSettingsImpl;
  *            Type of object owning the delegate
  */
 public class PaginableDelegate<T> extends AbstractOwnedDelegate<T> implements
-	Paginable<T> {
+		Paginable<T> {
 
-    /** The pagination */
-    private PaginationSettings pagination;
+	/** The pagination */
+	private PaginationSettings pagination;
 
-    /**
-     * Default constructor
-     * 
-     * @param owner
-     *             Owner of this delegate
-     */
-    public PaginableDelegate(final T owner) {
-	super(owner);
-    }
+	/**
+	 * Default constructor
+	 * 
+	 * @param owner
+	 *            Owner of this delegate
+	 */
+	public PaginableDelegate(final T owner) {
+		super(owner);
+	}
 
-    @Override
-    public PaginationSettings getPagination() {
-	return pagination;
-    }
+	@Override
+	public PaginationSettings getPagination() {
+		return pagination;
+	}
 
-    @Override
-    public void setPagination(final PaginationSettings pagination) {
-	this.pagination = pagination;
-    }
+	@Override
+	public void setPagination(final PaginationSettings pagination) {
+		this.pagination = pagination;
+	}
 
-    @Override
-    public T paginatedBy(final int pageSize, final int pageOffset) {
-	pagination = new PaginationSettingsImpl();
-	pagination.setItemsByPage(pageSize);
-	pagination.setPageOffset(pageOffset);
-	return getOwner();
-    }
+	@Override
+	public T paginatedBy(final int pageSize, final int pageOffset) {
+		pagination = new PaginationSettingsImpl();
+		pagination.setItemsByPage(pageSize);
+		pagination.setPageOffset(pageOffset);
+		return getOwner();
+	}
 
 }
