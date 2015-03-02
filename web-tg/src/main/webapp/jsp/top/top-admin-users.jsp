@@ -30,16 +30,10 @@
 				<tbody>
 					<s:iterator value="users" var="user">
 						<tr>
-							<td><img
-								src="<s:property value="#search.getResultMiniThumbUrl(#user)"/>">
-							</td>
-							<td><a
-								href="<s:property value="#urlService.getOverviewUrl('mainContent',#user)"/>"><s:property
-										value="#user.pseudo" /></a></td>
+							<td><img src="<s:property value="#search.getResultMiniThumbUrl(#user)"/>"></td>
+							<td><a href="<s:property value="#urlService.getOverviewUrl('mainContent',#user)"/>"><s:property value="#user.pseudo" /></a></td>
 							<td class="center"><s:property value="#user.email" /></td>
-							<td><a
-								href="<s:property value="#search.getResultLocalizationUrl(#user)"/>"><s:property
-										value="#search.getResultLocalizationName(#user)" /></a></td>
+							<td><a href="<s:property value="#search.getResultLocalizationUrl(#user)"/>"><s:property value="#search.getResultLocalizationName(#user)" /></a></td>
 							<td><s:property value="#user.onlineTimeout" /></td>
 						</tr>
 					</s:iterator>

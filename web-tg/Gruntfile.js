@@ -56,6 +56,11 @@ module.exports = function(grunt) {
 							cwd : 'dist/',
 							src : [ '**/*' ],
 							dest : '../web-static/dist'
+						},{
+							expand : true,
+							cwd : '../web-static/',
+							src : ['styles/font-awesome.min.css'],
+							dest : '../web-static/dist/'
 						}]
 					}
 				},

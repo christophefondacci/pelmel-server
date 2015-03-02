@@ -66,8 +66,18 @@ public class HomeMapSupportImpl implements MapSupport {
 			try {
 				final CalmObject target = activity.getUnique(CalmObject.class,
 						Constants.ALIAS_ACTIVITY_TARGET);
+				Localized l = null;
 				if ((target instanceof Localized) && !(target instanceof User)) {
-					final Localized l = (Localized) target;
+					l = (Localized) target;
+				} else {
+					final User u = activity.getUnique(User.class,
+							Constants.ALIAS_ACTIVITY_USER);
+					if (u != null) {
+						final City c = u.getUnique(City.class);
+						l = c;
+					}
+				}
+				if (l != null) {
 					// Extracting user
 					// final User user = activity.getUnique(User.class,
 					// Constants.ALIAS_ACTIVITY_USER);

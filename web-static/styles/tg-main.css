@@ -2383,8 +2383,9 @@ label {
 }
 .media-toolbox {
 	position: absolute;
-	top:-270px;
-	right:-166px;
+	top:-315px;
+	right:-100%;
+	left:-100%;
 	z-index: 1;
 }
 .media-toolbox > .img-button {

@@ -468,7 +468,9 @@
 									<substitution expression="\1" />
 									<fileset dir="target/${project.artifactId}" includes="**/*.jsp" />
 								</replaceregexp>
-								<exec executable="grunt"></exec>
+								<exec executable="grunt">
+									<arg value="--verbose"></arg>
+								</exec>
 								<!-- Removing carriage return -->
 <!-- 								<replaceregexp flags="gi"> -->
 <!-- 									<regexp pattern="\r\n" /> -->

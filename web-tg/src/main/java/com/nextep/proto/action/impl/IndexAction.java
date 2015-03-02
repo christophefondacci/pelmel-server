@@ -53,6 +53,7 @@ import com.videopolis.apis.model.ApisItemKeyAdapter;
 import com.videopolis.apis.model.ApisRequest;
 import com.videopolis.apis.model.FacetInformation;
 import com.videopolis.apis.service.ApiCompositeResponse;
+import com.videopolis.calm.model.CalmObject;
 import com.videopolis.calm.model.RequestType;
 import com.videopolis.cals.factory.ContextFactory;
 import com.videopolis.cals.model.PaginationInfo;
@@ -312,22 +313,16 @@ public class IndexAction extends AbstractAction implements TagAware,
 		}
 		favoriteUsersSupport.initilialize(getUrlService(), getLocale(), null,
 				filteredHotUsers);
-		// Initializing map support
-		// final List<Localized> mappables = new ArrayList<Localized>(
-		// activities.size());
-		// Localized mainPoint = null;
-		// for (Activity activity : activities) {
-		// // Extracting localized target for map
-		// final CalmObject o = activity.getUnique(CalmObject.class,
-		// Constants.ALIAS_ACTIVITY_TARGET);
-		// if (o instanceof Localized) {
-		// mappables.add((Localized) o);
-		// if (mainPoint == null) {
-		// mainPoint = (Localized) o;
-		// }
-		// }
-		// }
-		mapSupport.initialize(null, activities);
+
+		for (Activity a : latestActivities) {
+			try {
+				final CalmObject target = a.getUnique(CalmObject.class);
+				a.addAll(Constants.ALIAS_ACTIVITY_TARGET, Arrays.asList(target));
+			} catch (Exception e) {
+				LOG.warn("Conversion failed: " + e.getMessage(), e);
+			}
+		}
+		mapSupport.initialize(null, latestActivities);
 		return SUCCESS;
 	}
 

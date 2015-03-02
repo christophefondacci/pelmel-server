@@ -348,30 +348,32 @@ var Pelmel = {
 //			}
 			// Selecting corresponding activity
 			var nextActivity = $("#activity-" + marker.pelmelItemKey); //.addClass("selected-activity");
-			var nextTop = nextActivity.position().top;
-			var nextHeight = nextActivity.height();
-			var nextMargin = parseInt(nextActivity.css("margin-top"));
-			var scroll = nextActivity.parent().scrollTop();
-			// Detecting if we need to scroll to make it visible
-			var maxVisiblePosition = nextActivity.parent().height()-nextHeight;
-			if(nextTop+nextMargin>maxVisiblePosition) {
-				// Scrolling parent so current item will become the first one after scroll
-				nextActivity.parent().animate({
-					scrollTop: maxVisiblePosition + scroll
+			if(nextActivity.position()) {
+				var nextTop = nextActivity.position().top;
+				var nextHeight = nextActivity.height();
+				var nextMargin = parseInt(nextActivity.css("margin-top"));
+				var scroll = nextActivity.parent().scrollTop();
+				// Detecting if we need to scroll to make it visible
+				var maxVisiblePosition = nextActivity.parent().height()-nextHeight;
+				if(nextTop+nextMargin>maxVisiblePosition) {
+					// Scrolling parent so current item will become the first one after scroll
+					nextActivity.parent().animate({
+						scrollTop: maxVisiblePosition + scroll
+					});
+				} else if(Pelmel.mapTimerIndex == 0) {
+					// Scrolling to top at the end
+					nextActivity.parent().animate({
+						scrollTop: 0
+					});
+				}
+				$("#activity-highlighter").animate({
+					top: (nextTop+nextMargin+scroll) + "px",
+					height: nextHeight
 				});
-			} else if(Pelmel.mapTimerIndex == 0) {
-				// Scrolling to top at the end
-				nextActivity.parent().animate({
-					scrollTop: 0
+				$("#activity-highlighter > .highlight-caret").animate({
+					top: (nextHeight-25)/2
 				});
 			}
-			$("#activity-highlighter").animate({
-				top: (nextTop+nextMargin+scroll) + "px",
-				height: nextHeight
-			});
-			$("#activity-highlighter > .highlight-caret").animate({
-				top: (nextHeight-25)/2
-			});
 			Pelmel.lastMarkerKey = marker.pelmelItemKey;
 		}
 		Pelmel.mapTimerIndex = (Pelmel.mapTimerIndex+1)%Pelmel.markersarray.length;
