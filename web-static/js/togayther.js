@@ -461,6 +461,9 @@ var Pelmel = {
 		});
 		Pelmel.handleMediaList();
 	},
+	initAdmin : function() {
+		initOverlays();
+	},
 	handleMediaList: function () {
 		$(".user-media").hoverIntent({
 			timeout: 0,

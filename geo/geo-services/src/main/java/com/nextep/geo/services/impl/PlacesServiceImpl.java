@@ -11,6 +11,7 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.nextep.cal.util.helpers.CalHelper;
 import com.nextep.cal.util.model.CalDao;
 import com.nextep.cal.util.services.CalPersistenceService;
 import com.nextep.geo.dao.GeoDao;
@@ -18,6 +19,7 @@ import com.nextep.geo.model.City;
 import com.nextep.geo.model.MutablePlace;
 import com.nextep.geo.model.Place;
 import com.nextep.geo.model.impl.PlaceImpl;
+import com.nextep.geo.model.impl.RequestTypeListPlaces;
 import com.nextep.geo.model.impl.RequestTypeWithAlternates;
 import com.videopolis.calm.exception.CalException;
 import com.videopolis.calm.helper.Assert;
@@ -111,20 +113,35 @@ public class PlacesServiceImpl extends AbstractCalService implements
 	}
 
 	@Override
-	public ItemsResponse listItems(CalContext context, RequestType requestType,
+	public ItemsResponse listItems(CalContext context, RequestType rt,
 			RequestSettings requestSettings) throws CalException {
-		final ItemsResponseImpl response = new ItemsResponseImpl();
-		final List<Place> places = geoDao.listPlaces();
-		response.setItems(places);
-		if (requestType instanceof RequestTypeWithAlternates) {
-			final Map<Long, List<CalmObject>> alternateIdMap = new HashMap<Long, List<CalmObject>>();
-			for (Place p : places) {
-				GeoServiceHelper.fillAlternateMap(alternateIdMap, p);
+		ItemsResponse r = null;
+		if (rt instanceof RequestTypeListPlaces) {
+			final RequestTypeListPlaces requestType = (RequestTypeListPlaces) rt;
+			final List<Place> places = geoDao.listPlaces(requestType);
+			final int placesCount = (int) geoDao.countPlaces(requestType);
+			final PaginatedItemsResponseImpl paginatedResponse = new PaginatedItemsResponseImpl(
+					requestType.getPageSize(), requestType.getPage());
+			paginatedResponse.setItems(places);
+			paginatedResponse.setItemCount(placesCount);
+			paginatedResponse.setPageCount(CalHelper.getPageCount(
+					requestType.getPageSize(), placesCount));
+			r = paginatedResponse;
+		} else {
+			final ItemsResponseImpl response = new ItemsResponseImpl();
+			final List<Place> places = geoDao.listPlaces();
+			response.setItems(places);
+			if (rt instanceof RequestTypeWithAlternates) {
+				final Map<Long, List<CalmObject>> alternateIdMap = new HashMap<Long, List<CalmObject>>();
+				for (Place p : places) {
+					GeoServiceHelper.fillAlternateMap(alternateIdMap, p);
+				}
+				GeoServiceHelper.fillAlternatesFromMap(geoDao, alternateIdMap,
+						null);
 			}
-			GeoServiceHelper
-					.fillAlternatesFromMap(geoDao, alternateIdMap, null);
+			r = response;
 		}
-		return response;
+		return r;
 	}
 
 	@Override

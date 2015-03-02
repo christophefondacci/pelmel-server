@@ -31,6 +31,8 @@ import com.nextep.geo.model.impl.AdmImpl;
 import com.nextep.geo.model.impl.CountryImpl;
 import com.nextep.geo.model.impl.ItemCityImpl;
 import com.nextep.geo.model.impl.ItemPlaceImpl;
+import com.nextep.geo.model.impl.RequestTypeListPlaces;
+import com.nextep.geo.model.impl.RequestTypeListPlaces.FilterField;
 import com.videopolis.calm.exception.CalException;
 import com.videopolis.calm.factory.CalmFactory;
 import com.videopolis.calm.model.CalmObject;
@@ -493,6 +495,67 @@ public class GeoDaoImpl implements CalDao<CalmObject>, GeoDao {
 	@Override
 	public List<Place> listPlaces() {
 		return entityManager.createQuery("from PlaceImpl").getResultList();
+	}
+
+	@Override
+	public List<Place> listPlaces(RequestTypeListPlaces request) {
+		final String jpqlQuery = buildListPlacesQuery(request);
+		final Query query = entityManager.createQuery(jpqlQuery);
+		query.setMaxResults(request.getPageSize()).setFirstResult(
+				request.getPage() * request.getPageSize());
+
+		return query.getResultList();
+	}
+
+	@Override
+	public long countPlaces(RequestTypeListPlaces request) {
+		final String jpqlQuery = buildListPlacesQuery(request);
+		final Query query = entityManager.createQuery("select count(p) "
+				+ jpqlQuery);
+		return (long) query.getSingleResult();
+	}
+
+	private String buildListPlacesQuery(RequestTypeListPlaces request) {
+		final StringBuilder buf = new StringBuilder("from PlaceImpl as p");
+		final Collection<RequestTypeListPlaces.FilterField> filters = request
+				.getFilterFields();
+		String prefix = " where ";
+		if (filters != null && !filters.isEmpty()) {
+			for (FilterField filter : filters) {
+				switch (filter) {
+				case ONLINE:
+					buf.append(prefix + "online=true");
+					break;
+				case OFFLINE:
+					buf.append(prefix + "online=false");
+					break;
+				case INDEXED:
+					buf.append(prefix + "indexed=true");
+					break;
+				case UNINDEXED:
+					buf.append(prefix + "indexed=false");
+				}
+				prefix = " and ";
+			}
+		}
+		if (request.getSortField() != null) {
+			buf.append(" order by ");
+			switch (request.getSortField()) {
+			case CLOSED_REPORT_COUNT:
+				buf.append("closedCount");
+				break;
+			case UDATE:
+				buf.append("lastUpdate");
+				break;
+			}
+			if (request.isSortAsc()) {
+				buf.append(" ASC");
+			} else {
+				buf.append(" DESC");
+			}
+		}
+		return buf.toString();
+
 	}
 
 	@Override

@@ -465,6 +465,10 @@ public abstract class AbstractAction extends ActionSupport implements
 		return code;
 	}
 
+	protected void setLoginRedirectUrl(String url) {
+		this.url = url;
+	}
+
 	public final String getMediaUrl(String url) {
 		return urlService.getMediaUrl(url);
 	}

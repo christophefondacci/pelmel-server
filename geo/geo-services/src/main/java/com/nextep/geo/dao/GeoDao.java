@@ -12,6 +12,7 @@ import com.nextep.geo.model.Continent;
 import com.nextep.geo.model.Country;
 import com.nextep.geo.model.GeographicItem;
 import com.nextep.geo.model.Place;
+import com.nextep.geo.model.impl.RequestTypeListPlaces;
 import com.videopolis.calm.model.ItemKey;
 
 public interface GeoDao {
@@ -167,6 +168,19 @@ public interface GeoDao {
 	 * @return a list of all places
 	 */
 	List<Place> listPlaces();
+
+	/**
+	 * Lists places with filters and sort defined by request type (for admin use
+	 * only)
+	 * 
+	 * @param request
+	 *            the {@link RequestTypeListPlaces} containing filters, sort
+	 *            information to use for this list query
+	 * @return the list of matching {@link Place}s, in the sort order requested
+	 */
+	List<Place> listPlaces(RequestTypeListPlaces request);
+
+	long countPlaces(RequestTypeListPlaces request);
 
 	/**
 	 * Fetches the requested places from the database

@@ -10,6 +10,7 @@
     http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
     http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-3.0.xsd">
     <context:annotation-config />
+    <context:component-scan base-package="com.nextep"></context:component-scan>
     <task:annotation-driven executor="myExecutor" scheduler="myScheduler"/>
 	<task:executor id="myExecutor" pool-size="5"/>
 	<task:scheduler id="myScheduler" pool-size="10"/>

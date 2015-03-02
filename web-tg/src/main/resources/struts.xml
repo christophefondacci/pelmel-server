@@ -664,6 +664,11 @@
 		<action name="rankPlaces" class="rankPlacesAction">
 			<result>/jsp/tools/messages.jsp</result>
 		</action>
-		
+	</package>
+	<package name="admin" extends="myPackage" namespace="/admin">
+		<action name="places" class="adminAction">
+			<result type="tiles">adminPlaces</result>
+			<interceptor-ref name="default" />
+		</action>
 	</package>
 </struts>

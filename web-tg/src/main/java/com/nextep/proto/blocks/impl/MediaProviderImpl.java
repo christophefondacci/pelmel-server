@@ -62,21 +62,14 @@ public class MediaProviderImpl implements MediaProvider {
 	@Override
 	public String getMediaThumbUrl(Media m) {
 		final String relativeUrl = m.getThumbUrl();
-		if (!relativeUrl.toLowerCase().startsWith("http://")) {
-			return baseUrl + relativeUrl;
-		} else {
-			return relativeUrl;
-		}
+		return MediaHelper.getImageUrl(relativeUrl);
 	}
 
 	@Override
 	public String getMediaUrl(Media m) {
 		final String relativeUrl = m.getUrl();
-		if (!relativeUrl.toLowerCase().startsWith("http://")) {
-			return baseUrl + relativeUrl;
-		} else {
-			return relativeUrl;
-		}
+		return MediaHelper.getImageUrl(relativeUrl);
+
 	}
 
 	@Override

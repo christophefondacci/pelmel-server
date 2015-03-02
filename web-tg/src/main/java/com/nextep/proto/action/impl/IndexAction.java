@@ -182,7 +182,6 @@ public class IndexAction extends AbstractAction implements TagAware,
 												ActivityType.UNLIKE,
 												ActivityType.COMMENT,
 												ActivityType.REGISTER,
-												ActivityType.CITY_CHANGE,
 												ActivityType.REMOVAL_REQUESTED))
 								.aliasedBy(APIS_ALIAS_USER_ACTIVITY)
 								.addCriterion(
