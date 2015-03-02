@@ -33,12 +33,13 @@ import com.videopolis.apis.service.ApiCompositeResponse;
 import com.videopolis.cals.factory.ContextFactory;
 import com.videopolis.cals.model.PaginationInfo;
 
-public class AdminAction extends AbstractAction implements MediaAware,
+public class AdminPlacesAction extends AbstractAction implements MediaAware,
 		CurrentUserAware {
 
 	private static final long serialVersionUID = 5199841368119304685L;
 
 	private static final String APIS_ALIAS_PLACES = "p";
+	private static final String URL = "/admin/places";
 
 	// Injected supports
 	@Autowired

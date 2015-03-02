@@ -691,8 +691,13 @@
 		<property name="currentUserSupport" ref="currentUserSupport"/>
 		<property name="paymentSupport" ref="paymillPaymentSupport"/>
 	</bean> 
-	<bean id="adminAction" class="com.nextep.proto.action.impl.admin.AdminAction" parent="abstractAction" scope="request">
-		<property name="headerSupport" ref="adminHeaderSupport"/>
+	<bean id="adminPlacesAction" class="com.nextep.proto.action.impl.admin.AdminPlacesAction" parent="abstractAction" scope="request">
+		<property name="headerSupport" ref="adminPlacesHeaderSupport"/>
+		<property name="urlService" ref="urlService"/>
+		<property name="currentUserSupport" ref="currentUserSupport"/>
+	</bean> 
+	<bean id="adminUsersAction" class="com.nextep.proto.action.impl.admin.AdminUsersAction" parent="abstractAction" scope="request">
+		<property name="headerSupport" ref="adminUsersHeaderSupport"/>
 		<property name="urlService" ref="urlService"/>
 		<property name="currentUserSupport" ref="currentUserSupport"/>
 	</bean> 

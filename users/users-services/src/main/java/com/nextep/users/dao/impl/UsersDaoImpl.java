@@ -20,6 +20,7 @@ import javax.persistence.Query;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.nextep.cal.util.model.CalDaoExt;
 import com.nextep.cal.util.model.base.AbstractCalDao;
 import com.nextep.users.dao.UsersDao;
 import com.nextep.users.model.User;
@@ -32,7 +33,8 @@ import com.videopolis.calm.model.ItemKey;
 import com.videopolis.calm.model.RequestType;
 import com.videopolis.cals.model.RequestSettings;
 
-public class UsersDaoImpl extends AbstractCalDao<User> implements UsersDao {
+public class UsersDaoImpl extends AbstractCalDao<User> implements UsersDao,
+		CalDaoExt<User> {
 
 	final Log log = LogFactory.getLog(UsersDaoImpl.class);
 
@@ -351,5 +353,21 @@ public class UsersDaoImpl extends AbstractCalDao<User> implements UsersDao {
 						"select count(1) from USERS_ITEMS where ITEM_KEY=:itemKey")
 				.setParameter("itemKey", itemKey.toString()).getSingleResult())
 				.intValue();
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<User> listItems(RequestType requestType, Integer pageSize,
+			Integer pageOffset) {
+		return entityManager
+				.createQuery("from UserImpl order by onlineTimeout desc")
+				.setFirstResult(pageOffset).setMaxResults(pageSize)
+				.getResultList();
+	}
+
+	@Override
+	public int getCount() {
+		return (int) (long) entityManager.createQuery(
+				"select count(u) from UserImpl u").getSingleResult();
 	}
 }

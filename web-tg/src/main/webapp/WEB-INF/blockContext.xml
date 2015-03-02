@@ -34,6 +34,12 @@
 	<bean id="titledHeaderSupport" class="com.nextep.proto.blocks.impl.HeaderTitledSupportImpl" abstract="true">
 		<property name="messageSource" ref="globalMessages"/>
 	</bean>
+	<bean id="adminPlacesHeaderSupport" class="com.nextep.proto.blocks.impl.HeaderAdminSupportImpl">
+		<property name="canonical" value="/admin/places"/>
+	</bean>
+	<bean id="adminUsersHeaderSupport" class="com.nextep.proto.blocks.impl.HeaderAdminSupportImpl" >
+		<property name="canonical" value="/admin/users"/>
+	</bean>
 	<bean id="myMessagesHeaderSupport" parent="titledHeaderSupport" scope="prototype">
 		<property name="titleMessageKey" value="header.title.myMessages"/>
 		<property name="pageStyle" value="my-messages"/>

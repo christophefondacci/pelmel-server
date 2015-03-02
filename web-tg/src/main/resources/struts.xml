@@ -666,8 +666,12 @@
 		</action>
 	</package>
 	<package name="admin" extends="myPackage" namespace="/admin">
-		<action name="places" class="adminAction">
+		<action name="places" class="adminPlacesAction">
 			<result type="tiles">adminPlaces</result>
+			<interceptor-ref name="default" />
+		</action>
+		<action name="users" class="adminUsersAction">
+			<result type="tiles">adminUsers</result>
 			<interceptor-ref name="default" />
 		</action>
 	</package>

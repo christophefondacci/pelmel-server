@@ -261,6 +261,12 @@
 		<put-attribute name="header" value="/jsp/header/admin-header.jsp" />
 	</definition>
 	
+	<definition name="adminUsers" extends="static">
+		<put-attribute name="page-top" value="/jsp/top/top-admin-users.jsp"/>
+		<put-attribute name="footer" value="/jsp/footer/admin-footer.jsp" />
+		<put-attribute name="header" value="/jsp/header/admin-header.jsp" />
+	</definition>
+	
 	<!-- ERROR PAGES -->
 	<definition name="login-error" extends="base">
 		<put-attribute name="content" value="/jsp/structure/empty.jsp"/>
