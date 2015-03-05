@@ -451,6 +451,15 @@ public final class SearchRestriction {
 		return crit;
 	}
 
+	public static SearchCriterion searchForAllFacets(
+			Class<? extends CalmObject> itemType, SearchScope scope) {
+		final String type = ApisRegistry.getTypeFromModel(itemType);
+		final SearchCriterion crit = new SearchAllCriterionImpl(type, scope,
+				SearchMethod.NO_FACET_LIMIT);
+		crit.paginatedBy(0, 0);
+		return crit;
+	}
+
 	public static SearchCriterion searchNear(
 			Class<? extends CalmObject> itemType, SearchScope scope,
 			double lat, double lng, double radius, int pageSize, int pageOffset) {

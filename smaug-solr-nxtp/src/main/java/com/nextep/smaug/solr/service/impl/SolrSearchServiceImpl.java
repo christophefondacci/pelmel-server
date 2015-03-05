@@ -35,12 +35,14 @@ import com.nextep.smaug.solr.model.impl.ActivitySearchItemImpl;
 import com.nextep.smaug.solr.model.impl.SearchItemImpl;
 import com.nextep.smaug.solr.model.impl.SearchResponseImpl;
 import com.nextep.smaug.solr.model.impl.SearchTextItemImpl;
+import com.nextep.smaug.solr.model.impl.SolrQueryBuilderImpl;
 import com.nextep.smaug.solr.model.impl.SuggestResponseImpl;
 import com.nextep.users.model.User;
 import com.videopolis.calm.model.ItemKey;
 import com.videopolis.calm.model.Localized;
 import com.videopolis.smaug.common.factory.FacetFactory;
 import com.videopolis.smaug.common.model.FacetCategory;
+import com.videopolis.smaug.common.model.SearchMethod;
 import com.videopolis.smaug.common.model.SearchScope;
 import com.videopolis.smaug.common.model.SuggestScope;
 import com.videopolis.smaug.common.model.impl.FacetCategoryImpl;
@@ -304,6 +306,10 @@ public class SolrSearchServiceImpl implements SearchService {
 
 	@Override
 	public SearchResponse searchAll(SearchSettings settings, SearchWindow window) {
+		final SolrQueryBuilderImpl queryBuilder = new SolrQueryBuilderImpl();
+		if (settings.getSearchMethod() == SearchMethod.NO_FACET_LIMIT) {
+			queryBuilder.setNoFacetLimit(true);
+		}
 		final SolrQuery query = queryBuilder.buildQuery(settings, window);
 		final StringBuilder queryBuf = new StringBuilder();
 		String prefix = "";

@@ -203,7 +203,12 @@ public class MobileOverviewAction extends AbstractAction implements
 									.with(Media.class, MediaRequestTypes.THUMB))
 					.with(ApisActivitiesHelper.withUserActivities(
 							MAX_LOCALIZATION_ACTIVITY, 0, ActivityType.CHECKIN)
-							.aliasedBy(APIS_ALIAS_ACTIVITIES_CHECKIN));
+							.aliasedBy(APIS_ALIAS_ACTIVITIES_CHECKIN))
+			// TODO add message pagination retrieval for conversation with this
+			// user
+			// .with(SearchRestriction.with(Message.class, new
+			// MessageRequestTypeListConversation(
+			// fromKey, user.getKey());
 			;
 		} else if (Event.CAL_ID.equals(itemKey.getType())) {
 			objCriterion.addCriterion(

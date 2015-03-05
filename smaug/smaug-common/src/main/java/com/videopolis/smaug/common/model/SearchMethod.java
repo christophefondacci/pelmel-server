@@ -16,4 +16,6 @@ public enum SearchMethod {
 	CITIES_WITH_SHADOW_AUTODETECT,
 	/** City search including <b>only</b> shadow cities. */
 	SHADOW_CITY,
+	/** Includes all facets */
+	NO_FACET_LIMIT
 }

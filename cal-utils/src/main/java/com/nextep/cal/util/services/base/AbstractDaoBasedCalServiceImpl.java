@@ -40,7 +40,10 @@ public abstract class AbstractDaoBasedCalServiceImpl extends AbstractCalService 
 		for (ItemKey key : ids) {
 			idList.add(key.getNumericId());
 		}
-		final List<? extends CalmObject> items = calDao.getByIds(idList);
+		List<? extends CalmObject> items = null;
+		if (idList != null && !idList.isEmpty()) {
+			items = calDao.getByIds(idList);
+		}
 		if (items != null) {
 
 			response.setItems(reorderCalmObjects(ids, items));

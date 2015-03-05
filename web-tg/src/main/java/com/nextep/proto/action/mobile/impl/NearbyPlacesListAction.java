@@ -48,6 +48,7 @@ import com.nextep.proto.blocks.SearchSupport;
 import com.nextep.proto.blocks.TagSupport;
 import com.nextep.proto.builders.JsonBuilder;
 import com.nextep.proto.helpers.DisplayHelper;
+import com.nextep.proto.helpers.GeoHelper;
 import com.nextep.proto.helpers.MediaHelper;
 import com.nextep.proto.helpers.SearchHelper;
 import com.nextep.proto.model.Constants;
@@ -69,7 +70,6 @@ import com.videopolis.apis.model.ApisRequest;
 import com.videopolis.apis.model.FacetInformation;
 import com.videopolis.apis.model.SearchStatistic;
 import com.videopolis.apis.service.ApiCompositeResponse;
-import com.videopolis.calm.exception.CalException;
 import com.videopolis.calm.factory.CalmFactory;
 import com.videopolis.calm.model.CalmObject;
 import com.videopolis.calm.model.ItemKey;
@@ -283,18 +283,18 @@ public class NearbyPlacesListAction extends AbstractAction implements
 					.addCriterion(activitiesCrit).addCriterion(usersCrit));
 		}
 		request.addCriterion(
-				SearchRestriction.searchAll(User.class,
-						SearchScope.USER_LOCALIZATION, 0, 0).facettedBy(
+				SearchRestriction.searchForAllFacets(User.class,
+						SearchScope.USER_LOCALIZATION).facettedBy(
 						Arrays.asList(SearchHelper
 								.getUserCurrentPlaceCategory())))
 				.addCriterion(
-						SearchRestriction.searchAll(User.class,
-								SearchScope.CHILDREN, 0, 0).facettedBy(
+						SearchRestriction.searchForAllFacets(User.class,
+								SearchScope.CHILDREN).facettedBy(
 								Arrays.asList(SearchHelper
 										.getUserPlacesCategory())))
 				.addCriterion(
-						SearchRestriction.searchAll(User.class,
-								SearchScope.EVENTS, 0, 0).facettedBy(
+						SearchRestriction.searchForAllFacets(User.class,
+								SearchScope.EVENTS).facettedBy(
 								Arrays.asList(SearchHelper
 										.getUserEventsCategory())))
 				.addCriterion(
@@ -424,6 +424,15 @@ public class NearbyPlacesListAction extends AbstractAction implements
 			jsonCityPlaces.add(p);
 		}
 
+		// Building distance map (since search was made based on
+		// searchLat/searchLng, the distances are incorrect)
+		final Map<String, Double> distanceMap = new HashMap<String, Double>();
+		for (JsonPlace p : jsonPlaces) {
+			double distance = GeoHelper.distanceBetween(lat, lng, p.getLat(),
+					p.getLng());
+			distanceMap.put(p.getItemKey(), distance);
+			p.setRawDistance(distance);
+		}
 		// Sorting results
 		Collections.sort(jsonPlaces, new Comparator<JsonPlace>() {
 			@Override
@@ -435,36 +444,18 @@ public class NearbyPlacesListAction extends AbstractAction implements
 					return boost2 - boost1;
 				} else {
 
-					SearchStatistic distanceStat1 = null;
-					SearchStatistic distanceStat2 = null;
-					try {
-						distanceStat1 = response.getStatistic(
-								CalmFactory.parseKey(o1.getItemKey()),
-								SearchStatistic.DISTANCE);
-						distanceStat2 = response.getStatistic(
-								CalmFactory.parseKey(o2.getItemKey()),
-								SearchStatistic.DISTANCE);
-					} catch (CalException e) {
-						LOGGER.error(
-								"Problem sorting elements : " + e.getMessage(),
-								e);
-					}
 					// Else we use the standard sort algorithm based on user
 					// inside a place and user liking a place
 					int val1 = o1.getUsersCount() * 100 + o1.getLikesCount();
 					int val2 = o2.getUsersCount() * 100 + o2.getLikesCount();
-					if (distanceStat1 != null) {
-						int dist = distanceStat1.getNumericValue().intValue();
-						int mod = (dist % SORT_RANGE_DISTANCE);
-						int val = (dist / SORT_RANGE_DISTANCE) + mod;
-						val1 += -val * 1000;
-					}
-					if (distanceStat2 != null) {
-						int dist = distanceStat2.getNumericValue().intValue();
-						int mod = (dist % SORT_RANGE_DISTANCE);
-						int val = (dist / SORT_RANGE_DISTANCE) + mod;
-						val2 += -val * 1000;
-					}
+					int dist = (int) o1.getRawDistance();
+					int mod = (dist % SORT_RANGE_DISTANCE);
+					int val = (dist / SORT_RANGE_DISTANCE) + mod;
+					val1 += -val * 1000;
+					dist = (int) o2.getRawDistance();
+					mod = (dist % SORT_RANGE_DISTANCE);
+					val = (dist / SORT_RANGE_DISTANCE) + mod;
+					val2 += -val * 1000;
 					return val2 - val1;
 				}
 			}
