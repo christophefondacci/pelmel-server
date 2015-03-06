@@ -248,15 +248,17 @@ public class JsonBuilderImpl implements JsonBuilder {
 				// Extracting last location
 				final Place lastLocation = user.getUnique(Place.class,
 						Constants.APIS_ALIAS_USER_LOCATION);
-				final Date lastLocationTime = user.getLastLocationTime();
+				if (lastLocation != null) {
+					final Date lastLocationTime = user.getLastLocationTime();
 
-				// Converting to JSON place
-				final JsonLightPlace jsonUserPlace = buildJsonLightPlace(
-						lastLocation, highRes, l);
+					// Converting to JSON place
+					final JsonLightPlace jsonUserPlace = buildJsonLightPlace(
+							lastLocation, highRes, l);
 
-				// Injecting into JSON user bean
-				json.setLastLocation(jsonUserPlace);
-				json.setLastLocationTimeValue(lastLocationTime);
+					// Injecting into JSON user bean
+					json.setLastLocation(jsonUserPlace);
+					json.setLastLocationTimeValue(lastLocationTime);
+				}
 			} catch (CalException e) {
 				LOGGER.error(
 						"Unable to extract user's last location : "
