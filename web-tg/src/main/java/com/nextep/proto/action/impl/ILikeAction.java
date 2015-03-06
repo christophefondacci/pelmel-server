@@ -84,8 +84,7 @@ public class ILikeAction extends AbstractAction implements CurrentUserAware,
 								.addCriterion(
 										SearchRestriction.withContained(
 												User.class,
-												SearchScope.CHILDREN,
-												Constants.MAX_FAVORITE_MEN, 0)
+												SearchScope.CHILDREN, 1, 0)
 												.aliasedBy(
 														APIS_ALIAS_USER_LIKERS)));
 		final ApiCompositeResponse userResponse = (ApiCompositeResponse) getApiService()
@@ -110,7 +109,9 @@ public class ILikeAction extends AbstractAction implements CurrentUserAware,
 		// We load user to update search information
 		likeResult = searchPersistenceService.toggleLike(currentUser.getKey(),
 				likedKey);
-		likes = likedItem.get(User.class, APIS_ALIAS_USER_LIKERS).size();
+		final PaginationInfo likePaginationInfo = userResponse
+				.getPaginationInfo(APIS_ALIAS_USER_LIKERS);
+		likes = likePaginationInfo.getItemCount();
 		if (likeResult.wasLiked()) {
 			likes++;
 			// Initializing our activity entry

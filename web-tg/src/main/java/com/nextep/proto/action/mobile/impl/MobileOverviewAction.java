@@ -185,10 +185,9 @@ public class MobileOverviewAction extends AbstractAction implements
 									.with(User.class, maxRelatedElements, 0)
 									.aliasedBy(APIS_ALIAS_USER_LIKED)
 									.with(Media.class, MediaRequestTypes.THUMB))
-					.with(SearchRestriction
-							.withContained(User.class, SearchScope.CHILDREN,
-									Constants.MAX_FAVORITE_MEN, 0).aliasedBy(
-									APIS_ALIAS_USER_LIKERS))
+					.with(SearchRestriction.withContained(User.class,
+							SearchScope.CHILDREN, 1, 0).aliasedBy(
+							APIS_ALIAS_USER_LIKERS))
 					// .addCriterion(
 					// (WithCriterion) SearchRestriction
 					// .withContained(User.class,
@@ -542,7 +541,7 @@ public class MobileOverviewAction extends AbstractAction implements
 				likesUsers = overviewObject.get(User.class,
 						APIS_ALIAS_USER_LIKED);
 				final PaginationInfo likePagination = response
-						.getPaginationInfo(APIS_ALIAS_USER_LIKED);
+						.getPaginationInfo(APIS_ALIAS_USER_LIKERS);
 				json.setLikes(likePagination.getItemCount());
 			} else {
 				likesUsers = overviewObject.get(User.class,

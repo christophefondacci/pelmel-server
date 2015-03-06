@@ -446,8 +446,10 @@ public class NearbyPlacesListAction extends AbstractAction implements
 
 					// Else we use the standard sort algorithm based on user
 					// inside a place and user liking a place
-					int val1 = o1.getUsersCount() * 100 + o1.getLikesCount();
-					int val2 = o2.getUsersCount() * 100 + o2.getLikesCount();
+					int val1 = o1.getUsersCount() * 100 + o1.getLikesCount()
+							* 500;
+					int val2 = o2.getUsersCount() * 100 + o2.getLikesCount()
+							* 500;
 					int dist = (int) o1.getRawDistance();
 					int mod = (dist % SORT_RANGE_DISTANCE);
 					int val = (dist / SORT_RANGE_DISTANCE) + mod;
