@@ -1,6 +1,7 @@
 package com.nextep.proto.services;
 
 import java.util.List;
+import java.util.concurrent.Future;
 
 import com.nextep.comments.model.Comment;
 import com.nextep.descriptions.model.Description;
@@ -30,7 +31,7 @@ public interface NotificationService {
 	 * @param sound
 	 *            the sound to use when notifying (not used yet)
 	 */
-	void sendNotification(User user, String message, int badgeCount,
+	Future<Boolean> sendNotification(User user, String message, int badgeCount,
 			String sound);
 
 	/**
@@ -75,7 +76,7 @@ public interface NotificationService {
 	 * @param descriptionKey
 	 *            new description keys
 	 */
-	void sendPlaceUpdateEmailNotification(Place place, User user,
+	Future<Boolean> sendPlaceUpdateEmailNotification(Place place, User user,
 			String oldName, String oldAddress, String oldPlaceType,
 			String oldCity, String oldLat, String oldLng,
 			List<ItemKey> oldTagKeys,
@@ -92,9 +93,11 @@ public interface NotificationService {
 	 * @param reportType
 	 *            type of report (from Constants.REPORT_TYPE)
 	 */
-	void sendReportEmailNotification(CalmObject obj, User user, int reportType);
+	Future<Boolean> sendReportEmailNotification(CalmObject obj, User user,
+			int reportType);
 
-	void sendMediaAddedEmailNotification(CalmObject obj, User user, Media media);
+	Future<Boolean> sendMediaAddedEmailNotification(CalmObject obj, User user,
+			Media media);
 
 	/**
 	 * Notifies administrtor about a comment on a place
@@ -106,8 +109,8 @@ public interface NotificationService {
 	 * @param comment
 	 *            the comment added
 	 */
-	void sendCommentAddedEmailNotification(CalmObject obj, User user,
-			Comment comment);
+	Future<Boolean> sendCommentAddedEmailNotification(CalmObject obj,
+			User user, Comment comment);
 
 	/**
 	 * Sends an email to the user that offers him to change his password
