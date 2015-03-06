@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.Future;
 
 import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
@@ -24,6 +25,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.web.util.HtmlUtils;
 
 import com.nextep.cal.util.services.CalPersistenceService;
@@ -223,8 +226,9 @@ public class NotificationServiceImpl implements NotificationService {
 	}
 
 	@Override
-	public void sendNotification(User user, String message, int badgeCount,
-			String sound) {
+	@Async
+	public Future<Boolean> sendNotification(User user, String message,
+			int badgeCount, String sound) {
 		if (user.getPushDeviceId() != null && pushEnabled) {
 
 			LOGGER.info("Sending push notification to user [" + user.getKey()
@@ -254,6 +258,7 @@ public class NotificationServiceImpl implements NotificationService {
 						+ user.getPushDeviceId(), e);
 			}
 		}
+		return new AsyncResult<Boolean>(true);
 	}
 
 	// Authenticates to SendGrid
@@ -324,8 +329,9 @@ public class NotificationServiceImpl implements NotificationService {
 	}
 
 	@Override
-	public void sendPlaceUpdateEmailNotification(Place place, User user,
-			String oldName, String oldAddress, String oldPlaceType,
+	@Async
+	public Future<Boolean> sendPlaceUpdateEmailNotification(Place place,
+			User user, String oldName, String oldAddress, String oldPlaceType,
 			String oldCity, String oldLat, String oldLng,
 			List<ItemKey> oldTagKeys,
 			List<? extends Description> oldDescriptions,
@@ -365,6 +371,7 @@ public class NotificationServiceImpl implements NotificationService {
 		fillEmailFooterFor(buf, place, user);
 		notifyAdminByEmail("Place " + place.getName() + " " + updated + " by "
 				+ user.getPseudo(), buf.toString());
+		return new AsyncResult<Boolean>(true);
 	}
 
 	/**
@@ -414,8 +421,9 @@ public class NotificationServiceImpl implements NotificationService {
 	}
 
 	@Override
-	public void sendReportEmailNotification(CalmObject obj, User user,
-			int reportType) {
+	@Async
+	public Future<Boolean> sendReportEmailNotification(CalmObject obj,
+			User user, int reportType) {
 		final StringBuilder buf = new StringBuilder();
 		fillEmailHeaderFor(buf, obj, user, "reported");
 
@@ -442,6 +450,7 @@ public class NotificationServiceImpl implements NotificationService {
 				"Place " + DisplayHelper.getName(obj) + " reported as "
 						+ reportTypeLabel + " by " + user.getPseudo(),
 				buf.toString());
+		return new AsyncResult<Boolean>(true);
 	}
 
 	private void fillEmailFooterFor(StringBuilder buf, CalmObject object,
@@ -451,8 +460,9 @@ public class NotificationServiceImpl implements NotificationService {
 	}
 
 	@Override
-	public void sendMediaAddedEmailNotification(CalmObject obj, User user,
-			Media media) {
+	@Async
+	public Future<Boolean> sendMediaAddedEmailNotification(CalmObject obj,
+			User user, Media media) {
 		StringBuilder buf = new StringBuilder();
 		fillEmailHeaderFor(buf, obj, user, "modified with a new photo");
 
@@ -461,17 +471,20 @@ public class NotificationServiceImpl implements NotificationService {
 		fillEmailFooterFor(buf, obj, user);
 		notifyAdminByEmail("Photo added to " + DisplayHelper.getName(obj)
 				+ " by " + user.getPseudo(), buf.toString());
+		return new AsyncResult<Boolean>(true);
 	}
 
 	@Override
-	public void sendCommentAddedEmailNotification(CalmObject obj, User user,
-			Comment comment) {
+	@Async
+	public Future<Boolean> sendCommentAddedEmailNotification(CalmObject obj,
+			User user, Comment comment) {
 		StringBuilder buf = new StringBuilder();
 		fillEmailHeaderFor(buf, obj, user, "commented");
 		buf.append("Comment added: <br><p>" + comment.getMessage() + "</p>");
 		fillEmailFooterFor(buf, obj, user);
 		notifyAdminByEmail("Comment added to " + DisplayHelper.getName(obj)
 				+ " by " + user.getPseudo(), buf.toString());
+		return new AsyncResult<Boolean>(true);
 	}
 
 	@Override
