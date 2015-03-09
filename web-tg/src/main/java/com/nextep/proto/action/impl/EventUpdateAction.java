@@ -8,6 +8,7 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Locale;
+import java.util.TimeZone;
 
 import net.sf.json.JSONObject;
 
@@ -148,6 +149,20 @@ public class EventUpdateAction extends AbstractAction implements
 				Constants.APIS_ALIAS_CURRENT_USER);
 		checkCurrentUser(user);
 
+		// Extracting localization
+		final GeographicItem geoItem = userResponse.getUniqueElement(
+				GeographicItem.class, APIS_ALIAS_PLACE);
+		// We need to assign a city to this event for common operation based on
+		// localization
+		City eventCity = null;
+		if (geoItem != null) {
+			// Unwrapping place city if needed
+			if (geoItem instanceof Place) {
+				eventCity = ((Place) geoItem).getCity();
+			} else if (geoItem instanceof City) {
+				eventCity = (City) geoItem;
+			}
+		}
 		// Initializing event
 		if (!newEvent) {
 			event = (MutableEvent) userResponse.getUniqueElement(Event.class,
@@ -174,6 +189,7 @@ public class EventUpdateAction extends AbstractAction implements
 		event.setName(name);
 		event.setLocationKey(placeKey);
 		Date eventStartDate = null;
+		TimeZone serverTimezone = TimeZone.getDefault();
 		if (startDate != null) {
 			// Trying to parse event start date
 			final String startStr = startDate + " " + startHour + ":"
@@ -186,7 +202,11 @@ public class EventUpdateAction extends AbstractAction implements
 				LOGGER.error("Unable to parse date of event " + eventId + " ["
 						+ startStr + "]: " + e.getMessage());
 			}
-			event.setStartDate(eventStartDate);
+			final Date localizedStart = eventManagementService.convertDate(
+					eventStartDate, eventCity.getTimezoneId(),
+					serverTimezone.getID());
+			event.setStartDate(localizedStart);
+			eventStartDate = localizedStart;
 		}
 		Date eventEndDate = null;
 		if (endDate != null) {
@@ -219,7 +239,11 @@ public class EventUpdateAction extends AbstractAction implements
 							+ " [" + endStr + "]: " + e.getMessage());
 				}
 			}
-			event.setEndDate(eventEndDate);
+			final Date localizedEnd = eventManagementService.convertDate(
+					eventEndDate, eventCity.getTimezoneId(),
+					serverTimezone.getID());
+			event.setEndDate(localizedEnd);
+			eventEndDate = localizedEnd;
 		}
 		// Now setting any event series specific information
 		if (event instanceof EventSeries) {
@@ -255,22 +279,8 @@ public class EventUpdateAction extends AbstractAction implements
 				.updateDescriptions(user, PUFF_FIELD_DESCRIPTION, event,
 						languages, keys, descriptions, descriptionSourceId);
 
-		// Attaching localization
-		final GeographicItem geoItem = userResponse.getUniqueElement(
-				GeographicItem.class, APIS_ALIAS_PLACE);
-		// We need to assign a city to this event for common operation based on
-		// localization
-		if (geoItem != null) {
-			City c = null;
-			// Unwrapping place city if needed
-			if (geoItem instanceof Place) {
-				c = ((Place) geoItem).getCity();
-			} else if (geoItem instanceof City) {
-				c = (City) geoItem;
-			}
-			if (c != null) {
-				geoService.setItemFor(event.getKey(), c.getKey());
-			}
+		if (eventCity != null) {
+			geoService.setItemFor(event.getKey(), eventCity.getKey());
 		}
 
 		// Fetching full event object and store it back to the search layer

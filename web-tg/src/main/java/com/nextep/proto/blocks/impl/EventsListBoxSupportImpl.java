@@ -7,13 +7,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 
 import com.nextep.events.model.Event;
+import com.nextep.geo.model.City;
+import com.nextep.geo.model.Place;
 import com.nextep.media.model.Media;
 import com.nextep.proto.blocks.ItemsListBoxSupport;
 import com.nextep.proto.helpers.DisplayHelper;
+import com.nextep.proto.services.EventManagementService;
 import com.nextep.proto.services.UrlService;
 import com.videopolis.calm.model.CalmObject;
 
@@ -31,6 +36,9 @@ public class EventsListBoxSupportImpl implements ItemsListBoxSupport {
 	private List<? extends CalmObject> items;
 	private CalmObject parent;
 	private String translationKeyTitle = "block.events.title";
+
+	@Autowired
+	private EventManagementService eventManagementService;
 
 	@Override
 	public void initialize(UrlService urlService, Locale locale,
@@ -59,7 +67,17 @@ public class EventsListBoxSupportImpl implements ItemsListBoxSupport {
 	@Override
 	public String getItemDescription(CalmObject item) {
 		final Event event = (Event) item;
-		final Date startDate = event.getStartDate();
+		City city = null;
+		if (parent instanceof City) {
+			city = (City) parent;
+		} else if (parent instanceof Place) {
+			city = ((Place) parent).getCity();
+		}
+		Date startDate = event.getStartDate();
+		if (city != null) {
+			startDate = eventManagementService.convertDate(startDate, TimeZone
+					.getDefault().getID(), city.getTimezoneId());
+		}
 		if (startDate != null) {
 			DateFormat format = DATE_FORMAT_MAP.get(locale);
 			if (format == null) {
@@ -96,8 +114,20 @@ public class EventsListBoxSupportImpl implements ItemsListBoxSupport {
 	@Override
 	public String getItemTitlePrefix(CalmObject item) {
 		final Event event = (Event) item;
-		final Date startDate = event.getStartDate();
-		final Date endDate = event.getEndDate();
+		City city = null;
+		if (parent instanceof City) {
+			city = (City) parent;
+		} else if (parent instanceof Place) {
+			city = ((Place) parent).getCity();
+		}
+		Date startDate = event.getStartDate();
+		Date endDate = event.getEndDate();
+		if (city != null) {
+			startDate = eventManagementService.convertDate(startDate, TimeZone
+					.getDefault().getID(), city.getTimezoneId());
+			endDate = eventManagementService.convertDate(endDate, TimeZone
+					.getDefault().getID(), city.getTimezoneId());
+		}
 		if (startDate != null) {
 			return HOUR_FORMAT.format(startDate) + " - "
 					+ HOUR_FORMAT.format(endDate);
