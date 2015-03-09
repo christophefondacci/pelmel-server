@@ -29,7 +29,14 @@ public final class DisplayHelper {
 	}
 
 	public static String getName(CalmObject o) {
-		return getName(o, ActionContext.getContext().getLocale());
+		final ActionContext context = ActionContext.getContext();
+		Locale locale;
+		if (context != null) {
+			locale = context.getLocale();
+		} else {
+			locale = Locale.ENGLISH;
+		}
+		return getName(o, locale);
 	}
 
 	public static String getName(CalmObject o, Locale l) {

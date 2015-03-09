@@ -312,7 +312,12 @@ public class UrlServiceImpl implements UrlService {
 			buf.append(".action?id=");
 		} else {
 			if (locale == null) {
-				locale = ActionContext.getContext().getLocale();
+				final ActionContext context = ActionContext.getContext();
+				if (context != null) {
+					locale = context.getLocale();
+				} else {
+					locale = Locale.ENGLISH;
+				}
 			}
 			String seoPage = encode(messageSource.getMessage(
 					UrlConstants.KEY_OVERVIEW_PAGE, null, locale));
@@ -320,7 +325,7 @@ public class UrlServiceImpl implements UrlService {
 			if (item instanceof Place) {
 				final Place place = (Place) item;
 				seoObjTypeKey = place.getPlaceType();
-				seoPage = encode(DisplayHelper.getName(place.getCity()));
+				seoPage = encode(DisplayHelper.getName(place.getCity(), locale));
 			}
 			final String seoObjType = encode(messageSource.getMessage(
 					UrlConstants.KEY_SEO_TYPE_PREFIX + seoObjTypeKey, null,
