@@ -6,9 +6,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.TimeZone;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 
 import com.nextep.activities.model.Activity;
@@ -17,6 +20,7 @@ import com.nextep.comments.model.Comment;
 import com.nextep.descriptions.model.Description;
 import com.nextep.events.model.Event;
 import com.nextep.events.model.EventSeries;
+import com.nextep.geo.model.City;
 import com.nextep.geo.model.GeographicItem;
 import com.nextep.media.model.Media;
 import com.nextep.messages.model.Message;
@@ -62,6 +66,7 @@ import com.nextep.proto.helpers.DisplayHelper;
 import com.nextep.proto.helpers.SearchHelper;
 import com.nextep.proto.model.Constants;
 import com.nextep.proto.model.SearchType;
+import com.nextep.proto.services.EventManagementService;
 import com.nextep.proto.services.ViewManagementService;
 import com.nextep.tags.model.Tag;
 import com.nextep.users.model.User;
@@ -117,6 +122,8 @@ public class EventOverviewAction extends AbstractAction implements
 	private CalPersistenceService propertiesService;
 	private MosaicSupport mosaicSupport;
 	private ViewManagementService viewManagementService;
+	@Autowired
+	private EventManagementService eventManagementService;
 	private String id;
 
 	@Override
@@ -260,6 +267,12 @@ public class EventOverviewAction extends AbstractAction implements
 		eventsListSupport.initialize(getUrlService(), getLocale(), geoItem,
 				otherEvents);
 
+		// Being precaution, not sure we always have a City here and not an
+		// Admin zone
+		String timezone = TimeZone.getDefault().getID();
+		if (city instanceof City) {
+			timezone = ((City) city).getTimezoneId();
+		}
 		// Initializing properties
 		final DateFormat dateFormat = new SimpleDateFormat(
 				"EEEE dd MMMM HH:mm", getLocale());
@@ -268,7 +281,11 @@ public class EventOverviewAction extends AbstractAction implements
 			final MutableProperty p = (MutableProperty) propertiesService
 					.createTransientObject();
 			p.setCode(Constants.PROPERTY_EVENT_START);
-			p.setValue(dateFormat.format(event.getStartDate()));
+
+			final Date localizedStart = eventManagementService.convertDate(
+					event.getStartDate(), TimeZone.getDefault().getID(),
+					timezone);
+			p.setValue(dateFormat.format(localizedStart));
 			props.add(p);
 		}
 
@@ -276,7 +293,10 @@ public class EventOverviewAction extends AbstractAction implements
 			final MutableProperty p = (MutableProperty) propertiesService
 					.createTransientObject();
 			p.setCode(Constants.PROPERTY_EVENT_END);
-			p.setValue(dateFormat.format(event.getEndDate()));
+			final Date localizedEnd = eventManagementService
+					.convertDate(event.getEndDate(), TimeZone.getDefault()
+							.getID(), timezone);
+			p.setValue(dateFormat.format(localizedEnd));
 			props.add(p);
 		}
 
