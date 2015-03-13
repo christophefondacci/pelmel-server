@@ -22,65 +22,76 @@
 					<input type="hidden" name="calendarType" value="<s:property value="#editionSupport.getCalendarType()"/>">
 					<label class="col-xs-24"><s:if test="#showDescriptions"><s:text name="event.form.startDate"/></s:if><s:else><s:text name="event.form.startDate.opening"/></s:else></label>
 					<s:if test="!#recurrencyForced">
-						<input class="col-xs-8" type="text" name="startDate" id="startDate" value="<s:property value="#editionSupport.startDate"/>"/>
-						<label class="col-xs-4 field-align">&nbsp;<s:text name="event.form.startTime"/></label>
+						<div class="col-xs-12">
+							<input class="form-control" type="text" name="startDate" id="startDate" value="<s:property value="#editionSupport.startDate"/>"/>
+						</div>
+<%-- 						<label class="col-xs-4 field-align">&nbsp;<s:text name="event.form.startTime"/></label> --%>
 					</s:if>
-					<select class="col-xs-6" name="startHour">
-						<option value="-1"><s:text name="event.form.hour"/></option>
-						<s:iterator begin="0" end="23" step="1" var="hour">
-							<option <s:property value='#editionSupport.startHour==#hour ? "selected" : ""'/> value="<s:property value="#hour"/>">
-								<s:if test="#hour<10">
-									<s:property value='"0" + #hour'/>
-								</s:if><s:else>
-									<s:property value="#hour"/>
-								</s:else>
-							</option>
-						</s:iterator>
-					</select>
-					<select class="col-xs-6" name="startMinute">
-						<option value="-1"><s:text name="event.form.minute"/></option>
-						<s:iterator begin="0" end="45" step="15" var="min">
-							<option <s:property value='#editionSupport.startMinute==#min ? "selected" : ""'/> value="<s:property value="#min"/>">
-								<s:if test="#min<10">
-									<s:property value='"0" + #min'/>
-								</s:if><s:else>
-									<s:property value="#min"/>
-								</s:else>
-							</option>
-						</s:iterator>
-					</select>
+					<div class="col-xs-6">
+						<select class="form-control" name="startHour">
+							<option value="-1"><s:text name="event.form.hour"/></option>
+							<s:iterator begin="0" end="23" step="1" var="hour">
+								<option <s:property value='#editionSupport.startHour==#hour ? "selected" : ""'/> value="<s:property value="#hour"/>">
+									<s:if test="#hour<10">
+										<s:property value='"0" + #hour'/>
+									</s:if><s:else>
+										<s:property value="#hour"/>
+									</s:else>
+								</option>
+							</s:iterator>
+						</select>
+					</div>
+					<div class="col-xs-6">
+						<select class="form-control" name="startMinute">
+							<option value="-1"><s:text name="event.form.minute"/></option>
+							<s:iterator begin="0" end="45" step="15" var="min">
+								<option <s:property value='#editionSupport.startMinute==#min ? "selected" : ""'/> value="<s:property value="#min"/>">
+									<s:if test="#min<10">
+										<s:property value='"0" + #min'/>
+									</s:if><s:else>
+										<s:property value="#min"/>
+									</s:else>
+								</option>
+							</s:iterator>
+						</select>
+					</div>
 					<div class="clearfix"></div>
 				</div>
 				<div class="form-group">
 					<label class="col-xs-24"><s:if test="#showDescriptions"><s:text name="event.form.endDate"/></s:if><s:else><s:text name="event.form.endDate.opening"/></s:else></label>
 					<s:if test="!#recurrencyForced">
-						<input class="col-xs-8" type="text" name="endDate" id="endDate" value="<s:property value="#editionSupport.endDate"/>"/>
-						<label class="col-xs-4 field-align">&nbsp;<s:text name="event.form.endTime"/></label>
+						<div class="col-xs-12">
+							<input class="form-control" type="text" name="endDate" id="endDate" value="<s:property value="#editionSupport.endDate"/>"/>
+						</div>
 					</s:if>
-					<select class="col-xs-6" name="endHour">
-						<option value="-1"><s:text name="event.form.hour"/></option>
-						<s:iterator begin="0" end="23" step="1" var="hour">
-							<option <s:property value='#editionSupport.endHour==#hour ? "selected" : ""'/> value="<s:property value="#hour"/>">
-								<s:if test="#hour<10">
-									<s:property value='"0" + #hour'/>
-								</s:if><s:else>
-									<s:property value="#hour"/>
-								</s:else>
-							</option>
-						</s:iterator>
-					</select>
-					<select class="col-xs-6" name="endMinute">
-						<option value="-1"><s:text name="event.form.minute"/></option>
-						<s:iterator begin="0" end="45" step="15" var="min">
-							<option <s:property value='#editionSupport.endMinute==#min ? "selected" : ""'/> value="<s:property value="#min"/>">
-								<s:if test="#min<10">
-									<s:property value='"0" + #min'/>
-								</s:if><s:else>
-									<s:property value="#min"/>
-								</s:else>
-							</option>
-						</s:iterator>
-					</select>
+					<div class="col-xs-6">
+						<select class="form-control" name="endHour">
+							<option value="-1"><s:text name="event.form.hour"/></option>
+							<s:iterator begin="0" end="23" step="1" var="hour">
+								<option <s:property value='#editionSupport.endHour==#hour ? "selected" : ""'/> value="<s:property value="#hour"/>">
+									<s:if test="#hour<10">
+										<s:property value='"0" + #hour'/>
+									</s:if><s:else>
+										<s:property value="#hour"/>
+									</s:else>
+								</option>
+							</s:iterator>
+						</select>
+					</div>
+					<div class="col-xs-6">
+						<select class="form-control" name="endMinute">
+							<option value="-1"><s:text name="event.form.minute"/></option>
+							<s:iterator begin="0" end="45" step="15" var="min">
+								<option <s:property value='#editionSupport.endMinute==#min ? "selected" : ""'/> value="<s:property value="#min"/>">
+									<s:if test="#min<10">
+										<s:property value='"0" + #min'/>
+									</s:if><s:else>
+										<s:property value="#min"/>
+									</s:else>
+								</option>
+							</s:iterator>
+						</select>
+					</div>
 					<div class="clearfix"></div>
 				</div>
 				<input type="hidden" name="placeId" id="placeId" value="<s:property value="#editionSupport.placeId"/>"/>

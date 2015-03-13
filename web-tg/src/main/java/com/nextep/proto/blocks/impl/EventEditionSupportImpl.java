@@ -2,10 +2,13 @@ package com.nextep.proto.blocks.impl;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Locale;
+import java.util.TimeZone;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.NoSuchMessageException;
 
@@ -18,6 +21,7 @@ import com.nextep.geo.model.Place;
 import com.nextep.proto.blocks.EventEditionSupport;
 import com.nextep.proto.helpers.DisplayHelper;
 import com.nextep.proto.helpers.GeoHelper;
+import com.nextep.proto.services.EventManagementService;
 import com.videopolis.calm.exception.CalException;
 import com.videopolis.calm.model.CalmObject;
 
@@ -31,10 +35,14 @@ public class EventEditionSupportImpl implements EventEditionSupport {
 	private static final DateFormat MIN_FORMAT = new SimpleDateFormat("mm");
 	private Event event;
 	private GeographicItem location;
-	private CalendarType calendarType = null;
+	private CalendarType calendarType = CalendarType.EVENT;
 	private Locale locale;
+	private Date localizedStartDate;
+	private Date localizedEndDate;
 
 	private MessageSource messageSource;
+	@Autowired
+	private EventManagementService eventManagementService;
 
 	@Override
 	public void initialize(CalmObject eventOrLocation, Locale locale) {
@@ -47,6 +55,15 @@ public class EventEditionSupportImpl implements EventEditionSupport {
 				calendarType = ((EventSeries) eventOrLocation)
 						.getCalendarType();
 			}
+
+			// Localizing dates
+			final String fromTimezoneId = TimeZone.getDefault().getID();
+			final String toTimezoneId = eventManagementService
+					.getEventTimezoneId(event);
+			localizedStartDate = eventManagementService.convertDate(
+					event.getStartDate(), fromTimezoneId, toTimezoneId);
+			localizedEndDate = eventManagementService.convertDate(
+					event.getEndDate(), fromTimezoneId, toTimezoneId);
 		} else {
 			location = (GeographicItem) eventOrLocation;
 		}
@@ -71,7 +88,7 @@ public class EventEditionSupportImpl implements EventEditionSupport {
 	public String getStartHour() {
 		if (event != null) {
 			if (Event.CAL_ID.equals(event.getKey().getType())) {
-				return HOUR_FORMAT.format(event.getStartDate());
+				return HOUR_FORMAT.format(localizedStartDate);
 			} else {
 				return String.valueOf(((EventSeries) event).getStartHour());
 			}
@@ -83,7 +100,7 @@ public class EventEditionSupportImpl implements EventEditionSupport {
 	public String getStartMinute() {
 		if (event != null) {
 			if (Event.CAL_ID.equals(event.getKey().getType())) {
-				return MIN_FORMAT.format(event.getStartDate());
+				return MIN_FORMAT.format(localizedStartDate);
 			} else {
 				return String.valueOf(((EventSeries) event).getStartMinute());
 			}
@@ -101,7 +118,7 @@ public class EventEditionSupportImpl implements EventEditionSupport {
 	public String getEndHour() {
 		if (event != null) {
 			if (Event.CAL_ID.equals(event.getKey().getType())) {
-				return HOUR_FORMAT.format(event.getEndDate());
+				return HOUR_FORMAT.format(localizedEndDate);
 			} else {
 				return String.valueOf(((EventSeries) event).getEndHour());
 			}
@@ -113,7 +130,7 @@ public class EventEditionSupportImpl implements EventEditionSupport {
 	public String getEndMinute() {
 		if (event != null) {
 			if (Event.CAL_ID.equals(event.getKey().getType())) {
-				return MIN_FORMAT.format(event.getEndDate());
+				return MIN_FORMAT.format(localizedEndDate);
 			} else {
 				return String.valueOf(((EventSeries) event).getEndMinute());
 			}

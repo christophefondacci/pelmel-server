@@ -24,7 +24,9 @@ import com.nextep.events.model.CalendarType;
 import com.nextep.events.model.Event;
 import com.nextep.events.model.EventSeries;
 import com.nextep.events.model.MutableEvent;
+import com.nextep.geo.model.City;
 import com.nextep.geo.model.GeographicItem;
+import com.nextep.geo.model.Place;
 import com.nextep.media.model.Media;
 import com.nextep.media.model.MutableMedia;
 import com.nextep.properties.model.MutableProperty;
@@ -691,6 +693,31 @@ public class EventManagementServiceImpl implements EventManagementService {
 			}
 		}
 		return props;
+	}
+
+	@Override
+	public String getEventTimezoneId(Event event) {
+
+		try {
+			// Extracting city
+			City city = null;
+			GeographicItem geoItem = event.getUnique(GeographicItem.class);
+
+			// Event may be localized in place or city
+			if (geoItem instanceof Place) {
+				city = ((Place) geoItem).getCity();
+			} else if (geoItem instanceof City) {
+				city = (City) geoItem;
+			}
+
+			// Returning timezone of the extracted city
+			return city.getTimezoneId();
+		} catch (CalException e) {
+			LOGGER.error("Unable to extract event localization for event "
+					+ event.getKey() + ": " + e.getMessage(), e);
+		}
+		// Fallback on current default timezone
+		return TimeZone.getDefault().getID();
 	}
 
 	public void setApiService(ApiService apiService) {
