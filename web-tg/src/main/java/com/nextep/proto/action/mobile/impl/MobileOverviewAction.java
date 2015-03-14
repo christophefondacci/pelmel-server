@@ -161,8 +161,8 @@ public class MobileOverviewAction extends AbstractAction implements
 													Constants.APIS_ALIAS_EVENT_PLACE)
 											.with(Media.class,
 													MediaRequestTypes.THUMB)));
-			objCriterion
-					.addCriterion(SearchRestriction.with(EventSeries.class));
+			objCriterion.addCriterion((WithCriterion) SearchRestriction.with(
+					EventSeries.class).with(Media.class));
 			// Getting comments count
 			objCriterion.addCriterion(SearchRestriction.with(Comment.class, 1,
 					0).aliasedBy(APIS_ALIAS_COMMENTS));
@@ -209,7 +209,8 @@ public class MobileOverviewAction extends AbstractAction implements
 			// MessageRequestTypeListConversation(
 			// fromKey, user.getKey());
 			;
-		} else if (Event.CAL_ID.equals(itemKey.getType())) {
+		} else if (Event.CAL_ID.equals(itemKey.getType())
+				|| EventSeries.SERIES_CAL_ID.equals(itemKey.getType())) {
 			objCriterion.addCriterion(
 					(WithCriterion) SearchRestriction
 							.withContained(User.class, SearchScope.CHILDREN,
@@ -447,18 +448,7 @@ public class MobileOverviewAction extends AbstractAction implements
 				if (media != m) {
 					final JsonMedia jsonMedia = jsonBuilder.buildJsonMedia(
 							media, highRes);
-
-					// We select as main image one with higher height for proper
-					// mobile display
-					if (media.getWidth() < media.getHeight()
-							&& m.getWidth() > m.getHeight()) {
-						final JsonMedia previousJsonThumb = jsonElement
-								.getThumb();
-						jsonElement.setThumb(jsonMedia);
-						jsonElement.addOtherImage(previousJsonThumb);
-					} else if (jsonMedia != null) {
-						jsonElement.addOtherImage(jsonMedia);
-					}
+					jsonElement.addOtherImage(jsonMedia);
 				}
 			}
 		} else if (User.CAL_TYPE.equals(overviewObject.getKey().getType())) {
@@ -522,7 +512,9 @@ public class MobileOverviewAction extends AbstractAction implements
 					.getPaginationInfo(APIS_ALIAS_ACTIVITIES_CHECKIN);
 			jsonUser.setCheckedInPlacesCount(checkinsPagination.getItemCount());
 
-		} else if (Event.CAL_ID.equals(overviewObject.getKey().getType())) {
+		} else if (Event.CAL_ID.equals(overviewObject.getKey().getType())
+				|| EventSeries.SERIES_CAL_ID.equals(overviewObject.getKey()
+						.getType())) {
 			final JsonEvent jsonEvent = new JsonEvent();
 			jsonBuilder.fillJsonEvent(jsonEvent, (Event) overviewObject,
 					highRes, getLocale(), response);

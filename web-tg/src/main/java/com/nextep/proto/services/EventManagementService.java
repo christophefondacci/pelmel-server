@@ -91,4 +91,13 @@ public interface EventManagementService {
 	 * @return the list of {@link Property}
 	 */
 	List<Property> convertToProperties(List<EventSeries> seriesList, Locale l);
+
+	/**
+	 * Provides the timezone of the event
+	 * 
+	 * @param event
+	 *            the {@link Event} to get the timezone
+	 * @return the timezone ID
+	 */
+	String getEventTimezoneId(Event event);
 }

@@ -22,6 +22,7 @@ import org.apache.solr.client.solrj.response.QueryResponse;
 import com.nextep.activities.model.Activity;
 import com.nextep.advertising.model.AdvertisingBooster;
 import com.nextep.events.model.Event;
+import com.nextep.events.model.EventSeries;
 import com.nextep.geo.model.Admin;
 import com.nextep.geo.model.AlternateName;
 import com.nextep.geo.model.City;
@@ -163,7 +164,8 @@ public class SolrSearchPersistenceServiceImpl implements
 					likedKeys = solrUser.getPlaces();
 				} else if (User.CAL_TYPE.equals(likedKey.getType())) {
 					likedKeys = solrUser.getUsers();
-				} else if (Event.CAL_ID.equals(likedKey.getType())) {
+				} else if (Event.CAL_ID.equals(likedKey.getType())
+						|| EventSeries.SERIES_CAL_ID.equals(likedKey.getType())) {
 					likedKeys = solrUser.getEvents();
 				}
 				// If we got something

@@ -136,7 +136,9 @@ public class CalendarSupportImpl implements CalendarSupport {
 		StringBuilder buf = new StringBuilder();
 		if (obj instanceof EventSeries) {
 			final EventSeries series = (EventSeries) obj;
-			if (series.getCalendarType() == CalendarType.HAPPY_HOUR) {
+			if (series.getCalendarType() == CalendarType.HAPPY_HOUR
+					&& series.getName() != null
+					&& !series.getName().trim().isEmpty()) {
 				buf.append(series.getName() + " - ");
 			}
 			buf.append(eventManagementService.buildReadableTimeframe(series,

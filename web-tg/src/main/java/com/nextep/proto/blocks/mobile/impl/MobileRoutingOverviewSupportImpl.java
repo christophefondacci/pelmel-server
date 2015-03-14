@@ -20,7 +20,7 @@ import com.videopolis.calm.model.CalmObject;
  */
 public class MobileRoutingOverviewSupportImpl implements OverviewSupport {
 	private OverviewSupport baseOverviewSupport;
-	private Map<String, OverviewSupport> typedOverviewSupportMap = new HashMap<String, OverviewSupport>();;
+	private Map<String, OverviewSupport> typedOverviewSupportMap = new HashMap<String, OverviewSupport>();
 
 	@Override
 	public void initialize(UrlService urlService, Locale locale,

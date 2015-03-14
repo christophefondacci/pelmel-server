@@ -69,6 +69,7 @@ import com.videopolis.apis.model.ApisItemKeyAdapter;
 import com.videopolis.apis.model.ApisRequest;
 import com.videopolis.apis.model.FacetInformation;
 import com.videopolis.apis.model.SearchStatistic;
+import com.videopolis.apis.model.WithCriterion;
 import com.videopolis.apis.service.ApiCompositeResponse;
 import com.videopolis.calm.factory.CalmFactory;
 import com.videopolis.calm.model.CalmObject;
@@ -247,9 +248,13 @@ public class NearbyPlacesListAction extends AbstractAction implements
 		}
 
 		// Adding default places information
-		placesCriterion.with(Description.class).with(Media.class)
-				.with(Tag.class).with(AdvertisingBooster.class)
-				.with(EventSeries.class);
+		placesCriterion
+				.with(Description.class)
+				.with(Media.class)
+				.with(Tag.class)
+				.with(AdvertisingBooster.class)
+				.with((WithCriterion) SearchRestriction.with(EventSeries.class)
+						.with(Media.class));
 		// Integrating the criterion
 		if (parentKey == null) {
 			// At the root level by default

@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -434,8 +435,10 @@ public class JsonBuilderImpl implements JsonBuilder {
 
 		e.setName(event.getName());
 		e.setKey(event.getKey().toString());
-		e.setStartTime(event.getStartDate());
-		e.setEndTime(event.getEndDate());
+		if (!(event instanceof EventSeries)) {
+			e.setStartTime(event.getStartDate());
+			e.setEndTime(event.getEndDate());
+		}
 
 		// Extract the place
 		try {
@@ -445,6 +448,24 @@ public class JsonBuilderImpl implements JsonBuilder {
 				JsonLightPlace jsonPlace = buildJsonLightPlace(place, highRes,
 						l);
 				e.setPlace(jsonPlace);
+
+				// We compute series date here because we need timezone from
+				// extracted place
+				if (event instanceof EventSeries) {
+					final EventSeries series = (EventSeries) event;
+					String timezoneId = TimeZone.getDefault().getID();
+					if (place instanceof City) {
+						timezoneId = ((City) place).getTimezoneId();
+					} else if (place instanceof Place) {
+						timezoneId = ((Place) place).getCity().getTimezoneId();
+					}
+					final Date nextStart = eventManagementService.computeNext(
+							series, timezoneId, true);
+					final Date nextEnd = eventManagementService.computeNext(
+							series, timezoneId, false);
+					e.setStartTime(nextStart);
+					e.setEndTime(nextEnd);
+				}
 			}
 		} catch (CalException ex) {
 			LOGGER.error("Unable to get Place for event " + event.getKey()
@@ -538,17 +559,17 @@ public class JsonBuilderImpl implements JsonBuilder {
 		for (Media media : place.get(Media.class)) {
 			if (media != m) {
 				final JsonMedia jsonMedia = buildJsonMedia(media, highRes);
-
+				p.addOtherImage(jsonMedia);
 				// We select as main image one with higher height for proper
 				// mobile display
-				if (media.getWidth() < media.getHeight()
-						&& m.getWidth() > m.getHeight()) {
-					final JsonMedia previousMainMedia = p.getThumb();
-					p.setThumb(jsonMedia);
-					p.addOtherImage(previousMainMedia);
-				} else if (jsonMedia != null) {
-					p.addOtherImage(jsonMedia);
-				}
+				// if (media.getWidth() < media.getHeight()
+				// && m.getWidth() > m.getHeight()) {
+				// final JsonMedia previousMainMedia = p.getThumb();
+				// p.setThumb(jsonMedia);
+				// p.addOtherImage(previousMainMedia);
+				// } else if (jsonMedia != null) {
+				// p.addOtherImage(jsonMedia);
+				// }
 			}
 		}
 		// Misc info
@@ -624,6 +645,7 @@ public class JsonBuilderImpl implements JsonBuilder {
 						|| event.getNextEnd() > nextEndTime) {
 					event.setNextEnd(nextEndTime);
 					event.setName(series.getName());
+					event.setKey(series.getKey().toString());
 				}
 				if (event.getNextStart() == null
 						|| event.getNextStart() > nextStartTime) {
@@ -636,6 +658,14 @@ public class JsonBuilderImpl implements JsonBuilder {
 				String description = event.getDescription() == null ? ""
 						: event.getDescription() + " / ";
 				event.setDescription(description + hours);
+
+				// Processing series own media
+				final List<? extends Media> media = series.get(Media.class);
+				if (!media.isEmpty()) {
+					final JsonMedia jsonMedia = buildJsonMedia(media.iterator()
+							.next(), highRes);
+					event.setThumb(jsonMedia);
+				}
 			}
 		}
 		// Now we inject all specials (one by type)

@@ -437,10 +437,10 @@ public class UrlServiceImpl implements UrlService {
 			buf.append(webappPrefix + "/ajaxGetEventForm");
 		}
 		// Default calendar type is EVENT
-		if (calendarType == null) {
-			calendarType = CalendarType.EVENT;
+		if (calendarType != null) {
+			// calendarType = CalendarType.EVENT;
+			buf.append("&calendarType=" + calendarType.name());
 		}
-		buf.append("&calendarType=" + calendarType.name());
 		return buf.toString();
 	}
 

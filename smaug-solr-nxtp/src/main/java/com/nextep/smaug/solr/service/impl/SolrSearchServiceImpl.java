@@ -26,6 +26,7 @@ import org.apache.solr.client.solrj.response.QueryResponse;
 
 import com.nextep.activities.model.Activity;
 import com.nextep.events.model.Event;
+import com.nextep.events.model.EventSeries;
 import com.nextep.geo.model.Admin;
 import com.nextep.geo.model.City;
 import com.nextep.geo.model.Country;
@@ -184,7 +185,8 @@ public class SolrSearchServiceImpl implements SearchService {
 			default:
 				buf.append("places:" + parent.toString());
 			}
-		} else if (Event.CAL_ID.equals(parent.getType())) {
+		} else if (Event.CAL_ID.equals(parent.getType())
+				|| EventSeries.SERIES_CAL_ID.equals(parent.getType())) {
 			buf.append("events:" + parent.toString());
 		} else if (User.CAL_TYPE.equals(parent.getType())
 				&& User.CAL_TYPE.equals(settings.getReturnedType())) {

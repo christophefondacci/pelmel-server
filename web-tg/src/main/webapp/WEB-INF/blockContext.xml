@@ -233,6 +233,7 @@
 				<entry key="PLAC" value-ref="placeOverviewSupport"/>
 				<entry key="USER" value-ref="userOverviewSupport"/>
 				<entry key="EVNT" value-ref="eventOverviewSupport"/>
+				<entry key="SERI" value-ref="eventOverviewSupport"/>
 			</map>
 		</property>
 	</bean>

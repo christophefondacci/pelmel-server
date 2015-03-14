@@ -60,12 +60,12 @@ public class EventsDaoImpl implements EventsDao {
 		if ("PLAC".equals(key.getType()) || "CITY".equals(key.getType())) {
 			return entityManager
 					.createQuery(
-							"from EventImpl where placeKey=:placeKey and startDate > CURRENT_TIMESTAMP order by startDate")
+							"from EventImpl where placeKey=:placeKey and endDate > CURRENT_TIMESTAMP order by startDate")
 					.setParameter("placeKey", key.toString()).getResultList();
 		} else if (EventSeries.SERIES_CAL_ID.equals(key.getType())) {
 			return entityManager
 					.createQuery(
-							"from EventImpl where seriesKey=:seriesKey and startDate > CURRENT_TIMESTAMP order by startDate")
+							"from EventImpl where seriesKey=:seriesKey and endDate > CURRENT_TIMESTAMP order by startDate")
 					.setParameter("seriesKey", key.toString()).getResultList();
 		} else {
 			final List<ItemEventImpl> itemEvents = findItemEventFor(key, true);

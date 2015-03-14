@@ -5,6 +5,7 @@ import java.util.Locale;
 
 import org.springframework.context.MessageSource;
 
+import com.nextep.events.model.CalendarType;
 import com.nextep.geo.model.Place;
 import com.nextep.proto.blocks.OverviewSupport;
 import com.nextep.proto.helpers.DisplayHelper;
@@ -63,7 +64,8 @@ public class PlaceOverviewSupportImpl implements OverviewSupport {
 					place.getKey(), place.getPlaceType());
 		} else if ("addevent".equals(action)) {
 			return urlService.getEventEditionFormUrl(
-					DisplayHelper.getDefaultAjaxContainer(), place.getKey());
+					DisplayHelper.getDefaultAjaxContainer(), place.getKey(),
+					CalendarType.EVENT);
 		} else if ("delete".equals(action)) {
 			return "/deleteItem?key=" + place.getKey();
 		}

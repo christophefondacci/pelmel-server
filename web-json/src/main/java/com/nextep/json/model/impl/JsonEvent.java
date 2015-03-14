@@ -57,7 +57,7 @@ public class JsonEvent extends JsonLiker implements IJsonLightEvent {
 
 	@Override
 	public void setStartTime(Date startTime) {
-		this.startTime = startTime.getTime() / 1000;
+		this.startTime = startTime == null ? null : startTime.getTime() / 1000;
 	}
 
 	@Override
@@ -67,7 +67,7 @@ public class JsonEvent extends JsonLiker implements IJsonLightEvent {
 
 	@Override
 	public void setEndTime(Date endTime) {
-		this.endTime = endTime.getTime() / 1000;
+		this.endTime = endTime == null ? null : endTime.getTime() / 1000;
 	}
 
 	@Override
