@@ -60,10 +60,14 @@ public class EventEditionSupportImpl implements EventEditionSupport {
 			final String fromTimezoneId = TimeZone.getDefault().getID();
 			final String toTimezoneId = eventManagementService
 					.getEventTimezoneId(event);
-			localizedStartDate = eventManagementService.convertDate(
-					event.getStartDate(), fromTimezoneId, toTimezoneId);
-			localizedEndDate = eventManagementService.convertDate(
-					event.getEndDate(), fromTimezoneId, toTimezoneId);
+			if (event.getStartDate() != null) {
+				localizedStartDate = eventManagementService.convertDate(
+						event.getStartDate(), fromTimezoneId, toTimezoneId);
+			}
+			if (event.getEndDate() != null) {
+				localizedEndDate = eventManagementService.convertDate(
+						event.getEndDate(), fromTimezoneId, toTimezoneId);
+			}
 		} else {
 			location = (GeographicItem) eventOrLocation;
 		}
