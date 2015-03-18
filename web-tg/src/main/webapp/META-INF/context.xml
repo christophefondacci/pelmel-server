@@ -43,7 +43,7 @@
 		value="http://127.0.0.1:8983/solr-suggest/suggest/" />
 		
 	<Environment name="smaug/lastSeenMaxTime" type="java.lang.Long"
-		value="6000000" />	
+		value="12000000" />	
 	<Environment name="media/localPath" type="java.lang.String"
 		value="/Users/cfondacci/Dev/proto/http-static/media/" />
 	<Environment name="user/connectionTimeoutMinutes" type="java.lang.Integer"

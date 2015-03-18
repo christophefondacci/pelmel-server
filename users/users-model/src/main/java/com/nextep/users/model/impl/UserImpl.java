@@ -281,7 +281,8 @@ public class UserImpl extends AbstractCalmObject implements User, MutableUser {
 
 	@Override
 	public void setLastLocationKey(ItemKey lastLocationKey) {
-		this.lastLocationKey = lastLocationKey.toString();
+		this.lastLocationKey = lastLocationKey == null ? null : lastLocationKey
+				.toString();
 	}
 
 	@Override

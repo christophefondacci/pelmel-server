@@ -7,14 +7,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import javax.annotation.Resource;
+
 import net.sf.json.JSONObject;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.nextep.activities.model.Activity;
-import com.nextep.activities.model.ActivityType;
-import com.nextep.activities.model.impl.RequestTypeLatestActivities;
 import com.nextep.comments.model.Comment;
 import com.nextep.descriptions.model.Description;
 import com.nextep.events.model.Event;
@@ -40,7 +39,6 @@ import com.nextep.proto.action.model.OverviewAware;
 import com.nextep.proto.action.model.TagAware;
 import com.nextep.proto.apis.adapters.ApisEventLocationAdapter;
 import com.nextep.proto.apis.adapters.ApisUserLocationItemKeyAdapter;
-import com.nextep.proto.apis.model.impl.ApisActivitiesHelper;
 import com.nextep.proto.blocks.CurrentUserSupport;
 import com.nextep.proto.blocks.ItemsListBoxSupport;
 import com.nextep.proto.blocks.MediaProvider;
@@ -112,6 +110,8 @@ public class MobileOverviewAction extends AbstractAction implements
 	private JsonBuilder jsonBuilder;
 	private int maxRelatedElements;
 	private double radius;
+	@Resource(mappedName = "smaug/lastSeenMaxTime")
+	private Long checkinTime;
 
 	// Dynamic arguments
 	private String id;
@@ -149,9 +149,6 @@ public class MobileOverviewAction extends AbstractAction implements
 			objCriterion
 					.addCriterion((WithCriterion) SearchRestriction
 							.with(Event.class)
-							// .with(SearchRestriction.with(EventSeries.class)
-							// .aliasedBy(
-							// Constants.APIS_ALIAS_EVENT_SERIES))
 							.with(Media.class)
 							.with(Description.class)
 							.addCriterion(
@@ -166,11 +163,7 @@ public class MobileOverviewAction extends AbstractAction implements
 			// Getting comments count
 			objCriterion.addCriterion(SearchRestriction.with(Comment.class, 1,
 					0).aliasedBy(APIS_ALIAS_COMMENTS));
-			// Getting activities
-			objCriterion.with(ApisActivitiesHelper.withActivities(
-					MAX_LOCALIZATION_ACTIVITY, 0,
-					new RequestTypeLatestActivities(MAX_LOCALIZATION_ACTIVITY,
-							ActivityType.CHECKIN)));
+
 		} else if (User.CAL_TYPE.equals(itemKey.getType())) {
 			objCriterion
 					.with(SearchRestriction.with(GeographicItem.class))
@@ -188,21 +181,15 @@ public class MobileOverviewAction extends AbstractAction implements
 					.with(SearchRestriction.withContained(User.class,
 							SearchScope.CHILDREN, 1, 0).aliasedBy(
 							APIS_ALIAS_USER_LIKERS))
-					// .addCriterion(
-					// (WithCriterion) SearchRestriction
-					// .withContained(User.class,
-					// SearchScope.CHILDREN,
-					// Constants.MAX_FAVORITE_MEN, 0)
-					// .aliasedBy(APIS_ALIAS_USER_LIKE)
-					// .with(Media.class))
 					.addCriterion(
 							(ApisCriterion) SearchRestriction
 									.with(Place.class, maxRelatedElements, 0)
 									.aliasedBy(APIS_ALIAS_PLACE_LIKE)
 									.with(Media.class, MediaRequestTypes.THUMB))
-					.with(ApisActivitiesHelper.withUserActivities(
-							MAX_LOCALIZATION_ACTIVITY, 0, ActivityType.CHECKIN)
-							.aliasedBy(APIS_ALIAS_ACTIVITIES_CHECKIN))
+			// .with(ApisActivitiesHelper.withUserActivities(
+			// MAX_LOCALIZATION_ACTIVITY, 0, ActivityType.CHECKIN,
+			// ActivityType.CHECKOUT).aliasedBy(
+			// APIS_ALIAS_ACTIVITIES_CHECKIN))
 			// TODO add message pagination retrieval for conversation with this
 			// user
 			// .with(SearchRestriction.with(Message.class, new
@@ -342,6 +329,7 @@ public class MobileOverviewAction extends AbstractAction implements
 	@Override
 	public String getJson() {
 		JsonLiker json = null;
+		final long oldestCheckinTime = System.currentTimeMillis() - checkinTime;
 		if (Place.CAL_TYPE.equals(overviewObject.getKey().getType())) {
 			JsonOverviewElement jsonElement = jsonBuilder.buildJsonOverview(
 					getLocale(), overviewObject);
@@ -375,39 +363,6 @@ public class MobileOverviewAction extends AbstractAction implements
 					jsonElement.addInUser(jsonUser);
 					// Adding key
 					addedUserKeys.add(user.getKey().toString());
-				}
-			}
-
-			// Appending users who recently were there
-			final List<? extends Activity> activities = overviewObject
-					.get(Activity.class);
-			for (Activity a : activities) {
-
-				// Only considering localization activities
-				if (a.getActivityType() == ActivityType.LOCALIZATION
-						|| a.getActivityType() == ActivityType.CHECKIN) {
-					try {
-						// Getting user of this activity
-						final User user = a.getUnique(User.class,
-								Constants.ALIAS_ACTIVITY_USER);
-
-						// If not already in the list
-						if (user != null
-								&& !addedUserKeys.contains(user.getKey()
-										.toString())) {
-							// We build JSON representation of it
-							final JsonLightUser jsonUser = jsonBuilder
-									.buildJsonLightUser(user, highRes,
-											getLocale());
-							// And add it
-							jsonElement.addInUser(jsonUser);
-							addedUserKeys.add(user.getKey().toString());
-						}
-					} catch (CalException e) {
-						LOGGER.error(
-								"Problems while getting user from a localization activity: "
-										+ e.getMessage(), e);
-					}
 				}
 			}
 
@@ -471,46 +426,29 @@ public class MobileOverviewAction extends AbstractAction implements
 			}
 
 			// Extracting activities for checkin information
-			final List<? extends Activity> activities = overviewObject.get(
-					Activity.class, APIS_ALIAS_ACTIVITIES_CHECKIN);
-			for (Activity a : activities) {
-
-				// Only considering localization activities
-				if (a.getActivityType() == ActivityType.LOCALIZATION
-						|| a.getActivityType() == ActivityType.CHECKIN) {
-					try {
-						// Getting place of this activity
-						final Place place = a.getUnique(Place.class,
-								Constants.ALIAS_ACTIVITY_TARGET);
-
-						// Making sure we don't add the same place twice (when
-						// several checkins)
-						final Set<String> placeKeys = new HashSet<String>();
-
-						// If not already in the list
-						if (place != null
-								&& !placeKeys.contains(place.getKey()
-										.toString())) {
-							// We build JSON representation of it
-							final JsonLightPlace jsonPlace = jsonBuilder
-									.buildJsonLightPlace(place, highRes,
-											getLocale());
-							// And add it
-							jsonUser.addCheckedInPlace(jsonPlace);
-							placeKeys.add(place.getKey().toString());
-						}
-					} catch (CalException e) {
-						LOGGER.error(
-								"Problems while getting user checkins from a localization activity: "
-										+ e.getMessage(), e);
-					}
+			boolean checkedIn = false;
+			try {
+				final Place userLocation = user.getUnique(Place.class,
+						Constants.APIS_ALIAS_USER_LOCATION);
+				if (userLocation != null
+						&& user.getLastLocationTime().getTime() > oldestCheckinTime) {
+					// We build JSON representation of it
+					final JsonLightPlace jsonPlace = jsonBuilder
+							.buildJsonLightPlace(userLocation, highRes,
+									getLocale());
+					// And add it
+					jsonUser.addCheckedInPlace(jsonPlace);
 				}
+			} catch (CalException e) {
+				LOGGER.error(
+						"Unable to get user last checked in location for user '"
+								+ user.getKey() + "' / locationKey = '"
+								+ user.getLastLocationKey() + "': "
+								+ e.getMessage(), e);
 			}
 
 			// Generating checkins count
-			final PaginationInfo checkinsPagination = response
-					.getPaginationInfo(APIS_ALIAS_ACTIVITIES_CHECKIN);
-			jsonUser.setCheckedInPlacesCount(checkinsPagination.getItemCount());
+			jsonUser.setCheckedInPlacesCount(checkedIn ? 1 : 0);
 
 		} else if (Event.CAL_ID.equals(overviewObject.getKey().getType())
 				|| EventSeries.SERIES_CAL_ID.equals(overviewObject.getKey()

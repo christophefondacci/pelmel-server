@@ -4,7 +4,7 @@ public enum ActivityType {
 
 	CREATION("C"), UPDATE("U"), LIKE("I"), UNLIKE("N"), LOCALIZATION("L"), COMMENT(
 			"O"), REGISTER("R"), DELETION("D"), SEO_OPEN("S"), ABUSE("A"), REMOVAL_REQUESTED(
-			"E"), HOURS("H"), CITY_CHANGE("Y"), CHECKIN("K");
+			"E"), HOURS("H"), CITY_CHANGE("Y"), CHECKIN("K"), CHECKOUT("T");
 
 	private String code;
 

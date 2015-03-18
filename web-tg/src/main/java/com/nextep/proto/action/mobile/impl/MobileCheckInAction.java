@@ -28,6 +28,7 @@ public class MobileCheckInAction extends AbstractAction implements JsonProvider 
 	private String checkInKey;
 	private double lat;
 	private double lng;
+	private boolean checkout;
 
 	// Internal
 	private JsonStatus status;
@@ -51,8 +52,13 @@ public class MobileCheckInAction extends AbstractAction implements JsonProvider 
 
 		// Checking in
 		final ItemKey checkinItemKey = CalmFactory.parseKey(checkInKey);
-		localizationService.checkin((MutableUser) user, checkinItemKey,
-				ActivityType.CHECKIN, lat, lng);
+		if (!checkout) {
+			localizationService.checkin((MutableUser) user, checkinItemKey,
+					ActivityType.CHECKIN, lat, lng);
+		} else {
+			localizationService.checkout((MutableUser) user, checkinItemKey,
+					ActivityType.CHECKOUT, lat, lng);
+		}
 		// We're done
 		status.setError(false);
 		return SUCCESS;
@@ -93,5 +99,13 @@ public class MobileCheckInAction extends AbstractAction implements JsonProvider 
 	@Override
 	public String getJson() {
 		return JSONObject.fromObject(status).toString();
+	}
+
+	public void setCheckout(boolean checkout) {
+		this.checkout = checkout;
+	}
+
+	public boolean isCheckout() {
+		return checkout;
 	}
 }

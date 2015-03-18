@@ -28,6 +28,7 @@ public class LocalizationServiceImpl implements LocalizationService {
 
 	private final static Log LOGGER = LogFactory
 			.getLog(LocalizationServiceImpl.class);
+	private static final Log CHECKIN_LOGGER = LogFactory.getLog("CHECKIN");
 
 	private CalPersistenceService usersService;
 	private CalPersistenceService activitiesService;
@@ -104,15 +105,39 @@ public class LocalizationServiceImpl implements LocalizationService {
 	@Override
 	public void checkin(MutableUser user, ItemKey placeKey,
 			ActivityType activityType, double lat, double lng) {
-		final ItemKey previousLocationKey = user.getLastLocationKey();
-		// final Date previousLocationTime = user.getLastLocationTime();
-		user.setLastLocationKey(placeKey);
-		user.setLastLocationTime(new Date());
+		checkinOrOut(user, placeKey, activityType, lat, lng, false);
+	}
+
+	@Override
+	public void checkout(MutableUser user, ItemKey placeKey,
+			ActivityType activityType, double lat, double lng) {
+		checkinOrOut(user, placeKey, activityType, lat, lng, true);
+	}
+
+	private void checkinOrOut(MutableUser user, ItemKey placeKey,
+			ActivityType activityType, double lat, double lng, boolean checkout) {
+		if (!checkout) {
+			user.setLastLocationKey(placeKey);
+			user.setLastLocationTime(new Date());
+		} else {
+			// Only checking out if user is already checked in at this place
+			if (user.getLastLocationKey().equals(placeKey)) {
+				user.setLastLocationKey(null);
+			} else {
+				// Logging
+				LOGGER.warn("Attempt to checkout from a place where the user is not: userKey='"
+						+ user.getKey()
+						+ "' / placeKeyToCheckout='"
+						+ placeKey
+						+ "' / currentPlaceKey='"
+						+ user.getLastLocationKey()
+						+ "'");
+			}
+		}
 		user.setLatitude(lat);
 		user.setLongitude(lng);
-		// We add localization to the activities only if different
-		// from last
-		// if (!placeKey.equals(previousLocationKey)) {
+
+		// Adding activity
 		final MutableActivity activity = (MutableActivity) activitiesService
 				.createTransientObject();
 		activity.setActivityType(activityType);
@@ -120,17 +145,16 @@ public class LocalizationServiceImpl implements LocalizationService {
 		activity.setDate(user.getLastLocationTime());
 		activity.setLoggedItemKey(placeKey);
 		activitiesService.saveItem(activity);
-		// }
-		// We add localization to the search only if different or
-		// too old
-		// final long delay = System.currentTimeMillis()
-		// - previousLocationTime.getTime();
-		// if (delay > lastSeenMaxTime / 2
-		// || !placeKey.equals(previousLocationKey)) {
-		// }
 		searchService.updateUserOnlineStatus(user);
-		// Storing user localization info (lat, long and place)
+
+		// Saving user
 		usersService.saveItem(user);
+
+		// Logging lat/lng with checkin
+		CHECKIN_LOGGER.info(placeKey + ";"
+				+ (checkout ? "CHECKOUT" : "CHECKIN") + ";"
+				+ System.currentTimeMillis() + ";" + user.getKey() + ";" + lat
+				+ ";" + lng);
 	}
 
 	public void setActivitiesService(CalPersistenceService activitiesService) {

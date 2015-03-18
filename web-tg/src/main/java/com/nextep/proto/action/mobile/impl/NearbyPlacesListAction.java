@@ -13,8 +13,6 @@ import net.sf.json.JSONObject;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.nextep.activities.model.Activity;
-import com.nextep.activities.model.ActivityType;
 import com.nextep.advertising.model.AdvertisingBooster;
 import com.nextep.cal.util.services.CalPersistenceService;
 import com.nextep.descriptions.model.Description;
@@ -23,7 +21,6 @@ import com.nextep.events.model.EventSeries;
 import com.nextep.geo.model.City;
 import com.nextep.geo.model.GeographicItem;
 import com.nextep.geo.model.Place;
-import com.nextep.json.model.impl.JsonActivity;
 import com.nextep.json.model.impl.JsonLightCity;
 import com.nextep.json.model.impl.JsonLightEvent;
 import com.nextep.json.model.impl.JsonLightUser;
@@ -39,7 +36,6 @@ import com.nextep.proto.action.model.SearchAware;
 import com.nextep.proto.action.model.TagAware;
 import com.nextep.proto.apis.adapters.ApisEventLocationAdapter;
 import com.nextep.proto.apis.adapters.ApisFacetToItemKeyAdapter;
-import com.nextep.proto.apis.model.impl.ApisActivitiesHelper;
 import com.nextep.proto.apis.model.impl.ApisLocalizationHelper;
 import com.nextep.proto.blocks.ActivitySupport;
 import com.nextep.proto.blocks.CurrentUserSupport;
@@ -166,18 +162,18 @@ public class NearbyPlacesListAction extends AbstractAction implements
 					// Adding activities
 					final List<Sorter> activitiesDateSorter = SearchHelper
 							.getActivitiesDefaultSorter();
-					final ApisCriterion activitiesCrit = SearchRestriction
-							.searchNear(Activity.class,
-									SearchScope.NEARBY_ACTIVITIES, searchLat,
-									searchLng, radius, NEARBY_ACTIVITIES_COUNT,
-									0).sortBy(activitiesDateSorter)
-							.aliasedBy(APIS_ALIAS_NEARBY_ACTIVITIES);
+					// final ApisCriterion activitiesCrit = SearchRestriction
+					// .searchNear(Activity.class,
+					// SearchScope.NEARBY_ACTIVITIES, searchLat,
+					// searchLng, radius, NEARBY_ACTIVITIES_COUNT,
+					// 0).sortBy(activitiesDateSorter)
+					// .aliasedBy(APIS_ALIAS_NEARBY_ACTIVITIES);
 
 					// Adding required elements for activity generation
-					ApisActivitiesHelper
-							.addActivityConnectedItemsQuery(activitiesCrit);
-
-					request.addCriterion(activitiesCrit);
+					// ApisActivitiesHelper
+					// .addActivityConnectedItemsQuery(activitiesCrit);
+					//
+					// request.addCriterion(activitiesCrit);
 
 					// Adding users
 					final ApisCriterion usersCrit = (ApisCriterion) SearchRestriction
@@ -264,15 +260,15 @@ public class NearbyPlacesListAction extends AbstractAction implements
 			final ItemKey parentItemKey = CalmFactory.parseKey(parentKey);
 
 			// Preparing query of activities for this parent
-			final List<Sorter> activitiesDateSorter = SearchHelper
-					.getActivitiesDefaultSorter();
-			final ApisCriterion activitiesCrit = SearchRestriction
-					.withContained(Activity.class,
-							SearchScope.NEARBY_ACTIVITIES,
-							NEARBY_ACTIVITIES_COUNT, 0)
-					.aliasedBy(APIS_ALIAS_NEARBY_ACTIVITIES)
-					.sortBy(activitiesDateSorter);
-			ApisActivitiesHelper.addActivityConnectedItemsQuery(activitiesCrit);
+			// final List<Sorter> activitiesDateSorter = SearchHelper
+			// .getActivitiesDefaultSorter();
+			// final ApisCriterion activitiesCrit = SearchRestriction
+			// .withContained(Activity.class,
+			// SearchScope.NEARBY_ACTIVITIES,
+			// NEARBY_ACTIVITIES_COUNT, 0)
+			// .aliasedBy(APIS_ALIAS_NEARBY_ACTIVITIES)
+			// .sortBy(activitiesDateSorter);
+			// ApisActivitiesHelper.addActivityConnectedItemsQuery(activitiesCrit);
 
 			// Adding users
 			final ApisCriterion usersCrit = (ApisCriterion) SearchRestriction
@@ -285,7 +281,8 @@ public class NearbyPlacesListAction extends AbstractAction implements
 			request.addCriterion((ApisCriterion) SearchRestriction
 					.uniqueKeys(Arrays.asList(parentItemKey))
 					.aliasedBy(APIS_ALIAS_CITY).addCriterion(placesCriterion)
-					.addCriterion(activitiesCrit).addCriterion(usersCrit));
+					// .addCriterion(activitiesCrit)
+					.addCriterion(usersCrit));
 		}
 		request.addCriterion(
 				SearchRestriction.searchForAllFacets(User.class,
@@ -331,21 +328,21 @@ public class NearbyPlacesListAction extends AbstractAction implements
 				.getFacetCounts(SearchHelper.getUserCurrentPlaceCategory());
 		for (FacetCount c : currentPlaceCounts) {
 			int count = c.getCount();
-			// We never count the current user in the number of persons in a
-			// place so we substract 1 when we fall on the place where the
-			// current user is located
-			if (user != null && user.getLastLocationKey() != null) {
-				if (user.getLastLocationTime() != null
-						&& user.getLastLocationKey().toString()
-								.equals(c.getFacet().getFacetCode())) {
-					long timeoutTime = user.getLastLocationTime().getTime()
-							+ lastSeenMaxTime;
-					if (timeoutTime > System.currentTimeMillis()) {
-						count--;
-					}
-				}
-			}
-
+			// // We never count the current user in the number of persons in a
+			// // place so we substract 1 when we fall on the place where the
+			// // current user is located
+			// if (user != null && user.getLastLocationKey() != null) {
+			// if (user.getLastLocationTime() != null
+			// && user.getLastLocationKey().toString()
+			// .equals(c.getFacet().getFacetCode())) {
+			// long timeoutTime = user.getLastLocationTime().getTime()
+			// + lastSeenMaxTime;
+			// if (timeoutTime > System.currentTimeMillis()) {
+			// count--;
+			// }
+			// }
+			// }
+			//
 			currentPlacesMap.put(c.getFacet().getFacetCode(), count);
 		}
 
@@ -357,13 +354,13 @@ public class NearbyPlacesListAction extends AbstractAction implements
 
 		List<? extends Place> places;
 		List<? extends Event> events;
-		List<? extends Activity> activities;
+		// List<? extends Activity> activities;
 		List<? extends User> users;
 		if (parentKey == null) {
 			places = response
 					.getElements(Place.class, APIS_ALIAS_NEARBY_PLACES);
-			activities = response.getElements(Activity.class,
-					APIS_ALIAS_NEARBY_ACTIVITIES);
+			// activities = response.getElements(Activity.class,
+			// APIS_ALIAS_NEARBY_ACTIVITIES);
 			users = response.getElements(User.class, APIS_ALIAS_NEARBY_USERS);
 		} else {
 			// If we had a parent key set we need to extract places from its
@@ -371,7 +368,8 @@ public class NearbyPlacesListAction extends AbstractAction implements
 			final GeographicItem city = response.getUniqueElement(
 					GeographicItem.class, APIS_ALIAS_CITY);
 			places = city.get(Place.class, APIS_ALIAS_NEARBY_PLACES);
-			activities = city.get(Activity.class, APIS_ALIAS_NEARBY_ACTIVITIES);
+			// activities = city.get(Activity.class,
+			// APIS_ALIAS_NEARBY_ACTIVITIES);
 			users = city.get(User.class, APIS_ALIAS_NEARBY_USERS);
 		}
 		if (searchText != null) {
@@ -582,21 +580,21 @@ public class NearbyPlacesListAction extends AbstractAction implements
 		}
 
 		// Extracting activities
-		final PaginationInfo activitiesPagination = response
-				.getPaginationInfo(APIS_ALIAS_NEARBY_ACTIVITIES);
-		activitySupport.initialize(getUrlService(), getLocale(),
-				activitiesPagination, activities);
-		for (Activity activity : activities) {
-			if (activity.getActivityType() != ActivityType.LOCALIZATION
-					&& activity.getActivityType() != ActivityType.CITY_CHANGE) {
-				final JsonActivity jsonActivity = jsonBuilder
-						.buildJsonActivity(activity, highRes, getLocale());
-				final String text = activitySupport
-						.getActivityHtmlLine(activity);
-				jsonActivity.setMessage(text);
-				jsonResponse.addNearbyActivity(jsonActivity);
-			}
-		}
+		// final PaginationInfo activitiesPagination = response
+		// .getPaginationInfo(APIS_ALIAS_NEARBY_ACTIVITIES);
+		// activitySupport.initialize(getUrlService(), getLocale(),
+		// activitiesPagination, activities);
+		// for (Activity activity : activities) {
+		// if (activity.getActivityType() != ActivityType.LOCALIZATION
+		// && activity.getActivityType() != ActivityType.CITY_CHANGE) {
+		// final JsonActivity jsonActivity = jsonBuilder
+		// .buildJsonActivity(activity, highRes, getLocale());
+		// final String text = activitySupport
+		// .getActivityHtmlLine(activity);
+		// jsonActivity.setMessage(text);
+		// jsonResponse.addNearbyActivity(jsonActivity);
+		// }
+		// }
 
 		// JSONifying users
 		for (User nearbyUser : users) {

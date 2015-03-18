@@ -60,4 +60,21 @@ public interface LocalizationService {
 	 */
 	void checkin(MutableUser user, ItemKey placeKey, ActivityType activityType,
 			double lat, double lng);
+
+	/**
+	 * Checks the user out of the given place
+	 * 
+	 * @param user
+	 *            the {@link User} to check out
+	 * @param placeKey
+	 *            the place key that the user should checkout from
+	 * @param activityType
+	 *            the {@link ActivityType} to create
+	 * @param lat
+	 *            the user's current latitude
+	 * @param lng
+	 *            the user's current longitude
+	 */
+	void checkout(MutableUser user, ItemKey placeKey,
+			ActivityType activityType, double lat, double lng);
 }

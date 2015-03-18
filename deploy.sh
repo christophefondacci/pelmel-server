@@ -8,9 +8,9 @@ cd ../smaug
 mvn clean install
 cd ../smaug-solr-nxtp
 mvn clean install
-cd ../apis
+cd ../apis/api-services
 mvn clean install
-cd ../activities
+cd ../../activities
 mvn clean install
 cd ../advertising
 mvn clean install
