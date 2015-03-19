@@ -143,18 +143,20 @@ public class JsonBuilderImpl implements JsonBuilder {
 	@Override
 	public JsonMedia buildJsonMedia(Media m, boolean highRes) {
 		final JsonMedia jsonMedia = new JsonMedia();
-		final String url = highRes ? m.getMobileUrlHighDef() : m.getMobileUrl();
-		if (url != null) {
-			jsonMedia.setUrl(baseUrl + url);
-			final String thumbUrl = highRes ? m.getThumbUrl() : m
-					.getMiniThumbUrl();
-			jsonMedia.setThumbUrl(baseUrl + thumbUrl);
-			// jsonMedia.setTitle(m.getTitle());
-			jsonMedia.setKey(m.getKey().toString());
-			return jsonMedia;
-		} else {
-			return null;
+		String url = highRes ? m.getMobileUrlHighDef() : m.getMobileUrl();
+		// Might be null for facebook profiles
+		if (url == null) {
+			url = m.getUrl();
 		}
+		if (url != null) {
+			jsonMedia.setUrl(MediaHelper.getImageUrl(url));
+		}
+		final String thumbUrl = highRes ? m.getThumbUrl() : m.getMiniThumbUrl();
+		jsonMedia.setThumbUrl(MediaHelper.getImageUrl(thumbUrl));
+		// jsonMedia.setTitle(m.getTitle());
+		jsonMedia.setKey(m.getKey().toString());
+		return jsonMedia;
+
 	}
 
 	@Override
