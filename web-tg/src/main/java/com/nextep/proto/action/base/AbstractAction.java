@@ -87,6 +87,7 @@ public abstract class AbstractAction extends ActionSupport implements
 	// Internal variables
 	private boolean logged = false;
 	private Locale overriddenLocale;
+	private Exception lastException;
 	private SearchType currentSearchType = SearchType.BARS; // Default search
 															// type is BAR
 
@@ -103,15 +104,22 @@ public abstract class AbstractAction extends ActionSupport implements
 		try {
 			return doExecute();
 		} catch (ApisNoSuchElementException e) {
+			lastException = e;
 			response.setStatus(HttpStatus.SC_NOT_FOUND);
 		} catch (UserLoginTimeoutException e) {
+			lastException = e;
 			return loginTimeoutError(e.getMessage());
 		} catch (Exception e) {
+			lastException = e;
 			response.setStatus(HttpStatus.SC_INTERNAL_SERVER_ERROR);
 			LOGGER.error(
 					"Error while executing the action : " + e.getMessage(), e);
 		}
 		return error();
+	}
+
+	protected Exception getLastException() {
+		return lastException;
 	}
 
 	/**

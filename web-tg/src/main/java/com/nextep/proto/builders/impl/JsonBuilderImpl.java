@@ -328,7 +328,7 @@ public class JsonBuilderImpl implements JsonBuilder {
 		return messagesList;
 	}
 
-	private JsonMessage buildJsonMessage(Message message) {
+	public JsonMessage buildJsonMessage(Message message) {
 		final JsonMessage json = new JsonMessage();
 		json.setKey(message.getKey().toString());
 		json.setFromKey(message.getFromKey().toString());

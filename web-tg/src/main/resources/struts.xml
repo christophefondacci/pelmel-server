@@ -251,8 +251,8 @@
 			<interceptor-ref name="default" />
 		</action>
 		<action name="mobileSendMsg" class="ajaxSendMessageAction">
-			<result name="error">/jsp/ajax/ajax-send-message.jsp</result>
-			<result>/jsp/ajax/ajax-send-message.jsp</result>
+			<result name="error">/jsp/pages/json-error.jsp</result>
+			<result>/jsp/pages/json.jsp</result>
 		</action>
 		<action name="ajaxSendFullMsg" class="ajaxSendMessageAction">
 			<result name="error">/jsp/ajax/ajax-error-dialog.jsp</result>

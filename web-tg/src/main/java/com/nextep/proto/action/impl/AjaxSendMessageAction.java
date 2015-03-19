@@ -4,12 +4,20 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+import net.sf.json.JSONObject;
+
+import org.springframework.beans.factory.annotation.Autowired;
+
 import com.nextep.cal.util.services.CalPersistenceService;
+import com.nextep.json.model.impl.JsonMessage;
+import com.nextep.json.model.impl.JsonStatus;
 import com.nextep.messages.model.Message;
 import com.nextep.messages.model.MutableMessage;
 import com.nextep.messages.model.impl.MessageRequestTypeFactory;
 import com.nextep.proto.action.base.AbstractAction;
+import com.nextep.proto.action.model.JsonProviderWithError;
 import com.nextep.proto.blocks.CurrentUserSupport;
+import com.nextep.proto.builders.JsonBuilder;
 import com.nextep.proto.services.NotificationService;
 import com.nextep.proto.spring.ContextHolder;
 import com.nextep.users.model.User;
@@ -22,7 +30,8 @@ import com.videopolis.calm.factory.CalmFactory;
 import com.videopolis.calm.model.ItemKey;
 import com.videopolis.cals.factory.ContextFactory;
 
-public class AjaxSendMessageAction extends AbstractAction {
+public class AjaxSendMessageAction extends AbstractAction implements
+		JsonProviderWithError {
 
 	private static final long serialVersionUID = -4442024505781884882L;
 	private static final String APIS_ALIAS_TARGET_USER = "to";
@@ -30,10 +39,14 @@ public class AjaxSendMessageAction extends AbstractAction {
 	private CalPersistenceService messageService;
 	private CurrentUserSupport currentUserSupport;
 	private NotificationService notificationService;
+	@Autowired
+	private JsonBuilder jsonBuilder;
 
 	private User currentUser;
 	private String to;
 	private String msgText;
+
+	private Message message;
 
 	@Override
 	protected String doExecute() throws Exception {
@@ -79,7 +92,24 @@ public class AjaxSendMessageAction extends AbstractAction {
 			notificationService.sendNotification(targetUser, pushMsg,
 					unreadMessages.size(), null);
 		}
+		message = msg;
 		return SUCCESS;
+	}
+
+	@Override
+	public String getJson() {
+		final JsonMessage m = jsonBuilder.buildJsonMessage(message);
+		return JSONObject.fromObject(m).toString();
+	}
+
+	@Override
+	public String getJsonError() {
+		final JsonStatus s = new JsonStatus();
+		final Exception e = getLastException();
+		s.setError(true);
+		s.setMessage("Unable to send message: "
+				+ (e == null ? " unknown reason" : e.getMessage()));
+		return JSONObject.fromObject(s).toString();
 	}
 
 	public void setTo(String to) {

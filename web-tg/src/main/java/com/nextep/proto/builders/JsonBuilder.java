@@ -20,6 +20,7 @@ import com.nextep.json.model.impl.JsonLightPlace;
 import com.nextep.json.model.impl.JsonLightUser;
 import com.nextep.json.model.impl.JsonManyToOneMessageList;
 import com.nextep.json.model.impl.JsonMedia;
+import com.nextep.json.model.impl.JsonMessage;
 import com.nextep.json.model.impl.JsonOneToOneMessageList;
 import com.nextep.json.model.impl.JsonOverviewElement;
 import com.nextep.json.model.impl.JsonPlace;
@@ -155,6 +156,15 @@ public interface JsonBuilder {
 
 	JsonManyToOneMessageList buildJsonMessagesFromComments(
 			List<? extends Comment> comments, boolean highRes, Locale l);
+
+	/**
+	 * Converts a {@link Message} CAL object to its JSON representation
+	 * 
+	 * @param message
+	 *            the {@link Message} instance to convert
+	 * @return the corresponding {@link JsonMessage}
+	 */
+	JsonMessage buildJsonMessage(Message message);
 
 	JsonLightUser buildJsonLightUser(User user, boolean highRes, Locale l);
 
