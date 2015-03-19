@@ -5,6 +5,8 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
+import com.nextep.json.model.IJsonLightEvent;
+
 public class JsonUser extends JsonLiker {
 
 	private String key;
@@ -22,6 +24,7 @@ public class JsonUser extends JsonLiker {
 	private List<JsonLightPlace> likedPlaces = new ArrayList<JsonLightPlace>();
 	private int likedPlacesCount;
 	private List<JsonLightPlace> checkedInPlaces = new ArrayList<JsonLightPlace>();
+	private List<IJsonLightEvent> events = new ArrayList<IJsonLightEvent>();
 	private int checkedInPlacesCount;
 	private JsonLightPlace lastLocation;
 	private Long lastLocationTime;
@@ -189,5 +192,17 @@ public class JsonUser extends JsonLiker {
 
 	public void setNewUser(boolean newUser) {
 		this.newUser = newUser;
+	}
+
+	public void setEvents(List<IJsonLightEvent> events) {
+		this.events = events;
+	}
+
+	public List<IJsonLightEvent> getEvents() {
+		return events;
+	}
+
+	public void addEvent(IJsonLightEvent event) {
+		events.add(event);
 	}
 }

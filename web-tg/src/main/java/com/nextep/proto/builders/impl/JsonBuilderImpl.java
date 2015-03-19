@@ -30,6 +30,7 @@ import com.nextep.json.model.impl.JsonEvent;
 import com.nextep.json.model.impl.JsonFacet;
 import com.nextep.json.model.impl.JsonHour;
 import com.nextep.json.model.impl.JsonLightCity;
+import com.nextep.json.model.impl.JsonLightEvent;
 import com.nextep.json.model.impl.JsonLightPlace;
 import com.nextep.json.model.impl.JsonLightUser;
 import com.nextep.json.model.impl.JsonManyToOneMessageList;
@@ -265,6 +266,13 @@ public class JsonBuilderImpl implements JsonBuilder {
 						"Unable to extract user's last location : "
 								+ e.getMessage(), e);
 			}
+		}
+
+		// Setting events
+		for (Event event : user.get(Event.class)) {
+			JsonLightEvent jsonEvent = new JsonLightEvent();
+			fillJsonEvent(jsonEvent, event, highRes, l, null);
+			json.addEvent(jsonEvent);
 		}
 		return json;
 	}
@@ -646,26 +654,27 @@ public class JsonBuilderImpl implements JsonBuilder {
 					event.setNextEnd(nextEndTime);
 					event.setName(series.getName());
 					event.setKey(series.getKey().toString());
+					// Computing opening hours string
+					final String hours = eventManagementService
+							.buildReadableTimeframe(series, l);
+					String description = event.getDescription() == null ? ""
+							: event.getDescription() + " / ";
+					event.setDescription(description + hours);
+
+					// Processing series own media
+					final List<? extends Media> media = series.get(Media.class);
+					if (!media.isEmpty()) {
+						Media specialMedia = media.iterator().next();
+						final JsonMedia jsonMedia = buildJsonMedia(
+								specialMedia, highRes);
+						event.setThumb(jsonMedia);
+					}
 				}
 				if (event.getNextStart() == null
 						|| event.getNextStart() > nextStartTime) {
 					event.setNextStart(nextStartTime);
 				}
 
-				// Computing opening hours string
-				final String hours = eventManagementService
-						.buildReadableTimeframe(series, l);
-				String description = event.getDescription() == null ? ""
-						: event.getDescription() + " / ";
-				event.setDescription(description + hours);
-
-				// Processing series own media
-				final List<? extends Media> media = series.get(Media.class);
-				if (!media.isEmpty()) {
-					final JsonMedia jsonMedia = buildJsonMedia(media.iterator()
-							.next(), highRes);
-					event.setThumb(jsonMedia);
-				}
 			}
 		}
 		// Now we inject all specials (one by type)

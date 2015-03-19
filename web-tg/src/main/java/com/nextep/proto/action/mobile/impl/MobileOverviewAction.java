@@ -186,6 +186,16 @@ public class MobileOverviewAction extends AbstractAction implements
 									.with(Place.class, maxRelatedElements, 0)
 									.aliasedBy(APIS_ALIAS_PLACE_LIKE)
 									.with(Media.class, MediaRequestTypes.THUMB))
+					.addCriterion(
+							(ApisCriterion) SearchRestriction
+									.with(Event.class)
+									.with(Media.class)
+									.addCriterion(
+											SearchRestriction
+													.adaptKey(
+															eventLocationAdapter)
+													.aliasedBy(
+															Constants.APIS_ALIAS_EVENT_PLACE)));
 			// .with(ApisActivitiesHelper.withUserActivities(
 			// MAX_LOCALIZATION_ACTIVITY, 0, ActivityType.CHECKIN,
 			// ActivityType.CHECKOUT).aliasedBy(
