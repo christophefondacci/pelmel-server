@@ -497,6 +497,16 @@ public class SolrSearchPersistenceServiceImpl implements
 		}
 		searchItem.setBirthyear(birthDate.get(Calendar.YEAR));
 		searchItem.setOnlineTimeout(user.getOnlineTimeout());
+		if (user.getLatitude() != 0) {
+			searchItem.setLat(user.getLatitude());
+		} else {
+			searchItem.setLat(null);
+		}
+		if (user.getLongitude() != 0) {
+			searchItem.setLng(user.getLongitude());
+		} else {
+			searchItem.setLng(null);
+		}
 		// Adding tags
 		for (Tag tag : user.get(Tag.class)) {
 			searchItem.addTag(tag.getKey().toString());
@@ -525,8 +535,9 @@ public class SolrSearchPersistenceServiceImpl implements
 			}
 		}
 		// Adding localization information
+		City city = null;
 		try {
-			final City city = user.getUnique(City.class);
+			city = user.getUnique(City.class);
 			fillLocalization(searchItem, city);
 		} catch (CalException e) {
 			log.error(
@@ -548,7 +559,7 @@ public class SolrSearchPersistenceServiceImpl implements
 		} catch (RuntimeException e) {
 			throw new SearchException("Unable to store calm object: " + e, e);
 		}
-		storeSuggest(user.getKey(), Arrays.asList(user.getPseudo()));
+		storeSuggest(user.getKey(), Arrays.asList(user.getPseudo()), city);
 	}
 
 	private void fillLocalization(SearchItemImpl searchItem, City city) {

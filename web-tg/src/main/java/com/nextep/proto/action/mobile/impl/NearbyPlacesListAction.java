@@ -236,6 +236,15 @@ public class NearbyPlacesListAction extends AbstractAction implements
 					GeographicItem.class, scopes, searchText, pageSize)
 					.aliasedBy(APIS_ALIAS_NEARBY_PLACES);
 
+			List<SuggestScope> userScopes = Arrays.asList(SuggestScope.USER,
+					SuggestScope.GEO_FULLTEXT);
+			scopes.add(SuggestScope.GEO_FULLTEXT);
+			ApisCriterion usersCrit = (ApisCriterion) SearchRestriction
+					.searchFromText(User.class, userScopes, searchText,
+							NEARBY_USERS_COUNT)
+					.aliasedBy(APIS_ALIAS_NEARBY_USERS)
+					.with(Media.class, MediaRequestTypes.THUMB);
+			request.addCriterion(usersCrit);
 			// FacetCategory cityCategory = SearchHelper.getCityFacetCategory();
 			// request.addCriterion(SearchRestriction
 			// .searchAll(Place.class, SearchScope.CITY, 10, 0)
