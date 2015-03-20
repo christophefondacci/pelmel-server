@@ -33,7 +33,7 @@ public class ActivityImpl extends AbstractCalmObject implements Activity,
 	@Column(name = "ACTIVITY_ID")
 	private long id;
 	@Column(name = "ACTIVITY_DATE")
-	private Date date;
+	private Date date = new Date();
 	@Column(name = "USER_KEY")
 	private String userKey;
 	@Column(name = "ITEM_KEY")

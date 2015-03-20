@@ -116,7 +116,10 @@ public class MobileLikeActivityAction extends AbstractAction implements
 					// No need to set the user for each element (size
 					// optimization)
 					jsonActivity.setUser(null);
-					likesActivities.add(jsonActivity);
+					if (jsonActivity.getActivityPlace() != null
+							|| jsonActivity.getActivityUser() != null) {
+						likesActivities.add(jsonActivity);
+					}
 				}
 				activitiesMap.put(a.getLoggedItemKey(), a);
 			}

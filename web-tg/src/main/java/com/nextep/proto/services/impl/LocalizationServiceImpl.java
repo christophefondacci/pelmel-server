@@ -144,6 +144,8 @@ public class LocalizationServiceImpl implements LocalizationService {
 		activity.setUserKey(user.getKey());
 		activity.setDate(user.getLastLocationTime());
 		activity.setLoggedItemKey(placeKey);
+
+		ContextHolder.toggleWrite();
 		activitiesService.saveItem(activity);
 		searchService.updateUserOnlineStatus(user);
 
