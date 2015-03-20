@@ -32,7 +32,7 @@ public interface MutableUser extends User {
 
 	void setFacebookId(String facebookId);
 
-	void setFacebookToken(String token);
+	// void setFacebookToken(String token);
 
 	void setPushProvider(PushProvider provider);
 

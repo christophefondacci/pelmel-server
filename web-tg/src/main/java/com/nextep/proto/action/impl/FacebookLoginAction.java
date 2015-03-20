@@ -199,7 +199,7 @@ public class FacebookLoginAction extends AbstractAction implements
 					if (user != null) {
 						// Connecting existing user to facebook account
 						((MutableUser) user).setFacebookId(id);
-						((MutableUser) user).setFacebookToken(accessToken);
+						// ((MutableUser) user).setFacebookToken(accessToken);
 						ContextHolder.toggleWrite();
 						getUsersService().saveItem(user);
 					} else {
@@ -296,7 +296,7 @@ public class FacebookLoginAction extends AbstractAction implements
 		newUser.setEmail(email);
 
 		newUser.setFacebookId(id);
-		newUser.setFacebookToken(accessToken);
+		// newUser.setFacebookToken(accessToken);
 
 		ContextHolder.toggleWrite();
 		getUsersService().saveItem(user);

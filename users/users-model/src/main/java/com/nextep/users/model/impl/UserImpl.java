@@ -75,8 +75,8 @@ public class UserImpl extends AbstractCalmObject implements User, MutableUser {
 	@Column(name = "FACEBOOK_ID")
 	private String facebookId;
 
-	@Column(name = "FACEBOOK_TOKEN")
-	private String facebookToken;
+	// @Column(name = "FACEBOOK_TOKEN")
+	// private String facebookToken;
 	private transient String token;
 
 	@Column(name = "PUSH_PROVIDER")
@@ -300,15 +300,15 @@ public class UserImpl extends AbstractCalmObject implements User, MutableUser {
 		return facebookId;
 	}
 
-	@Override
-	public void setFacebookToken(String facebookToken) {
-		this.facebookToken = facebookToken;
-	}
-
-	@Override
-	public String getFacebookToken() {
-		return facebookToken;
-	}
+	// @Override
+	// public void setFacebookToken(String facebookToken) {
+	// this.facebookToken = facebookToken;
+	// }
+	//
+	// @Override
+	// public String getFacebookToken() {
+	// return facebookToken;
+	// }
 
 	@Override
 	public int hashCode() {

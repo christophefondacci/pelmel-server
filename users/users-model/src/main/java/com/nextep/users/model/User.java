@@ -124,7 +124,7 @@ public interface User extends CalmObject, Localized {
 	 * 
 	 * @return facebook's access token
 	 */
-	String getFacebookToken();
+	// String getFacebookToken();
 
 	/**
 	 * Informs about the provider to use when sending push notifications. Not
