@@ -140,6 +140,9 @@ public class NearbyPlacesListAction extends AbstractAction implements
 			searchLat = Double.parseDouble(searchLatStr);
 			searchLng = Double.parseDouble(searchLngStr);
 		}
+		if (radius < 20) {
+			radius = 20;
+		}
 		// Creating the request
 		final ApisRequest request = ApisFactory.createCompositeRequest();
 		// Place rating sorter
@@ -458,18 +461,15 @@ public class NearbyPlacesListAction extends AbstractAction implements
 
 					// Else we use the standard sort algorithm based on user
 					// inside a place and user liking a place
-					int val1 = o1.getUsersCount() * 100 + o1.getLikesCount()
+					int val1 = o1.getUsersCount() * 5000 + o1.getLikesCount()
 							* 500;
-					int val2 = o2.getUsersCount() * 100 + o2.getLikesCount()
+					int val2 = o2.getUsersCount() * 5000 + o2.getLikesCount()
 							* 500;
-					int dist = (int) o1.getRawDistance();
-					int mod = (dist % SORT_RANGE_DISTANCE);
-					int val = (dist / SORT_RANGE_DISTANCE) + mod;
-					val1 += -val * 1000;
-					dist = (int) o2.getRawDistance();
-					mod = (dist % SORT_RANGE_DISTANCE);
-					val = (dist / SORT_RANGE_DISTANCE) + mod;
-					val2 += -val * 1000;
+
+					int penalty1 = getDistancePenalty(o1.getRawDistance());
+					int penalty2 = getDistancePenalty(o2.getRawDistance());
+					val1 -= penalty1;
+					val2 -= penalty2;
 					return val2 - val1;
 				}
 			}
@@ -619,6 +619,19 @@ public class NearbyPlacesListAction extends AbstractAction implements
 			jsonResponse.setLocalizedCity(jsonCity);
 		}
 		return SUCCESS;
+	}
+
+	private int getDistancePenalty(double distance) {
+		int penalty = (int) (distance * 10.0);
+		// if (distance < 2) {
+		// return 0;
+		// } else
+		if (distance > 2 && distance < 20) {
+			penalty += 2000;
+		} else {
+			penalty += 5000;
+		}
+		return penalty;
 	}
 
 	@Override
