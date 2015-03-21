@@ -385,20 +385,32 @@ public class EventManagementServiceImpl implements EventManagementService {
 
 					// Computing event time
 					int eventTime;
-					if (isStart) {
-						eventTime = series.getStartHour() * 100
-								+ series.getStartMinute();
-					} else {
-						int seriesEnd = series.getEndHour();
-						// Handling the end on next day
-						if (seriesEnd < series.getStartHour()) {
-							seriesEnd += 24 + hourDelta;
-							delta += hourDelta / 24;
-						}
-						eventTime = seriesEnd * 100 + series.getEndMinute();
+
+					// Computing start and env
+					int eventStartTime, eventEndTime;
+					// Start time
+					eventStartTime = series.getStartHour() * 100
+							+ series.getStartMinute();
+
+					// End time, handling end on next day
+					int seriesEnd = series.getEndHour();
+					// Handling the end on next day
+					if (seriesEnd < series.getStartHour()) {
+						seriesEnd += 24 + hourDelta;
+						delta += hourDelta / 24;
 					}
-					// If too late, then we compute for next week
-					if (currentTime > eventTime) {
+					eventEndTime = seriesEnd * 100 + series.getEndMinute();
+
+					// Assigning start or end to computed date
+					if (isStart) {
+						eventTime = eventStartTime;
+					} else {
+						eventTime = eventEndTime;
+					}
+
+					// If too late, then we add 7 days only if not current event
+					// (end after current time)
+					if (currentTime > eventTime && currentTime > eventEndTime) {
 						delta += 7;
 					}
 				}

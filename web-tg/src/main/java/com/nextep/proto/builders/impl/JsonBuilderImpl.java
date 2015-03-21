@@ -328,6 +328,7 @@ public class JsonBuilderImpl implements JsonBuilder {
 		return messagesList;
 	}
 
+	@Override
 	public JsonMessage buildJsonMessage(Message message) {
 		final JsonMessage json = new JsonMessage();
 		json.setKey(message.getKey().toString());
