@@ -10,6 +10,7 @@ import com.nextep.events.model.EventSeries;
 import com.nextep.json.model.impl.JsonStatus;
 import com.nextep.proto.action.base.AbstractAction;
 import com.nextep.proto.action.model.JsonProvider;
+import com.nextep.proto.spring.ContextHolder;
 import com.videopolis.calm.factory.CalmFactory;
 import com.videopolis.calm.model.ItemKey;
 
@@ -38,6 +39,7 @@ public class EventDeleteAction extends AbstractAction implements JsonProvider {
 			throw new UnsupportedOperationException(
 					"Only events series can be removed with this method");
 		}
+		ContextHolder.toggleWrite();
 		eventSeriesService.delete(itemKey);
 		//
 		return SUCCESS;
