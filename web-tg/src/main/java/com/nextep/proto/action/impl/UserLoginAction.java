@@ -83,29 +83,52 @@ public class UserLoginAction extends AbstractAction implements CookieProvider,
 				searchService.updateUserOnlineStatus(user);
 				if (user != null) {
 					if (isMobileService) {
-						ApisRequest request = (ApisRequest) ApisFactory
-								.createCompositeRequest()
-								.addCriterion(
-										(ApisCriterion) currentUserSupport
-												.createApisCriterionFor(
-														user.getToken(), false)
-												.with(Description.class)
-												.with(Tag.class)
-												.addCriterion(
-														(ApisCriterion) SearchRestriction
-																.adaptKey(
-																		userLocationAdapter)
-																.aliasedBy(
-																		Constants.APIS_ALIAS_USER_LOCATION)
-																.with(Media.class,
-																		MediaRequestTypes.THUMB)));
-						ApiCompositeResponse response = (ApiCompositeResponse) getApiService()
-								.execute(
-										request,
-										ContextFactory
-												.createContext(getLocale()));
-						user = response.getUniqueElement(User.class,
-								CurrentUserSupport.APIS_ALIAS_CURRENT_USER);
+
+						// Checking on our read replica that we can login with
+						// our new token
+						ContextHolder.toggleReadonly();
+						User loggedUser = null;
+						int retries = 0;
+						while (loggedUser == null && retries < 5) {
+
+							// If this is not our first attempt we wait 500ms
+							// before another try
+							if (retries > 0) {
+								try {
+									Thread.sleep(500);
+								} catch (InterruptedException e) {
+									LOGGER.warn(
+											"Thread interrupted while waiting read replica: "
+													+ e.getMessage(), e);
+								}
+							}
+							ApisRequest request = (ApisRequest) ApisFactory
+									.createCompositeRequest()
+									.addCriterion(
+											(ApisCriterion) currentUserSupport
+													.createApisCriterionFor(
+															user.getToken(),
+															false)
+													.with(Description.class)
+													.with(Tag.class)
+													.addCriterion(
+															(ApisCriterion) SearchRestriction
+																	.adaptKey(
+																			userLocationAdapter)
+																	.aliasedBy(
+																			Constants.APIS_ALIAS_USER_LOCATION)
+																	.with(Media.class,
+																			MediaRequestTypes.THUMB)));
+							ApiCompositeResponse response = (ApiCompositeResponse) getApiService()
+									.execute(
+											request,
+											ContextFactory
+													.createContext(getLocale()));
+							loggedUser = response.getUniqueElement(User.class,
+									CurrentUserSupport.APIS_ALIAS_CURRENT_USER);
+							retries++;
+						}
+						user = loggedUser;
 						return SUCCESS;
 					} else {
 						return url != null

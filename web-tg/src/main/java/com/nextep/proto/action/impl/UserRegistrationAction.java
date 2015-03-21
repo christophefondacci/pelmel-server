@@ -129,6 +129,8 @@ public class UserRegistrationAction extends AbstractAction implements
 	protected String doExecute() throws Exception {
 		final CalPersistenceService usersService = getUsersService();
 		getHeaderSupport().initialize(getLocale(), null, null, null);
+		// Make sure we are doing everything on master DB
+		ContextHolder.toggleWrite();
 		// Creating our new user
 		if (userKey != null && !"".equals(userKey)) {
 			final ItemKey userItemKey = CalmFactory.parseKey(userKey);
