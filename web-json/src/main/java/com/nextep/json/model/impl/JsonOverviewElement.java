@@ -5,7 +5,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-public class JsonOverviewElement extends JsonLiker {
+import com.nextep.json.model.IJsonDescripted;
+
+public class JsonOverviewElement extends JsonLiker implements IJsonDescripted {
 	private final String key;
 	private String city;
 	private double lat, lng;
@@ -49,10 +51,12 @@ public class JsonOverviewElement extends JsonLiker {
 		this.address = address;
 	}
 
+	@Override
 	public void setDescription(String description) {
 		this.description = description;
 	}
 
+	@Override
 	public String getDescription() {
 		return description;
 	}
@@ -161,18 +165,22 @@ public class JsonOverviewElement extends JsonLiker {
 		return closedReportsCount;
 	}
 
+	@Override
 	public void setDescriptionKey(String descriptionKey) {
 		this.descriptionKey = descriptionKey;
 	}
 
+	@Override
 	public String getDescriptionKey() {
 		return descriptionKey;
 	}
 
+	@Override
 	public void setDescriptionLanguage(String descriptionLanguage) {
 		this.descriptionLanguage = descriptionLanguage;
 	}
 
+	@Override
 	public String getDescriptionLanguage() {
 		return descriptionLanguage;
 	}

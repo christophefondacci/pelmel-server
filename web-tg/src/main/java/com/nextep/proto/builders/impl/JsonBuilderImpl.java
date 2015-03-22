@@ -23,6 +23,7 @@ import com.nextep.events.model.EventSeries;
 import com.nextep.geo.model.City;
 import com.nextep.geo.model.GeographicItem;
 import com.nextep.geo.model.Place;
+import com.nextep.json.model.IJsonDescripted;
 import com.nextep.json.model.IJsonLightEvent;
 import com.nextep.json.model.impl.JsonActivity;
 import com.nextep.json.model.impl.JsonDescription;
@@ -94,26 +95,14 @@ public class JsonBuilderImpl implements JsonBuilder {
 			// Filling hours
 			final List<? extends EventSeries> events = p.get(EventSeries.class);
 			if (events != null) {
-				final Collection<JsonHour> hours = buildJsonHours(events);
+				final Collection<JsonHour> hours = buildJsonHours(events, l);
 				elt.setHours(hours);
 			}
 		}
 
-		// Iterating over descriptions to generate JSON description bean
-		final List<? extends Description> descriptions = o
-				.get(Description.class);
-		Description desc = getDescriptionForLanguage(descriptions, l);
-		if (desc == null || desc.getDescription() == null
-				|| desc.getDescription().trim().isEmpty()) {
-			desc = getDescriptionForLanguage(descriptions, null);
-		}
-		if (desc != null) {
-			elt.setDescription(desc.getDescription());
-			elt.setDescriptionKey(desc.getKey().toString());
-			elt.setDescriptionLanguage(desc.getLocale().getLanguage());
-		} else {
-			elt.setDescriptionLanguage(l.getLanguage());
-		}
+		// Filling descriptions
+		fillDescription(o, elt, l);
+
 		// Iterating over tags to generate JSON tag beans
 		final List<? extends Tag> tags = o.get(Tag.class);
 		for (Tag t : tags) {
@@ -121,6 +110,25 @@ public class JsonBuilderImpl implements JsonBuilder {
 		}
 
 		return elt;
+	}
+
+	private void fillDescription(CalmObject object, IJsonDescripted json,
+			Locale l) {
+		// Iterating over descriptions to generate JSON description bean
+		final List<? extends Description> descriptions = object
+				.get(Description.class);
+		Description desc = getDescriptionForLanguage(descriptions, l);
+		if (desc == null || desc.getDescription() == null
+				|| desc.getDescription().trim().isEmpty()) {
+			desc = getDescriptionForLanguage(descriptions, null);
+		}
+		if (desc != null) {
+			json.setDescription(desc.getDescription());
+			json.setDescriptionKey(desc.getKey().toString());
+			json.setDescriptionLanguage(desc.getLocale().getLanguage());
+		} else {
+			json.setDescriptionLanguage(l.getLanguage());
+		}
 	}
 
 	private Description getDescriptionForLanguage(
@@ -745,7 +753,7 @@ public class JsonBuilderImpl implements JsonBuilder {
 
 	@Override
 	public Collection<JsonHour> buildJsonHours(
-			Collection<? extends EventSeries> eventSeries) {
+			Collection<? extends EventSeries> eventSeries, Locale l) {
 		final List<JsonHour> jsonHours = new ArrayList<JsonHour>();
 
 		for (EventSeries event : eventSeries) {
@@ -766,6 +774,7 @@ public class JsonBuilderImpl implements JsonBuilder {
 			hour.setSunday(event.isSunday());
 			hour.setType(event.getCalendarType().name());
 			hour.setRecurrency(event.getWeekOfMonthOffset());
+			fillDescription(event, hour, l);
 			jsonHours.add(hour);
 		}
 		return jsonHours;

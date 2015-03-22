@@ -1,6 +1,8 @@
 package com.nextep.json.model.impl;
 
-public class JsonHour {
+import com.nextep.json.model.IJsonDescripted;
+
+public class JsonHour implements IJsonDescripted {
 
 	private String key;
 	private String name;
@@ -12,6 +14,9 @@ public class JsonHour {
 			sunday;
 	private Integer recurrency;
 	private String type;
+	private String description;
+	private String descriptionKey;
+	private String descriptionLanguage;
 
 	public String getKey() {
 		return key;
@@ -132,4 +137,35 @@ public class JsonHour {
 	public String getName() {
 		return name;
 	}
+
+	@Override
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	@Override
+	public String getDescription() {
+		return description;
+	}
+
+	@Override
+	public String getDescriptionKey() {
+		return descriptionKey;
+	}
+
+	@Override
+	public void setDescriptionKey(String descriptionKey) {
+		this.descriptionKey = descriptionKey;
+	}
+
+	@Override
+	public String getDescriptionLanguage() {
+		return descriptionLanguage;
+	}
+
+	@Override
+	public void setDescriptionLanguage(String descriptionLanguage) {
+		this.descriptionLanguage = descriptionLanguage;
+	}
+
 }

@@ -158,8 +158,9 @@ public class MobileOverviewAction extends AbstractAction implements
 													Constants.APIS_ALIAS_EVENT_PLACE)
 											.with(Media.class,
 													MediaRequestTypes.THUMB)));
-			objCriterion.addCriterion((WithCriterion) SearchRestriction.with(
-					EventSeries.class).with(Media.class));
+			objCriterion.addCriterion((WithCriterion) SearchRestriction
+					.with(EventSeries.class).with(Media.class)
+					.with(Description.class));
 			// Getting comments count
 			objCriterion.addCriterion(SearchRestriction.with(Comment.class, 1,
 					0).aliasedBy(APIS_ALIAS_COMMENTS));

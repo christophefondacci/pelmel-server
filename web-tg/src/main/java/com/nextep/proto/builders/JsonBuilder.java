@@ -202,9 +202,11 @@ public interface JsonBuilder {
 	 * @param eventSeries
 	 *            the collection of events to translate, as {@link EventSeries}
 	 *            beans
+	 * @param l
+	 *            {@link Locale} to use for descriptions
 	 * @return a corresponding collection of {@link JsonHour} beans
 	 */
 	Collection<JsonHour> buildJsonHours(
-			Collection<? extends EventSeries> eventSeries);
+			Collection<? extends EventSeries> eventSeries, Locale l);
 
 }

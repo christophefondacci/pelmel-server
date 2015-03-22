@@ -427,8 +427,8 @@ public class EventUpdateAction extends AbstractAction implements
 	@Override
 	public String getJson() {
 		if (updatedEvent instanceof EventSeries) {
-			final Collection<JsonHour> hours = jsonBuilder
-					.buildJsonHours(Arrays.asList((EventSeries) updatedEvent));
+			final Collection<JsonHour> hours = jsonBuilder.buildJsonHours(
+					Arrays.asList((EventSeries) updatedEvent), getLocale());
 			return JSONObject.fromObject(hours.iterator().next()).toString();
 		} else if (updatedEvent instanceof Event) {
 			final JsonEvent e = new JsonEvent();
