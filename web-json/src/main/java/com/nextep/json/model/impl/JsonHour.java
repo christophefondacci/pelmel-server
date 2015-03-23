@@ -2,32 +2,17 @@ package com.nextep.json.model.impl;
 
 import com.nextep.json.model.IJsonDescripted;
 
-public class JsonHour implements IJsonDescripted {
+public class JsonHour extends JsonSpecialEvent implements IJsonDescripted {
 
-	private String key;
-	private String name;
 	private int startHour;
 	private int startMinute;
 	private int endHour;
 	private int endMinute;
 	private boolean monday, tuesday, wednesday, thursday, friday, saturday,
 			sunday;
-	private Long nextStart;
-	private Long nextEnd;
 	private Integer recurrency;
-	private String type;
-	private String description;
 	private String descriptionKey;
 	private String descriptionLanguage;
-	private JsonMedia thumb;
-
-	public String getKey() {
-		return key;
-	}
-
-	public void setKey(String key) {
-		this.key = key;
-	}
 
 	public int getStartHour() {
 		return startHour;
@@ -125,32 +110,6 @@ public class JsonHour implements IJsonDescripted {
 		this.recurrency = recurrency;
 	}
 
-	public String getType() {
-		return type;
-	}
-
-	public void setType(String type) {
-		this.type = type;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	@Override
-	public void setDescription(String description) {
-		this.description = description;
-	}
-
-	@Override
-	public String getDescription() {
-		return description;
-	}
-
 	@Override
 	public String getDescriptionKey() {
 		return descriptionKey;
@@ -171,27 +130,4 @@ public class JsonHour implements IJsonDescripted {
 		this.descriptionLanguage = descriptionLanguage;
 	}
 
-	public void setNextStart(Long nextStart) {
-		this.nextStart = nextStart;
-	}
-
-	public Long getNextStart() {
-		return nextStart;
-	}
-
-	public void setNextEnd(Long nextEnd) {
-		this.nextEnd = nextEnd;
-	}
-
-	public Long getNextEnd() {
-		return nextEnd;
-	}
-
-	public void setThumb(JsonMedia thumb) {
-		this.thumb = thumb;
-	}
-
-	public JsonMedia getThumb() {
-		return thumb;
-	}
 }

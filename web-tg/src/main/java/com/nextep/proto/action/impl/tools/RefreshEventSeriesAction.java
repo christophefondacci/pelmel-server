@@ -16,9 +16,6 @@ import com.videopolis.apis.model.ApisRequest;
 import com.videopolis.apis.service.ApiCompositeResponse;
 import com.videopolis.cals.factory.ContextFactory;
 import com.videopolis.cals.model.PaginationInfo;
-import com.videopolis.concurrent.exception.TaskExecutionException;
-import com.videopolis.concurrent.model.TaskExecutionContext;
-import com.videopolis.concurrent.model.base.AbstractTask;
 import com.videopolis.concurrent.service.TaskRunnerService;
 
 public class RefreshEventSeriesAction extends AbstractAction {
@@ -36,27 +33,27 @@ public class RefreshEventSeriesAction extends AbstractAction {
 
 	@Override
 	protected String doExecute() throws Exception {
-		taskRunnerService.execute(new AbstractTask() {
-			@Override
-			public Object execute(TaskExecutionContext context)
-					throws TaskExecutionException, InterruptedException {
-				try {
-					refreshEventSeries();
-				} catch (ApisException e) {
-					LOGGER.error(
-							"Problem while cleaning events : " + e.getMessage(),
-							e);
-					throw new TaskExecutionException(e);
-				} catch (RuntimeException e) {
-					LOGGER.error(
-							"Problem while cleaning events : " + e.getMessage(),
-							e);
-					throw new TaskExecutionException(e);
-				}
-				return null;
-			};
-		});
-		messages.add("Refresh of event series process has been successfully started.");
+		// taskRunnerService.execute(new AbstractTask() {
+		// @Override
+		// public Object execute(TaskExecutionContext context)
+		// throws TaskExecutionException, InterruptedException {
+		// try {
+		// refreshEventSeries();
+		// } catch (ApisException e) {
+		// LOGGER.error(
+		// "Problem while cleaning events : " + e.getMessage(),
+		// e);
+		// throw new TaskExecutionException(e);
+		// } catch (RuntimeException e) {
+		// LOGGER.error(
+		// "Problem while cleaning events : " + e.getMessage(),
+		// e);
+		// throw new TaskExecutionException(e);
+		// }
+		// return null;
+		// };
+		// });
+		// messages.add("Refresh of event series process has been successfully started.");
 		return SUCCESS;
 	}
 

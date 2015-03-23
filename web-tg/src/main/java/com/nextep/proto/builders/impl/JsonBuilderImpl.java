@@ -647,22 +647,19 @@ public class JsonBuilderImpl implements JsonBuilder {
 
 				// Getting any other event registered under same calendar
 				// type
-				JsonSpecialEvent event = eventsTypeMap.get(series
+				JsonSpecialEvent otherEvent = eventsTypeMap.get(series
 						.getCalendarType());
 				// Creating if not already existing
-				if (event == null) {
-					event = new JsonSpecialEvent();
-					event.setType(series.getCalendarType().name());
-					eventsTypeMap.put(series.getCalendarType(), event);
-				}
+				JsonSpecialEvent event = new JsonSpecialEvent();
+				event.setType(series.getCalendarType().name());
 
 				// Filling with info on the soonest events to come
 				final long nextStartTime = nextStart.getTime() / 1000;
 				final long nextEndTime = nextEnd.getTime() / 1000;
 
 				// Soonest event to end will define the name
-				if (event.getNextEnd() == null
-						|| event.getNextEnd() > nextEndTime) {
+				if (otherEvent == null || otherEvent.getNextEnd() == null
+						|| otherEvent.getNextEnd() > nextEndTime) {
 					event.setNextEnd(nextEndTime);
 					event.setName(series.getName());
 					event.setKey(series.getKey().toString());
@@ -681,10 +678,10 @@ public class JsonBuilderImpl implements JsonBuilder {
 								specialMedia, highRes);
 						event.setThumb(jsonMedia);
 					}
-				}
-				if (event.getNextStart() == null
-						|| event.getNextStart() > nextStartTime) {
 					event.setNextStart(nextStartTime);
+
+					// Registering
+					eventsTypeMap.put(series.getCalendarType(), event);
 				}
 
 			}
