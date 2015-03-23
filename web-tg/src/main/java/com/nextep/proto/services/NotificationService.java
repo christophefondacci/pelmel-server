@@ -5,6 +5,8 @@ import java.util.concurrent.Future;
 
 import com.nextep.comments.model.Comment;
 import com.nextep.descriptions.model.Description;
+import com.nextep.events.model.Event;
+import com.nextep.geo.model.GeographicItem;
 import com.nextep.geo.model.Place;
 import com.nextep.media.model.Media;
 import com.nextep.users.model.User;
@@ -82,6 +84,23 @@ public interface NotificationService {
 			List<ItemKey> oldTagKeys,
 			List<? extends Description> oldDescriptions,
 			String[] newDescriptions, String[] descriptionKey);
+
+	Future<Boolean> sendEventUpdateEmailNotification(Event event, User user,
+			String oldKey, String oldName, GeographicItem oldPlace,
+			String oldStart, String oldEnd,
+			List<? extends Description> oldDescriptions,
+			String[] newDescriptions, String[] descriptionKey,
+			GeographicItem newEventPlace);
+
+	Future<Boolean> sendEventSeriesUpdateEmailNotification(Event event,
+			User user, String oldKey, String oldName, GeographicItem oldPlace,
+			String oldStart, String oldEnd, Integer oldStartHour,
+			Integer oldStartMinute, Integer oldEndHour, Integer oldEndMinute,
+			boolean oldMonday, boolean oldTuesday, boolean oldWednesday,
+			boolean oldThursday, boolean oldFriday, boolean oldSaturday,
+			boolean oldSunday, List<? extends Description> oldDescriptions,
+			String[] newDescriptions, String[] descriptionKey,
+			GeographicItem newEventPlace);
 
 	/**
 	 * Notifies administrator about a reported information

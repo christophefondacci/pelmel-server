@@ -1,5 +1,7 @@
 package com.nextep.proto.services.impl;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -33,6 +35,8 @@ import com.nextep.cal.util.services.CalPersistenceService;
 import com.nextep.comments.model.Comment;
 import com.nextep.descriptions.model.Description;
 import com.nextep.events.model.Event;
+import com.nextep.events.model.EventSeries;
+import com.nextep.geo.model.GeographicItem;
 import com.nextep.geo.model.Place;
 import com.nextep.media.model.Media;
 import com.nextep.proto.helpers.DisplayHelper;
@@ -108,6 +112,9 @@ public class NotificationServiceImpl implements NotificationService {
 	private boolean pushEnabled = true;
 	// Email notification
 	private String adminEmailAlias;
+
+	// Date formatter
+	private DateFormat dateFormatter = new SimpleDateFormat("yyyy/MM/dd HH:mm");
 
 	private class MyFailedConnectionListener implements
 			FailedConnectionListener<SimpleApnsPushNotification> {
@@ -330,6 +337,112 @@ public class NotificationServiceImpl implements NotificationService {
 
 	@Override
 	@Async
+	public Future<Boolean> sendEventUpdateEmailNotification(Event event,
+			User user, String oldKey, String oldName, GeographicItem oldPlace,
+			String oldStart, String oldEnd,
+			List<? extends Description> oldDescriptions,
+			String[] newDescriptions, String[] descriptionKey,
+			GeographicItem newEventPlace) {
+		return sendEventSeriesUpdateEmailNotification(event, user, oldKey,
+				oldName, oldPlace, oldStart, oldEnd, null, null, null, null,
+				false, false, false, false, false, false, false,
+				oldDescriptions, newDescriptions, descriptionKey, newEventPlace);
+	}
+
+	@Override
+	@Async
+	public Future<Boolean> sendEventSeriesUpdateEmailNotification(Event event,
+			User user, String oldKey, String oldName, GeographicItem oldPlace,
+			String oldStart, String oldEnd, Integer oldStartHour,
+			Integer oldStartMinute, Integer oldEndHour, Integer oldEndMinute,
+			boolean oldMonday, boolean oldTuesday, boolean oldWednesday,
+			boolean oldThursday, boolean oldFriday, boolean oldSaturday,
+			boolean oldSunday, List<? extends Description> oldDescriptions,
+			String[] newDescriptions, String[] descriptionKey,
+			GeographicItem newEventPlace) {
+		try {
+			final StringBuilder buf = new StringBuilder();
+
+			// Generic email header
+			final String updated = oldKey == null ? "added" : "updated";
+			fillEmailHeaderFor(buf, event, user, updated);
+
+			// Reporting changed information
+			buf.append("<table cellpadding=\"5\" style=\"border: 1px solid #ccc;\"><thead><tr><th>Field</th><th>Old Value</th><th>NEW value</th></thead><tbody>");
+			appendField(buf, "Name", oldName, event.getName());
+
+			String oldUrl = null;
+			if (oldPlace != null) {
+				oldUrl = urlService.getOverviewUrl(
+						DisplayHelper.getDefaultAjaxContainer(), oldPlace);
+			}
+			appendFieldWithUrl(buf, "Place", DisplayHelper.getName(oldPlace),
+					DisplayHelper.getName(newEventPlace), oldUrl,
+					urlService.getOverviewUrl(
+							DisplayHelper.getDefaultAjaxContainer(),
+							newEventPlace));
+
+			if (event instanceof EventSeries) {
+				final EventSeries series = (EventSeries) event;
+				appendField(buf, "Event Type", series.getCalendarType().name(),
+						series.getCalendarType().name());
+				appendField(buf, "Start time", pad(oldStartHour) + ":"
+						+ pad(oldStartMinute), pad(series.getStartHour()) + ":"
+						+ pad(series.getStartMinute()));
+				appendField(buf, "End time", pad(oldEndHour) + ":"
+						+ pad(oldEndMinute), pad(series.getEndHour()) + ":"
+						+ pad(series.getEndMinute()));
+				appendField(buf, "Monday", String.valueOf(oldMonday),
+						String.valueOf(series.isMonday()));
+				appendField(buf, "Tuesday", String.valueOf(oldTuesday),
+						String.valueOf(series.isTuesday()));
+				appendField(buf, "Wednesday", String.valueOf(oldWednesday),
+						String.valueOf(series.isWednesday()));
+				appendField(buf, "Thursday", String.valueOf(oldThursday),
+						String.valueOf(series.isThursday()));
+				appendField(buf, "Friday", String.valueOf(oldFriday),
+						String.valueOf(series.isFriday()));
+				appendField(buf, "Saturday", String.valueOf(oldSaturday),
+						String.valueOf(series.isSaturday()));
+				appendField(buf, "Sunday", String.valueOf(oldSunday),
+						String.valueOf(series.isSunday()));
+			} else {
+				appendField(buf, "Start date", oldStart,
+						dateFormatter.format(event.getStartDate()));
+				appendField(buf, "End date", oldEnd,
+						dateFormatter.format(event.getEndDate()));
+			}
+			appendDescriptions(buf, oldDescriptions, newDescriptions,
+					descriptionKey);
+			buf.append("</tbody></table>");
+			fillEmailFooterFor(buf, event, user);
+			notifyAdminByEmail(
+					"Event "
+							+ (event.getName() == null ? "" : event.getName()
+									+ " ") + updated + " by "
+							+ user.getPseudo(), buf.toString());
+		} catch (Exception e) {
+			LOGGER.error(
+					"Exception while generating EVENT email notification: "
+							+ e.getMessage(), e);
+		}
+		return new AsyncResult<Boolean>(true);
+	}
+
+	private String pad(Integer hour) {
+		if (hour == null) {
+			return "00";
+		} else {
+			String result = String.valueOf(hour);
+			if (hour < 10) {
+				result = "0" + result;
+			}
+			return result;
+		}
+	}
+
+	@Override
+	@Async
 	public Future<Boolean> sendPlaceUpdateEmailNotification(Place place,
 			User user, String oldName, String oldAddress, String oldPlaceType,
 			String oldCity, String oldLat, String oldLng,
@@ -352,6 +465,18 @@ public class NotificationServiceImpl implements NotificationService {
 				String.valueOf(place.getLatitude()));
 		appendField(buf, "Longitude", oldLng,
 				String.valueOf(place.getLongitude()));
+		appendDescriptions(buf, oldDescriptions, newDescriptions,
+				descriptionKey);
+		buf.append("</tbody></table>");
+		fillEmailFooterFor(buf, place, user);
+		notifyAdminByEmail("Place " + place.getName() + " " + updated + " by "
+				+ user.getPseudo(), buf.toString());
+		return new AsyncResult<Boolean>(true);
+	}
+
+	private void appendDescriptions(StringBuilder buf,
+			List<? extends Description> oldDescriptions,
+			String[] newDescriptions, String[] descriptionKey) {
 		// Descriptions
 		final Map<String, Description> oldDescMap = new HashMap<String, Description>();
 		if (descriptionKey != null) {
@@ -367,11 +492,6 @@ public class NotificationServiceImpl implements NotificationService {
 						newDesc);
 			}
 		}
-		buf.append("</tbody></table>");
-		fillEmailFooterFor(buf, place, user);
-		notifyAdminByEmail("Place " + place.getName() + " " + updated + " by "
-				+ user.getPseudo(), buf.toString());
-		return new AsyncResult<Boolean>(true);
 	}
 
 	/**
@@ -395,18 +515,21 @@ public class NotificationServiceImpl implements NotificationService {
 				+ urlService.getOverviewUrl(
 						DisplayHelper.getDefaultAjaxContainer(), user);
 
-		buf.append("Hello administrators,<br><br>A place has been "
-				+ actionType
-				+ " on <a href=\"http://www.pelmelguide.com\">PELMEL Guide</a>:<br><br>");
-		// buf.append("Hello administrators,<br><br>A place has been updated on PELMEL Guide:<br>");
-		String objectType = "place";
+		String objectType = "Place";
 		if (object instanceof User) {
 			objectType = "User";
 		} else if (object instanceof Event) {
 			objectType = "Event";
 		}
+		buf.append("Hello administrators,<br><br>A "
+				+ objectType.toLowerCase()
+				+ " has been "
+				+ actionType
+				+ " on <a href=\"http://www.pelmelguide.com\">PELMEL Guide</a>:<br><br>");
+		// buf.append("Hello administrators,<br><br>A place has been updated on PELMEL Guide:<br>");
+		final String name = DisplayHelper.getName(object);
 		buf.append(objectType + " " + actionType + ": <a href=\"" + url + "\">"
-				+ DisplayHelper.getName(object) + "</a><br>");
+				+ (name == null ? "[No name]" : name) + "</a><br>");
 		buf.append(objectType + " " + actionType + " by: <a href=\"" + userUrl
 				+ "\">" + user.getPseudo() + "</a><br><br>");
 	}
@@ -418,6 +541,18 @@ public class NotificationServiceImpl implements NotificationService {
 				+ "</i></td><td>" + HtmlUtils.htmlEscape(oldVal) + "</td><td>"
 				+ (isBold ? "<b>" : "") + HtmlUtils.htmlEscape(newVal)
 				+ (isBold ? "</b>" : "") + "</td></tr>");
+	}
+
+	private void appendFieldWithUrl(StringBuilder buf, String fieldName,
+			String oldVal, String newVal, String oldUrl, String newUrl) {
+		boolean isBold = newVal != null && !newVal.equals(oldVal);
+
+		buf.append("<tr><td style=\"text-align:right;\"><i>" + fieldName
+				+ "</i></td><td><a href=\"" + baseUrl + oldUrl + "\">"
+				+ HtmlUtils.htmlEscape(oldVal) + "</a></td><td><a href=\""
+				+ baseUrl + newUrl + "\">" + (isBold ? "<b>" : "")
+				+ HtmlUtils.htmlEscape(newVal) + (isBold ? "</b>" : "")
+				+ "</a></td></tr>");
 	}
 
 	@Override

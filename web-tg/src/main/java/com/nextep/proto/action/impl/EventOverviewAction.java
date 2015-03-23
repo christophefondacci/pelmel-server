@@ -360,9 +360,15 @@ public class EventOverviewAction extends AbstractAction implements
 				separator = ", ";
 			}
 			final DateFormat df = new SimpleDateFormat("HH:mm");
-			final String startHour = df.format(series.getStartDate());
-			final String endHour = df.format(series.getEndDate());
-
+			String startHour = "";
+			String endHour = "";
+			if (series.getStartDate() != null && series.getEndDate() != null) {
+				startHour = df.format(series.getStartDate());
+				endHour = df.format(series.getEndDate());
+			} else {
+				startHour = String.valueOf(series.getStartHour());
+				endHour = String.valueOf(series.getEndHour());
+			}
 			p.setValue(m.getMessage("event.recurring.sentence", new String[] {
 					freqStr, daysBuf.toString(), startHour, endHour }, l));
 			props.add(p);

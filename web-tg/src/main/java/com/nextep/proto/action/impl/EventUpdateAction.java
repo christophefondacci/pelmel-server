@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
 
@@ -33,12 +34,14 @@ import com.nextep.json.model.impl.JsonHour;
 import com.nextep.proto.action.base.AbstractAction;
 import com.nextep.proto.action.model.DescriptionsUpdateAware;
 import com.nextep.proto.action.model.JsonProvider;
+import com.nextep.proto.apis.adapters.ApisEventLocationAdapter;
 import com.nextep.proto.apis.model.ApisCriterionFactory;
 import com.nextep.proto.builders.JsonBuilder;
 import com.nextep.proto.model.ActivityConstants;
 import com.nextep.proto.model.Constants;
 import com.nextep.proto.services.DescriptionsManagementService;
 import com.nextep.proto.services.EventManagementService;
+import com.nextep.proto.services.NotificationService;
 import com.nextep.proto.services.PuffService;
 import com.nextep.proto.spring.ContextHolder;
 import com.nextep.smaug.service.SearchPersistenceService;
@@ -46,6 +49,7 @@ import com.nextep.users.model.User;
 import com.videopolis.apis.factory.ApisFactory;
 import com.videopolis.apis.factory.SearchRestriction;
 import com.videopolis.apis.model.ApisCriterion;
+import com.videopolis.apis.model.ApisItemKeyAdapter;
 import com.videopolis.apis.model.ApisRequest;
 import com.videopolis.apis.service.ApiCompositeResponse;
 import com.videopolis.calm.factory.CalmFactory;
@@ -62,12 +66,11 @@ public class EventUpdateAction extends AbstractAction implements
 			.getLog(EventUpdateAction.class);
 	private static final String ACTION_RESULT_PLACE = "placeRedirect";
 
-	private static final String APIS_ALIAS_PLACE = "place";
-
 	private static final DateFormat dateFormat = new SimpleDateFormat(
 			"yyyy/MM/dd HH:mm");
 	private static final DateFormat puffDateFormat = new SimpleDateFormat(
 			"yyyy/MM/dd HH:mm:ss");
+	private static final ApisItemKeyAdapter eventLocationAdapter = new ApisEventLocationAdapter();
 
 	private static final String PUFF_FIELD_NAME = "evt_name";
 	private static final String PUFF_FIELD_PLACE = "evt_place";
@@ -95,6 +98,8 @@ public class EventUpdateAction extends AbstractAction implements
 	private EventManagementService eventManagementService;
 	@Autowired
 	private JsonBuilder jsonBuilder;
+	@Autowired
+	private NotificationService notificationService;
 
 	private String eventId;
 	private String name;
@@ -135,12 +140,16 @@ public class EventUpdateAction extends AbstractAction implements
 			final ItemKey eventKey = CalmFactory.parseKey(eventId);
 			request.addCriterion((ApisCriterion) SearchRestriction
 					.uniqueKeys(Arrays.asList(eventKey))
-					.aliasedBy(APIS_ALIAS_EVENT).with(Description.class));
+					.aliasedBy(APIS_ALIAS_EVENT)
+					.with(Description.class)
+					.addCriterion(
+							SearchRestriction.adaptKey(eventLocationAdapter)
+									.aliasedBy(Constants.APIS_ALIAS_PLACE)));
 		}
 		// Querying localization
 		ItemKey placeKey = CalmFactory.parseKey(placeId);
 		request.addCriterion(SearchRestriction.uniqueKeys(
-				Arrays.asList(placeKey)).aliasedBy(APIS_ALIAS_PLACE));
+				Arrays.asList(placeKey)).aliasedBy(Constants.APIS_ALIAS_PLACE));
 
 		// Executing our APIS request
 		final ApiCompositeResponse userResponse = (ApiCompositeResponse) getApiService()
@@ -152,7 +161,7 @@ public class EventUpdateAction extends AbstractAction implements
 
 		// Extracting localization
 		final GeographicItem geoItem = userResponse.getUniqueElement(
-				GeographicItem.class, APIS_ALIAS_PLACE);
+				GeographicItem.class, Constants.APIS_ALIAS_PLACE);
 		// We need to assign a city to this event for common operation based on
 		// localization
 		eventCity = null;
@@ -185,7 +194,11 @@ public class EventUpdateAction extends AbstractAction implements
 				: puffDateFormat.format(event.getStartDate());
 		final String oldEnd = newEvent || event.getEndDate() == null ? null
 				: puffDateFormat.format(event.getEndDate());
+		final List<? extends Description> oldDescriptions = event
+				.get(Description.class);
 
+		GeographicItem oldEventPlace = event.getUnique(GeographicItem.class,
+				Constants.APIS_ALIAS_PLACE);
 		// Updating information
 		event.setName(name);
 		event.setLocationKey(placeKey);
@@ -248,7 +261,20 @@ public class EventUpdateAction extends AbstractAction implements
 		}
 		// Now setting any event series specific information
 		if (event instanceof EventSeries) {
+			// Saving old values
+
 			final MutableEventSeries series = (MutableEventSeries) event;
+			final boolean oldMonday = series.isMonday();
+			final boolean oldTuesday = series.isTuesday();
+			final boolean oldWednesday = series.isWednesday();
+			final boolean oldThursday = series.isThursday();
+			final boolean oldFriday = series.isFriday();
+			final boolean oldSaturday = series.isSaturday();
+			final boolean oldSunday = series.isSunday();
+			final Integer oldStartHour = series.getStartHour();
+			final Integer oldStartMinute = series.getStartMinute();
+			final Integer oldEndHour = series.getEndHour();
+			final Integer oldEndMinute = series.getEndMinute();
 			series.setWeekOfMonthOffset(monthRecurrency == 0 ? null
 					: monthRecurrency);
 			series.setMonday(monday);
@@ -270,10 +296,25 @@ public class EventUpdateAction extends AbstractAction implements
 				LOGGER.error("Invalid calendar type '" + calendarType
 						+ "', ignoring: " + e.getMessage());
 			}
+			// Saving event back to our persistent data store
+			ContextHolder.toggleWrite();
+			eventService.saveItem(event);
+
+			notificationService.sendEventSeriesUpdateEmailNotification(event,
+					user, eventId, oldName, oldEventPlace, oldStart, oldEnd,
+					oldStartHour, oldStartMinute, oldEndHour, oldEndMinute,
+					oldMonday, oldTuesday, oldWednesday, oldThursday,
+					oldFriday, oldSaturday, oldSunday, oldDescriptions,
+					descriptions, keys, geoItem);
+		} else {
+			// Saving event back to our persistent data store
+			ContextHolder.toggleWrite();
+			eventService.saveItem(event);
+
+			notificationService.sendEventUpdateEmailNotification(event, user,
+					eventId, oldName, oldEventPlace, oldStart, oldEnd,
+					oldDescriptions, descriptions, keys, geoItem);
 		}
-		// Saving event back to our persistent data store
-		ContextHolder.toggleWrite();
-		eventService.saveItem(event);
 
 		// Updating descriptions by delegating to the management service
 		final boolean descChanged = descriptionsManagementService

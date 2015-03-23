@@ -334,7 +334,11 @@ public class UrlServiceImpl implements UrlService {
 					+ actionName + "-" + seoObjType + "/");
 		}
 		buf.append(key.toString());
-		buf.append("-" + encode(DisplayHelper.getName(item, locale)));
+
+		final String name = DisplayHelper.getName(item, locale);
+		if (name != null) {
+			buf.append("-" + encode(name));
+		}
 		// Appending javascript arguments for ajax (target html ID)
 		if (addJSCall) {
 			buf.append("','mainContent')");
@@ -460,16 +464,16 @@ public class UrlServiceImpl implements UrlService {
 	public String getOverviewUrl(Locale locale, String targetHtmlElementId,
 			CalmObject item) {
 		final String type = item.getKey().getType();
-		if (Event.CAL_ID.equals(type)) {
-			return getEventOverviewUrl(locale, targetHtmlElementId, item);
-		} else if (User.CAL_TYPE.equals(type)) {
-			return getUserOverviewUrl(locale, targetHtmlElementId, item);
-		} else if (Place.CAL_TYPE.equals(type)) {
+		if (Place.CAL_TYPE.equals(type)) {
 			return getPlaceOverviewUrl(locale, targetHtmlElementId, item);
 		} else if (item instanceof GeographicItem) {
 			// Default bar-search
 			return buildSearchUrl(DisplayHelper.getDefaultAjaxContainer(),
 					(GeographicItem) item, SearchType.BARS);
+		} else if (User.CAL_TYPE.equals(type)) {
+			return getUserOverviewUrl(locale, targetHtmlElementId, item);
+		} else if (Event.CAL_ID.equals(type)) {
+			return getEventOverviewUrl(locale, targetHtmlElementId, item);
 		}
 		return "";
 	}
