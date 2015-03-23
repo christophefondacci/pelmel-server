@@ -115,7 +115,7 @@ public class ActivitiesDaoImpl extends AbstractCalDao<Activity> implements
 		final List<String> types = unwrapActivityTypes(activityTypes);
 		final Query query = entityManager
 				.createQuery(
-						"from ActivityImpl where userKey=:key and activityType in (:activityTypes) order by date DESC")
+						"from ActivityImpl where userKey=:key and activityType in (:activityTypes)  and visible=true order by date DESC")
 				.setParameter("key", userKey.toString())
 				.setParameter("activityTypes", types);
 		if (resultsPerPage > 0) {
@@ -269,15 +269,16 @@ public class ActivitiesDaoImpl extends AbstractCalDao<Activity> implements
 	@Override
 	public int getCount() {
 		return ((BigInteger) entityManager.createNativeQuery(
-				"select count(1) from ACTIVITIES").getSingleResult())
-				.intValue();
+				"select count(1) from ACTIVITIES where IS_VISIBLE='Y'")
+				.getSingleResult()).intValue();
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<Activity> listItems(RequestType requestType, Integer pageSize,
 			Integer pageOffset) {
-		final Query query = entityManager.createQuery("from ActivityImpl")
+		final Query query = entityManager
+				.createQuery("from ActivityImpl where visible=true")
 				.setMaxResults(pageSize).setFirstResult(pageOffset);
 		//
 		return query.getResultList();
