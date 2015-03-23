@@ -12,11 +12,14 @@ public class JsonHour implements IJsonDescripted {
 	private int endMinute;
 	private boolean monday, tuesday, wednesday, thursday, friday, saturday,
 			sunday;
+	private Long nextStart;
+	private Long nextEnd;
 	private Integer recurrency;
 	private String type;
 	private String description;
 	private String descriptionKey;
 	private String descriptionLanguage;
+	private JsonMedia thumb;
 
 	public String getKey() {
 		return key;
@@ -168,4 +171,27 @@ public class JsonHour implements IJsonDescripted {
 		this.descriptionLanguage = descriptionLanguage;
 	}
 
+	public void setNextStart(Long nextStart) {
+		this.nextStart = nextStart;
+	}
+
+	public Long getNextStart() {
+		return nextStart;
+	}
+
+	public void setNextEnd(Long nextEnd) {
+		this.nextEnd = nextEnd;
+	}
+
+	public Long getNextEnd() {
+		return nextEnd;
+	}
+
+	public void setThumb(JsonMedia thumb) {
+		this.thumb = thumb;
+	}
+
+	public JsonMedia getThumb() {
+		return thumb;
+	}
 }

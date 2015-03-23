@@ -95,7 +95,8 @@ public class JsonBuilderImpl implements JsonBuilder {
 			// Filling hours
 			final List<? extends EventSeries> events = p.get(EventSeries.class);
 			if (events != null) {
-				final Collection<JsonHour> hours = buildJsonHours(events, l);
+				final Collection<JsonHour> hours = buildJsonHours(events,
+						p.getCity(), l);
 				elt.setHours(hours);
 			}
 		}
@@ -753,9 +754,10 @@ public class JsonBuilderImpl implements JsonBuilder {
 
 	@Override
 	public Collection<JsonHour> buildJsonHours(
-			Collection<? extends EventSeries> eventSeries, Locale l) {
+			Collection<? extends EventSeries> eventSeries, City eventCity,
+			Locale l) {
 		final List<JsonHour> jsonHours = new ArrayList<JsonHour>();
-
+		final String timezoneId = eventCity.getTimezoneId();
 		for (EventSeries event : eventSeries) {
 			final JsonHour hour = new JsonHour();
 			hour.setKey(event.getKey() != null ? event.getKey().toString()
@@ -775,6 +777,28 @@ public class JsonBuilderImpl implements JsonBuilder {
 			hour.setType(event.getCalendarType().name());
 			hour.setRecurrency(event.getWeekOfMonthOffset());
 			fillDescription(event, hour, l);
+
+			// Computing next start / end time
+			final Date nextStart = eventManagementService.computeNext(event,
+					timezoneId, true);
+			if (nextStart != null) {
+				final Date nextEnd = eventManagementService.computeNext(event,
+						timezoneId, false);
+
+				// Filling with info on the soonest events to come
+				final long nextStartTime = nextStart.getTime() / 1000;
+				final long nextEndTime = nextEnd.getTime() / 1000;
+
+				hour.setNextStart(nextStartTime);
+				hour.setNextEnd(nextEndTime);
+			}
+
+			// Media
+			Media m = MediaHelper.getSingleMedia(event);
+			if (m != null) {
+				JsonMedia jsonMedia = buildJsonMedia(m, false);
+				hour.setThumb(jsonMedia);
+			}
 			jsonHours.add(hour);
 		}
 		return jsonHours;

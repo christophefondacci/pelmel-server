@@ -113,6 +113,7 @@ public class EventUpdateAction extends AbstractAction implements
 	private boolean highRes;
 
 	private Event updatedEvent;
+	private City eventCity;
 
 	@Override
 	protected String doExecute() throws Exception {
@@ -154,7 +155,7 @@ public class EventUpdateAction extends AbstractAction implements
 				GeographicItem.class, APIS_ALIAS_PLACE);
 		// We need to assign a city to this event for common operation based on
 		// localization
-		City eventCity = null;
+		eventCity = null;
 		if (geoItem != null) {
 			// Unwrapping place city if needed
 			if (geoItem instanceof Place) {
@@ -428,7 +429,8 @@ public class EventUpdateAction extends AbstractAction implements
 	public String getJson() {
 		if (updatedEvent instanceof EventSeries) {
 			final Collection<JsonHour> hours = jsonBuilder.buildJsonHours(
-					Arrays.asList((EventSeries) updatedEvent), getLocale());
+					Arrays.asList((EventSeries) updatedEvent), eventCity,
+					getLocale());
 			return JSONObject.fromObject(hours.iterator().next()).toString();
 		} else if (updatedEvent instanceof Event) {
 			final JsonEvent e = new JsonEvent();

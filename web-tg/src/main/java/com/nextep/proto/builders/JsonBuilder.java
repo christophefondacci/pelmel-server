@@ -207,6 +207,7 @@ public interface JsonBuilder {
 	 * @return a corresponding collection of {@link JsonHour} beans
 	 */
 	Collection<JsonHour> buildJsonHours(
-			Collection<? extends EventSeries> eventSeries, Locale l);
+			Collection<? extends EventSeries> eventSeries, City eventCity,
+			Locale l);
 
 }
