@@ -6,6 +6,7 @@ import java.util.Locale;
 
 import com.nextep.events.model.Event;
 import com.nextep.events.model.EventSeries;
+import com.nextep.geo.model.City;
 import com.nextep.properties.model.Property;
 
 public interface EventManagementService {
@@ -100,4 +101,13 @@ public interface EventManagementService {
 	 * @return the timezone ID
 	 */
 	String getEventTimezoneId(Event event);
+
+	/**
+	 * Helper method that extracts the city from an event
+	 * 
+	 * @param event
+	 *            the {@link Event} to process
+	 * @return the City where this event takes place
+	 */
+	City getEventCity(Event event);
 }

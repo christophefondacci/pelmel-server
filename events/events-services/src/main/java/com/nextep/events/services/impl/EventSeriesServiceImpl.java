@@ -1,6 +1,8 @@
 package com.nextep.events.services.impl;
 
-import java.util.Collections;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -8,8 +10,10 @@ import com.nextep.cal.util.services.CalExtendedPersistenceService;
 import com.nextep.cal.util.services.base.AbstractDaoBasedCalServiceImpl;
 import com.nextep.events.dao.EventSeriesDao;
 import com.nextep.events.model.EventSeries;
+import com.nextep.events.model.MutableEventSeries;
 import com.nextep.events.model.impl.EventSeriesImpl;
 import com.videopolis.calm.exception.CalException;
+import com.videopolis.calm.helper.Assert;
 import com.videopolis.calm.model.CalmObject;
 import com.videopolis.calm.model.ItemKey;
 import com.videopolis.calm.model.RequestType;
@@ -37,13 +41,21 @@ public class EventSeriesServiceImpl extends AbstractDaoBasedCalServiceImpl
 
 	@Override
 	public void saveItem(CalmObject object) {
+		((MutableEventSeries) object).setLastUpdateTime(new Date());
 		getCalDao().save(object);
 	}
 
 	@Override
 	public List<? extends CalmObject> setItemFor(ItemKey contributedItemKey,
 			ItemKey... internalItemKeys) throws CalException {
-		return Collections.emptyList();
+		Assert.notNull(contributedItemKey,
+				"Cannot define EventSeries association with null item key");
+		Assert.notNull(internalItemKeys,
+				"Cannot define EventSeries association with no events");
+		Assert.moreThan(internalItemKeys.length, 0,
+				"Cannot define EventSeries association with empty events");
+		return ((EventSeriesDao) getCalDao()).bindEventsSeries(
+				contributedItemKey, Arrays.asList(internalItemKeys));
 	}
 
 	@Override
@@ -56,17 +68,41 @@ public class EventSeriesServiceImpl extends AbstractDaoBasedCalServiceImpl
 	public MultiKeyItemsResponse getItemsFor(List<ItemKey> itemKeys,
 			CalContext context, RequestType requestType) throws CalException {
 
-		// Querying event series for given list of keys
-		final Map<ItemKey, List<EventSeries>> seriesMap = ((EventSeriesDao) getCalDao())
-				.getEventsSeriesFor(itemKeys);
+		// Extracting user keys
+		final List<ItemKey> userKeys = new ArrayList<ItemKey>();
+		final List<ItemKey> otherKeys = new ArrayList<ItemKey>(itemKeys);
+		for (ItemKey itemKey : itemKeys) {
+			if ("USER".equals(itemKey.getType())) {
+				userKeys.add(itemKey);
+				otherKeys.remove(itemKey);
+			}
+		}
 
 		// Preparing response
 		MultiKeyItemsResponseImpl response = new MultiKeyItemsResponseImpl();
-		for (ItemKey key : seriesMap.keySet()) {
-			final List<EventSeries> seriesList = seriesMap.get(key);
-			response.setItemsFor(key, seriesList);
-		}
+		final EventSeriesDao dao = (EventSeriesDao) getCalDao();
 
+		// Internal GEO keys
+		if (!otherKeys.isEmpty()) {
+			// Querying event series for given list of keys
+			final Map<ItemKey, List<EventSeries>> seriesMap = dao
+					.getEventsSeriesFor(otherKeys);
+
+			// Filling response
+			for (ItemKey key : seriesMap.keySet()) {
+				final List<EventSeries> seriesList = seriesMap.get(key);
+				response.setItemsFor(key, seriesList);
+			}
+		}
+		// Querying users
+		if (!userKeys.isEmpty()) {
+			final Map<ItemKey, List<EventSeries>> userSeriesMap = dao
+					.findItemEventFor(userKeys);
+			for (ItemKey key : userSeriesMap.keySet()) {
+				final List<EventSeries> seriesList = userSeriesMap.get(key);
+				response.setItemsFor(key, seriesList);
+			}
+		}
 		// Response is ready
 		return response;
 	}

@@ -24,6 +24,9 @@
 				</div>
 			</s:if>
 		</s:iterator>
+		<s:if test="rightsManagementService.canDelete(#currentUser,overviewSupport.getOverviewObject())">
+			<a data-toggle="modal" data-target="#myModal" href="<s:property value="overviewSupport.getToolbarActionUrl('delete','status')"/>" rel="nofollow"><span id="addevent" class="tool tool-delete" data-toggle="tooltip" data-placement="right" title="<s:text name="tooltip.delete"/>"><!--  --></span></a>
+		</s:if>
 	</div>
 	<div class="action-page-title hidden-xs">
 		<s:property value="#overviewSupport.getTitle(#obj)"/>

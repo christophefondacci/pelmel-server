@@ -223,7 +223,8 @@ public class FacebookLoginAction extends AbstractAction implements
 			// Updating PELMEL token
 			ContextHolder.toggleWrite();
 			((UsersService) getUsersService()).refreshUserOnlineTimeout(user,
-					((UsersService) getUsersService()).generateUniqueToken());
+					((UsersService) getUsersService())
+							.generateUniqueToken(user));
 		}
 		// Generating redirection URL if needed
 		if (forceRedirect) {

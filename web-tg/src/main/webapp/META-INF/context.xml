@@ -93,7 +93,7 @@
 	<Environment name="paymill.api.privateKey" type="java.lang.String" value="1a5d73a09eac1debce1fcc9e91ee1d0b"/>
 	<Environment name="paymill.api.publicKey" type="java.lang.String" value="473111045874418180cea25184fe7a20"/>
 	<Environment name="payment.url" type="java.lang.String" value="/processPayment"/>
-	<Environment name="adminUserKeys" type="java.lang.String" value="USER37,USER1"/>
+	<Environment name="adminUserKeys" type="java.lang.String" value="USER37,USER1,USER3,USER1381"/>
 	
 	<Environment name="welcomeMessageUserKey" type="java.lang.String" value="USER1"/>
 

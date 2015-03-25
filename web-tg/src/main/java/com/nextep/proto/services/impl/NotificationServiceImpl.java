@@ -4,11 +4,14 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
+import java.util.TimeZone;
 import java.util.concurrent.Future;
 
 import javax.annotation.PreDestroy;
@@ -41,6 +44,7 @@ import com.nextep.geo.model.Place;
 import com.nextep.media.model.Media;
 import com.nextep.proto.helpers.DisplayHelper;
 import com.nextep.proto.model.Constants;
+import com.nextep.proto.services.EventManagementService;
 import com.nextep.proto.services.NotificationService;
 import com.nextep.proto.services.UrlService;
 import com.nextep.proto.spring.ContextHolder;
@@ -102,6 +106,8 @@ public class NotificationServiceImpl implements NotificationService {
 	@Autowired
 	@Qualifier("usersService")
 	private CalPersistenceService usersService;
+	@Autowired
+	private EventManagementService eventManagementService;
 
 	private PushManager<SimpleApnsPushNotification> pushManager;
 
@@ -364,7 +370,8 @@ public class NotificationServiceImpl implements NotificationService {
 			final StringBuilder buf = new StringBuilder();
 
 			// Generic email header
-			final String updated = oldKey == null ? "added" : "updated";
+			final String updated = oldKey == null ? "added" : "####"
+					.equals(oldKey) ? "deleted" : "updated";
 			fillEmailHeaderFor(buf, event, user, updated);
 
 			// Reporting changed information
@@ -407,10 +414,20 @@ public class NotificationServiceImpl implements NotificationService {
 				appendField(buf, "Sunday", String.valueOf(oldSunday),
 						String.valueOf(series.isSunday()));
 			} else {
+				// Getting event timezone
+				final String eventTimezone = eventManagementService
+						.getEventTimezoneId(event);
+				final Date localizedStart = eventManagementService.convertDate(
+						event.getStartDate(), eventTimezone, TimeZone
+								.getDefault().getID());
+				final Date localizedEnd = eventManagementService.convertDate(
+						event.getEndDate(), eventTimezone, TimeZone
+								.getDefault().getID());
+
 				appendField(buf, "Start date", oldStart,
-						dateFormatter.format(event.getStartDate()));
+						dateFormatter.format(localizedStart));
 				appendField(buf, "End date", oldEnd,
-						dateFormatter.format(event.getEndDate()));
+						dateFormatter.format(localizedEnd));
 			}
 			appendDescriptions(buf, oldDescriptions, newDescriptions,
 					descriptionKey);
@@ -427,6 +444,16 @@ public class NotificationServiceImpl implements NotificationService {
 							+ e.getMessage(), e);
 		}
 		return new AsyncResult<Boolean>(true);
+	}
+
+	@Async
+	@Override
+	public Future<Boolean> sendEventDeletedNotification(Event event,
+			Place eventPlace, User user) {
+		return sendEventSeriesUpdateEmailNotification(event, user, "####",
+				null, null, null, null, null, null, null, null, false, false,
+				false, false, false, false, false, Collections.EMPTY_LIST,
+				null, null, eventPlace);
 	}
 
 	private String pad(Integer hour) {
@@ -529,7 +556,8 @@ public class NotificationServiceImpl implements NotificationService {
 		// buf.append("Hello administrators,<br><br>A place has been updated on PELMEL Guide:<br>");
 		final String name = DisplayHelper.getName(object);
 		buf.append(objectType + " " + actionType + ": <a href=\"" + url + "\">"
-				+ (name == null ? "[No name]" : name) + "</a><br>");
+				+ (name == null || name.trim().isEmpty() ? "[No name]" : name)
+				+ "</a><br>");
 		buf.append(objectType + " " + actionType + " by: <a href=\"" + userUrl
 				+ "\">" + user.getPseudo() + "</a><br><br>");
 	}

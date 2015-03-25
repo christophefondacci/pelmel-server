@@ -40,6 +40,12 @@
 	<bean id="adminUsersHeaderSupport" class="com.nextep.proto.blocks.impl.HeaderAdminSupportImpl" >
 		<property name="canonical" value="/admin/users"/>
 	</bean>
+	<bean id="adminEventsHeaderSupport" class="com.nextep.proto.blocks.impl.HeaderAdminSupportImpl" >
+		<property name="canonical" value="/admin/events"/>
+	</bean>
+	<bean id="adminEventsSeriesHeaderSupport" class="com.nextep.proto.blocks.impl.HeaderAdminSupportImpl" >
+		<property name="canonical" value="/admin/eventseries"/>
+	</bean>
 	<bean id="myMessagesHeaderSupport" parent="titledHeaderSupport" scope="prototype">
 		<property name="titleMessageKey" value="header.title.myMessages"/>
 		<property name="pageStyle" value="my-messages"/>

@@ -2,11 +2,11 @@ package com.nextep.events.dao;
 
 import java.util.List;
 
-import com.nextep.cal.util.model.CalDao;
+import com.nextep.cal.util.model.CalDaoExt;
 import com.nextep.events.model.Event;
 import com.videopolis.calm.model.ItemKey;
 
-public interface EventsDao extends CalDao<Event> {
+public interface EventsDao extends CalDaoExt<Event> {
 
 	/**
 	 * Binds the specified events to the given external item.
@@ -18,6 +18,8 @@ public interface EventsDao extends CalDao<Event> {
 	 * @return the list of associated {@link Event}
 	 */
 	List<Event> bindEvents(ItemKey externalItem, List<ItemKey> eventKey);
-	
+
 	public List<Event> getAllItemsFor(ItemKey key);
+
+	void delete(ItemKey key);
 }

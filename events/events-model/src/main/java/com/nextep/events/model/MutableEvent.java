@@ -52,4 +52,26 @@ public interface MutableEvent extends Event {
 	 */
 	void setSeriesKey(ItemKey seriesKey);
 
+	/**
+	 * Sets the last time this event was updated
+	 * 
+	 * @param lastUpdateTime
+	 */
+	void setLastUpdateTime(Date lastUpdateTime);
+
+	/**
+	 * Defines the very first author of the event
+	 * 
+	 * @param authorKey
+	 */
+	void setAuthorKey(ItemKey authorKey);
+
+	/**
+	 * Sets the visibility of this event
+	 * 
+	 * @param isOnline
+	 *            <code>true</code> to make the event visible, else
+	 *            <code>false</code> to hide/cancel it
+	 */
+	void setOnline(boolean isOnline);
 }

@@ -7,10 +7,14 @@ import net.sf.json.JSONObject;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.nextep.activities.model.ActivityType;
 import com.nextep.activities.model.MutableActivity;
 import com.nextep.cal.util.services.CalPersistenceService;
+import com.nextep.events.model.Event;
+import com.nextep.events.model.EventSeries;
+import com.nextep.geo.model.City;
 import com.nextep.geo.model.MutablePlace;
 import com.nextep.geo.model.Place;
 import com.nextep.json.model.impl.JsonStatus;
@@ -18,15 +22,21 @@ import com.nextep.media.model.Media;
 import com.nextep.media.model.MutableMedia;
 import com.nextep.proto.action.base.AbstractAction;
 import com.nextep.proto.action.model.JsonProvider;
+import com.nextep.proto.apis.adapters.ApisEventLocationAdapter;
 import com.nextep.proto.blocks.CurrentUserSupport;
 import com.nextep.proto.model.Constants;
+import com.nextep.proto.services.EventManagementService;
 import com.nextep.proto.services.NotificationService;
 import com.nextep.proto.spring.ContextHolder;
 import com.nextep.users.model.User;
+import com.videopolis.apis.exception.ApisException;
 import com.videopolis.apis.factory.ApisFactory;
 import com.videopolis.apis.factory.SearchRestriction;
+import com.videopolis.apis.model.ApisCriterion;
+import com.videopolis.apis.model.ApisItemKeyAdapter;
 import com.videopolis.apis.model.ApisRequest;
 import com.videopolis.apis.service.ApiCompositeResponse;
+import com.videopolis.calm.exception.CalException;
 import com.videopolis.calm.factory.CalmFactory;
 import com.videopolis.calm.model.CalmObject;
 import com.videopolis.calm.model.ItemKey;
@@ -49,6 +59,7 @@ public class MobileReportingAction extends AbstractAction implements
 
 	// Static constants
 	private static final String APIS_ALIAS_ITEM = "item";
+	private static final ApisItemKeyAdapter eventLocationAdapter = new ApisEventLocationAdapter();
 
 	// Injected supports & services
 	private CurrentUserSupport currentUserSupport;
@@ -56,6 +67,8 @@ public class MobileReportingAction extends AbstractAction implements
 	private CalPersistenceService placeService;
 	private CalPersistenceService activitiesService;
 	private NotificationService notificationService;
+	@Autowired
+	private EventManagementService eventManagementService;
 
 	// Dynamic arguments
 	private String key;
@@ -67,16 +80,14 @@ public class MobileReportingAction extends AbstractAction implements
 	@Override
 	protected String doExecute() throws Exception {
 		final ItemKey itemKey = CalmFactory.parseKey(key);
-
+		final ApisCriterion itemCriterion = buildApisCriterionFor(itemKey);
 		// Building a request which retrieves the user and the element
 		final ApisRequest request = (ApisRequest) ApisFactory
 				.createCompositeRequest()
 				.addCriterion(
 						currentUserSupport.createApisCriterionFor(
 								getNxtpUserToken(), true))
-				.addCriterion(
-						SearchRestriction.uniqueKeys(Arrays.asList(itemKey))
-								.aliasedBy(APIS_ALIAS_ITEM));
+				.addCriterion(itemCriterion);
 
 		// Querying
 		final ApiCompositeResponse response = (ApiCompositeResponse) getApiService()
@@ -113,6 +124,20 @@ public class MobileReportingAction extends AbstractAction implements
 		case Constants.REPORT_TYPE_NOTGAY:
 		case Constants.REPORT_TYPE_LOCATION:
 		case Constants.REPORT_TYPE_CLOSED:
+			ContextHolder.toggleWrite();
+
+			LOGGER.info("MOBILE_REPORT: User " + currentUser.getKey()
+					+ " reported that place has closed: " + itemKey);
+			reportActivity = ActivityType.REMOVAL_REQUESTED;
+			// Registering activity
+			final MutableActivity activity = (MutableActivity) activitiesService
+					.createTransientObject();
+
+			activity.setActivityType(reportActivity);
+			activity.setDate(new Date());
+			activity.setLoggedItemKey(itemKey);
+			activity.setUserKey(currentUser.getKey());
+
 			if (Place.CAL_TYPE.equals(item.getKey().getType())) {
 				// Getting a mutable place
 				final MutablePlace place = (MutablePlace) item;
@@ -121,38 +146,46 @@ public class MobileReportingAction extends AbstractAction implements
 				// Adding 1
 				place.setClosedCount(closedCount + 1);
 				// Storing back to storage
-				ContextHolder.toggleWrite();
 				placeService.saveItem(place);
-				LOGGER.info("MOBILE_REPORT: User " + currentUser.getKey()
-						+ " reported that place has closed: " + place.getKey());
-				reportActivity = ActivityType.REMOVAL_REQUESTED;
-				// Registering activity
-				final MutableActivity activity = (MutableActivity) activitiesService
-						.createTransientObject();
-				activity.add(place.getCity());
-				activity.setActivityType(reportActivity);
-				activity.setDate(new Date());
-				activity.setLoggedItemKey(place.getKey());
-				activity.setUserKey(currentUser.getKey());
-				activitiesService.saveItem(activity);
 
-				try {
-					notificationService.sendReportEmailNotification(item,
-							currentUser, type);
-				} catch (Exception e) {
-					LOGGER.error(
-							"Problems sending email notification: "
-									+ e.getMessage(), e);
-				}
-				// Now if current user is admin we close it
-				if (getRightsManagementService().isAdministrator(currentUser)) {
-					return REDIRECT;
-				}
+				// Setting up activity
+				activity.add(place.getCity());
+			} else if (Event.CAL_ID.equals(item.getKey().getType())
+					|| EventSeries.SERIES_CAL_ID
+							.equals(item.getKey().getType())) {
+				// Extracting event city to localize activity
+				final Event event = (Event) item;
+				final City city = eventManagementService.getEventCity(event);
+				activity.add(city);
+			}
+			activitiesService.saveItem(activity);
+			try {
+				notificationService.sendReportEmailNotification(item,
+						currentUser, type);
+			} catch (Exception e) {
+				LOGGER.error(
+						"Problems sending email notification: "
+								+ e.getMessage(), e);
+			}
+			// Now if current user is admin we close it
+			if (getRightsManagementService().canDelete(currentUser, item)) {
+				return REDIRECT;
 			}
 		}
 
 		success = true;
 		return SUCCESS;
+	}
+
+	private ApisCriterion buildApisCriterionFor(ItemKey itemKey)
+			throws CalException, ApisException {
+		ApisCriterion crit = SearchRestriction.uniqueKeys(
+				Arrays.asList(itemKey)).aliasedBy(APIS_ALIAS_ITEM);
+		if (Event.CAL_ID.equals(itemKey.getType())
+				|| EventSeries.SERIES_CAL_ID.equals(itemKey.getType())) {
+			crit.addCriterion(SearchRestriction.adaptKey(eventLocationAdapter));
+		}
+		return crit;
 	}
 
 	public void setKey(String key) {

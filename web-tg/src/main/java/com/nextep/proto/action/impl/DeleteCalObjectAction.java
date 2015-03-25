@@ -6,21 +6,32 @@ import java.util.List;
 
 import net.sf.json.JSONObject;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+
 import com.nextep.activities.model.Activity;
 import com.nextep.activities.model.MutableActivity;
+import com.nextep.cal.util.services.CalExtendedPersistenceService;
 import com.nextep.cal.util.services.CalPersistenceService;
+import com.nextep.events.model.Event;
+import com.nextep.events.model.EventSeries;
+import com.nextep.events.model.MutableEvent;
+import com.nextep.events.model.MutableEventSeries;
 import com.nextep.geo.model.MutablePlace;
 import com.nextep.geo.model.Place;
 import com.nextep.json.model.impl.JsonStatus;
 import com.nextep.proto.action.base.AbstractAction;
 import com.nextep.proto.action.model.JsonProviderWithError;
+import com.nextep.proto.apis.adapters.ApisEventLocationAdapter;
 import com.nextep.proto.blocks.CurrentUserSupport;
+import com.nextep.proto.services.NotificationService;
 import com.nextep.proto.spring.ContextHolder;
 import com.nextep.smaug.service.SearchPersistenceService;
 import com.nextep.users.model.User;
 import com.videopolis.apis.factory.ApisFactory;
 import com.videopolis.apis.factory.SearchRestriction;
 import com.videopolis.apis.model.ApisCriterion;
+import com.videopolis.apis.model.ApisItemKeyAdapter;
 import com.videopolis.apis.model.ApisRequest;
 import com.videopolis.apis.service.ApiCompositeResponse;
 import com.videopolis.calm.factory.CalmFactory;
@@ -43,12 +54,21 @@ public class DeleteCalObjectAction extends AbstractAction implements
 	private static final long serialVersionUID = 6190406774419036820L;
 	private static final String APIS_ALIAS_OBJECT = "obj";
 	private static final String REDIRECT_ACTION_PLACE_OVERVIEW = "placeOverview";
+	private static final ApisItemKeyAdapter eventLocationAdapter = new ApisEventLocationAdapter();
 
 	// Injected dependencies
 	private CurrentUserSupport currentUserSupport;
 	private SearchPersistenceService searchPersistenceService;
 	private CalPersistenceService placesService;
 	private CalPersistenceService activitiesService;
+	@Autowired
+	@Qualifier("eventSeriesService")
+	private CalExtendedPersistenceService eventSeriesService;
+	@Autowired
+	@Qualifier("eventsService")
+	private CalExtendedPersistenceService eventsService;
+	@Autowired
+	private NotificationService notificationService;
 
 	// Dynamic arguments
 	private String key;
@@ -75,7 +95,10 @@ public class DeleteCalObjectAction extends AbstractAction implements
 						(ApisCriterion) SearchRestriction
 								.uniqueKeys(Arrays.asList(itemKey))
 								.aliasedBy(APIS_ALIAS_OBJECT)
-								.with(Activity.class));
+								.with(Activity.class)
+								.addCriterion(
+										SearchRestriction
+												.adaptKey(eventLocationAdapter)));
 		// Executing
 		final ApiCompositeResponse response = (ApiCompositeResponse) getApiService()
 				.execute(request, ContextFactory.createContext(getLocale()));
@@ -99,6 +122,9 @@ public class DeleteCalObjectAction extends AbstractAction implements
 							: "activities.deletion.text";
 					buttonTextKey = place.isOnline() ? "object.deletion.button"
 							: "activities.deletion.button";
+				} else {
+					messageTextKey = "object.deletion.text";
+					buttonTextKey = "object.deletion.button";
 				}
 				return CONFIRM;
 			} else {
@@ -127,10 +153,42 @@ public class DeleteCalObjectAction extends AbstractAction implements
 							activitiesService.saveItem(activity);
 						}
 					}
-				}
+					redirectAction = REDIRECT_ACTION_PLACE_OVERVIEW;
+					redirectId = key;
+				} else if (item instanceof EventSeries) {
+					redirectAction = REDIRECT_ACTION_PLACE_OVERVIEW;
+					redirectId = ((EventSeries) item).getLocationKey()
+							.toString();
 
-				redirectAction = REDIRECT_ACTION_PLACE_OVERVIEW;
-				redirectId = key;
+					// Removing by switching online flag
+					final MutableEventSeries series = (MutableEventSeries) item;
+					// series.setOnline(false);
+					eventSeriesService.delete(series.getKey());
+
+					// Unindexing from Search
+					searchPersistenceService.remove(item);
+
+					// Sending notification
+					final Place place = item.getUnique(Place.class);
+					notificationService.sendEventDeletedNotification(series,
+							place, user);
+				} else if (item instanceof Event) {
+					redirectAction = REDIRECT_ACTION_PLACE_OVERVIEW;
+					redirectId = ((Event) item).getLocationKey().toString();
+
+					// Removing by switching online flag
+					final MutableEvent event = (MutableEvent) item;
+					event.setOnline(false);
+					eventsService.saveItem(event);
+
+					// Unindexing from Search
+					searchPersistenceService.remove(item);
+
+					// Sending notification
+					final Place place = item.getUnique(Place.class);
+					notificationService.sendEventDeletedNotification(event,
+							place, user);
+				}
 
 				// Done
 				return SUCCESS;

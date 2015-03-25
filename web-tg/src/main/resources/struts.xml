@@ -412,7 +412,7 @@
 		<action name="mobileDeleteEvent" class="eventDeleteAction">
 			<result>/jsp/pages/json.jsp</result>
 			<result name="input">/jsp/pages/json.jsp</result>
-			<result name="error">/jsp/pages/json.jsp</result>
+			<result name="error">/jsp/pages/json-error.jsp</result>
 		</action>
 		<action name="updatePlace" class="placeUpdateAction">
 			<result name="input">/jsp/blocks/block-edit-place.jsp</result>
@@ -553,7 +553,7 @@
 		<action name="mobileReport" class="mobileReportingAction">
 			<result>/jsp/pages/json.jsp</result>
 			<result name="redirect" type="redirectAction">
-				<param name="actionName">deleteItem</param>
+				<param name="actionName">mobileDeleteItem</param>
 				<param name="namespace">/</param>
 				<param name="prependServletContext">false</param>
 				<param name="parse">true</param>
@@ -672,6 +672,14 @@
 		</action>
 		<action name="users" class="adminUsersAction">
 			<result type="tiles">adminUsers</result>
+			<interceptor-ref name="default" />
+		</action>
+		<action name="events" class="adminEventsAction">
+			<result type="tiles">adminEvents</result>
+			<interceptor-ref name="default" />
+		</action>
+		<action name="eventseries" class="adminEventsSeriesAction">
+			<result type="tiles">adminEventsSeries</result>
 			<interceptor-ref name="default" />
 		</action>
 	</package>

@@ -1,5 +1,6 @@
 package com.nextep.events.dao.impl;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -37,6 +38,7 @@ public class EventsDaoImpl implements EventsDao {
 				.setParameter("id", id).getSingleResult();
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public List<Event> getByIds(final List<Long> idList) {
 		List<Event> objList = entityManager
@@ -60,12 +62,12 @@ public class EventsDaoImpl implements EventsDao {
 		if ("PLAC".equals(key.getType()) || "CITY".equals(key.getType())) {
 			return entityManager
 					.createQuery(
-							"from EventImpl where placeKey=:placeKey and endDate > CURRENT_TIMESTAMP order by startDate")
+							"from EventImpl where placeKey=:placeKey and endDate > CURRENT_TIMESTAMP and isOnline=true order by startDate")
 					.setParameter("placeKey", key.toString()).getResultList();
 		} else if (EventSeries.SERIES_CAL_ID.equals(key.getType())) {
 			return entityManager
 					.createQuery(
-							"from EventImpl where seriesKey=:seriesKey and endDate > CURRENT_TIMESTAMP order by startDate")
+							"from EventImpl where seriesKey=:seriesKey and endDate > CURRENT_TIMESTAMP and isOnline=true order by startDate")
 					.setParameter("seriesKey", key.toString()).getResultList();
 		} else {
 			final List<ItemEventImpl> itemEvents = findItemEventFor(key, true);
@@ -91,21 +93,24 @@ public class EventsDaoImpl implements EventsDao {
 		return buildEvents(itemEvents);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public List<Event> getItemsFor(ItemKey key, int resultsPerPage,
 			int pageOffset) {
 		return entityManager
 				.createQuery(
-						"from EventImpl where placeKey=:placeKey and startDate > CURRENT_TIMESTAMP order by startDate")
+						"from EventImpl where placeKey=:placeKey and startDate > CURRENT_TIMESTAMP and isOnline=true order by startDate")
 				.setParameter("placeKey", key.toString())
 				.setFirstResult(pageOffset * resultsPerPage)
 				.setMaxResults(resultsPerPage).getResultList();
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public List<Event> listItems(RequestType requestType,
 			RequestSettings requestSettings) {
-		return entityManager.createQuery("from EventImpl").getResultList();
+		return entityManager.createQuery("from EventImpl where isOnline=true")
+				.getResultList();
 	}
 
 	@Override
@@ -172,5 +177,34 @@ public class EventsDaoImpl implements EventsDao {
 			allEvents.addAll(events);
 		}
 		return allEvents;
+	}
+
+	@Override
+	public void delete(ItemKey itemKey) {
+		// entityManager.createQuery("delete ItemEventImpl where itemId=:eventId")
+		// .setParameter("eventId", itemKey.getNumericId())
+		// .executeUpdate();
+		entityManager
+				.createQuery(
+						"update EventImpl set isOnline=false where id=:eventId")
+				.setParameter("eventId", itemKey.getNumericId())
+				.executeUpdate();
+
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<Event> listItems(RequestType requestType, Integer pageSize,
+			Integer pageOffset) {
+		return entityManager
+				.createQuery("from EventImpl order by lastUpdateTime desc")
+				.setFirstResult(pageOffset).setMaxResults(pageSize)
+				.getResultList();
+	}
+
+	@Override
+	public int getCount() {
+		return ((BigInteger) entityManager.createNativeQuery(
+				"select count(1) from EVENTS").getSingleResult()).intValue();
 	}
 }

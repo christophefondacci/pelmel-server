@@ -5,12 +5,8 @@
 	<div role="tabpanel">
 
 		<!-- Nav tabs -->
-		<ul class="nav nav-tabs" role="tablist">
-			<li role="presentation" class="active"><a href="/admin/places"
-				aria-controls="home" role="tab" data-toggle="tab">Places</a></li>
-			<li role="presentation" ><a href="/admin/users"
-				aria-controls="home" role="tab" data-toggle="tab">Users</a></li>
-		</ul>
+		<s:set value="0" var="activeTab"/>
+		<tiles:insertTemplate template="/jsp/top/top-admin-tabs.jsp"></tiles:insertTemplate>
 		<div class="tab-content">
 			<form action="<s:property value="url"/>" method="get" class="form-inline append-bottom prepend-top">
 			

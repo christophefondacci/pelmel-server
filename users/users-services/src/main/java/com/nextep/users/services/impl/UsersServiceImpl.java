@@ -49,7 +49,7 @@ public class UsersServiceImpl extends AbstractDaoBasedCalServiceImpl implements
 		getCalDao().save(object);
 		String token = user.getToken();
 		if (token == null) {
-			token = generateUniqueToken();
+			token = generateUniqueToken(user);
 			refreshUserOnlineTimeout(user, token);
 		}
 	}
@@ -86,7 +86,7 @@ public class UsersServiceImpl extends AbstractDaoBasedCalServiceImpl implements
 				LOGGER.warn("PUSH: Invalid provider: " + pushProvider);
 			}
 		}
-		final String token = generateUniqueToken();
+		final String token = generateUniqueToken(user);
 		refreshUserOnlineTimeout(user, token);
 		return user;
 	}
@@ -105,7 +105,7 @@ public class UsersServiceImpl extends AbstractDaoBasedCalServiceImpl implements
 	}
 
 	@Override
-	public String generateUniqueToken() {
+	public String generateUniqueToken(User user) {
 		Random generator = random.get();
 		if (generator == null) {
 			generator = new Random();
@@ -113,7 +113,11 @@ public class UsersServiceImpl extends AbstractDaoBasedCalServiceImpl implements
 		}
 		final long randomVal = generator.nextLong();
 		final long token = System.currentTimeMillis() & randomVal;
-		return String.valueOf(token);
+		String tok = String.valueOf(token);
+		if (user.getKey() != null) {
+			tok += String.valueOf(user.getKey().getNumericId());
+		}
+		return tok;
 	}
 
 	@Override

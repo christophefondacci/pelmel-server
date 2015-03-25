@@ -90,6 +90,16 @@ public class EventSeriesImpl extends AbstractCalmObject implements
 	@Column(name = "CALENDAR_TYPE")
 	private String calendarType;
 
+	@Column(name = "UDATE")
+	private Date lastUpdateTime;
+
+	@Column(name = "AUTHOR_ITEM_KEY")
+	private String authorKey;
+
+	@Column(name = "IS_ONLINE")
+	@Type(type = "yes_no")
+	private boolean isOnline = true;
+
 	public EventSeriesImpl() {
 		super(null);
 	}
@@ -313,5 +323,41 @@ public class EventSeriesImpl extends AbstractCalmObject implements
 					+ calendarType + "' to event");
 			this.calendarType = CalendarType.EVENT.name();
 		}
+	}
+
+	@Override
+	public void setLastUpdateTime(Date lastUpdateTime) {
+		this.lastUpdateTime = lastUpdateTime;
+	}
+
+	@Override
+	public Date getLastUpdateTime() {
+		return lastUpdateTime;
+	}
+
+	@Override
+	public ItemKey getAuthorKey() {
+		try {
+			return authorKey == null ? null : CalmFactory.parseKey(authorKey);
+		} catch (CalException e) {
+			LOGGER.error("Unable to create series author key [" + authorKey
+					+ "]: " + e.getMessage());
+		}
+		return null;
+	}
+
+	@Override
+	public void setAuthorKey(ItemKey authorKey) {
+		this.authorKey = authorKey == null ? null : authorKey.toString();
+	}
+
+	@Override
+	public boolean isOnline() {
+		return isOnline;
+	}
+
+	@Override
+	public void setOnline(boolean isOnline) {
+		this.isOnline = isOnline;
 	}
 }

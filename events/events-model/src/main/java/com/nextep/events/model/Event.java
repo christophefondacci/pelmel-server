@@ -57,4 +57,26 @@ public interface Event extends CalmObject, Named {
 	 * @return the {@link ItemKey} of the series
 	 */
 	ItemKey getSeriesKey();
+
+	/**
+	 * Provides the last update time of the element
+	 * 
+	 * @return the last update {@link Date}
+	 */
+	Date getLastUpdateTime();
+
+	/**
+	 * The {@link ItemKey} of the author of this event. Only available when
+	 * user-generated
+	 * 
+	 * @return the author's {@link ItemKey}
+	 */
+	ItemKey getAuthorKey();
+
+	/**
+	 * Whether this event is visible or not
+	 * 
+	 * @return <code>true</code> when visible, else <code>false</code>
+	 */
+	boolean isOnline();
 }

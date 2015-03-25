@@ -68,5 +68,5 @@ public interface UsersService {
 	 * 
 	 * @return a unique token string
 	 */
-	String generateUniqueToken();
+	String generateUniqueToken(User user);
 }

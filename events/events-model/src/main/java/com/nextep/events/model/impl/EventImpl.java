@@ -10,6 +10,7 @@ import javax.persistence.Table;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.annotations.Type;
 
 import com.nextep.events.model.MutableEvent;
 import com.videopolis.calm.base.AbstractCalmObject;
@@ -41,6 +42,13 @@ public class EventImpl extends AbstractCalmObject implements MutableEvent {
 	private String cityKey;
 	@Column(name = "EVNT_SERIES_KEY")
 	private String seriesKey;
+	@Column(name = "UDATE")
+	private Date lastUpdateTime = new Date();
+	@Column(name = "AUTHOR_ITEM_KEY")
+	private String authorKey;
+	@Column(name = "IS_ONLINE")
+	@Type(type = "yes_no")
+	private boolean isOnline = true;
 
 	public EventImpl() {
 		super(null);
@@ -158,5 +166,41 @@ public class EventImpl extends AbstractCalmObject implements MutableEvent {
 		} else {
 			this.seriesKey = seriesKey.toString();
 		}
+	}
+
+	@Override
+	public Date getLastUpdateTime() {
+		return lastUpdateTime;
+	}
+
+	@Override
+	public void setLastUpdateTime(Date lastUpdateTime) {
+		this.lastUpdateTime = lastUpdateTime;
+	}
+
+	@Override
+	public ItemKey getAuthorKey() {
+		try {
+			return authorKey == null ? null : CalmFactory.parseKey(authorKey);
+		} catch (CalException e) {
+			LOGGER.error("Unable to create series author key [" + authorKey
+					+ "]: " + e.getMessage());
+		}
+		return null;
+	}
+
+	@Override
+	public void setAuthorKey(ItemKey authorKey) {
+		this.authorKey = authorKey == null ? null : authorKey.toString();
+	}
+
+	@Override
+	public boolean isOnline() {
+		return isOnline;
+	}
+
+	@Override
+	public void setOnline(boolean isOnline) {
+		this.isOnline = isOnline;
 	}
 }

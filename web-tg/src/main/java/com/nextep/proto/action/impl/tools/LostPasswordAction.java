@@ -58,7 +58,7 @@ public class LostPasswordAction extends AbstractAction implements JsonProvider {
 			// Refreshing token
 			ContextHolder.toggleWrite();
 			usersService.refreshUserOnlineTimeout(user,
-					usersService.generateUniqueToken());
+					usersService.generateUniqueToken(user));
 
 			notificationService.sendChangePasswordEmail(user);
 			result = new TaskResult(true,

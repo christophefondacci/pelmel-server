@@ -7,6 +7,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.nextep.events.model.Event;
+import com.nextep.events.model.EventSeries;
 import com.nextep.geo.model.GeographicItem;
 import com.nextep.geo.model.Place;
 import com.nextep.media.model.Media;
@@ -67,6 +68,7 @@ public class ReIndexUsersAction extends AbstractAction {
 				.with(GeographicItem.class).with(Media.class).with(Tag.class)
 				.with(Place.class, Constants.APIS_ALIAS_FAVORITE)
 				.with(Event.class, Constants.APIS_ALIAS_FAVORITE)
+				.with(EventSeries.class, Constants.APIS_ALIAS_FAVORITE)
 				.with(User.class, Constants.APIS_ALIAS_FAVORITE);
 
 		final ApiResponse response = getApiService().execute(request,

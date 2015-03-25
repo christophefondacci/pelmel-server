@@ -523,11 +523,12 @@ public class EventManagementServiceImpl implements EventManagementService {
 
 	@Override
 	public void refreshEventSeries(EventSeries series) {
-		if (series.getCalendarType() != null
-				&& series.getCalendarType().generateEvents()) {
-			final RefreshTask task = new RefreshTask(series);
-			taskService.execute(task);
-		}
+		// De-activating
+		// if (series.getCalendarType() != null
+		// && series.getCalendarType().generateEvents()) {
+		// final RefreshTask task = new RefreshTask(series);
+		// taskService.execute(task);
+		// }
 	}
 
 	@Override
@@ -696,6 +697,8 @@ public class EventManagementServiceImpl implements EventManagementService {
 			case HAPPY_HOUR:
 				propCode = type.name();
 				break;
+			default:
+				propCode = null;
 			}
 			if (propCode != null) {
 				MutableProperty prop = new PropertyImpl();
@@ -710,9 +713,24 @@ public class EventManagementServiceImpl implements EventManagementService {
 	@Override
 	public String getEventTimezoneId(Event event) {
 
+		// Getting event city
+		final City city = getEventCity(event);
+
+		// Returning timezone of the extracted city
+		if (city != null) {
+			return city.getTimezoneId();
+		} else {
+			LOGGER.warn("Using default server timezone - Event location not found for '"
+					+ event.getKey() + "'");
+			return TimeZone.getDefault().getID();
+		}
+	}
+
+	@Override
+	public City getEventCity(Event event) {
+		City city = null;
 		try {
 			// Extracting city
-			City city = null;
 			GeographicItem geoItem = event.getUnique(GeographicItem.class);
 
 			// Event may be localized in place or city
@@ -721,15 +739,11 @@ public class EventManagementServiceImpl implements EventManagementService {
 			} else if (geoItem instanceof City) {
 				city = (City) geoItem;
 			}
-
-			// Returning timezone of the extracted city
-			return city.getTimezoneId();
 		} catch (CalException e) {
 			LOGGER.error("Unable to extract event localization for event "
 					+ event.getKey() + ": " + e.getMessage(), e);
 		}
-		// Fallback on current default timezone
-		return TimeZone.getDefault().getID();
+		return city;
 	}
 
 	public void setApiService(ApiService apiService) {

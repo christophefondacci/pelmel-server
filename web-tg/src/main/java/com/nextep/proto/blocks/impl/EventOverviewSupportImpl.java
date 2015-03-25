@@ -106,6 +106,8 @@ public class EventOverviewSupportImpl implements OverviewSupport {
 				}
 			}
 			return "#";
+		} else if (Constants.ACTION_CODE_DELETE.equals(action)) {
+			return "/deleteItem?key=" + event.getKey();
 		} else {
 			return commonOverviewSupport.getToolbarActionUrl(action,
 					targetHtmlId);

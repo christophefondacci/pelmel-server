@@ -1,13 +1,15 @@
 package com.nextep.events.services.impl;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
-import com.nextep.cal.util.services.CalPersistenceService;
+import com.nextep.cal.util.services.CalExtendedPersistenceService;
 import com.nextep.cal.util.services.base.AbstractDaoBasedCalServiceImpl;
 import com.nextep.events.dao.EventsDao;
 import com.nextep.events.model.Event;
 import com.nextep.events.model.EventRequestTypes;
+import com.nextep.events.model.MutableEvent;
 import com.nextep.events.model.impl.EventImpl;
 import com.videopolis.calm.exception.CalException;
 import com.videopolis.calm.helper.Assert;
@@ -19,7 +21,7 @@ import com.videopolis.cals.model.ItemsResponse;
 import com.videopolis.cals.model.impl.ItemsResponseImpl;
 
 public class EventsServiceImpl extends AbstractDaoBasedCalServiceImpl implements
-		CalPersistenceService {
+		CalExtendedPersistenceService {
 
 	@Override
 	public Class<? extends CalmObject> getProvidedClass() {
@@ -38,15 +40,21 @@ public class EventsServiceImpl extends AbstractDaoBasedCalServiceImpl implements
 
 	@Override
 	public void saveItem(CalmObject object) {
+		((MutableEvent) object).setLastUpdateTime(new Date());
 		getCalDao().save(object);
 	}
 
-	
+	@Override
+	public void delete(ItemKey objectKey) {
+		((EventsDao) getCalDao()).delete(objectKey);
+	}
+
 	@Override
 	protected ItemsResponse getItemsFor(ItemKey itemKey, CalContext context,
 			RequestType requestType) throws CalException {
-		if(requestType==EventRequestTypes.ALL_EVENTS) {
-			final List<Event> events = ((EventsDao)getCalDao()).getAllItemsFor(itemKey);
+		if (requestType == EventRequestTypes.ALL_EVENTS) {
+			final List<Event> events = ((EventsDao) getCalDao())
+					.getAllItemsFor(itemKey);
 			final ItemsResponseImpl response = new ItemsResponseImpl();
 			response.setItems(events);
 			return response;
@@ -54,6 +62,7 @@ public class EventsServiceImpl extends AbstractDaoBasedCalServiceImpl implements
 			return getItemsFor(itemKey, context);
 		}
 	}
+
 	@Override
 	public List<? extends CalmObject> setItemFor(ItemKey contributedItemKey,
 			ItemKey... internalItemKeys) throws CalException {

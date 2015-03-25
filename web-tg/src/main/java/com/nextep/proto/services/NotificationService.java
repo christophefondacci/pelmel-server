@@ -85,6 +85,22 @@ public interface NotificationService {
 			List<? extends Description> oldDescriptions,
 			String[] newDescriptions, String[] descriptionKey);
 
+	/**
+	 * Notifies adminitrator about event update
+	 * 
+	 * @param event
+	 * @param user
+	 * @param oldKey
+	 * @param oldName
+	 * @param oldPlace
+	 * @param oldStart
+	 * @param oldEnd
+	 * @param oldDescriptions
+	 * @param newDescriptions
+	 * @param descriptionKey
+	 * @param newEventPlace
+	 * @return
+	 */
 	Future<Boolean> sendEventUpdateEmailNotification(Event event, User user,
 			String oldKey, String oldName, GeographicItem oldPlace,
 			String oldStart, String oldEnd,
@@ -92,6 +108,33 @@ public interface NotificationService {
 			String[] newDescriptions, String[] descriptionKey,
 			GeographicItem newEventPlace);
 
+	/**
+	 * Notifies administrator about event update
+	 * 
+	 * @param event
+	 * @param user
+	 * @param oldKey
+	 * @param oldName
+	 * @param oldPlace
+	 * @param oldStart
+	 * @param oldEnd
+	 * @param oldStartHour
+	 * @param oldStartMinute
+	 * @param oldEndHour
+	 * @param oldEndMinute
+	 * @param oldMonday
+	 * @param oldTuesday
+	 * @param oldWednesday
+	 * @param oldThursday
+	 * @param oldFriday
+	 * @param oldSaturday
+	 * @param oldSunday
+	 * @param oldDescriptions
+	 * @param newDescriptions
+	 * @param descriptionKey
+	 * @param newEventPlace
+	 * @return
+	 */
 	Future<Boolean> sendEventSeriesUpdateEmailNotification(Event event,
 			User user, String oldKey, String oldName, GeographicItem oldPlace,
 			String oldStart, String oldEnd, Integer oldStartHour,
@@ -101,6 +144,9 @@ public interface NotificationService {
 			boolean oldSunday, List<? extends Description> oldDescriptions,
 			String[] newDescriptions, String[] descriptionKey,
 			GeographicItem newEventPlace);
+
+	Future<Boolean> sendEventDeletedNotification(Event event, Place eventPlace,
+			User user);
 
 	/**
 	 * Notifies administrator about a reported information

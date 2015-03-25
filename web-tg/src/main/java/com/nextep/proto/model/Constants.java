@@ -63,6 +63,7 @@ public interface Constants {
 
 	String ACTION_CODE_EDIT = "edit";
 	String ACTION_CODE_LIKE = "like";
+	String ACTION_CODE_DELETE = "delete";
 
 	String PROPERTY_EVENT_START = "event.start";
 	String PROPERTY_EVENT_END = "event.end";

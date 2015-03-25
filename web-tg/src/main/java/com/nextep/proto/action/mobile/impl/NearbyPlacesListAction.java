@@ -48,7 +48,6 @@ import com.nextep.proto.helpers.GeoHelper;
 import com.nextep.proto.helpers.MediaHelper;
 import com.nextep.proto.helpers.SearchHelper;
 import com.nextep.proto.model.Constants;
-import com.nextep.proto.model.PlaceType;
 import com.nextep.proto.model.SearchType;
 import com.nextep.proto.services.DistanceDisplayService;
 import com.nextep.proto.services.EventManagementService;
@@ -406,10 +405,6 @@ public class NearbyPlacesListAction extends AbstractAction implements
 		for (CalmObject o : searchSupport.getSearchResults()) {
 			final Place place = (Place) o;
 
-			// Skipping hotels for mobile devices.
-			if (PlaceType.hotel.name().equals(place.getPlaceType())) {
-				continue;
-			}
 			final JsonPlace p = jsonBuilder.buildJsonPlace(place, highRes,
 					getLocale(), likedPlacesMap, currentPlacesMap);
 

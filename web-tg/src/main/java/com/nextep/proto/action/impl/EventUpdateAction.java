@@ -177,6 +177,11 @@ public class EventUpdateAction extends AbstractAction implements
 		if (!newEvent) {
 			event = (MutableEvent) userResponse.getUniqueElement(Event.class,
 					APIS_ALIAS_EVENT);
+			// For event series, we update author each time a modification is
+			// made
+			if (event instanceof EventSeries) {
+				event.setAuthorKey(user.getKey());
+			}
 		} else {
 			// If we don't have an existing event id, this is a new event
 			if (monthRecurrency == null || monthRecurrency < -1) {
@@ -185,6 +190,8 @@ public class EventUpdateAction extends AbstractAction implements
 				event = (MutableEvent) eventSeriesService
 						.createTransientObject();
 			}
+			// Setting author of a new event
+			event.setAuthorKey(user.getKey());
 		}
 		// Updating fields
 		final String oldName = event.getName();

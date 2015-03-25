@@ -701,6 +701,16 @@
 		<property name="urlService" ref="urlService"/>
 		<property name="currentUserSupport" ref="currentUserSupport"/>
 	</bean> 
+	<bean id="adminEventsSeriesAction" class="com.nextep.proto.action.impl.admin.AdminEventsSeriesAction" parent="abstractAction" scope="request">
+		<property name="headerSupport" ref="adminEventsSeriesHeaderSupport"/>
+		<property name="urlService" ref="urlService"/>
+		<property name="currentUserSupport" ref="currentUserSupport"/>
+	</bean> 
+	<bean id="adminEventsAction" class="com.nextep.proto.action.impl.admin.AdminEventsAction" parent="abstractAction" scope="request">
+		<property name="headerSupport" ref="adminEventsHeaderSupport"/>
+		<property name="urlService" ref="urlService"/>
+		<property name="currentUserSupport" ref="currentUserSupport"/>
+	</bean> 
 	<bean id="staticNotFoundAction" class="com.nextep.proto.action.impl.StaticNotFoundAction" parent="abstractAction">
 		<property name="headerSupport" ref="aboutHeaderSupport"/>
 	</bean>

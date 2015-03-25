@@ -112,7 +112,12 @@ public class SolrSearchPersistenceServiceImpl implements
 		if (object instanceof User) {
 			storeUser((User) object);
 		} else if (object instanceof Event) {
-			storeEvent((Event) object);
+			final Event event = (Event) object;
+			if (event.isOnline()) {
+				storeEvent((Event) object);
+			} else {
+				remove(object);
+			}
 		} else if (object instanceof Place) {
 			storePlace((Place) object);
 		} else if (object instanceof Activity) {
@@ -410,6 +415,14 @@ public class SolrSearchPersistenceServiceImpl implements
 				throw new SearchException("Unable to store calm object: " + e,
 						e);
 			}
+		} else if (object instanceof Event) {
+			log.info("Removing event " + object.getKey() + " from SOLR index");
+			try {
+				eventsSolrServer.deleteById(object.getKey().toString());
+			} catch (SolrServerException | IOException e) {
+				throw new SearchException("Unable to store calm object: " + e,
+						e);
+			}
 		}
 	}
 
@@ -522,7 +535,9 @@ public class SolrSearchPersistenceServiceImpl implements
 		final List<? extends Event> events = user.get(Event.class, "favorites");
 		if (events != null) {
 			for (Event e : events) {
-				if (e.getEndDate().getTime() > System.currentTimeMillis()) {
+				if (e.getEndDate() == null
+						|| e.getEndDate().getTime() > System
+								.currentTimeMillis()) {
 					searchItem.addEvent(e.getKey().toString());
 				}
 			}

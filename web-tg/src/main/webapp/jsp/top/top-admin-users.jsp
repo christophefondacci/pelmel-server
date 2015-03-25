@@ -6,12 +6,8 @@
 	<div role="tabpanel">
 
 		<!-- Nav tabs -->
-		<ul class="nav nav-tabs" role="tablist">
-			<li role="presentation"><a href="/admin/places"
-				aria-controls="home" role="tab" data-toggle="tab">Places</a></li>
-			<li role="presentation" class="active"><a href="/admin/users"
-				aria-controls="home" role="tab" data-toggle="tab">Users</a></li>
-		</ul>
+		<s:set value="1" var="activeTab"/>
+		<tiles:insertTemplate template="/jsp/top/top-admin-tabs.jsp"></tiles:insertTemplate>
 		<div class="tab-content">
 			<s:set value="searchSupport" var="search" />
 			<s:set value="urlService" var="urlService" />

@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.nextep.activities.model.Activity;
 import com.nextep.advertising.model.AdvertisingBooster;
+import com.nextep.events.model.Event;
 import com.nextep.geo.model.GeographicItem;
 import com.nextep.geo.model.Place;
 import com.nextep.media.model.Media;
@@ -37,6 +38,11 @@ public class RightsManagementServiceImpl implements RightsManagementService {
 					|| isAdministrator(user);
 		} else if (object instanceof Place || object instanceof Activity) {
 			return isAdministrator(user);
+		} else if (object instanceof Event) {
+			final Event event = (Event) object;
+			boolean isAuthor = event.getAuthorKey() != null
+					&& event.getAuthorKey().equals(user.getKey());
+			return isAuthor || isAdministrator(user);
 		}
 		return false;
 	}
