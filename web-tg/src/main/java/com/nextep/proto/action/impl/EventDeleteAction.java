@@ -19,6 +19,7 @@ import com.nextep.proto.blocks.CurrentUserSupport;
 import com.nextep.proto.services.NotificationService;
 import com.nextep.proto.services.RightsManagementService;
 import com.nextep.proto.spring.ContextHolder;
+import com.nextep.smaug.service.SearchPersistenceService;
 import com.nextep.users.model.User;
 import com.videopolis.apis.factory.ApisFactory;
 import com.videopolis.apis.factory.SearchRestriction;
@@ -57,6 +58,8 @@ public class EventDeleteAction extends AbstractAction implements
 	private CurrentUserSupport currentUserSupport;
 	@Autowired
 	private NotificationService notificationService;
+	@Autowired
+	private SearchPersistenceService searchPersistenceService;
 
 	private String eventKey;
 
@@ -99,11 +102,13 @@ public class EventDeleteAction extends AbstractAction implements
 		ContextHolder.toggleWrite();
 		if (EventSeries.SERIES_CAL_ID.equals(itemKey.getType())) {
 			eventSeriesService.delete(itemKey);
+			searchPersistenceService.remove(event);
 			notificationService.sendEventDeletedNotification(event, place,
 					currentUser);
 		} else if (Event.CAL_ID.equals(itemKey.getType())) {
 			if (rightsManagementService.canDelete(currentUser, event)) {
 				eventService.delete(itemKey);
+				searchPersistenceService.remove(event);
 				notificationService.sendEventDeletedNotification(event, place,
 						currentUser);
 			}

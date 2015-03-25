@@ -44,7 +44,7 @@ public class MessageImpl extends AbstractCalmObject implements MutableMessage {
 	private Message sourceMessage;
 
 	@Column(name = "MSG_DATE")
-	private Date messageDate;
+	private Date messageDate = new Date();
 
 	@Column(name = "MSG_TEXT")
 	private String message;

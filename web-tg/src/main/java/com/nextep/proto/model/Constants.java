@@ -88,8 +88,9 @@ public interface Constants {
 
 	int REPORT_TYPE_ABUSE = 1;
 	int REPORT_TYPE_CLOSED = 2;
-	int REPORT_TYPE_NOTGAY = 4;
 	int REPORT_TYPE_LOCATION = 3;
+	int REPORT_TYPE_NOTGAY = 4;
+	int REPORT_TYPE_REMOVAL_REQUESTED = 5;
 
 	public static final String APIS_ALIAS_PLACE = "place";
 }

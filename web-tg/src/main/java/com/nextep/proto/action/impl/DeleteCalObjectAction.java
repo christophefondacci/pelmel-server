@@ -4,10 +4,13 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+import javax.annotation.Resource;
+
 import net.sf.json.JSONObject;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.MessageSource;
 
 import com.nextep.activities.model.Activity;
 import com.nextep.activities.model.MutableActivity;
@@ -20,10 +23,13 @@ import com.nextep.events.model.MutableEventSeries;
 import com.nextep.geo.model.MutablePlace;
 import com.nextep.geo.model.Place;
 import com.nextep.json.model.impl.JsonStatus;
+import com.nextep.messages.model.MutableMessage;
 import com.nextep.proto.action.base.AbstractAction;
 import com.nextep.proto.action.model.JsonProviderWithError;
 import com.nextep.proto.apis.adapters.ApisEventLocationAdapter;
 import com.nextep.proto.blocks.CurrentUserSupport;
+import com.nextep.proto.helpers.DisplayHelper;
+import com.nextep.proto.services.EventManagementService;
 import com.nextep.proto.services.NotificationService;
 import com.nextep.proto.spring.ContextHolder;
 import com.nextep.smaug.service.SearchPersistenceService;
@@ -34,6 +40,7 @@ import com.videopolis.apis.model.ApisCriterion;
 import com.videopolis.apis.model.ApisItemKeyAdapter;
 import com.videopolis.apis.model.ApisRequest;
 import com.videopolis.apis.service.ApiCompositeResponse;
+import com.videopolis.calm.exception.CalException;
 import com.videopolis.calm.factory.CalmFactory;
 import com.videopolis.calm.helper.Assert;
 import com.videopolis.calm.model.CalmObject;
@@ -54,6 +61,7 @@ public class DeleteCalObjectAction extends AbstractAction implements
 	private static final long serialVersionUID = 6190406774419036820L;
 	private static final String APIS_ALIAS_OBJECT = "obj";
 	private static final String REDIRECT_ACTION_PLACE_OVERVIEW = "placeOverview";
+	private static final String TRANSLATION_OBJECT_TYPE_PREFIX = "activity.objType.";
 	private static final ApisItemKeyAdapter eventLocationAdapter = new ApisEventLocationAdapter();
 
 	// Injected dependencies
@@ -62,6 +70,9 @@ public class DeleteCalObjectAction extends AbstractAction implements
 	private CalPersistenceService placesService;
 	private CalPersistenceService activitiesService;
 	@Autowired
+	@Qualifier("messagesService")
+	private CalPersistenceService messageService;
+	@Autowired
 	@Qualifier("eventSeriesService")
 	private CalExtendedPersistenceService eventSeriesService;
 	@Autowired
@@ -69,6 +80,13 @@ public class DeleteCalObjectAction extends AbstractAction implements
 	private CalExtendedPersistenceService eventsService;
 	@Autowired
 	private NotificationService notificationService;
+	@Autowired
+	private EventManagementService eventManagementService;
+	@Autowired
+	@Qualifier("globalMessages")
+	private MessageSource messageSource;
+	@Resource(mappedName = "systemMessageUserKey")
+	private String systemUserKey;
 
 	// Dynamic arguments
 	private String key;
@@ -129,7 +147,10 @@ public class DeleteCalObjectAction extends AbstractAction implements
 				return CONFIRM;
 			} else {
 				ContextHolder.toggleWrite();
-
+				// For sending message
+				ItemKey itemAuthorKey = null;
+				String itemName = DisplayHelper.getName(item);
+				String itemType = getItemTypeLabel(item);
 				if (item instanceof MutablePlace) {
 					final MutablePlace place = (MutablePlace) item;
 					if (place.isOnline()) {
@@ -162,8 +183,13 @@ public class DeleteCalObjectAction extends AbstractAction implements
 
 					// Removing by switching online flag
 					final MutableEventSeries series = (MutableEventSeries) item;
-					// series.setOnline(false);
-					eventSeriesService.delete(series.getKey());
+					if (series.isOnline()) {
+						series.setOnline(false);
+						eventSeriesService.saveItem(series);
+					} else if (getRightsManagementService().isAdministrator(
+							user)) {
+						eventSeriesService.delete(series.getKey());
+					}
 
 					// Unindexing from Search
 					searchPersistenceService.remove(item);
@@ -172,6 +198,17 @@ public class DeleteCalObjectAction extends AbstractAction implements
 					final Place place = item.getUnique(Place.class);
 					notificationService.sendEventDeletedNotification(series,
 							place, user);
+					itemAuthorKey = series.getAuthorKey();
+					itemName = DisplayHelper.getName(series);
+					if (itemName == null || itemName.trim().isEmpty()) {
+						String timeframe = eventManagementService
+								.buildReadableTimeframe(series, getLocale());
+						String seriesTypeLabel = messageSource.getMessage(
+								"calendarType."
+										+ series.getCalendarType().name(),
+								null, getLocale());
+						itemName = seriesTypeLabel + " " + timeframe;
+					}
 				} else if (item instanceof Event) {
 					redirectAction = REDIRECT_ACTION_PLACE_OVERVIEW;
 					redirectId = ((Event) item).getLocationKey().toString();
@@ -188,8 +225,16 @@ public class DeleteCalObjectAction extends AbstractAction implements
 					final Place place = item.getUnique(Place.class);
 					notificationService.sendEventDeletedNotification(event,
 							place, user);
+					itemAuthorKey = event.getAuthorKey();
+					itemName = DisplayHelper.getName(event);
 				}
 
+				// Sending in-app message
+				sendMessage(user.getKey(), user, itemName, itemType, user);
+				if (itemAuthorKey != null
+						&& !user.getKey().equals(itemAuthorKey)) {
+					sendMessage(itemAuthorKey, user, itemName, itemType, user);
+				}
 				// Done
 				return SUCCESS;
 			}
@@ -203,6 +248,35 @@ public class DeleteCalObjectAction extends AbstractAction implements
 			}
 			return FORBIDDEN;
 		}
+	}
+
+	private String getItemTypeLabel(CalmObject object) {
+		final String targetType = object.getKey().getType();
+		String targetTypeLabel = messageSource.getMessage(
+				TRANSLATION_OBJECT_TYPE_PREFIX + targetType, null, getLocale());
+		return targetTypeLabel;
+	}
+
+	private void sendMessage(ItemKey recipient, CalmObject sender,
+			String itemName, String itemType, User deletionAuthor)
+			throws CalException {
+		ContextHolder.toggleWrite();
+		final MutableMessage m = (MutableMessage) messageService
+				.createTransientObject();
+
+		// Computing sender of message (avoiding to send message from ourselves
+		ItemKey senderKey = sender.getKey();
+		if (deletionAuthor.getKey().equals(senderKey)) {
+			senderKey = CalmFactory.parseKey(systemUserKey);
+		}
+		m.setFromKey(senderKey);
+		m.setToKey(recipient);
+		m.setMessageDate(new Date());
+		final String message = messageSource.getMessage(
+				"deleteCalObject.message", new String[] { itemType, itemName,
+						deletionAuthor.getPseudo() }, getLocale());
+		m.setMessage(message);
+		messageService.saveItem(m);
 	}
 
 	public void setKey(String key) {

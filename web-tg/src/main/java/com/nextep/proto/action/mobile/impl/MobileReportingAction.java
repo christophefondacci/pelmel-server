@@ -124,6 +124,7 @@ public class MobileReportingAction extends AbstractAction implements
 		case Constants.REPORT_TYPE_NOTGAY:
 		case Constants.REPORT_TYPE_LOCATION:
 		case Constants.REPORT_TYPE_CLOSED:
+		case Constants.REPORT_TYPE_REMOVAL_REQUESTED:
 			ContextHolder.toggleWrite();
 
 			LOGGER.info("MOBILE_REPORT: User " + currentUser.getKey()

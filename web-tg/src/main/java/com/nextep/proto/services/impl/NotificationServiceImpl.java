@@ -496,8 +496,9 @@ public class NotificationServiceImpl implements NotificationService {
 				descriptionKey);
 		buf.append("</tbody></table>");
 		fillEmailFooterFor(buf, place, user);
-		notifyAdminByEmail("Place " + place.getName() + " " + updated + " by "
-				+ user.getPseudo(), buf.toString());
+		final String objType = getObjectTypeName(place);
+		notifyAdminByEmail(objType + " " + place.getName() + " " + updated
+				+ " by " + user.getPseudo(), buf.toString());
 		return new AsyncResult<Boolean>(true);
 	}
 
@@ -521,6 +522,20 @@ public class NotificationServiceImpl implements NotificationService {
 		}
 	}
 
+	private String getObjectTypeName(CalmObject object) {
+		String objectType = object.getKey().getType();
+		if (object instanceof Place) {
+			objectType = "Place";
+		} else if (object instanceof User) {
+			objectType = "User";
+		} else if (object instanceof EventSeries) {
+			objectType = "Recurring event";
+		} else if (object instanceof Event) {
+			objectType = "Event";
+		}
+		return objectType;
+	}
+
 	/**
 	 * Fills a generic email header for the given object
 	 * 
@@ -542,12 +557,7 @@ public class NotificationServiceImpl implements NotificationService {
 				+ urlService.getOverviewUrl(
 						DisplayHelper.getDefaultAjaxContainer(), user);
 
-		String objectType = "Place";
-		if (object instanceof User) {
-			objectType = "User";
-		} else if (object instanceof Event) {
-			objectType = "Event";
-		}
+		final String objectType = getObjectTypeName(object);
 		buf.append("Hello administrators,<br><br>A "
 				+ objectType.toLowerCase()
 				+ " has been "
@@ -605,12 +615,16 @@ public class NotificationServiceImpl implements NotificationService {
 		case Constants.REPORT_TYPE_NOTGAY:
 			reportTypeLabel = "not gay";
 			break;
+		case Constants.REPORT_TYPE_REMOVAL_REQUESTED:
+			reportTypeLabel = "removal requested";
+			break;
 		}
 		buf.append(reportTypeLabel);
 		buf.append("</b>");
 		fillEmailFooterFor(buf, obj, user);
+		final String objectType = getObjectTypeName(obj);
 		notifyAdminByEmail(
-				"Place " + DisplayHelper.getName(obj) + " reported as "
+				objectType + " " + DisplayHelper.getName(obj) + " reported as "
 						+ reportTypeLabel + " by " + user.getPseudo(),
 				buf.toString());
 		return new AsyncResult<Boolean>(true);
@@ -632,8 +646,10 @@ public class NotificationServiceImpl implements NotificationService {
 		buf.append("Photo added: <a href=\"" + baseUrl + media.getUrl()
 				+ "\">New photo</a><br>");
 		fillEmailFooterFor(buf, obj, user);
-		notifyAdminByEmail("Photo added to " + DisplayHelper.getName(obj)
-				+ " by " + user.getPseudo(), buf.toString());
+		final String objType = getObjectTypeName(obj);
+		notifyAdminByEmail(
+				"Photo added to " + objType + " " + DisplayHelper.getName(obj)
+						+ " by " + user.getPseudo(), buf.toString());
 		return new AsyncResult<Boolean>(true);
 	}
 
@@ -645,8 +661,11 @@ public class NotificationServiceImpl implements NotificationService {
 		fillEmailHeaderFor(buf, obj, user, "commented");
 		buf.append("Comment added: <br><p>" + comment.getMessage() + "</p>");
 		fillEmailFooterFor(buf, obj, user);
-		notifyAdminByEmail("Comment added to " + DisplayHelper.getName(obj)
-				+ " by " + user.getPseudo(), buf.toString());
+		final String objType = getObjectTypeName(obj);
+		notifyAdminByEmail(
+				"Comment added to " + objType + " "
+						+ DisplayHelper.getName(obj) + " by "
+						+ user.getPseudo(), buf.toString());
 		return new AsyncResult<Boolean>(true);
 	}
 

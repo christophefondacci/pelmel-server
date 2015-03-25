@@ -99,7 +99,7 @@ public class EventsSeriesDaoImpl implements EventSeriesDao {
 
 		final List<EventSeries> eventSeries = entityManager
 				.createQuery(
-						"from EventSeriesImpl where placeKey in (:itemKeys)")
+						"from EventSeriesImpl where placeKey in (:itemKeys) and isOnline=true")
 				.setParameter("itemKeys", itemKeysStr).getResultList();
 
 		// Hashing result by key

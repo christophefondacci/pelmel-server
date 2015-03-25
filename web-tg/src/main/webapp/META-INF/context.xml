@@ -96,6 +96,7 @@
 	<Environment name="adminUserKeys" type="java.lang.String" value="USER37,USER1,USER3,USER1381"/>
 	
 	<Environment name="welcomeMessageUserKey" type="java.lang.String" value="USER1"/>
+	<Environment name="systemMessageUserKey" type="java.lang.String" value="USER1383"/>
 
 
 	<Environment name="push.key.path" type="java.lang.String" value="/Users/cfondacci/Documents/PELMEL/iphone_dev.p12"/>
@@ -116,7 +117,7 @@
 	<Environment name="smtpHostName" type="java.lang.String" value="smtp.pelmelguide.com"/>
 	<Environment name="smtpAuthUser" type="java.lang.String" value="christophe@pelmelguide.com"/>
 	<Environment name="smtpAuthPassword" type="java.lang.String" value="tdk;1558"/>
-	<Environment name="smtpAuthPort" type="java.lang.Integer" value="25"/>
+	<Environment name="smtpAuthPort" type="java.lang.Integer" value="587"/>
 
 
 	<Environment name="redirectEnabled" type="java.lang.Boolean" value="true"/>

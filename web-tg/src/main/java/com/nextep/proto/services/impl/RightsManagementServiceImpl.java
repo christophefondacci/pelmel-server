@@ -22,6 +22,9 @@ public class RightsManagementServiceImpl implements RightsManagementService {
 
 	@Override
 	public boolean canDelete(User user, CalmObject object) {
+		if (object == null) {
+			return false;
+		}
 		// Getting owner
 		final ItemKey ownerKey = getOwnerKey(object);
 		// If the owner is the given user, then he has all rights over this
