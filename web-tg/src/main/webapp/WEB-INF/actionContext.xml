@@ -245,9 +245,7 @@
 		<property name="tagSupport" ref="tagSupport"/>
 		<property name="nearbySearchSupport" ref="nearbySearchSupport"/>
 		<property name="urlService" ref="mobileUrlService"/>
-		<property name="eventManagementService" ref="eventManagementService"/>
 		<property name="distanceDisplayService" ref="distanceDisplayService"/>
-		<property name="activitySupport" ref="activitySupport"/>
 		<property name="geoService" ref="geoService"/>
 		<property name="pageSize">
 			<jee:jndi-lookup jndi-name="java:comp/env/mobile/nearbyPlacesCount"></jee:jndi-lookup>
@@ -263,9 +261,6 @@
 		<property name="localizationService" ref="localizationService"/>
 		<property name="jsonBuilder" ref="jsonBuilder"/>
 		<property name="viewManagementService" ref="viewManagementService"/>
-		<property name="lastSeenMaxTime">
-			<jee:jndi-lookup jndi-name="java:comp/env/smaug/lastSeenMaxTime"/>
-		</property>
 	</bean>
 	<bean id="mobileCheckinAction" class="com.nextep.proto.action.mobile.impl.MobileCheckInAction" parent="abstractMobileAction" scope="request">
 		<property name="currentUserSupport" ref="currentUserSupport"/>

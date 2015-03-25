@@ -10,9 +10,6 @@ import java.util.Map;
 
 import net.sf.json.JSONObject;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import com.nextep.advertising.model.AdvertisingBooster;
 import com.nextep.cal.util.services.CalPersistenceService;
 import com.nextep.descriptions.model.Description;
@@ -37,7 +34,6 @@ import com.nextep.proto.action.model.TagAware;
 import com.nextep.proto.apis.adapters.ApisEventLocationAdapter;
 import com.nextep.proto.apis.adapters.ApisFacetToItemKeyAdapter;
 import com.nextep.proto.apis.model.impl.ApisLocalizationHelper;
-import com.nextep.proto.blocks.ActivitySupport;
 import com.nextep.proto.blocks.CurrentUserSupport;
 import com.nextep.proto.blocks.NearbySearchSupport;
 import com.nextep.proto.blocks.SearchSupport;
@@ -50,7 +46,6 @@ import com.nextep.proto.helpers.SearchHelper;
 import com.nextep.proto.model.Constants;
 import com.nextep.proto.model.SearchType;
 import com.nextep.proto.services.DistanceDisplayService;
-import com.nextep.proto.services.EventManagementService;
 import com.nextep.proto.services.LocalizationService;
 import com.nextep.proto.services.ViewManagementService;
 import com.nextep.proto.spring.ContextHolder;
@@ -81,17 +76,14 @@ public class NearbyPlacesListAction extends AbstractAction implements
 		SearchAware, JsonProvider, TagAware, NearbySearchAware {
 
 	private static final long serialVersionUID = 2386753201776395502L;
-	private static final Log LOGGER = LogFactory
-			.getLog(NearbyPlacesListAction.class);
+	// private static final Log LOGGER = LogFactory
+	// .getLog(NearbyPlacesListAction.class);
 
 	private static String APIS_ALIAS_NEARBY_PLACES = "np";
 	private static String APIS_ALIAS_NEARBY_EVENTS = "ne";
-	private static String APIS_ALIAS_NEARBY_ACTIVITIES = "na";
 	private static String APIS_ALIAS_NEARBY_USERS = "nu";
 	private static String APIS_ALIAS_CITY = "parentCity";
 
-	private static final int SORT_RANGE_DISTANCE = 2;
-	private static final int NEARBY_ACTIVITIES_COUNT = 20;
 	private static final int NEARBY_USERS_COUNT = 50;
 	private static final int NEARBY_EVENTS_COUNT = 50;
 
@@ -105,16 +97,13 @@ public class NearbyPlacesListAction extends AbstractAction implements
 	// Injected supports & services
 	private CurrentUserSupport currentUserSupport;
 	private SearchSupport searchSupport;
-	private ActivitySupport activitySupport;
 	private TagSupport tagSupport;
 	private NearbySearchSupport nearbySearchSupport;
 	private LocalizationService localizationService;
 	private DistanceDisplayService distanceDisplayService;
 	private CalPersistenceService geoService;
 	private ViewManagementService viewManagementService;
-	private EventManagementService eventManagementService;
 	private JsonBuilder jsonBuilder;
-	private long lastSeenMaxTime;
 
 	// Actions arguments
 	private double lat, lng;
@@ -162,8 +151,8 @@ public class NearbyPlacesListAction extends AbstractAction implements
 							.aliasedBy(APIS_ALIAS_NEARBY_PLACES);
 
 					// Adding activities
-					final List<Sorter> activitiesDateSorter = SearchHelper
-							.getActivitiesDefaultSorter();
+					// final List<Sorter> activitiesDateSorter = SearchHelper
+					// .getActivitiesDefaultSorter();
 					// final ApisCriterion activitiesCrit = SearchRestriction
 					// .searchNear(Activity.class,
 					// SearchScope.NEARBY_ACTIVITIES, searchLat,
@@ -384,6 +373,9 @@ public class NearbyPlacesListAction extends AbstractAction implements
 			users = city.get(User.class, APIS_ALIAS_NEARBY_USERS);
 		}
 		if (searchText != null) {
+			// Because we did a full text search which can return events (among
+			// other objects)
+			// then everything is under the same "places" alias
 			events = response
 					.getElements(Event.class, APIS_ALIAS_NEARBY_PLACES);
 		} else {
@@ -396,7 +388,8 @@ public class NearbyPlacesListAction extends AbstractAction implements
 				.getPaginationInfo(Place.class);
 		searchSupport.initialize(null, getUrlService(), getLocale(), null,
 				null, null, paginationInfo, places);
-		tagSupport.initialize(getLocale(), Collections.EMPTY_LIST);
+		final List<Tag> tags = Collections.emptyList();
+		tagSupport.initialize(getLocale(), tags);
 		nearbySearchSupport.initialize(getLocale(), response);
 		final List<JsonPlace> jsonPlaces = new ArrayList<JsonPlace>();
 
@@ -734,10 +727,6 @@ public class NearbyPlacesListAction extends AbstractAction implements
 		this.jsonBuilder = jsonBuilder;
 	}
 
-	public void setLastSeenMaxTime(long lastSeenMaxTime) {
-		this.lastSeenMaxTime = lastSeenMaxTime;
-	}
-
 	public void setSearchText(String searchText) {
 		this.searchText = searchText;
 	}
@@ -761,15 +750,6 @@ public class NearbyPlacesListAction extends AbstractAction implements
 	public void setViewManagementService(
 			ViewManagementService viewManagementService) {
 		this.viewManagementService = viewManagementService;
-	}
-
-	public void setEventManagementService(
-			EventManagementService eventManagementService) {
-		this.eventManagementService = eventManagementService;
-	}
-
-	public void setActivitySupport(ActivitySupport activitySupport) {
-		this.activitySupport = activitySupport;
 	}
 
 	public void setSearchLat(String searchLat) {
