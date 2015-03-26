@@ -295,6 +295,8 @@ public class EventUpdateAction extends AbstractAction implements
 			series.setStartMinute(Integer.valueOf(startMinute));
 			series.setEndHour(Integer.valueOf(endHour));
 			series.setEndMinute(Integer.valueOf(endMinute));
+			series.setStartDate(null);
+			series.setEndDate(null);
 			try {
 				if (calendarType != null) {
 					series.setCalendarType(CalendarType.valueOf(calendarType));
@@ -478,7 +480,7 @@ public class EventUpdateAction extends AbstractAction implements
 		if (updatedEvent instanceof EventSeries) {
 			final Collection<JsonHour> hours = jsonBuilder.buildJsonHours(
 					Arrays.asList((EventSeries) updatedEvent), eventCity,
-					getLocale());
+					getLocale(), null);
 			return JSONObject.fromObject(hours.iterator().next()).toString();
 		} else if (updatedEvent instanceof Event) {
 			final JsonEvent e = new JsonEvent();

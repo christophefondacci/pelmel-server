@@ -25,6 +25,7 @@ import com.nextep.geo.model.GeographicItem;
 import com.nextep.geo.model.Place;
 import com.nextep.json.model.IJsonDescripted;
 import com.nextep.json.model.IJsonLightEvent;
+import com.nextep.json.model.IJsonWithParticipants;
 import com.nextep.json.model.impl.JsonActivity;
 import com.nextep.json.model.impl.JsonDescription;
 import com.nextep.json.model.impl.JsonEvent;
@@ -94,13 +95,6 @@ public class JsonBuilderImpl implements JsonBuilder {
 			elt.setType(p.getPlaceType());
 			elt.setCity(p.getCity().getName());
 
-			// Filling hours
-			final List<? extends EventSeries> events = p.get(EventSeries.class);
-			if (events != null) {
-				final Collection<JsonHour> hours = buildJsonHours(events,
-						p.getCity(), l);
-				elt.setHours(hours);
-			}
 		}
 
 		// Filling descriptions
@@ -557,6 +551,13 @@ public class JsonBuilderImpl implements JsonBuilder {
 			}
 		}
 
+		// Filling participants
+		fillJsonEventParticipants(event, response, e);
+
+	}
+
+	private void fillJsonEventParticipants(Event event, ApiResponse response,
+			IJsonWithParticipants e) {
 		// Participants
 		if (response != null) {
 			final FacetInformation facetInfo = response
@@ -577,10 +578,13 @@ public class JsonBuilderImpl implements JsonBuilder {
 		if (event instanceof EventSeries) {
 			final Date nextEnd = eventManagementService.computeNextStart(
 					(EventSeries) event, new Date(), false);
-			return new ExpirableItemKeyImpl(event.getKey(), nextEnd.getTime());
-		} else {
-			return event.getKey();
+			if (nextEnd != null) {
+				return new ExpirableItemKeyImpl(event.getKey(),
+						nextEnd.getTime());
+			}
 		}
+		return event.getKey();
+
 	}
 
 	public void setDistanceDisplayService(
@@ -802,7 +806,7 @@ public class JsonBuilderImpl implements JsonBuilder {
 	@Override
 	public Collection<JsonHour> buildJsonHours(
 			Collection<? extends EventSeries> eventSeries, City eventCity,
-			Locale l) {
+			Locale l, ApiResponse response) {
 		final List<JsonHour> jsonHours = new ArrayList<JsonHour>();
 		final String timezoneId = eventCity.getTimezoneId();
 		for (EventSeries event : eventSeries) {
@@ -823,6 +827,8 @@ public class JsonBuilderImpl implements JsonBuilder {
 			hour.setSunday(event.isSunday());
 			hour.setType(event.getCalendarType().name());
 			hour.setRecurrency(event.getWeekOfMonthOffset());
+			// Filling participants
+			fillJsonEventParticipants(event, response, hour);
 			fillDescription(event, hour, l);
 
 			// Computing next start / end time

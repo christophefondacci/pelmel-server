@@ -106,6 +106,10 @@ public class EventsSeriesDaoImpl implements EventSeriesDao {
 		final Map<ItemKey, List<EventSeries>> seriesMap = new HashMap<ItemKey, List<EventSeries>>();
 		for (EventSeries s : eventSeries) {
 			final ItemKey locationKey = s.getLocationKey();
+			if (s.getEndDate() != null
+					&& s.getEndDate().getTime() < System.currentTimeMillis()) {
+				continue;
+			}
 			// Retrieving list
 			List<EventSeries> itemSeries = seriesMap.get(locationKey);
 			// No list ? create one

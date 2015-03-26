@@ -213,6 +213,6 @@ public interface JsonBuilder {
 	 */
 	Collection<JsonHour> buildJsonHours(
 			Collection<? extends EventSeries> eventSeries, City eventCity,
-			Locale l);
+			Locale l, ApiResponse response);
 
 }

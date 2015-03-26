@@ -16,6 +16,7 @@ import com.nextep.descriptions.model.Description;
 import com.nextep.events.model.Event;
 import com.nextep.events.model.EventSeries;
 import com.nextep.geo.model.Place;
+import com.nextep.json.model.impl.JsonHour;
 import com.nextep.json.model.impl.JsonLightEvent;
 import com.nextep.json.model.impl.JsonLightUser;
 import com.nextep.json.model.impl.JsonOverviewElement;
@@ -236,6 +237,15 @@ public class MobileOverviewPlaceAction extends AbstractAction implements
 			}
 		}
 
+		// Filling hours
+		final List<? extends EventSeries> series = overviewObject
+				.get(EventSeries.class);
+		if (series != null) {
+			final Collection<JsonHour> hours = jsonBuilder.buildJsonHours(
+					series, ((Place) overviewObject).getCity(), getLocale(),
+					response);
+			json.setHours(hours);
+		}
 		// Filling number of comments
 		PaginationInfo pagination = response
 				.getPaginationInfo(APIS_ALIAS_COMMENTS);

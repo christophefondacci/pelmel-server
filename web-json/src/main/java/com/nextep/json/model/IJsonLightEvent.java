@@ -6,7 +6,7 @@ import java.util.Date;
 import com.nextep.json.model.impl.JsonLightPlace;
 import com.nextep.json.model.impl.JsonMedia;
 
-public interface IJsonLightEvent {
+public interface IJsonLightEvent extends IJsonWithParticipants {
 
 	String getKey();
 
@@ -39,8 +39,4 @@ public interface IJsonLightEvent {
 	double getRawDistance();
 
 	void setRawDistance(double rawDistance);
-
-	void setParticipants(int participants);
-
-	int getParticipants();
 }

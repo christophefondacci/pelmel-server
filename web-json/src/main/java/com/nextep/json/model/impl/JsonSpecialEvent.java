@@ -1,6 +1,8 @@
 package com.nextep.json.model.impl;
 
-public class JsonSpecialEvent {
+import com.nextep.json.model.IJsonWithParticipants;
+
+public class JsonSpecialEvent implements IJsonWithParticipants {
 
 	private String key;
 	private String type;
@@ -67,10 +69,12 @@ public class JsonSpecialEvent {
 		this.thumb = thumb;
 	}
 
+	@Override
 	public void setParticipants(int participants) {
 		this.participants = participants;
 	}
 
+	@Override
 	public int getParticipants() {
 		return participants;
 	}

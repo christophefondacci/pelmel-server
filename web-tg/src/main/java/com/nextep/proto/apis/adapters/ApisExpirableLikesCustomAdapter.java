@@ -49,8 +49,15 @@ public class ApisExpirableLikesCustomAdapter implements ApisCustomAdapter {
 				final EventSeries series = (EventSeries) parent;
 				final Date nextEnd = eventManagementService.computeNextStart(
 						series, new Date(), false);
-				final ItemKey likeExpirableKey = new ExpirableItemKeyImpl(
-						series.getKey(), nextEnd.getTime());
+
+				// Default to series unique key
+				ItemKey likeExpirableKey = series.getKey();
+
+				// We may not have an next end date...
+				if (nextEnd != null) {
+					likeExpirableKey = new ExpirableItemKeyImpl(
+							series.getKey(), nextEnd.getTime());
+				}
 
 				final SearchSettings settings = SearchFactory
 						.createSearchSettings(User.CAL_TYPE,
@@ -74,6 +81,6 @@ public class ApisExpirableLikesCustomAdapter implements ApisCustomAdapter {
 			}
 		}
 		//
-		return null;
+		return Collections.emptyList();
 	}
 }
