@@ -116,9 +116,6 @@
 		<property name="descriptionSupport" ref="descriptionSupport"/>
 		<property name="urlService" ref="mobileUrlService"/>
 		<property name="jsonBuilder" ref="jsonBuilder"/>
-		<property name="baseUrl">
-			<jee:jndi-lookup jndi-name="java:comp/env/togaytherBaseUrl"/>
-		</property>
 		<property name="maxRelatedElements">
 			<jee:jndi-lookup jndi-name="java:comp/env/maxMobileLikes"/>
 		</property>

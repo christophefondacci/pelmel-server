@@ -9,6 +9,7 @@ import com.videopolis.calm.exception.CalException;
 import com.videopolis.calm.factory.CalmFactory;
 import com.videopolis.calm.helper.Assert;
 import com.videopolis.calm.model.ItemKey;
+import com.videopolis.calm.model.impl.ExpirableItemKeyImpl;
 
 public final class CalHelper {
 
@@ -154,5 +155,17 @@ public final class CalHelper {
 			}
 		}
 		return keys;
+	}
+
+	public static String getKeyType(ItemKey itemKey) {
+		String type = null;
+		if (itemKey != null) {
+			type = itemKey.getType();
+			if (itemKey instanceof ExpirableItemKeyImpl) {
+				type = ((ExpirableItemKeyImpl) itemKey).getBaseItemKey()
+						.getType();
+			}
+		}
+		return type;
 	}
 }

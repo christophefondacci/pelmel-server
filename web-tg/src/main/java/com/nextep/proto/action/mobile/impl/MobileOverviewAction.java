@@ -13,6 +13,7 @@ import net.sf.json.JSONObject;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.nextep.comments.model.Comment;
 import com.nextep.descriptions.model.Description;
@@ -38,6 +39,7 @@ import com.nextep.proto.action.model.MediaAware;
 import com.nextep.proto.action.model.OverviewAware;
 import com.nextep.proto.action.model.TagAware;
 import com.nextep.proto.apis.adapters.ApisEventLocationAdapter;
+import com.nextep.proto.apis.adapters.ApisExpirableLikesCustomAdapter;
 import com.nextep.proto.apis.adapters.ApisUserLocationItemKeyAdapter;
 import com.nextep.proto.blocks.CurrentUserSupport;
 import com.nextep.proto.blocks.ItemsListBoxSupport;
@@ -48,14 +50,17 @@ import com.nextep.proto.builders.JsonBuilder;
 import com.nextep.proto.helpers.MediaHelper;
 import com.nextep.proto.helpers.SearchHelper;
 import com.nextep.proto.model.Constants;
+import com.nextep.proto.services.EventManagementService;
 import com.nextep.proto.services.LocalizationService;
 import com.nextep.proto.services.ViewManagementService;
 import com.nextep.tags.model.Tag;
 import com.nextep.users.model.User;
+import com.videopolis.apis.exception.ApisException;
 import com.videopolis.apis.factory.ApisFactory;
 import com.videopolis.apis.factory.SearchRestriction;
 import com.videopolis.apis.helper.ApisRegistry;
 import com.videopolis.apis.model.ApisCriterion;
+import com.videopolis.apis.model.ApisCustomAdapter;
 import com.videopolis.apis.model.ApisItemKeyAdapter;
 import com.videopolis.apis.model.ApisRequest;
 import com.videopolis.apis.model.FacetInformation;
@@ -80,33 +85,26 @@ public class MobileOverviewAction extends AbstractAction implements
 	// Constants declaration
 	private static final long serialVersionUID = 154177235838836337L;
 	private static final String APIS_ALIAS_PLACE = "p";
-	private static final String APIS_ALIAS_USER_CITY = "ucity";
 	private static final String APIS_ALIAS_USER_LIKERS = "ulikers";
 	private static final String APIS_ALIAS_USER_LIKED = "liked";
 	private static final String APIS_ALIAS_PLACE_LIKE = "plike";
 	private static final String APIS_ALIAS_USER_NEAR = "unear";
 	private static final String APIS_ALIAS_NEARBY_PLACES = "nearbyPlaces";
 	private static final String APIS_ALIAS_COMMENTS = "comments";
-	private static final String APIS_ALIAS_ACTIVITIES_CHECKIN = "checkins";
 
 	private static final ApisItemKeyAdapter eventLocationAdapter = new ApisEventLocationAdapter();
 	private static final ApisItemKeyAdapter userLocationAdapter = new ApisUserLocationItemKeyAdapter();
 
-	private static final String KEY_LIKE_COUNT = "label.like.count";
-	private static final String KEY_USER_COUNT = "label.user.count";
-
-	private static final int MAX_USERS_FROM_ACTIVITY = 30;
-	private static final int MAX_LOCALIZATION_ACTIVITY = 50;
-
 	// Injected supports
 	private ViewManagementService viewManagementService;
+	@Autowired
+	private EventManagementService eventManagementService;
 	private LocalizationService localizationService;
 	private CurrentUserSupport currentUserSupport;
 	private OverviewSupport overviewSupport;
 	private MediaProvider mediaProvider;
 	private TagSupport tagSupport;
 	private ItemsListBoxSupport descriptionSupport;
-	private String baseUrl;
 	private JsonBuilder jsonBuilder;
 	private int maxRelatedElements;
 	private double radius;
@@ -192,11 +190,27 @@ public class MobileOverviewAction extends AbstractAction implements
 									.with(Event.class)
 									.with(Media.class)
 									.addCriterion(
-											SearchRestriction
+											(ApisCriterion) SearchRestriction
 													.adaptKey(
 															eventLocationAdapter)
 													.aliasedBy(
-															Constants.APIS_ALIAS_EVENT_PLACE)));
+															Constants.APIS_ALIAS_EVENT_PLACE)
+													.with(Media.class,
+															MediaRequestTypes.THUMB)))
+					.addCriterion(
+							(ApisCriterion) SearchRestriction
+									.with(EventSeries.class)
+									.aliasedBy(
+											Constants.APIS_ALIAS_EVENT_SERIES)
+									.with(Media.class)
+									.addCriterion(
+											(ApisCriterion) SearchRestriction
+													.adaptKey(
+															eventLocationAdapter)
+													.aliasedBy(
+															Constants.APIS_ALIAS_EVENT_PLACE)
+													.with(Media.class,
+															MediaRequestTypes.THUMB)));
 			// .with(ApisActivitiesHelper.withUserActivities(
 			// MAX_LOCALIZATION_ACTIVITY, 0, ActivityType.CHECKIN,
 			// ActivityType.CHECKOUT).aliasedBy(
@@ -209,16 +223,24 @@ public class MobileOverviewAction extends AbstractAction implements
 			;
 		} else if (Event.CAL_ID.equals(itemKey.getType())
 				|| EventSeries.SERIES_CAL_ID.equals(itemKey.getType())) {
-			objCriterion.addCriterion(
-					(WithCriterion) SearchRestriction
-							.withContained(User.class, SearchScope.CHILDREN,
-									maxRelatedElements, 0)
-							.aliasedBy(APIS_ALIAS_USER_LIKERS)
-							.with(Media.class)).addCriterion(
-					(ApisCriterion) SearchRestriction
-							.adaptKey(eventLocationAdapter)
-							.aliasedBy(Constants.APIS_ALIAS_EVENT_PLACE)
-							.with(Media.class, MediaRequestTypes.THUMB));
+
+			final ApisCustomAdapter customLikeAdapter = new ApisExpirableLikesCustomAdapter(
+					eventManagementService, APIS_ALIAS_USER_LIKERS,
+					maxRelatedElements, 0);
+
+			if (itemKey.getType().equals(EventSeries.SERIES_CAL_ID)) {
+				objCriterion.addCriterion(SearchRestriction.customAdapt(
+						customLikeAdapter, APIS_ALIAS_USER_LIKERS));
+			} else {
+				objCriterion.addCriterion((WithCriterion) SearchRestriction
+						.withContained(User.class, SearchScope.CHILDREN,
+								maxRelatedElements, 0)
+						.aliasedBy(APIS_ALIAS_USER_LIKERS).with(Media.class));
+			}
+			objCriterion.addCriterion((ApisCriterion) SearchRestriction
+					.adaptKey(eventLocationAdapter)
+					.aliasedBy(Constants.APIS_ALIAS_EVENT_PLACE)
+					.with(Media.class, MediaRequestTypes.THUMB));
 			// Getting comments count
 			objCriterion.addCriterion(SearchRestriction.with(Comment.class, 1,
 					0).aliasedBy(APIS_ALIAS_COMMENTS));
@@ -227,8 +249,8 @@ public class MobileOverviewAction extends AbstractAction implements
 				.createCompositeRequest()
 				.addCriterion(objCriterion)
 				.addCriterion(
-						SearchRestriction.searchAll(User.class,
-								SearchScope.EVENTS, 0, 0).facettedBy(
+						SearchRestriction.searchForAllFacets(User.class,
+								SearchScope.EVENTS).facettedBy(
 								Arrays.asList(
 										SearchHelper.getUserPlacesCategory(),
 										SearchHelper.getUserEventsCategory())));
@@ -420,7 +442,7 @@ public class MobileOverviewAction extends AbstractAction implements
 		} else if (User.CAL_TYPE.equals(overviewObject.getKey().getType())) {
 			final User user = (User) overviewObject;
 			final JsonUser jsonUser = jsonBuilder.buildJsonUser(user, highRes,
-					getLocale());
+					getLocale(), response);
 			json = jsonUser;
 
 			// Setting liked places count
@@ -485,11 +507,30 @@ public class MobileOverviewAction extends AbstractAction implements
 						.getPaginationInfo(APIS_ALIAS_USER_LIKERS);
 				json.setLikes(likePagination.getItemCount());
 			} else {
-				likesUsers = overviewObject.get(User.class,
-						APIS_ALIAS_USER_LIKERS);
+				// Setting likes
 				final PaginationInfo likePagination = response
 						.getPaginationInfo(APIS_ALIAS_USER_LIKERS);
 				json.setLikes(likePagination.getItemCount());
+
+				if (EventSeries.SERIES_CAL_ID.equals(overviewObject.getKey()
+						.getType())) {
+					try {
+						likesUsers = response.getElements(User.class,
+								APIS_ALIAS_USER_LIKERS);
+					} catch (ApisException e) {
+						likesUsers = Collections.emptyList();
+						LOGGER.error(
+								"Unable to get LIKERS of EventSeries '"
+										+ overviewObject.getKey() + "': "
+										+ e.getMessage(), e);
+					}
+					((JsonEvent) json).setParticipants(likePagination
+							.getItemCount());
+				} else {
+					likesUsers = overviewObject.get(User.class,
+							APIS_ALIAS_USER_LIKERS);
+				}
+
 			}
 			for (User user : likesUsers) {
 				final JsonLightUser jsonUser = jsonBuilder.buildJsonLightUser(
@@ -530,10 +571,6 @@ public class MobileOverviewAction extends AbstractAction implements
 
 	public void setCurrentUserSupport(CurrentUserSupport currentUserSupport) {
 		this.currentUserSupport = currentUserSupport;
-	}
-
-	public void setBaseUrl(String baseUrl) {
-		this.baseUrl = baseUrl;
 	}
 
 	public void setHighRes(boolean highRes) {

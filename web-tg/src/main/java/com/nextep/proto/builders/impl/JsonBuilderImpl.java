@@ -59,6 +59,7 @@ import com.videopolis.apis.service.ApiResponse;
 import com.videopolis.calm.exception.CalException;
 import com.videopolis.calm.model.CalmObject;
 import com.videopolis.calm.model.ItemKey;
+import com.videopolis.calm.model.impl.ExpirableItemKeyImpl;
 import com.videopolis.smaug.common.model.FacetCategory;
 import com.videopolis.smaug.common.model.SearchScope;
 import com.videopolis.smaug.model.FacetCount;
@@ -204,6 +205,12 @@ public class JsonBuilderImpl implements JsonBuilder {
 
 	@Override
 	public JsonUser buildJsonUser(User user, boolean highRes, Locale l) {
+		return buildJsonUser(user, highRes, l, null);
+	}
+
+	@Override
+	public JsonUser buildJsonUser(User user, boolean highRes, Locale l,
+			ApiResponse response) {
 		final JsonUser json = new JsonUser();
 		json.setKey(user.getKey().toString());
 		json.setPseudo(user.getPseudo());
@@ -282,7 +289,13 @@ public class JsonBuilderImpl implements JsonBuilder {
 		// Setting events
 		for (Event event : user.get(Event.class)) {
 			JsonLightEvent jsonEvent = new JsonLightEvent();
-			fillJsonEvent(jsonEvent, event, highRes, l, null);
+			fillJsonEvent(jsonEvent, event, highRes, l, response);
+			json.addEvent(jsonEvent);
+		}
+		for (Event event : user.get(EventSeries.class,
+				Constants.APIS_ALIAS_EVENT_SERIES)) {
+			JsonLightEvent jsonEvent = new JsonLightEvent();
+			fillJsonEvent(jsonEvent, event, highRes, l, response);
 			json.addEvent(jsonEvent);
 		}
 		return json;
@@ -534,10 +547,22 @@ public class JsonBuilderImpl implements JsonBuilder {
 
 			Map<String, Integer> likedEventsMap = SearchHelper.unwrapFacets(
 					facetInfo, SearchHelper.getUserEventsCategory());
-			final Integer likes = likedEventsMap.get(event.getKey().toString());
+
+			final ItemKey likedKey = buildEventLikedKey(event);
+			final Integer likes = likedEventsMap.get(likedKey.toString());
 			if (likes != null) {
 				e.setParticipants(likes);
 			}
+		}
+	}
+
+	private ItemKey buildEventLikedKey(Event event) {
+		if (event instanceof EventSeries) {
+			final Date nextEnd = eventManagementService.computeNextStart(
+					(EventSeries) event, new Date(), false);
+			return new ExpirableItemKeyImpl(event.getKey(), nextEnd.getTime());
+		} else {
+			return event.getKey();
 		}
 	}
 
@@ -554,13 +579,14 @@ public class JsonBuilderImpl implements JsonBuilder {
 	@Override
 	public JsonPlace buildJsonPlace(Place place, boolean highRes, Locale l) {
 		final Map<String, Integer> emptyMap = Collections.emptyMap();
-		return buildJsonPlace(place, highRes, l, emptyMap, emptyMap);
+		return buildJsonPlace(place, highRes, l, emptyMap, emptyMap, emptyMap);
 	}
 
 	@Override
 	public JsonPlace buildJsonPlace(Place place, boolean highRes, Locale l,
 			Map<String, Integer> likedPlacesMap,
-			Map<String, Integer> currentPlacesMap) {
+			Map<String, Integer> currentPlacesMap,
+			Map<String, Integer> eventUsersMap) {
 		final JsonPlace p = new JsonPlace(DisplayHelper.getName(place));
 
 		p.setAddress(place.getAddress1());
@@ -680,6 +706,13 @@ public class JsonBuilderImpl implements JsonBuilder {
 					}
 					event.setNextStart(nextStartTime);
 
+					// Participants
+					final ItemKey likedKey = buildEventLikedKey(series);
+					final Integer participants = eventUsersMap.get(likedKey
+							.toString());
+					if (participants != null) {
+						event.setParticipants(participants);
+					}
 					// Registering
 					eventsTypeMap.put(series.getCalendarType(), event);
 				}

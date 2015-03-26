@@ -1,6 +1,5 @@
 package com.nextep.json.model.impl;
 
-
 public class JsonSpecialEvent {
 
 	private String key;
@@ -10,6 +9,7 @@ public class JsonSpecialEvent {
 	private String description;
 	private String name;
 	private JsonMedia thumb;
+	private int participants;
 
 	public String getKey() {
 		return key;
@@ -65,5 +65,13 @@ public class JsonSpecialEvent {
 
 	public void setThumb(JsonMedia thumb) {
 		this.thumb = thumb;
+	}
+
+	public void setParticipants(int participants) {
+		this.participants = participants;
+	}
+
+	public int getParticipants() {
+		return participants;
 	}
 }

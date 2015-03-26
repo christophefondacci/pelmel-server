@@ -21,6 +21,7 @@ import org.apache.solr.client.solrj.response.QueryResponse;
 
 import com.nextep.activities.model.Activity;
 import com.nextep.advertising.model.AdvertisingBooster;
+import com.nextep.cal.util.helpers.CalHelper;
 import com.nextep.events.model.Event;
 import com.nextep.events.model.EventSeries;
 import com.nextep.geo.model.Admin;
@@ -46,6 +47,7 @@ import com.videopolis.calm.exception.CalException;
 import com.videopolis.calm.model.CalmObject;
 import com.videopolis.calm.model.ItemKey;
 import com.videopolis.calm.model.Localized;
+import com.videopolis.calm.model.impl.ExpirableItemKeyImpl;
 import com.videopolis.smaug.common.model.SearchScope;
 import com.videopolis.smaug.exception.SearchException;
 
@@ -164,23 +166,30 @@ public class SolrSearchPersistenceServiceImpl implements
 			if (solrUser != null) {
 				List<String> likedKeys = null;
 
+				final String keyType = CalHelper.getKeyType(likedKey);
 				// We get the appropriate like collection that we will work on
-				if (Place.CAL_TYPE.equals(likedKey.getType())) {
+				if (Place.CAL_TYPE.equals(keyType)) {
 					likedKeys = solrUser.getPlaces();
-				} else if (User.CAL_TYPE.equals(likedKey.getType())) {
+				} else if (User.CAL_TYPE.equals(keyType)) {
 					likedKeys = solrUser.getUsers();
-				} else if (Event.CAL_ID.equals(likedKey.getType())
-						|| EventSeries.SERIES_CAL_ID.equals(likedKey.getType())) {
+				} else if (Event.CAL_ID.equals(keyType)
+						|| EventSeries.SERIES_CAL_ID.equals(keyType)) {
 					likedKeys = solrUser.getEvents();
 				}
 				// If we got something
 				if (likedKeys != null) {
-					boolean liked = likedKeys.contains(likedKey.toString());
-					if (liked) {
-						likedKeys.remove(likedKey.toString());
-					} else {
-						likedKeys.add(likedKey.toString());
+					final String likedKeyStr = likedKey.toString();
+					// Cleaning past expired occurrences if needed
+					if (isExpirable(likedKey)) {
+						cleanExpiredKeys(likedKeys);
 					}
+					boolean liked = likedKeys.contains(likedKeyStr);
+					if (liked) {
+						likedKeys.remove(likedKeyStr);
+					} else {
+						likedKeys.add(likedKeyStr);
+					}
+
 					saveBean(solrUser, userSolrServer);
 					// We have toggle the like status, so we return the opposite
 					return new LikeActionResultImpl(!liked, likedKeys.size());
@@ -188,6 +197,29 @@ public class SolrSearchPersistenceServiceImpl implements
 			}
 		}
 		return new LikeActionResultImpl(false, 0);
+	}
+
+	private boolean isExpirable(ItemKey itemKey) {
+		return itemKey.getType().equals(ExpirableItemKeyImpl.CAL_TYPE);
+	}
+
+	private void cleanExpiredKeys(List<String> likedKeys) {
+		// Processing each key
+		for (String likedKey : new ArrayList<String>(likedKeys)) {
+
+			// Getting expiration time
+			if (likedKey.contains("-")) {
+				final long expirationTime = Long
+						.valueOf(likedKey.split("-")[1]);
+
+				// Checking if expired
+				if (expirationTime < System.currentTimeMillis()) {
+
+					// If so we remove the key
+					likedKeys.remove(likedKey);
+				}
+			}
+		}
 	}
 
 	@Override

@@ -20,13 +20,13 @@ import com.nextep.events.dao.EventSeriesDao;
 import com.nextep.events.model.Event;
 import com.nextep.events.model.EventRequestTypes;
 import com.nextep.events.model.EventSeries;
-import com.nextep.events.model.impl.EventSeriesImpl;
 import com.nextep.events.model.impl.ItemEventSeriesImpl;
 import com.videopolis.calm.exception.CalException;
 import com.videopolis.calm.factory.CalmFactory;
 import com.videopolis.calm.model.CalmObject;
 import com.videopolis.calm.model.ItemKey;
 import com.videopolis.calm.model.RequestType;
+import com.videopolis.calm.model.impl.ExpirableItemKeyImpl;
 import com.videopolis.cals.model.RequestSettings;
 
 public class EventsSeriesDaoImpl implements EventSeriesDao {
@@ -131,38 +131,59 @@ public class EventsSeriesDaoImpl implements EventSeriesDao {
 	@SuppressWarnings("unchecked")
 	public Map<ItemKey, List<EventSeries>> findItemEventFor(
 			List<ItemKey> externalItems) throws CalException {
-
+		if (externalItems.size() > 1) {
+			throw new UnsupportedOperationException(
+					"Unsupported EventSeries.getItemsFor() for multiple input keys");
+		}
 		final Collection<String> ids = CalHelper.unwrapItemKeys(externalItems);
 
-		final List<Object[]> rows = entityManager
+		final List<ItemEventSeriesImpl> itemEvents = entityManager
 				.createQuery(
-						"select itemEvent,event from ItemEventSeriesImpl as itemEvent, EventSeriesImpl as event "
-								+ "where itemEvent.externalItemKey in (:extIds) and event.id=itemEvent.itemId ")
+						"select itemEvent from ItemEventSeriesImpl as itemEvent "
+								+ "where itemEvent.externalItemKey in (:extIds)")
 				.setParameter("extIds", ids).getResultList();
 
-		Map<ItemKey, List<EventSeries>> eventSeriesMap = new HashMap<ItemKey, List<EventSeries>>();
-		for (Object[] row : rows) {
-			final ItemEventSeriesImpl itemEvent = (ItemEventSeriesImpl) row[0];
-			final EventSeriesImpl eventSeries = (EventSeriesImpl) row[1];
-
-			final ItemKey extItemKey = CalmFactory.parseKey(itemEvent
+		// Processing matching event series keys, filtering out outdated
+		// occurrences
+		final List<Long> seriesIds = new ArrayList<Long>();
+		ItemKey externalItemKey = null;
+		for (ItemEventSeriesImpl itemEvent : itemEvents) {
+			final ItemKey eventOccurrenceKey = CalmFactory.parseKey(itemEvent
+					.getSeriesOccurenceKey());
+			externalItemKey = CalmFactory.parseKey(itemEvent
 					.getExternalItemKey());
-			List<EventSeries> seriesList = eventSeriesMap.get(extItemKey);
-			if (seriesList == null) {
-				seriesList = new ArrayList<EventSeries>();
 
-				eventSeriesMap.put(extItemKey, seriesList);
+			// If this is an occurrence key, we check if it is expired
+			if (eventOccurrenceKey instanceof ExpirableItemKeyImpl) {
+				final ExpirableItemKeyImpl expirableKey = (ExpirableItemKeyImpl) eventOccurrenceKey;
+				final long expirationTime = expirableKey.getExpirationTime();
+				if (expirationTime > System.currentTimeMillis()) {
+					seriesIds.add(expirableKey.getBaseItemKey().getNumericId());
+				}
+			} else {
+				seriesIds.add(eventOccurrenceKey.getNumericId());
 			}
-			seriesList.add(eventSeries);
 		}
+		Map<ItemKey, List<EventSeries>> eventSeriesMap = new HashMap<ItemKey, List<EventSeries>>();
+		if (!seriesIds.isEmpty()) {
+			final List<EventSeries> eventSeries = entityManager
+					.createQuery(
+							"from EventSeriesImpl where seriesId in (:ids) and isOnline=true")
+					.setParameter("ids", seriesIds).getResultList();
+
+			if (externalItemKey != null) {
+				eventSeriesMap.put(externalItemKey, eventSeries);
+			}
+		}
+
 		return eventSeriesMap;
 	}
 
 	@SuppressWarnings("unchecked")
 	public List<ItemEventSeriesImpl> findItemEventFor(ItemKey externalItem) {
 		final StringBuilder buf = new StringBuilder();
-		buf.append("select itemEvent from ItemEventSeriesImpl as itemEvent, EventSeriesImpl as event "
-				+ "where itemEvent.externalItemKey=:extId and event.id=itemEvent.itemId ");
+		buf.append("select itemEvent from ItemEventSeriesImpl as itemEvent "
+				+ "where itemEvent.externalItemKey=:extId");
 		return entityManager.createQuery(buf.toString())
 				.setParameter("extId", externalItem.toString()).getResultList();
 	}
@@ -176,40 +197,55 @@ public class EventsSeriesDaoImpl implements EventSeriesDao {
 		final Map<ItemKey, ItemEventSeriesImpl> itemEventsMap = new HashMap<ItemKey, ItemEventSeriesImpl>();
 		for (ItemEventSeriesImpl itemEvent : itemEvents) {
 			try {
-				final ItemKey eventKey = CalmFactory.createKey(
-						EventSeries.SERIES_CAL_ID, itemEvent.getItemId());
+				final ItemKey eventKey = CalmFactory.parseKey(itemEvent
+						.getSeriesOccurenceKey());
+				// createKey(EventSeries.SERIES_CAL_ID, itemEvent.getItemId());
 				itemEventsMap.put(eventKey, itemEvent);
 			} catch (CalException e) {
 				LOGGER.error("Exception: " + e.getMessage(), e);
 			}
 		}
 		// Processing new places
-		final List<Long> eventIds = new ArrayList<Long>();
+		final List<ItemKey> eventOccurrenceKeys = new ArrayList<ItemKey>();
 		final List<Event> allEvents = new ArrayList<Event>();
 		for (ItemKey eventKey : eventKeys) {
 			final ItemEventSeriesImpl existingItemEvent = itemEventsMap
 					.get(eventKey);
 			if (existingItemEvent == null) {
 				// If not existing we load the event
-				eventIds.add(eventKey.getNumericId());
+				eventOccurrenceKeys.add(eventKey);
 			} else {
 				// If existing we remove association
 				entityManager.remove(existingItemEvent);
-				eventIds.remove(eventKey.getNumericId());
+				eventOccurrenceKeys.remove(eventKey);
 			}
 		}
 		// Registering new events
-		if (!eventIds.isEmpty()) {
-			final List<EventSeries> events = getByIds(eventIds);
-			for (EventSeries p : events) {
+		if (!eventOccurrenceKeys.isEmpty()) {
+			List<Long> eventIds = new ArrayList<Long>();
+			// final List<EventSeries> events = getByIds(eventIds);
+			for (ItemKey occurrenceKey : eventOccurrenceKeys) {
 				// Setting up new association
 				final ItemEventSeriesImpl itemPlace = new ItemEventSeriesImpl(
-						externalItem, p.getKey());
+						externalItem, occurrenceKey);
 				entityManager.persist(itemPlace);
+				// Adding event id to load event series
+				eventIds.add(unwrapSeriesItemKey(occurrenceKey));
 			}
+			// Loading series to return them
+			final List<EventSeries> events = getByIds(eventIds);
 			allEvents.addAll(events);
 		}
 		return allEvents;
+	}
+
+	private Long unwrapSeriesItemKey(ItemKey itemKey) {
+		if (itemKey instanceof ExpirableItemKeyImpl) {
+			return ((ExpirableItemKeyImpl) itemKey).getBaseItemKey()
+					.getNumericId();
+		} else {
+			return itemKey.getNumericId();
+		}
 	}
 
 	@Override

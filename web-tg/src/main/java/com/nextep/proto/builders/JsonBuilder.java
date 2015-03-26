@@ -98,6 +98,9 @@ public interface JsonBuilder {
 	 */
 	JsonUser buildJsonUser(User user, boolean highRes, Locale l);
 
+	JsonUser buildJsonUser(User user, boolean highRes, Locale l,
+			ApiResponse response);
+
 	JsonActivity buildJsonActivity(Activity activity, boolean highRes, Locale l);
 
 	/**
@@ -115,7 +118,8 @@ public interface JsonBuilder {
 
 	JsonPlace buildJsonPlace(Place place, boolean highRes, Locale l,
 			Map<String, Integer> likedPlaceMap,
-			Map<String, Integer> currentPlacesMap);
+			Map<String, Integer> currentPlacesMap,
+			Map<String, Integer> eventUsersMap);
 
 	void fillJsonEvent(IJsonLightEvent e, Event event, boolean highRes,
 			Locale l, ApiResponse response);

@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 
+import javax.annotation.Resource;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -64,6 +66,8 @@ public class AdminEventsSeriesAction extends AbstractAction implements
 	private AdminPaginationSupport paginationSupport;
 	@Autowired
 	private EventManagementService eventManagementService;
+	@Resource(mappedName = "togaytherBaseUrl")
+	private String baseUrl;
 
 	// Dynamic arguments
 	private int page = 0;
@@ -147,6 +151,10 @@ public class AdminEventsSeriesAction extends AbstractAction implements
 		// + endMinute;
 		return eventManagementService.buildReadableTimeframe(series,
 				getLocale());
+	}
+
+	public String getSeriesUrl(EventSeries series) {
+		return baseUrl + "/o-overview/e-event/" + series.getKey();
 	}
 
 	public String getLocalizedDate(Event event, Date date) throws CalException {

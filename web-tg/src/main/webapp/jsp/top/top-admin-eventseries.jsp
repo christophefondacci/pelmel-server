@@ -32,7 +32,7 @@
 						<tr>
 							<td><img src="<s:property value="#search.getResultMiniThumbUrl(#event)"/>"></td>
 							<td><a href="<s:property value="#search.getResultLocalizationUrl(#event)"/>"><s:property value="#search.getResultLocalizationName(#event)" /></a></td>
-							<td><a href="<s:property value="#urlService.getOverviewUrl('mainContent',#event)"/>"><s:property value="#event.name" /></a></td>
+							<td><a href="<s:property value="getSeriesUrl(#event)"/>"><s:property value="#event.name" /></a></td>
 							<td class="center"><s:property value="#event.calendarType.name()" /></td>
 							<td class="center"><s:if test="#event.online"><img class="admin-icon" src="/images/V3/check.png"></s:if><s:else><img class="admin-icon" src="/images/V3/delete.png"></s:else></td>
 							<td class="center"><s:property value="getHours(#event)" /></td>

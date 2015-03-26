@@ -9,13 +9,13 @@ import javax.persistence.Table;
 import com.videopolis.calm.model.ItemKey;
 
 @Entity
-@IdClass(value = ItemEventPK.class)
+@IdClass(value = ItemEventSeriesPK.class)
 @Table(name = "EVENTS_SERIES_ITEMS")
 public class ItemEventSeriesImpl {
 
 	@Id
-	@Column(name = "ESERIE_ID", nullable = false)
-	private long itemId;
+	@Column(name = "ESERIE_OCCURRENCE_KEY", nullable = false)
+	private String seriesOccurrenceKey;
 
 	@Id
 	@Column(name = "ITEM_KEY", nullable = false)
@@ -25,12 +25,12 @@ public class ItemEventSeriesImpl {
 	}
 
 	public ItemEventSeriesImpl(ItemKey externalItemKey, ItemKey eventKey) {
-		this.itemId = eventKey.getNumericId();
+		this.seriesOccurrenceKey = eventKey.toString();
 		this.externalItemKey = externalItemKey.toString();
 	}
 
-	public long getItemId() {
-		return itemId;
+	public String getSeriesOccurenceKey() {
+		return seriesOccurrenceKey;
 	}
 
 	public String getExternalItemKey() {

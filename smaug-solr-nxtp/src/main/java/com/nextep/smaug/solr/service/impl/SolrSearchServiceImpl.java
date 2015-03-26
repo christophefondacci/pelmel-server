@@ -25,6 +25,7 @@ import org.apache.solr.client.solrj.response.FieldStatsInfo;
 import org.apache.solr.client.solrj.response.QueryResponse;
 
 import com.nextep.activities.model.Activity;
+import com.nextep.cal.util.helpers.CalHelper;
 import com.nextep.events.model.Event;
 import com.nextep.events.model.EventSeries;
 import com.nextep.geo.model.Admin;
@@ -165,16 +166,17 @@ public class SolrSearchServiceImpl implements SearchService {
 		final SolrQuery query = queryBuilder.buildQuery(settings, window);
 		// Building the query string
 		final StringBuilder buf = new StringBuilder();
+		final String keyType = CalHelper.getKeyType(parent);
 		if (parent == null) {
 			buf.append("cityId:*");
-		} else if (City.CAL_ID.equals(parent.getType())) {
+		} else if (City.CAL_ID.equals(keyType)) {
 			buf.append("cityId:" + parent.toString());
-		} else if (Admin.CAL_ID.equals(parent.getType())) {
+		} else if (Admin.CAL_ID.equals(keyType)) {
 			buf.append("(adm1:" + parent.toString() + " OR adm2:"
 					+ parent.toString() + ")");
-		} else if (Country.CAL_ID.equals(parent.getType())) {
+		} else if (Country.CAL_ID.equals(keyType)) {
 			buf.append("countryId:" + parent.toString());
-		} else if (Place.CAL_TYPE.equals(parent.getType())) {
+		} else if (Place.CAL_TYPE.equals(keyType)) {
 			switch (settings.getSearchScope()) {
 			case NEARBY_BLOCK:
 				// Nearby block is the scope for search of users IN a place
@@ -185,10 +187,10 @@ public class SolrSearchServiceImpl implements SearchService {
 			default:
 				buf.append("places:" + parent.toString());
 			}
-		} else if (Event.CAL_ID.equals(parent.getType())
-				|| EventSeries.SERIES_CAL_ID.equals(parent.getType())) {
+		} else if (Event.CAL_ID.equals(keyType)
+				|| EventSeries.SERIES_CAL_ID.equals(keyType)) {
 			buf.append("events:" + parent.toString());
-		} else if (User.CAL_TYPE.equals(parent.getType())
+		} else if (User.CAL_TYPE.equals(keyType)
 				&& User.CAL_TYPE.equals(settings.getReturnedType())) {
 			buf.append("users:" + parent.toString());
 		} else {

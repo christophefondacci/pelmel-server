@@ -6,20 +6,25 @@ import java.util.List;
 
 import net.sf.json.JSONObject;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
 import com.nextep.activities.model.Activity;
 import com.nextep.activities.model.ActivityRequestTypes;
 import com.nextep.activities.model.ActivityType;
 import com.nextep.activities.model.MutableActivity;
 import com.nextep.cal.util.services.CalPersistenceService;
+import com.nextep.events.model.EventSeries;
 import com.nextep.json.model.impl.JsonLikeInfo;
 import com.nextep.messages.model.MutableMessage;
 import com.nextep.proto.action.base.AbstractAction;
 import com.nextep.proto.action.model.CurrentUserAware;
 import com.nextep.proto.action.model.JsonProvider;
 import com.nextep.proto.action.model.OverviewAware;
+import com.nextep.proto.apis.adapters.ApisExpirableLikesCustomAdapter;
 import com.nextep.proto.blocks.CurrentUserSupport;
 import com.nextep.proto.blocks.OverviewSupport;
 import com.nextep.proto.model.Constants;
+import com.nextep.proto.services.EventManagementService;
 import com.nextep.proto.spring.ContextHolder;
 import com.nextep.smaug.service.SearchPersistenceService;
 import com.nextep.smaug.solr.model.LikeActionResult;
@@ -33,6 +38,7 @@ import com.videopolis.apis.service.ApiCompositeResponse;
 import com.videopolis.calm.factory.CalmFactory;
 import com.videopolis.calm.model.CalmObject;
 import com.videopolis.calm.model.ItemKey;
+import com.videopolis.calm.model.impl.ExpirableItemKeyImpl;
 import com.videopolis.cals.factory.ContextFactory;
 import com.videopolis.cals.model.PaginationInfo;
 import com.videopolis.cals.service.CalService;
@@ -48,11 +54,13 @@ public class ILikeAction extends AbstractAction implements CurrentUserAware,
 	private static final String APIS_ALIAS_LIKED_KEY = "liked";
 	private static final String APIS_ALIAS_LIKE_COUNT = "count";
 	private static final String APIS_ALIAS_USER_LIKERS = "likers";
+	private static final String APIS_ALIAS_USER_EXPIRABLE_LIKERS = "expLikers";
 	private static final String APIS_ALIAS_LIKED_OBJ = "likedObj";
 	private SearchPersistenceService searchPersistenceService;
 	private CalPersistenceService messageService;
 	private CalPersistenceService activitiesService;
-
+	@Autowired
+	private EventManagementService eventManagementService;
 	private CurrentUserSupport currentUserSupport;
 	private OverviewSupport overviewSupport;
 	private LikeActionResult likeResult;
@@ -86,7 +94,15 @@ public class ILikeAction extends AbstractAction implements CurrentUserAware,
 												User.class,
 												SearchScope.CHILDREN, 1, 0)
 												.aliasedBy(
-														APIS_ALIAS_USER_LIKERS)));
+														APIS_ALIAS_USER_LIKERS))
+								.addCriterion(
+										SearchRestriction
+												.customAdapt(
+														new ApisExpirableLikesCustomAdapter(
+																eventManagementService,
+																APIS_ALIAS_USER_EXPIRABLE_LIKERS,
+																1, 0),
+														APIS_ALIAS_USER_EXPIRABLE_LIKERS)));
 		final ApiCompositeResponse userResponse = (ApiCompositeResponse) getApiService()
 				.execute(userRequest, ContextFactory.createContext(getLocale()));
 		final User currentUser = userResponse.getUniqueElement(User.class,
@@ -99,18 +115,25 @@ public class ILikeAction extends AbstractAction implements CurrentUserAware,
 		ContextHolder.toggleWrite();
 		final CalService calService = ApisRegistry.getCalService(likedKey
 				.getType());
+
+		// We load user to update search information
+		final ItemKey searchLikeKey = computeSearchLikeKey(likedItem);
+
 		if (calService instanceof CalPersistenceService) {
 			((CalPersistenceService) calService).setItemFor(
-					currentUser.getKey(), likedKey);
+					currentUser.getKey(), searchLikeKey);
 		}
 
 		ContextHolder.toggleWrite();
 
-		// We load user to update search information
 		likeResult = searchPersistenceService.toggleLike(currentUser.getKey(),
-				likedKey);
-		final PaginationInfo likePaginationInfo = userResponse
-				.getPaginationInfo(APIS_ALIAS_USER_LIKERS);
+				searchLikeKey);
+		PaginationInfo likePaginationInfo = userResponse
+				.getPaginationInfo(APIS_ALIAS_USER_EXPIRABLE_LIKERS);
+		if (likePaginationInfo == null) {
+			likePaginationInfo = userResponse
+					.getPaginationInfo(APIS_ALIAS_USER_LIKERS);
+		}
 		likes = likePaginationInfo.getItemCount();
 		if (likeResult.wasLiked()) {
 			likes++;
@@ -178,6 +201,23 @@ public class ILikeAction extends AbstractAction implements CurrentUserAware,
 		overviewSupport.initialize(getUrlService(), getLocale(), likedItem,
 				paginationInfo.getItemCount(), 0, currentUser);
 		return SUCCESS;
+	}
+
+	/**
+	 * Only here to handle occurrences of an event series
+	 * 
+	 * @param likedItem
+	 *            the {@link CalmObject} being liked / unliked
+	 * @return the {@link ItemKey} to store in the search system as the like key
+	 */
+	private ItemKey computeSearchLikeKey(CalmObject likedItem) {
+		if (likedItem instanceof EventSeries) {
+			final EventSeries series = (EventSeries) likedItem;
+			final Date nextEnd = eventManagementService.computeNextStart(
+					series, new Date(), false);
+			return new ExpirableItemKeyImpl(series.getKey(), nextEnd.getTime());
+		}
+		return likedItem.getKey();
 	}
 
 	public void setSearchPersistenceService(

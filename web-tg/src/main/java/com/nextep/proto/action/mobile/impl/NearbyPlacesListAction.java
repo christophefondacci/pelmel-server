@@ -284,16 +284,18 @@ public class NearbyPlacesListAction extends AbstractAction implements
 					// .addCriterion(activitiesCrit)
 					.addCriterion(usersCrit));
 		}
-		request.addCriterion(
+		request
+		// .addCriterion(
+		// SearchRestriction.searchForAllFacets(User.class,
+		// SearchScope.USER_LOCALIZATION).facettedBy(
+		// Arrays.asList(SearchHelper
+		// .getUserCurrentPlaceCategory())))
+		.addCriterion(
 				SearchRestriction.searchForAllFacets(User.class,
-						SearchScope.USER_LOCALIZATION).facettedBy(
-						Arrays.asList(SearchHelper
-								.getUserCurrentPlaceCategory())))
-				.addCriterion(
-						SearchRestriction.searchForAllFacets(User.class,
-								SearchScope.CHILDREN).facettedBy(
-								Arrays.asList(SearchHelper
-										.getUserPlacesCategory())))
+						SearchScope.CHILDREN).facettedBy(
+						Arrays.asList(SearchHelper.getUserPlacesCategory(),
+								SearchHelper.getUserCurrentPlaceCategory(),
+								SearchHelper.getUserEventsCategory())))
 				.addCriterion(
 						SearchRestriction.searchForAllFacets(User.class,
 								SearchScope.EVENTS).facettedBy(
@@ -320,11 +322,11 @@ public class NearbyPlacesListAction extends AbstractAction implements
 		checkCurrentUser(user);
 
 		// Extracting facets
-		final FacetInformation currentPlaceFacetInfo = response
-				.getFacetInformation(SearchScope.USER_LOCALIZATION);
+		final FacetInformation facetInfo = response
+				.getFacetInformation(SearchScope.CHILDREN);
 		// Hashing current user places by place key
 		Map<String, Integer> currentPlacesMap = new HashMap<String, Integer>();
-		final List<FacetCount> currentPlaceCounts = currentPlaceFacetInfo
+		final List<FacetCount> currentPlaceCounts = facetInfo
 				.getFacetCounts(SearchHelper.getUserCurrentPlaceCategory());
 		for (FacetCount c : currentPlaceCounts) {
 			int count = c.getCount();
@@ -347,10 +349,13 @@ public class NearbyPlacesListAction extends AbstractAction implements
 		}
 
 		// Hashing liked user places by place key
-		final FacetInformation facetInfo = response
-				.getFacetInformation(SearchScope.CHILDREN);
+		// final FacetInformation facetInfo = response
+		// .getFacetInformation(SearchScope.CHILDREN);
 		Map<String, Integer> likedPlacesMap = SearchHelper.unwrapFacets(
 				facetInfo, SearchHelper.getUserPlacesCategory());
+
+		Map<String, Integer> eventsUsersMap = SearchHelper.unwrapFacets(
+				facetInfo, SearchHelper.getUserEventsCategory());
 
 		List<? extends Place> places;
 		List<? extends Event> events;
@@ -399,7 +404,8 @@ public class NearbyPlacesListAction extends AbstractAction implements
 			final Place place = (Place) o;
 
 			final JsonPlace p = jsonBuilder.buildJsonPlace(place, highRes,
-					getLocale(), likedPlacesMap, currentPlacesMap);
+					getLocale(), likedPlacesMap, currentPlacesMap,
+					eventsUsersMap);
 
 			// Distance management
 			final SearchStatistic distanceStat = response.getStatistic(
