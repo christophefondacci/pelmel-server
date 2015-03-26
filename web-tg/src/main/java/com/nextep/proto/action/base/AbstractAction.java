@@ -7,6 +7,8 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import net.sf.json.JSONObject;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpStatus;
@@ -14,8 +16,11 @@ import org.apache.struts2.ServletActionContext;
 import org.springframework.context.MessageSource;
 
 import com.nextep.cal.util.services.CalPersistenceService;
+import com.nextep.json.model.impl.JsonStatus;
 import com.nextep.proto.action.model.AdBannerAware;
 import com.nextep.proto.action.model.HeaderAware;
+import com.nextep.proto.action.model.JsonProvider;
+import com.nextep.proto.action.model.JsonProviderWithError;
 import com.nextep.proto.action.model.LoginAware;
 import com.nextep.proto.blocks.AdBannerSupport;
 import com.nextep.proto.blocks.HeaderSearchSupport;
@@ -488,4 +493,37 @@ public abstract class AbstractAction extends ActionSupport implements
 	public String getRedirectUrl() {
 		return redirectUrl;
 	}
+
+	public String getSafeJson() {
+		try {
+			return ((JsonProvider) this).getJson();
+		} catch (Throwable e) {
+			final HttpServletResponse response = ServletActionContext
+					.getResponse();
+			response.setStatus(HttpStatus.SC_INTERNAL_SERVER_ERROR);
+			final JsonStatus status = new JsonStatus();
+			status.setError(true);
+			status.setMessage(e.getMessage());
+			LOGGER.error("Error while generating JSON: " + e.getMessage(), e);
+			return JSONObject.fromObject(status).toString();
+		}
+	}
+
+	public String getSafeJsonError() {
+		try {
+			return ((JsonProviderWithError) this).getJsonError();
+		} catch (Throwable e) {
+			final HttpServletResponse response = ServletActionContext
+					.getResponse();
+			response.setStatus(HttpStatus.SC_INTERNAL_SERVER_ERROR);
+			final JsonStatus status = new JsonStatus();
+			status.setError(true);
+			status.setMessage(e.getMessage());
+			LOGGER.error(
+					"Error while generating error message JSON: "
+							+ e.getMessage(), e);
+			return JSONObject.fromObject(status).toString();
+		}
+	}
+
 }

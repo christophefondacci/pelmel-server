@@ -365,7 +365,7 @@ public class MobileOverviewAction extends AbstractAction implements
 		final long oldestCheckinTime = System.currentTimeMillis() - checkinTime;
 		if (Place.CAL_TYPE.equals(overviewObject.getKey().getType())) {
 			JsonOverviewElement jsonElement = jsonBuilder.buildJsonOverview(
-					getLocale(), overviewObject);
+					getLocale(), overviewObject, highRes);
 			json = jsonElement;
 			// Filling like and nearby facetting
 			final FacetInformation likesFacetInfo = response
@@ -542,6 +542,7 @@ public class MobileOverviewAction extends AbstractAction implements
 			int unreadMessagesCount = currentUser.get(Message.class).size();
 			json.setUnreadMsgCount(unreadMessagesCount);
 
+			// Filling the "liked" flag
 			if (getNxtpUserToken() != null) {
 				final List<? extends CalmObject> likedObjects = currentUserSupport
 						.getCurrentUser().get(CalmObject.class,

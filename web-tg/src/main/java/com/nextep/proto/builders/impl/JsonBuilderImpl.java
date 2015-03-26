@@ -81,7 +81,8 @@ public class JsonBuilderImpl implements JsonBuilder {
 	}
 
 	@Override
-	public JsonOverviewElement buildJsonOverview(Locale l, CalmObject o) {
+	public JsonOverviewElement buildJsonOverview(Locale l, CalmObject o,
+			boolean highRes) {
 		final JsonOverviewElement elt = new JsonOverviewElement(o.getKey()
 				.toString());
 		elt.setName(DisplayHelper.getName(o));
@@ -109,6 +110,22 @@ public class JsonBuilderImpl implements JsonBuilder {
 		final List<? extends Tag> tags = o.get(Tag.class);
 		for (Tag t : tags) {
 			elt.addTag(t.getCode());
+		}
+
+		// Image & thumb (TODO: need to factorize this with events and
+		// users)
+		final Media m = MediaHelper.getSingleMedia(o);
+		if (m != null) {
+			final JsonMedia jsonMedia = buildJsonMedia(m, highRes);
+			if (jsonMedia != null) {
+				elt.setThumb(jsonMedia);
+			}
+		}
+		for (Media media : o.get(Media.class)) {
+			if (media != m) {
+				final JsonMedia jsonMedia = buildJsonMedia(media, highRes);
+				elt.addOtherImage(jsonMedia);
+			}
 		}
 
 		return elt;

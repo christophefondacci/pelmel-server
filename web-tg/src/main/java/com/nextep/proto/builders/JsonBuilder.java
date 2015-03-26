@@ -48,7 +48,8 @@ public interface JsonBuilder {
 	 *            the {@link CalmObject} of the object of the overview
 	 * @return the JSON bean as a {@link JsonOverviewElement}
 	 */
-	JsonOverviewElement buildJsonOverview(Locale l, CalmObject o);
+	JsonOverviewElement buildJsonOverview(Locale l, CalmObject o,
+			boolean highRes);
 
 	/**
 	 * Builds a JSON media bean from a CAL media bean

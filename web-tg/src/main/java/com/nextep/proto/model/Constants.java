@@ -93,5 +93,7 @@ public interface Constants {
 	int REPORT_TYPE_NOTGAY = 4;
 	int REPORT_TYPE_REMOVAL_REQUESTED = 5;
 
+	public static final String APIS_ALIAS_NEARBY_PLACES = "nearbyPlaces";
+
 	public static final String APIS_ALIAS_PLACE = "place";
 }

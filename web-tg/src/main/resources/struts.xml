@@ -683,4 +683,16 @@
 			<interceptor-ref name="default" />
 		</action>
 	</package>
+	<package name="api" extends="struts-default" namespace="/api">
+		<global-results>
+			<result name="success">/jsp/pages/json.jsp</result>
+			<result name="input">/jsp/pages/json.jsp</result>
+			<result name="error">/jsp/pages/json-error.jsp</result>
+			<result name="notfound">/jsp/pages/json-error.jsp</result>
+			<result name="301">/jsp/pages/json-error.jsp</result>
+		</global-results>
+		<action name="place" class="mobileOverviewPlaceAction"/>
+		<action name="user" class="mobileOverviewUserAction"/>
+		<action name="event" class="mobileOverviewEventAction"/>
+	</package>
 </struts>

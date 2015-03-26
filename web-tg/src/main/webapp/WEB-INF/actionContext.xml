@@ -125,6 +125,45 @@
 		<property name="localizationService" ref="localizationService"/>
 		<property name="viewManagementService" ref="viewManagementService"/>
 	</bean>
+	<bean id="mobileOverviewPlaceAction" class="com.nextep.proto.action.mobile.impl.MobileOverviewPlaceAction" parent="abstractMobileAction" scope="request">
+		<property name="currentUserSupport" ref="currentUserSupport"/>
+		<property name="urlService" ref="mobileUrlService"/>
+		<property name="jsonBuilder" ref="jsonBuilder"/>
+		<property name="maxRelatedElements">
+			<jee:jndi-lookup jndi-name="java:comp/env/maxMobileLikes"/>
+		</property>
+		<property name="radius">
+			<jee:jndi-lookup jndi-name="java:comp/env/mobile/nearbyPlacesRadius"></jee:jndi-lookup>
+		</property>
+		<property name="localizationService" ref="localizationService"/>
+		<property name="viewManagementService" ref="viewManagementService"/>
+	</bean>
+	<bean id="mobileOverviewUserAction" class="com.nextep.proto.action.mobile.impl.MobileOverviewUserAction" parent="abstractMobileAction" scope="request">
+		<property name="currentUserSupport" ref="currentUserSupport"/>
+		<property name="urlService" ref="mobileUrlService"/>
+		<property name="jsonBuilder" ref="jsonBuilder"/>
+		<property name="maxRelatedElements">
+			<jee:jndi-lookup jndi-name="java:comp/env/maxMobileLikes"/>
+		</property>
+		<property name="radius">
+			<jee:jndi-lookup jndi-name="java:comp/env/mobile/nearbyPlacesRadius"></jee:jndi-lookup>
+		</property>
+		<property name="localizationService" ref="localizationService"/>
+		<property name="viewManagementService" ref="viewManagementService"/>
+	</bean>
+	<bean id="mobileOverviewEventAction" class="com.nextep.proto.action.mobile.impl.MobileOverviewEventAction" parent="abstractMobileAction" scope="request">
+		<property name="currentUserSupport" ref="currentUserSupport"/>
+		<property name="urlService" ref="mobileUrlService"/>
+		<property name="jsonBuilder" ref="jsonBuilder"/>
+		<property name="maxRelatedElements">
+			<jee:jndi-lookup jndi-name="java:comp/env/maxMobileLikes"/>
+		</property>
+		<property name="radius">
+			<jee:jndi-lookup jndi-name="java:comp/env/mobile/nearbyPlacesRadius"></jee:jndi-lookup>
+		</property>
+		<property name="localizationService" ref="localizationService"/>
+		<property name="viewManagementService" ref="viewManagementService"/>
+	</bean>
 	<bean id="eventUpdateAction" class="com.nextep.proto.action.impl.EventUpdateAction" parent="abstractAction" scope="request">
 		<property name="eventService" ref="eventsService"/>
 		<property name="eventSeriesService" ref="eventSeriesService"/>
