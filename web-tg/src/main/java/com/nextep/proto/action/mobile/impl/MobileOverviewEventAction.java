@@ -224,14 +224,17 @@ public class MobileOverviewEventAction extends AbstractAction implements
 				.getPaginationInfo(APIS_ALIAS_USER_LIKERS);
 		jsonEvent.setLikes(likePagination.getItemCount());
 		jsonEvent.setParticipants(likePagination.getItemCount());
-
-		try {
-			likesUsers = response.getElements(User.class,
-					APIS_ALIAS_USER_LIKERS);
-		} catch (ApisException e) {
-			likesUsers = Collections.emptyList();
-			LOGGER.error("Unable to get LIKERS of EventSeries '"
-					+ overviewObject.getKey() + "': " + e.getMessage(), e);
+		if (EventSeries.SERIES_CAL_ID.equals(overviewObject.getKey().getType())) {
+			try {
+				likesUsers = response.getElements(User.class,
+						APIS_ALIAS_USER_LIKERS);
+			} catch (ApisException e) {
+				likesUsers = Collections.emptyList();
+				LOGGER.error("Unable to get LIKERS of EventSeries '"
+						+ overviewObject.getKey() + "': " + e.getMessage(), e);
+			}
+		} else {
+			likesUsers = overviewObject.get(User.class, APIS_ALIAS_USER_LIKERS);
 		}
 		for (User user : likesUsers) {
 			final JsonLightUser jsonUser = jsonBuilder.buildJsonLightUser(user,
