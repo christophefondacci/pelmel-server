@@ -284,18 +284,16 @@ public class NearbyPlacesListAction extends AbstractAction implements
 					// .addCriterion(activitiesCrit)
 					.addCriterion(usersCrit));
 		}
-		request
-		// .addCriterion(
-		// SearchRestriction.searchForAllFacets(User.class,
-		// SearchScope.USER_LOCALIZATION).facettedBy(
-		// Arrays.asList(SearchHelper
-		// .getUserCurrentPlaceCategory())))
-		.addCriterion(
+		request.addCriterion(
 				SearchRestriction.searchForAllFacets(User.class,
-						SearchScope.CHILDREN).facettedBy(
-						Arrays.asList(SearchHelper.getUserPlacesCategory(),
-								SearchHelper.getUserCurrentPlaceCategory(),
-								SearchHelper.getUserEventsCategory())))
+						SearchScope.USER_LOCALIZATION).facettedBy(
+						Arrays.asList(SearchHelper
+								.getUserCurrentPlaceCategory())))
+				.addCriterion(
+						SearchRestriction.searchForAllFacets(User.class,
+								SearchScope.CHILDREN).facettedBy(
+								Arrays.asList(SearchHelper
+										.getUserPlacesCategory())))
 				.addCriterion(
 						SearchRestriction.searchForAllFacets(User.class,
 								SearchScope.EVENTS).facettedBy(
@@ -322,35 +320,21 @@ public class NearbyPlacesListAction extends AbstractAction implements
 		checkCurrentUser(user);
 
 		// Extracting facets
-		final FacetInformation facetInfo = response
-				.getFacetInformation(SearchScope.CHILDREN);
+		final FacetInformation currentPlaceFacetInfo = response
+				.getFacetInformation(SearchScope.USER_LOCALIZATION);
 		// Hashing current user places by place key
 		Map<String, Integer> currentPlacesMap = new HashMap<String, Integer>();
-		final List<FacetCount> currentPlaceCounts = facetInfo
+		final List<FacetCount> currentPlaceCounts = currentPlaceFacetInfo
 				.getFacetCounts(SearchHelper.getUserCurrentPlaceCategory());
 		for (FacetCount c : currentPlaceCounts) {
 			int count = c.getCount();
-			// // We never count the current user in the number of persons in a
-			// // place so we substract 1 when we fall on the place where the
-			// // current user is located
-			// if (user != null && user.getLastLocationKey() != null) {
-			// if (user.getLastLocationTime() != null
-			// && user.getLastLocationKey().toString()
-			// .equals(c.getFacet().getFacetCode())) {
-			// long timeoutTime = user.getLastLocationTime().getTime()
-			// + lastSeenMaxTime;
-			// if (timeoutTime > System.currentTimeMillis()) {
-			// count--;
-			// }
-			// }
-			// }
-			//
+
 			currentPlacesMap.put(c.getFacet().getFacetCode(), count);
 		}
 
 		// Hashing liked user places by place key
-		// final FacetInformation facetInfo = response
-		// .getFacetInformation(SearchScope.CHILDREN);
+		final FacetInformation facetInfo = response
+				.getFacetInformation(SearchScope.CHILDREN);
 		Map<String, Integer> likedPlacesMap = SearchHelper.unwrapFacets(
 				facetInfo, SearchHelper.getUserPlacesCategory());
 
