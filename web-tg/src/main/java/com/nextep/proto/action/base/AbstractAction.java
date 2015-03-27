@@ -511,7 +511,18 @@ public abstract class AbstractAction extends ActionSupport implements
 
 	public String getSafeJsonError() {
 		try {
-			return ((JsonProviderWithError) this).getJsonError();
+			if (this instanceof JsonProviderWithError) {
+				return ((JsonProviderWithError) this).getJsonError();
+			} else {
+				final JsonStatus status = new JsonStatus();
+				status.setError(true);
+				status.setMessage(lastException != null ? lastException
+						.getMessage() : "[No exception caught]");
+				LOGGER.error("Error catched by safeJsonError: "
+						+ (lastException != null ? lastException.getMessage()
+								: "[No exception caught]"), lastException);
+				return JSONObject.fromObject(status).toString();
+			}
 		} catch (Throwable e) {
 			final HttpServletResponse response = ServletActionContext
 					.getResponse();

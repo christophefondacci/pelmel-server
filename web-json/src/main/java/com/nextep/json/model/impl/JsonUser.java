@@ -25,6 +25,7 @@ public class JsonUser extends JsonLiker {
 	private int likedPlacesCount;
 	private List<JsonLightPlace> checkedInPlaces = new ArrayList<JsonLightPlace>();
 	private List<IJsonLightEvent> events = new ArrayList<IJsonLightEvent>();
+	private List<JsonHour> recurringEvents = new ArrayList<JsonHour>();
 	private int checkedInPlacesCount;
 	private JsonLightPlace lastLocation;
 	private Long lastLocationTime;
@@ -204,5 +205,17 @@ public class JsonUser extends JsonLiker {
 
 	public void addEvent(IJsonLightEvent event) {
 		events.add(event);
+	}
+
+	public void setRecurringEvents(List<JsonHour> recurringEvents) {
+		this.recurringEvents = recurringEvents;
+	}
+
+	public List<JsonHour> getRecurringEvents() {
+		return recurringEvents;
+	}
+
+	public void addRecurringEvent(JsonHour recurringEvent) {
+		this.recurringEvents.add(recurringEvent);
 	}
 }

@@ -18,6 +18,7 @@ public class JsonEvent extends JsonLiker implements IJsonLightEvent {
 	private double rawDistance;
 	private String description;
 	private int participants;
+	private String calendarType;
 	private int commentsCount;
 
 	@Override
@@ -124,5 +125,15 @@ public class JsonEvent extends JsonLiker implements IJsonLightEvent {
 	@Override
 	public int getParticipants() {
 		return participants;
+	}
+
+	@Override
+	public void setCalendarType(String calendarType) {
+		this.calendarType = calendarType;
+	}
+
+	@Override
+	public String getCalendarType() {
+		return calendarType;
 	}
 }

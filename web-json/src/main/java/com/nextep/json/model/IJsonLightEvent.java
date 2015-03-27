@@ -39,4 +39,8 @@ public interface IJsonLightEvent extends IJsonWithParticipants {
 	double getRawDistance();
 
 	void setRawDistance(double rawDistance);
+
+	String getCalendarType();
+
+	void setCalendarType(String calendarType);
 }

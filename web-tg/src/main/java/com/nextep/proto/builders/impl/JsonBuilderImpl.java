@@ -509,6 +509,7 @@ public class JsonBuilderImpl implements JsonBuilder {
 							series, timezoneId, false);
 					e.setStartTime(nextStart);
 					e.setEndTime(nextEnd);
+					e.setCalendarType(series.getCalendarType().name());
 				}
 			}
 		} catch (CalException ex) {

@@ -17,6 +17,7 @@ public class JsonLightEvent implements IJsonLightEvent {
 	private String distance;
 	private double rawDistance;
 	private int participants = 0;
+	private String calendarType;
 
 	@Override
 	public String getKey() {
@@ -108,4 +109,13 @@ public class JsonLightEvent implements IJsonLightEvent {
 		return participants;
 	}
 
+	@Override
+	public void setCalendarType(String calendarType) {
+		this.calendarType = calendarType;
+	}
+
+	@Override
+	public String getCalendarType() {
+		return calendarType;
+	}
 }
