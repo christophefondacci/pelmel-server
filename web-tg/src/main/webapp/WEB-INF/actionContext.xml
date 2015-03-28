@@ -410,6 +410,10 @@
 		<property name="activitiesService" ref="activitiesService"/>
 		<property name="urlService" ref="urlService"/>
 	</bean>
+	<bean id="mobileRegisterToken" class="com.nextep.proto.action.mobile.impl.MobileRegisterToken"  scope="request"  parent="abstractMobileAction" >
+		<property name="urlService" ref="urlService"/>
+		<property name="headerSupport" ref="myProfileHeaderSupport"/>
+	</bean>
 	<bean id="mobileUserLoginAction" class="com.nextep.proto.action.impl.UserLoginAction"  scope="request"  parent="abstractMobileAction" >
 		<property name="usersService" ref="mobileUsersService"/>
 		<property name="searchService" ref="searchPersistenceService"/>

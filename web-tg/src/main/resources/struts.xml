@@ -550,6 +550,11 @@
 			<result name="input">/jsp/pages/json.jsp</result>
 			<result name="error">/jsp/pages/json.jsp</result>
 		</action>
+		<action name="mobileRegisterToken" class="mobileRegisterToken">
+			<result>/jsp/pages/json.jsp</result>
+			<result name="input">/jsp/pages/json-error.jsp</result>
+			<result name="error">/jsp/pages/json-error.jsp</result>
+		</action>
 		<action name="mobileReport" class="mobileReportingAction">
 			<result>/jsp/pages/json.jsp</result>
 			<result name="redirect" type="redirectAction">
@@ -623,6 +628,7 @@
 			<result name="error" type="tiles">error</result>
 			<interceptor-ref name="default"></interceptor-ref>
 		</action>
+		
 	</package>
 	<package name="tools" extends="myPackage" namespace="/tools">
 		<action name="processPushFeedbacks" class="processPushFeedbackAction">
