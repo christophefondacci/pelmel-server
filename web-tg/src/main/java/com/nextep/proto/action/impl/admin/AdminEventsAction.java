@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 import com.nextep.events.model.Event;
+import com.nextep.events.model.EventRequestTypes;
 import com.nextep.geo.model.Place;
 import com.nextep.media.model.Media;
 import com.nextep.proto.action.base.AbstractAction;
@@ -68,6 +69,7 @@ public class AdminEventsAction extends AbstractAction implements MediaAware,
 	// Dynamic arguments
 	private int page = 0;
 	private int pageSize = 30;
+	private boolean allEvents = true;
 
 	// Internal
 	private List<? extends Event> events;
@@ -80,7 +82,9 @@ public class AdminEventsAction extends AbstractAction implements MediaAware,
 				.createCompositeRequest()
 				.addCriterion(
 						(ApisCriterion) SearchRestriction
-								.list(Event.class, null)
+								.list(Event.class,
+										allEvents ? EventRequestTypes.ALL_EVENTS
+												: null)
 								.paginatedBy(pageSize, page)
 								.aliasedBy(APIS_ALIAS_EVENTS)
 								.with(Media.class)
@@ -199,4 +203,11 @@ public class AdminEventsAction extends AbstractAction implements MediaAware,
 		return paginationSupport;
 	}
 
+	public void setAllEvents(boolean allEvents) {
+		this.allEvents = allEvents;
+	}
+
+	public boolean isAllEvents() {
+		return allEvents;
+	}
 }

@@ -266,6 +266,10 @@ public class EventUpdateAction extends AbstractAction implements
 			event.setEndDate(localizedEnd);
 			eventEndDate = localizedEnd;
 		}
+
+		// Registering event city in event to enable dates auto-localization
+		// features
+		event.add(eventCity);
 		// Now setting any event series specific information
 		if (event instanceof EventSeries) {
 			// Saving old values

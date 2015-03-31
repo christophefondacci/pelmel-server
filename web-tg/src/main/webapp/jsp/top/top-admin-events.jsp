@@ -9,6 +9,17 @@
 		<s:set value="2" var="activeTab"/>
 		<tiles:insertTemplate template="/jsp/top/top-admin-tabs.jsp"></tiles:insertTemplate>
 		<div class="tab-content">
+			<form action="<s:property value="url"/>" method="get" class="form-inline append-bottom prepend-top">
+				<div class="form-group">
+					<label for="allEvents">Filter</label>
+					<select class="form-control" id="allEvents" name="allEvents">
+						<option value="true" <s:property value="allEvents ? 'selected' : ''"/>>All events</option>
+						<option value="false" <s:property value="!allEvents ? 'selected' : ''"/>>Upcoming only</option>
+					</select>
+				</div>
+				<button class="btn btn-primary">Refresh</button>
+			</form>
+		
 			<s:set value="searchSupport" var="search" />
 			<s:set value="urlService" var="urlService" />
 			<s:set value="paginationSupport" var="paginationSupport" />
@@ -18,10 +29,10 @@
 					<tr>
 						<th>Thumb</th>
 						<th>Name</th>
-						<th class="center">Start</th>
+						<th class="center">Start <s:if test="!allEvents"><i class="fa fa-fw fa-sort-desc"></i></s:if></th>
 						<th>Place</th>
 						<th>Online</th>
-						<th class="center">Updated<i class="fa fa-fw fa-sort-desc"></i></th>
+						<th class="center">Updated<s:if test="allEvents"><i class="fa fa-fw fa-sort-desc"></i></s:if></th>
 						<th class="center">Author</th>
 						<th class="center">Edit</th><th class="center">Del</th>
 					</tr>
