@@ -99,7 +99,7 @@ public class EventsDaoImpl implements EventsDao {
 			int pageOffset) {
 		return entityManager
 				.createQuery(
-						"from EventImpl where placeKey=:placeKey and startDate > CURRENT_TIMESTAMP and isOnline=true order by startDate")
+						"from EventImpl where placeKey=:placeKey and endDate > CURRENT_TIMESTAMP and isOnline=true order by startDate")
 				.setParameter("placeKey", key.toString())
 				.setFirstResult(pageOffset * resultsPerPage)
 				.setMaxResults(resultsPerPage).getResultList();
@@ -129,7 +129,7 @@ public class EventsDaoImpl implements EventsDao {
 		buf.append("select itemEvent from ItemEventImpl as itemEvent, EventImpl as event "
 				+ "where itemEvent.externalItemKey=:extId and event.id=itemEvent.itemId ");
 		if (futureEventsOnly) {
-			buf.append("and event.startDate > CURRENT_TIMESTAMP ");
+			buf.append("and event.endDate > CURRENT_TIMESTAMP ");
 		}
 		buf.append("order by event.startDate");
 		return entityManager.createQuery(buf.toString())
