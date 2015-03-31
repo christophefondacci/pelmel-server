@@ -10,6 +10,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 
+import javax.annotation.Resource;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -77,6 +79,9 @@ public class JsonBuilderImpl implements JsonBuilder {
 	private DistanceDisplayService distanceDisplayService;
 	private EventManagementService eventManagementService;
 	private String baseUrl;
+
+	@Resource(mappedName = "smaug/lastSeenMaxTime")
+	private Long checkinTime;
 
 	private JsonBuilderImpl() {
 	}
@@ -282,13 +287,18 @@ public class JsonBuilderImpl implements JsonBuilder {
 				if (lastLocation != null) {
 					final Date lastLocationTime = user.getLastLocationTime();
 
-					// Converting to JSON place
-					final JsonLightPlace jsonUserPlace = buildJsonLightPlace(
-							lastLocation, highRes, l);
+					// Only filling this information if checkin time is not
+					// expired
+					if ((System.currentTimeMillis() - lastLocationTime
+							.getTime()) < checkinTime) {
+						// Converting to JSON place
+						final JsonLightPlace jsonUserPlace = buildJsonLightPlace(
+								lastLocation, highRes, l);
 
-					// Injecting into JSON user bean
-					json.setLastLocation(jsonUserPlace);
-					json.setLastLocationTimeValue(lastLocationTime);
+						// Injecting into JSON user bean
+						json.setLastLocation(jsonUserPlace);
+						json.setLastLocationTimeValue(lastLocationTime);
+					}
 				}
 			} catch (CalException e) {
 				LOGGER.error(
@@ -332,7 +342,6 @@ public class JsonBuilderImpl implements JsonBuilder {
 				jsonUser.setThumb(jsonMedia);
 			}
 		}
-		jsonUser.setLastLocationTimeValue(user.getLastLocationTime());
 		jsonUser.setOnline(user.getOnlineTimeout().getTime() > System
 				.currentTimeMillis());
 		return jsonUser;
