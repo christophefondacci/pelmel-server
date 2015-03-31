@@ -2,9 +2,12 @@ package com.nextep.proto.services.impl;
 
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.Future;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.AsyncResult;
 
 import com.nextep.activities.model.ActivityType;
 import com.nextep.activities.model.MutableActivity;
@@ -37,35 +40,44 @@ public class LocalizationServiceImpl implements LocalizationService {
 	private double localizationDistance;
 	private long lastSeenMaxTime;
 
+	@Async
 	@Override
-	public void localize(User user, List<? extends Place> nearbyPlaces,
-			ApiResponse response, double lat, double lng) {
+	public Future<Boolean> localize(User user,
+			List<? extends Place> nearbyPlaces, ApiResponse response,
+			double lat, double lng) {
 		final MutableUser currentUser = (MutableUser) user;
 		if (currentUser != null) {
 			ItemKey currentPlaceKey = null;
 			ContextHolder.toggleWrite();
+
+			// Always saving user lat/lng for nearby user-to-user search
+			currentUser.setLatitude(lat);
+			currentUser.setLongitude(lng);
+
+			// Storing user localization info (lat, long and place)
+			usersService.saveItem(user);
+			searchService.updateUserOnlineStatus(currentUser);
+
+			// If we have places around
 			if (!nearbyPlaces.isEmpty()) {
 				final Place p = nearbyPlaces.iterator().next();
 				final SearchStatistic stat = response.getStatistic(p.getKey(),
 						SearchStatistic.DISTANCE);
+				// We compute if the closest one is under localization distance
 				if (stat != null) {
 					if (stat.getNumericValue().doubleValue() < localizationDistance) {
 						currentPlaceKey = p.getKey();
 					}
 				}
 
-				// Always saving user lat/lng for nearby user-to-user search
-				currentUser.setLatitude(lat);
-				currentUser.setLongitude(lng);
-				// Storing user localization info (lat, long and place)
-				usersService.saveItem(user);
-				searchService.updateUserOnlineStatus(currentUser);
-
 				// If localized, we store the place
-				// if (currentPlaceKey != null) {
-				// checkin(currentUser, currentPlaceKey,
-				// ActivityType.LOCALIZATION, lat, lng);
-				// }
+				if (currentPlaceKey != null) {
+					// Logging lat/lng with checkin
+					CHECKIN_LOGGER.info(currentPlaceKey + ";"
+							+ "LOCALIZATION_AUTO_STAT" + ";"
+							+ System.currentTimeMillis() + ";" + user.getKey()
+							+ ";" + lat + ";" + lng);
+				}
 			}
 			if (response instanceof ApiCompositeResponse) {
 				try {
@@ -100,6 +112,7 @@ public class LocalizationServiceImpl implements LocalizationService {
 			}
 
 		}
+		return new AsyncResult<Boolean>(true);
 	}
 
 	@Override

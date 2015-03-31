@@ -134,8 +134,13 @@ public class NearbyPlacesListAction extends AbstractAction implements
 		// Creating the request
 		final ApisRequest request = ApisFactory.createCompositeRequest();
 		// Place rating sorter
-		final List<Sorter> placeSorters = Arrays.asList(SearchHelper
+		List<Sorter> placeSorters = Arrays.asList(SearchHelper
 				.getPlaceRatingSorter());
+		if (searchLng != null && searchLat != null
+				&& lat == searchLat.doubleValue()
+				&& lng == searchLng.doubleValue()) {
+			placeSorters = Arrays.asList(SearchHelper.getDistanceSorter());
+		}
 
 		// Preparing the places list criterion
 		ApisCriterion placesCriterion = null;

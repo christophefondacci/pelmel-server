@@ -1,6 +1,7 @@
 package com.nextep.proto.services;
 
 import java.util.List;
+import java.util.concurrent.Future;
 
 import com.nextep.activities.model.ActivityType;
 import com.nextep.geo.model.Place;
@@ -41,7 +42,7 @@ public interface LocalizationService {
 	 * @param lng
 	 *            user's longitude
 	 */
-	void localize(User user, List<? extends Place> nearbyPlaces,
+	Future<Boolean> localize(User user, List<? extends Place> nearbyPlaces,
 			ApiResponse response, double lat, double lng);
 
 	/**
