@@ -16,6 +16,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.nextep.events.dao.EventsDao;
 import com.nextep.events.model.Event;
+import com.nextep.events.model.EventRequestTypes;
 import com.nextep.events.model.EventSeries;
 import com.nextep.events.model.impl.ItemEventImpl;
 import com.videopolis.calm.exception.CalException;
@@ -196,15 +197,31 @@ public class EventsDaoImpl implements EventsDao {
 	@Override
 	public List<Event> listItems(RequestType requestType, Integer pageSize,
 			Integer pageOffset) {
-		return entityManager
-				.createQuery("from EventImpl order by lastUpdateTime desc")
-				.setFirstResult(pageOffset).setMaxResults(pageSize)
-				.getResultList();
+		String query = null;
+		if (requestType == EventRequestTypes.ALL_EVENTS) {
+			query = "from EventImpl order by lastUpdateTime desc";
+		} else {
+			query = "from EventImpl where endDate > CURRENT_TIMESTAMP order by startDate asc";
+		}
+		return entityManager.createQuery(query).setFirstResult(pageOffset)
+				.setMaxResults(pageSize).getResultList();
 	}
 
 	@Override
 	public int getCount() {
 		return ((BigInteger) entityManager.createNativeQuery(
 				"select count(1) from EVENTS").getSingleResult()).intValue();
+	}
+
+	@Override
+	public int getListItemsCount(RequestType requestType) {
+		String query = null;
+		if (requestType == EventRequestTypes.ALL_EVENTS) {
+			query = "select count(1) from EVENTS";
+		} else {
+			query = "select count(1) from EVENTS where EVNT_END_DATE > CURRENT_TIMESTAMP";
+		}
+		return ((BigInteger) entityManager.createNativeQuery(query)
+				.getSingleResult()).intValue();
 	}
 }

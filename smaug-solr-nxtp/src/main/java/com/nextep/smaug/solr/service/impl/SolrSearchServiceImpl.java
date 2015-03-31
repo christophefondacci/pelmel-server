@@ -262,7 +262,11 @@ public class SolrSearchServiceImpl implements SearchService {
 			separator = " OR ";
 		}
 		if (settings.getSuggestScope().contains(SuggestScope.EVENT)) {
-			buf.append(separator + "type:" + Event.CAL_ID);
+			buf.append(separator + "(type:" + Event.CAL_ID);
+			// Filtering unexpired events (i.e. keeping only events in the
+			// future)
+			buf.append(" AND expirationTime:[" + System.currentTimeMillis()
+					+ " TO *])");
 			separator = " OR ";
 		}
 		if (settings.getSuggestScope().contains(SuggestScope.USER)) {

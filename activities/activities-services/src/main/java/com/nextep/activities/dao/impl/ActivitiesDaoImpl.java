@@ -283,4 +283,9 @@ public class ActivitiesDaoImpl extends AbstractCalDao<Activity> implements
 		//
 		return query.getResultList();
 	}
+
+	@Override
+	public int getListItemsCount(RequestType requestType) {
+		return getCount();
+	}
 }

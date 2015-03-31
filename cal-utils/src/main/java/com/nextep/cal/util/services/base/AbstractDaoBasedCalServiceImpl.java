@@ -101,7 +101,7 @@ public abstract class AbstractDaoBasedCalServiceImpl extends AbstractCalService 
 			// Querying
 			final List<? extends CalmObject> allItems = extDao.listItems(
 					requestType, pageSize, page * pageSize);
-			final int itemsCount = extDao.getCount();
+			final int itemsCount = extDao.getListItemsCount(requestType);
 
 			// Preparing resulting current pagination info
 			int pages = itemsCount / pageSize;

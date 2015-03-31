@@ -90,6 +90,11 @@ public class EventsSeriesDaoImpl implements EventSeriesDao {
 				.intValue();
 	}
 
+	@Override
+	public int getListItemsCount(RequestType requestType) {
+		return getCount();
+	}
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public Map<ItemKey, List<EventSeries>> getEventsSeriesFor(

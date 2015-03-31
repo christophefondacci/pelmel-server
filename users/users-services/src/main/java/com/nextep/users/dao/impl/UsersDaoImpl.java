@@ -370,4 +370,9 @@ public class UsersDaoImpl extends AbstractCalDao<User> implements UsersDao,
 		return (int) (long) entityManager.createQuery(
 				"select count(u) from UserImpl u").getSingleResult();
 	}
+
+	@Override
+	public int getListItemsCount(RequestType requestType) {
+		return getCount();
+	}
 }

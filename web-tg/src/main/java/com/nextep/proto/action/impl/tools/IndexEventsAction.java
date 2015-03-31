@@ -8,6 +8,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.nextep.events.model.Event;
+import com.nextep.events.model.EventRequestTypes;
 import com.nextep.proto.action.base.AbstractAction;
 import com.nextep.proto.apis.adapters.ApisEventLocationAdapter;
 import com.nextep.proto.spring.ContextHolder;
@@ -16,10 +17,12 @@ import com.nextep.tags.model.Tag;
 import com.videopolis.apis.exception.ApisException;
 import com.videopolis.apis.factory.ApisFactory;
 import com.videopolis.apis.factory.SearchRestriction;
+import com.videopolis.apis.model.ApisCriterion;
 import com.videopolis.apis.model.ApisItemKeyAdapter;
 import com.videopolis.apis.model.ApisRequest;
-import com.videopolis.apis.service.ApiResponse;
+import com.videopolis.apis.service.ApiCompositeResponse;
 import com.videopolis.cals.factory.ContextFactory;
+import com.videopolis.cals.model.PaginationInfo;
 import com.videopolis.concurrent.exception.TaskExecutionException;
 import com.videopolis.concurrent.model.TaskExecutionContext;
 import com.videopolis.concurrent.model.base.AbstractTask;
@@ -31,14 +34,18 @@ public class IndexEventsAction extends AbstractAction {
 
 	private static final Log LOGGER = LogFactory
 			.getLog(IndexEventsAction.class);
+
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 8242078679018166793L;
 	private static final ApisItemKeyAdapter eventLocationAdapter = new ApisEventLocationAdapter();
+	private static final int PAGE_SIZE = 200;
+	private static final String APIS_ALIAS_EVENTS = "events";
+
 	private SearchPersistenceService searchService;
 	private TaskRunnerService taskRunnerService;
-	private boolean newOnly = false;
+	private boolean all = false;
 	private List<String> messages = new ArrayList<String>();
 
 	@Override
@@ -68,28 +75,44 @@ public class IndexEventsAction extends AbstractAction {
 	}
 
 	private void indexEvents() throws ApisException {
-		final ApisRequest request = (ApisRequest) ApisFactory
-				.createRequest(Event.class).list(Event.class, null)
-				.with(Tag.class)
-				.addCriterion(SearchRestriction.adaptKey(eventLocationAdapter));
-		final ApiResponse response = getApiService().execute(request,
-				ContextFactory.createContext(getLocale()));
-		final Collection<Event> events = (Collection<Event>) response
-				.getElements();
-		ContextHolder.toggleWrite();
-		// Now we safely fetched our events we purge solr
-		// searchService.removeAll(Event.CAL_ID);
-		final int count = events.size();
-		int i = 1;
-		for (Event event : events) {
-			String msg = "Storing event '" + event.getName() + "' [" + i
-					+ " / " + count + "] ";
-			i++;
-			if (!newOnly
-					|| event.getStartDate().getTime() > System
-							.currentTimeMillis()) {
+
+		int page = 0;
+		int itemsCount = 0;
+		boolean hasMore = true;
+		while (hasMore) {
+			ContextHolder.toggleReadonly();
+
+			// Building new request for this page
+			final ApisRequest request = buildRequest(page++);
+
+			// Querying data
+			final ApiCompositeResponse response = (ApiCompositeResponse) getApiService()
+					.execute(request, ContextFactory.createContext(getLocale()));
+
+			// Getting page info
+			final PaginationInfo pagination = response
+					.getPaginationInfo(APIS_ALIAS_EVENTS);
+			hasMore = pagination.getItemCount() > itemsCount + PAGE_SIZE;
+
+			// Getting this page's elements
+			final Collection<? extends Event> events = response.getElements(
+					Event.class, APIS_ALIAS_EVENTS);
+
+			ContextHolder.toggleWrite();
+			// Now we safely fetched our events we purge solr
+			// searchService.removeAll(Event.CAL_ID);
+			final long count = pagination.getItemCount();
+			for (Event event : events) {
+				String msg = "Storing event '" + event.getName() + "' ["
+						+ itemsCount + " / " + count + "] ";
+				itemsCount++;
 				try {
-					searchService.storeCalmObject(event, SearchScope.CHILDREN);
+					if (event.isOnline()) {
+						searchService.storeCalmObject(event,
+								SearchScope.CHILDREN);
+					} else {
+						searchService.remove(event);
+					}
 					msg = msg + " -> SUCCESS!";
 				} catch (SearchException e) {
 					msg = msg + " -> FAILED : " + e.getMessage();
@@ -102,7 +125,23 @@ public class IndexEventsAction extends AbstractAction {
 				LOGGER.info(msg);
 			}
 		}
+	}
 
+	private ApisRequest buildRequest(int page) throws ApisException {
+		final ApisRequest request = (ApisRequest) ApisFactory
+				.createCompositeRequest()
+				.addCriterion(
+						(ApisCriterion) SearchRestriction
+								.list(Event.class,
+										all ? EventRequestTypes.ALL_EVENTS
+												: null)
+								.paginatedBy(PAGE_SIZE, page)
+								.aliasedBy(APIS_ALIAS_EVENTS)
+								.with(Tag.class)
+								.addCriterion(
+										SearchRestriction
+												.adaptKey(eventLocationAdapter)));
+		return request;
 	}
 
 	public void setSearchService(SearchPersistenceService searchService) {
@@ -117,11 +156,11 @@ public class IndexEventsAction extends AbstractAction {
 		this.taskRunnerService = taskRunnerService;
 	}
 
-	public void setNewOnly(boolean newOnly) {
-		this.newOnly = newOnly;
+	public void setAll(boolean all) {
+		this.all = all;
 	}
 
-	public boolean getNewOnly() {
-		return newOnly;
+	public boolean isAll() {
+		return all;
 	}
 }

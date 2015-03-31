@@ -451,6 +451,9 @@ public class SolrSearchPersistenceServiceImpl implements
 			log.info("Removing event " + object.getKey() + " from SOLR index");
 			try {
 				eventsSolrServer.deleteById(object.getKey().toString());
+				eventsSolrServer.commit();
+				suggestSolrServer.deleteById(object.getKey().toString());
+				suggestSolrServer.commit();
 			} catch (SolrServerException | IOException e) {
 				throw new SearchException("Unable to store calm object: " + e,
 						e);
@@ -511,7 +514,8 @@ public class SolrSearchPersistenceServiceImpl implements
 				throw new SearchException("Unable to store calm object: " + e,
 						e);
 			}
-			storeSuggest(event.getKey(), Arrays.asList(event.getName()), city);
+			storeSuggest(event.getKey(), Arrays.asList(event.getName()), city,
+					event.getEndDate());
 		}
 	}
 
@@ -739,10 +743,17 @@ public class SolrSearchPersistenceServiceImpl implements
 
 	@Override
 	public void storeSuggest(ItemKey itemKey, List<String> knownNames, City city) {
+		storeSuggest(itemKey, knownNames, city, null);
+	}
+
+	public void storeSuggest(ItemKey itemKey, List<String> knownNames,
+			City city, Date expirationDate) {
+
 		final SearchTextItemImpl item = new SearchTextItemImpl();
 		item.setId(itemKey.toString());
 		item.setNames(knownNames);
 		item.setType(itemKey.getType());
+		item.setExpirationTime(expirationDate);
 		if (city != null) {
 			final Collection<String> cityNames = getNameWithAlternates(
 					city.getName(), city);

@@ -221,21 +221,35 @@ public class NearbyPlacesListAction extends AbstractAction implements
 			List<SuggestScope> scopes = new ArrayList<SuggestScope>();
 			scopes.add(SuggestScope.DESTINATION);
 			scopes.add(SuggestScope.PLACE);
-			scopes.add(SuggestScope.EVENT);
 			scopes.add(SuggestScope.GEO_FULLTEXT);
 			placesCriterion = SearchRestriction.searchFromText(
 					GeographicItem.class, scopes, searchText, pageSize)
 					.aliasedBy(APIS_ALIAS_NEARBY_PLACES);
 
+			// Building a user fulltext search from text
 			List<SuggestScope> userScopes = Arrays.asList(SuggestScope.USER,
 					SuggestScope.GEO_FULLTEXT);
-			scopes.add(SuggestScope.GEO_FULLTEXT);
 			ApisCriterion usersCrit = (ApisCriterion) SearchRestriction
 					.searchFromText(User.class, userScopes, searchText,
 							NEARBY_USERS_COUNT)
 					.aliasedBy(APIS_ALIAS_NEARBY_USERS)
 					.with(Media.class, MediaRequestTypes.THUMB);
 			request.addCriterion(usersCrit);
+
+			// Building an event fulltext search
+			List<SuggestScope> eventScopes = Arrays.asList(SuggestScope.EVENT,
+					SuggestScope.GEO_FULLTEXT);
+			ApisCriterion eventsCrit = (ApisCriterion) SearchRestriction
+					.searchFromText(Event.class, eventScopes, searchText,
+							NEARBY_EVENTS_COUNT)
+					.aliasedBy(APIS_ALIAS_NEARBY_EVENTS)
+					.with(Media.class, MediaRequestTypes.THUMB)
+					.addCriterion(
+							(ApisCriterion) SearchRestriction
+									.adaptKey(eventLocationAdapter)
+									.aliasedBy(Constants.APIS_ALIAS_EVENT_PLACE)
+									.with(Media.class, MediaRequestTypes.THUMB));
+			request.addCriterion(eventsCrit);
 			// FacetCategory cityCategory = SearchHelper.getCityFacetCategory();
 			// request.addCriterion(SearchRestriction
 			// .searchAll(Place.class, SearchScope.CITY, 10, 0)
@@ -361,16 +375,10 @@ public class NearbyPlacesListAction extends AbstractAction implements
 			// APIS_ALIAS_NEARBY_ACTIVITIES);
 			users = city.get(User.class, APIS_ALIAS_NEARBY_USERS);
 		}
-		if (searchText != null) {
-			// Because we did a full text search which can return events (among
-			// other objects)
-			// then everything is under the same "places" alias
-			events = response
-					.getElements(Event.class, APIS_ALIAS_NEARBY_PLACES);
-		} else {
-			events = response
-					.getElements(Event.class, APIS_ALIAS_NEARBY_EVENTS);
-		}
+
+		// Getting events from response root
+		events = response.getElements(Event.class, APIS_ALIAS_NEARBY_EVENTS);
+
 		// final FacetInformation facetInfo = response
 		// .getFacetInformation(SearchScope.NEARBY_BLOCK);
 		final PaginationInfo paginationInfo = response

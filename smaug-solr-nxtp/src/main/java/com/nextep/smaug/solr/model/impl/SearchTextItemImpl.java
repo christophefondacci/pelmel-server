@@ -1,6 +1,7 @@
 package com.nextep.smaug.solr.model.impl;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -26,7 +27,8 @@ public class SearchTextItemImpl implements SearchItem {
 	private Collection<String> stateName;
 	@Field
 	private Collection<String> countryName;
-
+	@Field
+	private Long expirationTime;
 	private String matchedText;
 
 	@Override
@@ -91,4 +93,8 @@ public class SearchTextItemImpl implements SearchItem {
 		this.countryName = countryName;
 	}
 
+	public void setExpirationTime(Date expirationDate) {
+		this.expirationTime = expirationDate == null ? null : expirationDate
+				.getTime();
+	}
 }
