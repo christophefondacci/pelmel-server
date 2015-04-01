@@ -289,6 +289,15 @@ public class IndexAction extends AbstractAction implements TagAware,
 				Activity.class, APIS_ALIAS_USER_ACTIVITY);
 		final PaginationInfo activitiesPagination = response
 				.getPaginationInfo(APIS_ALIAS_USER_ACTIVITY);
+		// Filtering out user to user likes
+		for (Activity a : new ArrayList<Activity>(activities)) {
+			if (a.getActivityType() == ActivityType.LIKE
+					|| a.getActivityType() == ActivityType.UNLIKE) {
+				if (a.getLoggedItemKey().getType().equals(User.CAL_TYPE)) {
+					activities.remove(a);
+				}
+			}
+		}
 		activitySupport.initialize(getUrlService(), getLocale(),
 				activitiesPagination, activities);
 

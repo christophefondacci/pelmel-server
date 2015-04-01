@@ -6,6 +6,7 @@ import java.util.List;
 import com.nextep.activities.model.Activity;
 import com.nextep.activities.model.ActivityRequestTypes;
 import com.nextep.activities.model.ActivityType;
+import com.nextep.activities.model.impl.RequestTypeLatestActivities;
 import com.nextep.media.model.Media;
 import com.nextep.proto.apis.adapters.ApisActivityExtraKeyAdapter;
 import com.nextep.proto.apis.adapters.ApisActivityTargetKeyAdapter;
@@ -32,7 +33,11 @@ public final class ApisActivitiesHelper {
 
 	public static WithCriterion withActivities(int pageSize, int pageOffset)
 			throws ApisException {
-		return withActivities(pageSize, pageOffset, null);
+		return withActivities(pageSize, pageOffset,
+				new RequestTypeLatestActivities(-1, ActivityType.COMMENT,
+						ActivityType.CREATION, ActivityType.HOURS,
+						ActivityType.LIKE, ActivityType.REGISTER,
+						ActivityType.UNLIKE, ActivityType.UPDATE));
 	}
 
 	public static WithCriterion withActivities(int pageSize, int pageOffset,
@@ -52,11 +57,10 @@ public final class ApisActivitiesHelper {
 	public static WithCriterion withUserActivities(int pageSize,
 			int pageOffset, ActivityType... activityTypes) throws ApisException {
 		if (activityTypes == null || activityTypes.length == 0) {
-			activityTypes = new ActivityType[] { ActivityType.CHECKIN,
-					ActivityType.COMMENT, ActivityType.CREATION,
-					ActivityType.HOURS, ActivityType.LIKE,
-					ActivityType.REGISTER, ActivityType.UNLIKE,
-					ActivityType.UPDATE };
+			activityTypes = new ActivityType[] { ActivityType.COMMENT,
+					ActivityType.CREATION, ActivityType.HOURS,
+					ActivityType.LIKE, ActivityType.REGISTER,
+					ActivityType.UNLIKE, ActivityType.UPDATE };
 		}
 		final WithCriterion crit = SearchRestriction.with(Activity.class,
 				ActivityRequestTypes.fromUser(activityTypes)).paginatedBy(
