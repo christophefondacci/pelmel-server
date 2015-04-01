@@ -3,11 +3,13 @@ package com.nextep.proto.blocks;
 import java.util.Locale;
 
 import com.nextep.events.model.CalendarType;
+import com.nextep.proto.services.UrlService;
 import com.videopolis.calm.model.CalmObject;
 
 public interface EventEditionSupport extends CalendarEditionSupport {
 
-	void initialize(CalmObject eventOrLocation, Locale locale);
+	void initialize(CalmObject eventOrLocation, UrlService urlService,
+			Locale locale);
 
 	/**
 	 * Provides the event ID

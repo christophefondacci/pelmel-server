@@ -3,6 +3,7 @@ package com.nextep.proto.services.mobile.impl;
 import java.util.Locale;
 
 import com.nextep.events.model.CalendarType;
+import com.nextep.events.model.Event;
 import com.nextep.geo.model.GeographicItem;
 import com.nextep.proto.model.SearchType;
 import com.nextep.proto.services.UrlService;
@@ -243,5 +244,10 @@ public class MobileUrlServiceImpl implements UrlService {
 	@Override
 	public String getResetPasswordUrl(User user) {
 		return baseUrlService.getResetPasswordUrl(user);
+	}
+
+	@Override
+	public String getEventDeletionUrl(Event event) {
+		return baseUrlService.getEventDeletionUrl(event);
 	}
 }

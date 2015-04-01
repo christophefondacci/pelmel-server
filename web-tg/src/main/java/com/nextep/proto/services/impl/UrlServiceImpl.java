@@ -602,4 +602,10 @@ public class UrlServiceImpl implements UrlService {
 	public String getResetPasswordUrl(User user) {
 		return baseUrl + "/resetPassword?nxtpUserToken=" + user.getToken();
 	}
+
+	@Override
+	public String getEventDeletionUrl(Event event) {
+		return baseUrl + "/deleteItem?key=" + event.getKey()
+				+ "&confirmed=true";
+	}
 }

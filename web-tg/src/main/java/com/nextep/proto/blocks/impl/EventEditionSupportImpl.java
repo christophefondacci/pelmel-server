@@ -22,6 +22,7 @@ import com.nextep.proto.blocks.EventEditionSupport;
 import com.nextep.proto.helpers.DisplayHelper;
 import com.nextep.proto.helpers.GeoHelper;
 import com.nextep.proto.services.EventManagementService;
+import com.nextep.proto.services.UrlService;
 import com.videopolis.calm.exception.CalException;
 import com.videopolis.calm.model.CalmObject;
 
@@ -39,14 +40,17 @@ public class EventEditionSupportImpl implements EventEditionSupport {
 	private Locale locale;
 	private Date localizedStartDate;
 	private Date localizedEndDate;
+	private UrlService urlService;
 
 	private MessageSource messageSource;
 	@Autowired
 	private EventManagementService eventManagementService;
 
 	@Override
-	public void initialize(CalmObject eventOrLocation, Locale locale) {
+	public void initialize(CalmObject eventOrLocation, UrlService urlService,
+			Locale locale) {
 		final String eventType = eventOrLocation.getKey().getType();
+		this.urlService = urlService;
 		this.locale = locale;
 		if (Event.CAL_ID.equals(eventType)
 				|| EventSeries.SERIES_CAL_ID.equals(eventType)) {
@@ -288,5 +292,10 @@ public class EventEditionSupportImpl implements EventEditionSupport {
 
 	public void setMessageSource(MessageSource messageSource) {
 		this.messageSource = messageSource;
+	}
+
+	@Override
+	public String getDeleteEventUrl() {
+		return urlService.getEventDeletionUrl(event);
 	}
 }

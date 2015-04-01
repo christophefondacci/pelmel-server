@@ -15,7 +15,7 @@
 				<s:if test="#editionSupport.isNamed()">
 					<div class="form-group">
 						<label for="eventName"><s:text name="event.form.name"/></label>
-						<input class="form-control" type="text" id="eventName" name="name" value="<s:property value="#editionSupport.name"/>"/>
+						<input class="form-control" type="text" id="eventName" name="name" value="<s:property value="#editionSupport.name"/>" placeholder="<s:text name="event.form.namePlaceholder"/>"/>
 					</div>
 				</s:if>
 				<div class="form-group">
@@ -103,12 +103,14 @@
 				</s:if>
 				<s:if test="#editionSupport.isSeriesEnabled()">
 					<div class="form-group">
-						<s:if test="#recurrencyForced">
-							<input type="hidden" name="monthRecurrency" value="0">
-						</s:if><s:else>
+<%-- 						<s:if test="#recurrencyForced"> --%>
+<!-- 							<input type="hidden" name="monthRecurrency" value="0"> -->
+<%-- 						</s:if><s:else> --%>
 							<label class="col-xs-24"><s:text name="event.form.monthrecurrency"/></label>
 							<select class="form-control" name="monthRecurrency" class="col-xs-24">
-								<option value="-999" <s:property value="#editionSupport.isRecurringFor(null) ? 'SELECTED' : ''"/>><s:text name="event.form.monthnone"/></option>
+								<s:if test="#recurrencyForced"> 
+									<option value="-999" <s:property value="#editionSupport.isRecurringFor(null) ? 'SELECTED' : ''"/>><s:text name="event.form.monthnone"/></option>
+								</s:if>
 								<option value="0" <s:property value="#editionSupport.isRecurringFor(0) ? 'SELECTED' : ''"/>><s:text name="event.form.monthevery"/></option>
 								<option value="1" <s:property value="#editionSupport.isRecurringFor(1) ? 'SELECTED' : ''"/>><s:text name="event.form.monthfirst"/></option>
 								<option value="2" <s:property value="#editionSupport.isRecurringFor(2) ? 'SELECTED' : ''"/>><s:text name="event.form.monthsecond"/></option>
@@ -116,7 +118,7 @@
 								<option value="4" <s:property value="#editionSupport.isRecurringFor(4) ? 'SELECTED' : ''"/>><s:text name="event.form.monthfourth"/></option>
 								<option value="-1" <s:property value="#editionSupport.isRecurringFor(-1) ? 'SELECTED' : ''"/>><s:text name="event.form.monthlast"/></option>
 							</select>
-						</s:else>
+<%-- 						</s:else> --%>
 						<label class="col-xs-24"><s:text name="event.form.frequency"/></label>
 						<div>
 							<div class="col-xs-8"><input id="monday" type="checkbox" name="monday" value="true" <s:property value="#editionSupport.isMonday() ? 'CHECKED' : ''"/>/><label class="event-day" for="monday"><s:text name="event.form.monday"/></label></div>
@@ -137,7 +139,15 @@
 				<tiles:insertTemplate template="/jsp/edition/block-edit-descriptions.jsp"/>
 			</div>
 		</s:if>
-		<div class="col-xs-offset-15 prepend-top append-bottom col-xs-8">
+		<div class="col-xs-24">&nbsp;</div>
+		<div class="col-xs-offset-1 col-xs-8">
+			<s:if test="#editionSupport.eventId!=null && !''.equals(#editionSupport.eventId)">
+				<a class="button button-fullsize full-width <s:property value="headerSupport.getPageStyle()"/>" href="<s:property value="#editionSupport.getDeleteEventUrl()"/>"><s:text name="event.form.delete"/></a>
+			</s:if><s:else>
+				&nbsp;
+			</s:else>
+		</div>
+		<div class="col-xs-offset-6 append-bottom col-xs-8">
 			<input type="submit" class="button button-fullsize full-width <s:property value="headerSupport.getPageStyle()"/>" value="<s:text name="button.save"/>" />
 		</div>
 	</div>

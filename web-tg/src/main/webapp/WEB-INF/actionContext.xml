@@ -557,6 +557,7 @@
 		<property name="descriptionsEditionSupport" ref="descriptionsEditionSupport"/>
 		<property name="currentUserSupport" ref="currentUserSupport"/>
 		<property name="headerSupport" ref="overviewHeaderSupport"/>
+		<property name="urlService" ref="urlService"/>
 	</bean>
 	<bean id="ajaxGetPlaceFormAction" class="com.nextep.proto.action.impl.GetPlaceFormAction" parent="abstractAction" scope="request">
 		<property name="placeEditionSupport" ref="placeEditionSupport"/>

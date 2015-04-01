@@ -75,7 +75,7 @@ public class CalendarSupportImpl implements CalendarSupport {
 		seriesMap = new HashMap<CalendarType, List<EventSeries>>();
 		nextStartsMap = new HashMap<CalendarType, DateSuffixHolder>();
 		sortedCalendarTypes = Arrays.asList(CalendarType.OPENING,
-				CalendarType.HAPPY_HOUR);
+				CalendarType.HAPPY_HOUR, CalendarType.THEME);
 
 		// Hashing all series by their attached calendar type
 		for (EventSeries series : seriesList) {
@@ -136,7 +136,7 @@ public class CalendarSupportImpl implements CalendarSupport {
 		StringBuilder buf = new StringBuilder();
 		if (obj instanceof EventSeries) {
 			final EventSeries series = (EventSeries) obj;
-			if (series.getCalendarType() == CalendarType.HAPPY_HOUR
+			if (series.getCalendarType() != CalendarType.OPENING
 					&& series.getName() != null
 					&& !series.getName().trim().isEmpty()) {
 				buf.append(series.getName() + " - ");

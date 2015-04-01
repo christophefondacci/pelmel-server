@@ -3,6 +3,7 @@ package com.nextep.proto.services;
 import java.util.Locale;
 
 import com.nextep.events.model.CalendarType;
+import com.nextep.events.model.Event;
 import com.nextep.geo.model.GeographicItem;
 import com.nextep.proto.model.SearchType;
 import com.nextep.users.model.User;
@@ -202,6 +203,15 @@ public interface UrlService {
 	 * @return the corresponding URL
 	 */
 	String getEventEditionFormUrl(String targetHtmlElementId, ItemKey element);
+
+	/**
+	 * Provides the deletion url for this event
+	 * 
+	 * @param event
+	 *            event to delete
+	 * @return the deletion URL
+	 */
+	String getEventDeletionUrl(Event event);
 
 	/**
 	 * Same as {@link UrlService#getEventEditionFormUrl(String, ItemKey)} except

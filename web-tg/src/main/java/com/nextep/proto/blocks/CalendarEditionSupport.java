@@ -38,4 +38,5 @@ public interface CalendarEditionSupport {
 
 	boolean isWednesday();
 
+	String getDeleteEventUrl();
 }

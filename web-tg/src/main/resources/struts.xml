@@ -150,7 +150,7 @@
 				<param name="id">${redirectId}</param>
 			</result>
 			<result name="confirm">/jsp/blocks/block-confirm-delobject.jsp</result>
-			<result name="forbidden">/jsp/blocks/block-confirm-delobject.jsp</result>
+			<result name="forbidden" type="tiles">error</result>
 			<interceptor-ref name="default" />
 		</action>
 		<action name="mobileDeleteItem" class="deleteCalObjectAction">

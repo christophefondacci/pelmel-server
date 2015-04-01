@@ -94,7 +94,8 @@ public class GetEventFormAction extends AbstractAction implements
 			checkCurrentUser(currentUser);
 
 			// Standard support initialization
-			eventEditionSupport.initialize(calObject, getLocale());
+			eventEditionSupport.initialize(calObject, getUrlService(),
+					getLocale());
 			if (formCalendarType != null) {
 				eventEditionSupport.setCalendarType(formCalendarType);
 			}
@@ -102,7 +103,7 @@ public class GetEventFormAction extends AbstractAction implements
 					calObject instanceof Event ? calObject : null,
 					getUrlService());
 		} else {
-			eventEditionSupport.initialize(null, getLocale());
+			eventEditionSupport.initialize(null, getUrlService(), getLocale());
 			descriptionsEditionSupport.initialize(getLocale(), null,
 					getUrlService());
 		}
