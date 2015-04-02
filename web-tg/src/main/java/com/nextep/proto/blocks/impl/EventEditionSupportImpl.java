@@ -179,7 +179,7 @@ public class EventEditionSupportImpl implements EventEditionSupport {
 
 	@Override
 	public boolean isSeriesEnabled() {
-		return event == null
+		return (event == null && calendarType != CalendarType.EVENT)
 				|| EventSeries.SERIES_CAL_ID.equals(event.getKey().getType());
 	}
 

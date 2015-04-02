@@ -259,10 +259,7 @@ public class EventsSeriesDaoImpl implements EventSeriesDao {
 
 	@Override
 	public void delete(ItemKey itemKey) {
-		entityManager
-				.createQuery("delete ItemEventSeriesImpl where itemId=:eventId")
-				.setParameter("eventId", itemKey.getNumericId())
-				.executeUpdate();
+
 		entityManager
 				.createQuery("delete EventSeriesImpl where seriesId=:seriesId")
 				.setParameter("seriesId", itemKey.getNumericId())

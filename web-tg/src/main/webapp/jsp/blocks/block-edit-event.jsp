@@ -103,12 +103,12 @@
 				</s:if>
 				<s:if test="#editionSupport.isSeriesEnabled()">
 					<div class="form-group">
-<%-- 						<s:if test="#recurrencyForced"> --%>
-<!-- 							<input type="hidden" name="monthRecurrency" value="0"> -->
-<%-- 						</s:if><s:else> --%>
+						<s:if test="'OPENING'.equals(#editionSupport.getCalendarType())">
+							<input type="hidden" name="monthRecurrency" value="0">
+						</s:if><s:else>
 							<label class="col-xs-24"><s:text name="event.form.monthrecurrency"/></label>
 							<select class="form-control" name="monthRecurrency" class="col-xs-24">
-								<s:if test="#recurrencyForced"> 
+								<s:if test="!#recurrencyForced"> 
 									<option value="-999" <s:property value="#editionSupport.isRecurringFor(null) ? 'SELECTED' : ''"/>><s:text name="event.form.monthnone"/></option>
 								</s:if>
 								<option value="0" <s:property value="#editionSupport.isRecurringFor(0) ? 'SELECTED' : ''"/>><s:text name="event.form.monthevery"/></option>
@@ -118,7 +118,7 @@
 								<option value="4" <s:property value="#editionSupport.isRecurringFor(4) ? 'SELECTED' : ''"/>><s:text name="event.form.monthfourth"/></option>
 								<option value="-1" <s:property value="#editionSupport.isRecurringFor(-1) ? 'SELECTED' : ''"/>><s:text name="event.form.monthlast"/></option>
 							</select>
-<%-- 						</s:else> --%>
+						</s:else>
 						<label class="col-xs-24"><s:text name="event.form.frequency"/></label>
 						<div>
 							<div class="col-xs-8"><input id="monday" type="checkbox" name="monday" value="true" <s:property value="#editionSupport.isMonday() ? 'CHECKED' : ''"/>/><label class="event-day" for="monday"><s:text name="event.form.monday"/></label></div>
