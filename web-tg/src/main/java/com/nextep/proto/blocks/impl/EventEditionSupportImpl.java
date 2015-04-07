@@ -89,7 +89,7 @@ public class EventEditionSupportImpl implements EventEditionSupport {
 
 	@Override
 	public String getStartDate() {
-		return event == null ? "" : DATE_FORMAT.format(event.getStartDate());
+		return event == null ? "" : DATE_FORMAT.format(localizedStartDate);
 	}
 
 	@Override
@@ -119,7 +119,7 @@ public class EventEditionSupportImpl implements EventEditionSupport {
 	@Override
 	public String getEndDate() {
 
-		return event == null ? "" : DATE_FORMAT.format(event.getEndDate());
+		return event == null ? "" : DATE_FORMAT.format(localizedEndDate);
 	}
 
 	@Override
