@@ -9,6 +9,7 @@ import org.springframework.context.MessageSource;
 
 import com.nextep.descriptions.model.Description;
 import com.nextep.proto.blocks.ItemsListBoxSupport;
+import com.nextep.proto.helpers.DisplayHelper;
 import com.nextep.proto.helpers.LocalizationHelper;
 import com.nextep.proto.services.UrlService;
 import com.videopolis.calm.model.CalmObject;
@@ -80,7 +81,7 @@ public class DescriptionsListBoxSupportImpl implements ItemsListBoxSupport {
 
 	@Override
 	public String getItemDescription(CalmObject item) {
-		return ((Description) item).getDescription();
+		return DisplayHelper.getHtmlSafe(((Description) item).getDescription());
 	}
 
 	@Override

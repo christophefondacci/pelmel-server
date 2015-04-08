@@ -241,4 +241,17 @@ public final class DisplayHelper {
 		}
 		return title;
 	}
+
+	/**
+	 * An alternative to struts escapeHTML feature when we need to render
+	 * special emoji character but still don't watn HTML injection.
+	 * 
+	 * @param str
+	 *            the string to secure for HTML rendering
+	 * @return an HTML-safe string that could be put as is
+	 */
+	public static String getHtmlSafe(String str) {
+		return str.replace("&", "&amp;").replace("<", "&lt;")
+				.replace(">", "&gt;");
+	}
 }

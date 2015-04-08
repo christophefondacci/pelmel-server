@@ -25,7 +25,7 @@
 					<tiles:insertTemplate template="/jsp/blocks/block-properties.jsp"/>
 					<div class="prepend-top">
 						<s:iterator value="descriptionSupport.items" var="desc">
-							<p><s:property value="descriptionSupport.getItemDescription(#desc)"/></p>
+							<p><s:property value="descriptionSupport.getItemDescription(#desc)" escapeHtml="false"/></p>
 						</s:iterator>
 					</div>
 					<tiles:insertTemplate template="/jsp/blocks/block-openings.jsp"/>

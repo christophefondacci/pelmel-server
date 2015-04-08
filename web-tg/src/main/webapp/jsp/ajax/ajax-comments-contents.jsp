@@ -27,8 +27,8 @@
 		<a class="pull-left" href="<s:property value="#commentSupport.getAuthorLinkUrl(#comment)"/>"><img class="comment-thumb list-item-thumb" src="<s:property value="#commentSupport.getCommentIconUrl(#comment)"/>" alt="<s:property value="#commentSupport.getAuthor(#comment)"/> comment"></a>
 		<div class="media-body">
 			<div class="comment-body">
-				<a class="activity-user" href="<s:property value="#commentSupport.getAuthorLinkUrl(#comment)"/>"><s:property value="#commentSupport.getAuthor(#comment)"/></a>
-				<s:property value="#commentSupport.getMessage(#comment)"/>
+				<a class="activity-user" href="<s:property value="#commentSupport.getAuthorLinkUrl(#comment)"/>"><s:property value="#commentSupport.getAuthor(#comment)" escapeHtml="false"/></a>
+				<s:property value="#commentSupport.getMessage(#comment)" escapeHtml="false"/>
 			</div>
 			<span class="timestamp"><s:property value="#commentSupport.getDate(#comment)"/></span>
 		</div>

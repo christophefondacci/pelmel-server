@@ -6,13 +6,13 @@
 		maxActive="30" maxIdle="30" maxWait="10000" username="root"
 		driverClassName="com.mysql.jdbc.Driver" defaultAutoCommit="true"
 		poolPreparedStatements="true" validationQuery="SELECT 1"
-		url="jdbc:mysql://localhost:3306/pelmel?useUnicode=true&amp;characterEncoding=UTF-8&amp;cachePrepStmts=true&amp;zeroDateTimeBehavior=convertToNull" />
+		url="jdbc:mysql://localhost:3306/pelmel?cachePrepStmts=true&amp;zeroDateTimeBehavior=convertToNull" />
 
 	<Resource name="jdbc/togayther_write" auth="Container" type="javax.sql.DataSource"
 		maxActive="30" maxIdle="30" maxWait="10000" username="root"
 		driverClassName="com.mysql.jdbc.Driver" defaultAutoCommit="true"
 		poolPreparedStatements="true" validationQuery="SELECT 1"
-		url="jdbc:mysql://localhost:3306/pelmel?useUnicode=true&amp;characterEncoding=UTF-8&amp;cachePrepStmts=true&amp;zeroDateTimeBehavior=convertToNull" />
+		url="jdbc:mysql://localhost:3306/pelmel?cachePrepStmts=true&amp;zeroDateTimeBehavior=convertToNull" />
 
 	<!-- Locally deployed Solr slave instances -->
 	<Environment name="smaug/usersSolrServer" type="java.lang.String"

@@ -97,7 +97,7 @@ public class CommentSupportImpl implements CommentSupport {
 	public String getAuthor(Comment comment) {
 		try {
 			final User user = comment.getUnique(User.class);
-			return user.getPseudo();
+			return DisplayHelper.getHtmlSafe(user.getPseudo());
 		} catch (CalException e) {
 			LOGGER.error("Unable to retrieve comment's author for key "
 					+ comment.getAuthorItemKey());
@@ -107,7 +107,7 @@ public class CommentSupportImpl implements CommentSupport {
 
 	@Override
 	public String getMessage(Comment comment) {
-		return comment.getMessage();
+		return DisplayHelper.getHtmlSafe(comment.getMessage());
 	}
 
 	@Override

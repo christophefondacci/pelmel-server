@@ -7,6 +7,7 @@ import java.util.Locale;
 import org.springframework.context.MessageSource;
 
 import com.nextep.proto.blocks.OverviewSupport;
+import com.nextep.proto.helpers.DisplayHelper;
 import com.nextep.proto.helpers.UserHelper;
 import com.nextep.proto.services.UrlService;
 import com.nextep.users.model.User;
@@ -45,7 +46,7 @@ public class UserOverviewSupportImpl implements OverviewSupport {
 
 	@Override
 	public String getTitle(CalmObject o) {
-		return ((User) o).getPseudo();
+		return DisplayHelper.getHtmlSafe(((User) o).getPseudo());
 	}
 
 	@Override

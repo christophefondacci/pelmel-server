@@ -21,5 +21,5 @@
 	<div id="user-toolbar" class="toolbar">
 		<tiles:insertTemplate template="/jsp/toolbars/toolbar-picture-map-actions.jsp"/>
 	</div>
-	<div class="action-page-title hidden-xs"><s:property value="#overviewSupport.getTitle(#obj)"/></div>
+	<div class="action-page-title hidden-xs"><s:property value="#overviewSupport.getTitle(#obj)" escapeHtml="false"/></div>
 </div>

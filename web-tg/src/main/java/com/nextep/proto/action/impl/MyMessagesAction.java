@@ -185,14 +185,17 @@ public class MyMessagesAction extends AbstractAction implements MessagingAware,
 	@Override
 	public String getJson() {
 		// Getting the list of messages to convert to JSON
-		final List<? extends Message> messages = myMessagingSupport
-				.getMessages();
+		List<? extends Message> messages = myMessagingSupport.getMessages();
+		if (messages == null) {
+			messages = Collections.emptyList();
+		}
 		Collections.reverse(messages);
 		// Building the JSON wrapper
 		final JsonManyToOneMessageList messagesList = jsonBuilder
 				.buildJsonManyToOneMessages(messages, highRes, getLocale(),
 						currentUserSupport.getCurrentUser());
-		int unreadCount = instantMessagingSupport.getMessages().size();
+		int unreadCount = instantMessagingSupport.getMessages() == null ? 0
+				: instantMessagingSupport.getMessages().size();
 		messagesList.setUnreadMsgCount(unreadCount);
 
 		// Sending JSON serialized string
