@@ -18,7 +18,7 @@
 		<a class="pull-left" href="<s:property value="#messagingSupport.getFromUrl(#currentMsg)"/>"><img class="thumb-logged-user" src=<s:property value="#messagingSupport.getFromIconUrl(#currentMsg)"/>></a>
 		<div class="media-body">
 			<a class="msg-from-link" href="<s:property value="#messagingSupport.getFromUrl(#currentMsg)"/>">
-				<s:property value="#messagingSupport.getFromText(#currentMsg)"/>
+				<s:property value="#messagingSupport.getFromText(#currentMsg)" escapeHtml="false"/>
 			</a>
 			<span class="msg-date"><s:property value="#messagingSupport.getDateText(#currentMsg)"/></span>
 		</div>
@@ -46,7 +46,7 @@
 			</div>
 			<div class="media-body">
 				<a class="msg-from-link" href="#">
-					<s:property value="#overviewSupport.getTitle(#overviewSupport.overviewObject)"/>
+					<s:property value="#overviewSupport.getTitle(#overviewSupport.overviewObject)" escapeHtml="false"/>
 				</a>
 			</div>
 		</div>
