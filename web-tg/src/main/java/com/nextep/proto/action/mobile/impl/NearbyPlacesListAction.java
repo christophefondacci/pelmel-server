@@ -597,11 +597,31 @@ public class NearbyPlacesListAction extends AbstractAction implements
 		// }
 
 		// JSONifying users
+		final List<JsonLightUser> jsonUsers = new ArrayList<JsonLightUser>();
+		final List<String> userKeysOrder = new ArrayList<String>();
 		for (User nearbyUser : users) {
 			final JsonLightUser jsonUser = jsonBuilder.buildJsonLightUser(
 					nearbyUser, highRes, getLocale());
-			jsonResponse.addNearbyUser(jsonUser);
+			jsonUsers.add(jsonUser);
+			userKeysOrder.add(nearbyUser.getKey().toString());
 		}
+
+		// Sorting with online first, then default sort (distance for nearby
+		// search, relevance for text search,...)
+		Collections.sort(jsonUsers, new Comparator<JsonLightUser>() {
+			@Override
+			public int compare(JsonLightUser o1, JsonLightUser o2) {
+				if (o1.isOnline() && !o2.isOnline()) {
+					return -1;
+				} else if (!o1.isOnline() && o2.isOnline()) {
+					return 1;
+				} else {
+					return userKeysOrder.indexOf(o1.getKey().toString())
+							- userKeysOrder.indexOf(o2.getKey().toString());
+				}
+			}
+		});
+		jsonResponse.setNearbyUsers(jsonUsers);
 
 		// Building city JSON
 		if (localizedCity != null) {
