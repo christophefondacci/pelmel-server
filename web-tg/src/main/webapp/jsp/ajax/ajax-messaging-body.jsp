@@ -28,7 +28,7 @@
 		<div>
 			<div class="margin-span msg-container">
 				<s:iterator value="#messagingSupport.getMessageText(#currentMsg)" var="msgLine">
-					<s:property value="#msgLine"/><br>
+					<s:property value="#msgLine" escapeHtml="false"/><br>
 				</s:iterator>
 			</div>
 		</div>

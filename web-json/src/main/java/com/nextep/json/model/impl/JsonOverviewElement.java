@@ -6,10 +6,13 @@ import java.util.Collections;
 import java.util.List;
 
 import com.nextep.json.model.IJsonDescripted;
+import com.nextep.json.model.IJsonLightPlace;
 
-public class JsonOverviewElement extends JsonLiker implements IJsonDescripted {
-	private final String key;
+public class JsonOverviewElement extends JsonLiker implements IJsonDescripted,
+		IJsonLightPlace {
+	private String key;
 	private String city;
+	private String timezoneId;
 	private double lat, lng;
 	private String name, address, type;
 	private int users;
@@ -31,14 +34,22 @@ public class JsonOverviewElement extends JsonLiker implements IJsonDescripted {
 		this.key = key;
 	}
 
+	@Override
 	public String getKey() {
 		return key;
 	}
 
+	@Override
+	public void setKey(String key) {
+		this.key = key;
+	}
+
+	@Override
 	public String getName() {
 		return name;
 	}
 
+	@Override
 	public void setName(String name) {
 		this.name = name;
 	}
@@ -149,10 +160,12 @@ public class JsonOverviewElement extends JsonLiker implements IJsonDescripted {
 		otherImages.add(media);
 	}
 
+	@Override
 	public JsonMedia getThumb() {
 		return thumb;
 	}
 
+	@Override
 	public void setThumb(JsonMedia thumb) {
 		this.thumb = thumb;
 	}
@@ -199,5 +212,15 @@ public class JsonOverviewElement extends JsonLiker implements IJsonDescripted {
 
 	public Collection<JsonHour> getHours() {
 		return hours;
+	}
+
+	@Override
+	public void setTimezoneId(String timezoneId) {
+		this.timezoneId = timezoneId;
+	}
+
+	@Override
+	public String getTimezoneId() {
+		return timezoneId;
 	}
 }

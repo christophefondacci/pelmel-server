@@ -2,10 +2,12 @@ package com.nextep.json.model.impl;
 
 import java.util.Date;
 
+import com.nextep.json.model.IJsonLightPlace;
+
 public class JsonActivity {
 
 	private JsonLightUser user;
-	private JsonLightPlace activityPlace;
+	private IJsonLightPlace activityPlace;
 	private JsonLightUser activityUser;
 	private String message;
 	private Long activityDate;
@@ -18,11 +20,11 @@ public class JsonActivity {
 		this.user = user;
 	}
 
-	public JsonLightPlace getActivityPlace() {
+	public IJsonLightPlace getActivityPlace() {
 		return activityPlace;
 	}
 
-	public void setActivityPlace(JsonLightPlace place) {
+	public void setActivityPlace(IJsonLightPlace place) {
 		this.activityPlace = place;
 	}
 

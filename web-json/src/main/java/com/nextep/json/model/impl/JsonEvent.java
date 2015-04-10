@@ -5,12 +5,13 @@ import java.util.Collection;
 import java.util.Date;
 
 import com.nextep.json.model.IJsonLightEvent;
+import com.nextep.json.model.IJsonLightPlace;
 
 public class JsonEvent extends JsonLiker implements IJsonLightEvent {
 
 	private String key;
 	private String name;
-	private JsonLightPlace place;
+	private IJsonLightPlace place;
 	private Long startTime;
 	private Long endTime;
 	private Collection<JsonMedia> media = new ArrayList<JsonMedia>();
@@ -42,12 +43,12 @@ public class JsonEvent extends JsonLiker implements IJsonLightEvent {
 	}
 
 	@Override
-	public JsonLightPlace getPlace() {
+	public IJsonLightPlace getPlace() {
 		return place;
 	}
 
 	@Override
-	public void setPlace(JsonLightPlace place) {
+	public void setPlace(IJsonLightPlace place) {
 		this.place = place;
 	}
 

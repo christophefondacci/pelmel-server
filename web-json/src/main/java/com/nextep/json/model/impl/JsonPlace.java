@@ -3,7 +3,9 @@ package com.nextep.json.model.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-public class JsonPlace {
+import com.nextep.json.model.IJsonLightPlace;
+
+public class JsonPlace implements IJsonLightPlace {
 
 	private String itemKey, name, address, city, description, type;
 	private JsonMedia thumb;
@@ -16,6 +18,7 @@ public class JsonPlace {
 	private List<JsonMedia> otherImages = new ArrayList<JsonMedia>();
 	private int boostValue;
 	private int closedReportsCount;
+	private String timezoneId;
 	private List<JsonSpecialEvent> specials = new ArrayList<JsonSpecialEvent>();
 
 	public JsonPlace(String name) {
@@ -23,10 +26,20 @@ public class JsonPlace {
 		tags = new ArrayList<String>();
 	}
 
+	/**
+	 * @deprecated here for compatibility with pre 2.1, use getKey / setKey
+	 * @param itemKey
+	 */
+	@Deprecated
 	public void setItemKey(String itemKey) {
 		this.itemKey = itemKey;
 	}
 
+	/**
+	 * @deprecated here for compatibility with pre 2.1, use getKey / setKey
+	 * @return itemKey
+	 */
+	@Deprecated
 	public String getItemKey() {
 		return itemKey;
 	}
@@ -35,10 +48,12 @@ public class JsonPlace {
 		return distance;
 	}
 
+	@Override
 	public String getName() {
 		return name;
 	}
 
+	@Override
 	public void setName(String name) {
 		this.name = name;
 	}
@@ -119,10 +134,12 @@ public class JsonPlace {
 		this.usersCount = usersCount;
 	}
 
+	@Override
 	public void setThumb(JsonMedia thumb) {
 		this.thumb = thumb;
 	}
 
+	@Override
 	public JsonMedia getThumb() {
 		return thumb;
 	}
@@ -165,5 +182,25 @@ public class JsonPlace {
 
 	public int getClosedReportsCount() {
 		return closedReportsCount;
+	}
+
+	@Override
+	public void setTimezoneId(String timezoneId) {
+		this.timezoneId = timezoneId;
+	}
+
+	@Override
+	public String getTimezoneId() {
+		return timezoneId;
+	}
+
+	@Override
+	public String getKey() {
+		return itemKey;
+	}
+
+	@Override
+	public void setKey(String key) {
+		this.itemKey = key;
 	}
 }

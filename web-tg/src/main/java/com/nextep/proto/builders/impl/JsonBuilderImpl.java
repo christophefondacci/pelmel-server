@@ -27,6 +27,7 @@ import com.nextep.geo.model.GeographicItem;
 import com.nextep.geo.model.Place;
 import com.nextep.json.model.IJsonDescripted;
 import com.nextep.json.model.IJsonLightEvent;
+import com.nextep.json.model.IJsonLightPlace;
 import com.nextep.json.model.IJsonWithParticipants;
 import com.nextep.json.model.impl.JsonActivity;
 import com.nextep.json.model.impl.JsonDescription;
@@ -99,7 +100,7 @@ public class JsonBuilderImpl implements JsonBuilder {
 			elt.setAddress(p.getAddress1());
 			elt.setType(p.getPlaceType());
 			elt.setCity(p.getCity().getName());
-
+			elt.setTimezoneId(p.getCity().getTimezoneId());
 		}
 
 		// Filling descriptions
@@ -292,7 +293,7 @@ public class JsonBuilderImpl implements JsonBuilder {
 					if ((System.currentTimeMillis() - lastLocationTime
 							.getTime()) < checkinTime) {
 						// Converting to JSON place
-						final JsonLightPlace jsonUserPlace = buildJsonLightPlace(
+						final IJsonLightPlace jsonUserPlace = buildJsonLightPlace(
 								lastLocation, highRes, l);
 
 						// Injecting into JSON user bean
@@ -472,6 +473,11 @@ public class JsonBuilderImpl implements JsonBuilder {
 		final JsonLightPlace jsonPlace = new JsonLightPlace();
 		jsonPlace.setKey(place.getKey().toString());
 		jsonPlace.setName(place.getName());
+		if (place instanceof Place) {
+			jsonPlace.setTimezoneId(((Place) place).getCity().getTimezoneId());
+		} else if (place instanceof City) {
+			jsonPlace.setTimezoneId(((City) place).getTimezoneId());
+		}
 		final Media placeMedia = MediaHelper.getSingleMedia(place);
 		if (placeMedia != null) {
 			final JsonMedia jsonMedia = buildJsonMedia(placeMedia, highRes);
@@ -498,7 +504,7 @@ public class JsonBuilderImpl implements JsonBuilder {
 			final GeographicItem place = event.getUnique(GeographicItem.class,
 					Constants.APIS_ALIAS_EVENT_PLACE);
 			if (place != null) {
-				JsonLightPlace jsonPlace = buildJsonLightPlace(place, highRes,
+				IJsonLightPlace jsonPlace = buildJsonLightPlace(place, highRes,
 						l);
 				e.setPlace(jsonPlace);
 
@@ -624,7 +630,7 @@ public class JsonBuilderImpl implements JsonBuilder {
 		p.setCity(DisplayHelper.getName(place.getCity()));
 		// p.setDescription(searchSupport.getResultDescription(o));
 		p.setClosedReportsCount(place.getClosedCount());
-
+		p.setTimezoneId(place.getCity().getTimezoneId());
 		// Image & thumb
 		final Media m = MediaHelper.getSingleMedia(place);
 		if (m != null) {
@@ -783,8 +789,8 @@ public class JsonBuilderImpl implements JsonBuilder {
 			json.setUser(jsonUser);
 		}
 		if (activityPlace != null) {
-			final JsonLightPlace jsonPlace = buildJsonLightPlace(activityPlace,
-					highRes, l);
+			final IJsonLightPlace jsonPlace = buildJsonLightPlace(
+					activityPlace, highRes, l);
 			json.setActivityPlace(jsonPlace);
 		}
 		if (activityUser != null) {

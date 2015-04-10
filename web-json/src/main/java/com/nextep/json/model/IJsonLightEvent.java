@@ -3,7 +3,6 @@ package com.nextep.json.model;
 import java.util.Collection;
 import java.util.Date;
 
-import com.nextep.json.model.impl.JsonLightPlace;
 import com.nextep.json.model.impl.JsonMedia;
 
 public interface IJsonLightEvent extends IJsonWithParticipants {
@@ -16,9 +15,9 @@ public interface IJsonLightEvent extends IJsonWithParticipants {
 
 	void setName(String name);
 
-	JsonLightPlace getPlace();
+	IJsonLightPlace getPlace();
 
-	void setPlace(JsonLightPlace place);
+	void setPlace(IJsonLightPlace place);
 
 	Long getStartTime();
 

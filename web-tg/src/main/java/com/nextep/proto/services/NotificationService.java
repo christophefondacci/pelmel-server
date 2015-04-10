@@ -129,6 +129,7 @@ public interface NotificationService {
 	 * @param oldFriday
 	 * @param oldSaturday
 	 * @param oldSunday
+	 * @param oldWeekOfMonthOffset
 	 * @param oldDescriptions
 	 * @param newDescriptions
 	 * @param descriptionKey
@@ -141,7 +142,8 @@ public interface NotificationService {
 			Integer oldStartMinute, Integer oldEndHour, Integer oldEndMinute,
 			boolean oldMonday, boolean oldTuesday, boolean oldWednesday,
 			boolean oldThursday, boolean oldFriday, boolean oldSaturday,
-			boolean oldSunday, List<? extends Description> oldDescriptions,
+			boolean oldSunday, Integer oldWeekOfMonthOffset,
+			List<? extends Description> oldDescriptions,
 			String[] newDescriptions, String[] descriptionKey,
 			GeographicItem newEventPlace);
 

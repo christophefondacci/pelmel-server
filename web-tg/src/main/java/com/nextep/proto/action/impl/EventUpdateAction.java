@@ -286,6 +286,7 @@ public class EventUpdateAction extends AbstractAction implements
 			final Integer oldStartMinute = series.getStartMinute();
 			final Integer oldEndHour = series.getEndHour();
 			final Integer oldEndMinute = series.getEndMinute();
+			final Integer oldWeekOffset = series.getWeekOfMonthOffset();
 			series.setWeekOfMonthOffset(monthRecurrency == 0 ? null
 					: monthRecurrency);
 			series.setMonday(monday);
@@ -317,8 +318,8 @@ public class EventUpdateAction extends AbstractAction implements
 					user, eventId, oldName, oldEventPlace, oldStart, oldEnd,
 					oldStartHour, oldStartMinute, oldEndHour, oldEndMinute,
 					oldMonday, oldTuesday, oldWednesday, oldThursday,
-					oldFriday, oldSaturday, oldSunday, oldDescriptions,
-					descriptions, keys, geoItem);
+					oldFriday, oldSaturday, oldSunday, oldWeekOffset,
+					oldDescriptions, descriptions, keys, geoItem);
 		} else {
 			// Saving event back to our persistent data store
 			ContextHolder.toggleWrite();

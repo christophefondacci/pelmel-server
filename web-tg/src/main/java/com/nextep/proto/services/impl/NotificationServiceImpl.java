@@ -351,7 +351,7 @@ public class NotificationServiceImpl implements NotificationService {
 			GeographicItem newEventPlace) {
 		return sendEventSeriesUpdateEmailNotification(event, user, oldKey,
 				oldName, oldPlace, oldStart, oldEnd, null, null, null, null,
-				false, false, false, false, false, false, false,
+				false, false, false, false, false, false, false, null,
 				oldDescriptions, newDescriptions, descriptionKey, newEventPlace);
 	}
 
@@ -363,7 +363,8 @@ public class NotificationServiceImpl implements NotificationService {
 			Integer oldStartMinute, Integer oldEndHour, Integer oldEndMinute,
 			boolean oldMonday, boolean oldTuesday, boolean oldWednesday,
 			boolean oldThursday, boolean oldFriday, boolean oldSaturday,
-			boolean oldSunday, List<? extends Description> oldDescriptions,
+			boolean oldSunday, Integer oldWeekOfMonthOffset,
+			List<? extends Description> oldDescriptions,
 			String[] newDescriptions, String[] descriptionKey,
 			GeographicItem newEventPlace) {
 		try {
@@ -413,16 +414,22 @@ public class NotificationServiceImpl implements NotificationService {
 						String.valueOf(series.isSaturday()));
 				appendField(buf, "Sunday", String.valueOf(oldSunday),
 						String.valueOf(series.isSunday()));
+				appendField(
+						buf,
+						"Week of month",
+						oldWeekOfMonthOffset == null ? null : String
+								.valueOf(oldWeekOfMonthOffset),
+						String.valueOf(series.getWeekOfMonthOffset()));
 			} else {
 				// Getting event timezone
 				final String eventTimezone = eventManagementService
 						.getEventTimezoneId(event);
 				final Date localizedStart = eventManagementService.convertDate(
-						event.getStartDate(), eventTimezone, TimeZone
-								.getDefault().getID());
+						event.getStartDate(), TimeZone.getDefault().getID(),
+						eventTimezone);
 				final Date localizedEnd = eventManagementService.convertDate(
-						event.getEndDate(), eventTimezone, TimeZone
-								.getDefault().getID());
+						event.getEndDate(), TimeZone.getDefault().getID(),
+						eventTimezone);
 
 				appendField(buf, "Start date", oldStart,
 						dateFormatter.format(localizedStart));
@@ -452,8 +459,8 @@ public class NotificationServiceImpl implements NotificationService {
 			Place eventPlace, User user) {
 		return sendEventSeriesUpdateEmailNotification(event, user, "####",
 				null, null, null, null, null, null, null, null, false, false,
-				false, false, false, false, false, Collections.EMPTY_LIST,
-				null, null, eventPlace);
+				false, false, false, false, false, null,
+				Collections.EMPTY_LIST, null, null, eventPlace);
 	}
 
 	private String pad(Integer hour) {

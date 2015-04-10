@@ -2,6 +2,7 @@ package com.nextep.proto.blocks.impl;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -121,8 +122,11 @@ public class MessagingSupportImpl implements MessagingSupport,
 
 	@Override
 	public List<String> getMessageText(Message m) {
-		final List<String> messageLines = Arrays.asList(m.getMessage().split(
-				"\n"));
+		final List<String> messageLines = new ArrayList<String>();
+
+		for (String msgLine : m.getMessage().split("\n")) {
+			messageLines.add(DisplayHelper.getHtmlSafe(msgLine));
+		}
 		return messageLines;
 	}
 
