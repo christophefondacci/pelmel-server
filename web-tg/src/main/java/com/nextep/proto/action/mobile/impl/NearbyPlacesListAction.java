@@ -357,8 +357,11 @@ public class NearbyPlacesListAction extends AbstractAction implements
 		Map<String, Integer> likedPlacesMap = SearchHelper.unwrapFacets(
 				facetInfo, SearchHelper.getUserPlacesCategory());
 
+		// Hashing users attending events
+		final FacetInformation eventsFacetInfo = response
+				.getFacetInformation(SearchScope.EVENTS);
 		Map<String, Integer> eventsUsersMap = SearchHelper.unwrapFacets(
-				facetInfo, SearchHelper.getUserEventsCategory());
+				eventsFacetInfo, SearchHelper.getUserEventsCategory());
 
 		List<? extends Place> places;
 		List<? extends Event> events;
