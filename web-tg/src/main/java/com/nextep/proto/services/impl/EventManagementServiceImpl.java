@@ -362,11 +362,20 @@ public class EventManagementServiceImpl implements EventManagementService {
 				// Compute the day delta within a week
 				int delta = day - dayOfWeek;
 
+				// If this is today, we need to consider time of day
+				final int currentHour = c.get(Calendar.HOUR_OF_DAY);
+				final int currentMinute = c.get(Calendar.MINUTE);
+
+				// Current time in the form of HHMM integer for numeric
+				// comparison
+				final int currentTime = currentHour * 100 + currentMinute;
+
 				// If the series is for yesterday but the end finishes the day
 				// after, then we need to consider
 				int hourDelta = 0;
-				if (delta == -1 && !isStart
-						&& series.getEndHour() < series.getStartHour()) {
+				if (delta == -1
+						&& series.getEndHour() < series.getStartHour()
+						&& (series.getEndHour() * 100 + series.getEndMinute()) > currentTime) {
 					delta = 0;
 					hourDelta = -24;
 				}
@@ -374,14 +383,6 @@ public class EventManagementServiceImpl implements EventManagementService {
 				if (delta < 0) {
 					delta += 7;
 				} else if (delta == 0) {
-
-					// If this is today, we need to consider time of day
-					final int currentHour = c.get(Calendar.HOUR_OF_DAY);
-					final int currentMinute = c.get(Calendar.MINUTE);
-
-					// Current time in the form of HHMM integer for numeric
-					// comparison
-					final int currentTime = currentHour * 100 + currentMinute;
 
 					// Computing event time
 					int eventTime;

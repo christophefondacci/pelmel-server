@@ -2,6 +2,7 @@ package com.videopolis.apis.model.impl;
 
 import com.videopolis.apis.model.ApisContext;
 import com.videopolis.apis.service.ApiMutableResponse;
+import com.videopolis.apis.service.ApiService;
 import com.videopolis.cals.model.CalContext;
 import com.videopolis.smaug.service.SearchService;
 
@@ -13,34 +14,44 @@ import com.videopolis.smaug.service.SearchService;
  */
 public class ApisContextImpl implements ApisContext {
 
-    private ApiMutableResponse apiResponse;
-    private CalContext calContext;
-    private SearchService searchService;
+	private ApiMutableResponse apiResponse;
+	private CalContext calContext;
+	private SearchService searchService;
+	private ApiService apiService;
 
-    @Override
-    public ApiMutableResponse getApiResponse() {
-	return apiResponse;
-    }
+	@Override
+	public ApiMutableResponse getApiResponse() {
+		return apiResponse;
+	}
 
-    @Override
-    public CalContext getCalContext() {
-	return calContext;
-    }
+	@Override
+	public CalContext getCalContext() {
+		return calContext;
+	}
 
-    @Override
-    public SearchService getSearchService() {
-	return searchService;
-    }
+	@Override
+	public SearchService getSearchService() {
+		return searchService;
+	}
 
-    public void setApiResponse(ApiMutableResponse apiResponse) {
-	this.apiResponse = apiResponse;
-    }
+	public void setApiResponse(ApiMutableResponse apiResponse) {
+		this.apiResponse = apiResponse;
+	}
 
-    public void setCalContext(CalContext calContext) {
-	this.calContext = calContext;
-    }
+	public void setCalContext(CalContext calContext) {
+		this.calContext = calContext;
+	}
 
-    public void setSearchService(SearchService searchService) {
-	this.searchService = searchService;
-    }
+	public void setSearchService(SearchService searchService) {
+		this.searchService = searchService;
+	}
+
+	@Override
+	public ApiService getApiService() {
+		return apiService;
+	}
+
+	public void setApiService(ApiService apiService) {
+		this.apiService = apiService;
+	}
 }

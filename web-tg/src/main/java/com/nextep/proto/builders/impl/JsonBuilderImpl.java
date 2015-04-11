@@ -592,8 +592,16 @@ public class JsonBuilderImpl implements JsonBuilder {
 
 	private ItemKey buildEventLikedKey(Event event) {
 		if (event instanceof EventSeries) {
-			final Date nextEnd = eventManagementService.computeNextStart(
-					(EventSeries) event, new Date(), false);
+			// Extracting event timezone
+			final City city = eventManagementService.getEventCity(event);
+			String timezoneId = TimeZone.getDefault().getID();
+			if (city != null) {
+				timezoneId = city.getTimezoneId();
+			}
+
+			// Computing next date RELATIVE TO EVENT TIMEZONE
+			final Date nextEnd = eventManagementService.computeNext(
+					(EventSeries) event, timezoneId, false);
 			if (nextEnd != null) {
 				return new ExpirableItemKeyImpl(event.getKey(),
 						nextEnd.getTime());
@@ -744,6 +752,9 @@ public class JsonBuilderImpl implements JsonBuilder {
 					event.setNextStart(nextStartTime);
 
 					// Participants
+
+					// Registering event place as child
+					series.add(place);
 					final ItemKey likedKey = buildEventLikedKey(series);
 					final Integer participants = eventUsersMap.get(likedKey
 							.toString());
@@ -844,6 +855,7 @@ public class JsonBuilderImpl implements JsonBuilder {
 			hour.setType(event.getCalendarType().name());
 			hour.setRecurrency(event.getWeekOfMonthOffset());
 			// Filling participants
+			event.add(eventCity);
 			fillJsonEventParticipants(event, response, hour);
 			fillDescription(event, hour, l);
 

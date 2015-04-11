@@ -2,6 +2,7 @@ package com.videopolis.apis.model;
 
 import com.videopolis.apis.service.ApiMutableResponse;
 import com.videopolis.apis.service.ApiResponse;
+import com.videopolis.apis.service.ApiService;
 import com.videopolis.cals.model.CalContext;
 import com.videopolis.cals.service.CalService;
 import com.videopolis.smaug.service.SearchService;
@@ -44,6 +45,12 @@ public interface ApisContext {
 	 */
 	SearchService getSearchService();
 
+	/**
+	 * Exposes the API Service for use in custom adapters
+	 * 
+	 * @return the {@link ApiService}
+	 */
+	ApiService getApiService();
 	/**
 	 * Register a CAL object in the current APIS execution pipeline. Registering
 	 * a CAL object makes "getItem()" calls faster as an already resolved bean

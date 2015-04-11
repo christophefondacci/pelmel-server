@@ -149,7 +149,11 @@ public class EventSeriesImpl extends AbstractCalmObject implements
 
 	@Override
 	public void setWeekOfMonthOffset(Integer weekOfMonthOffset) {
-		this.weekOfMonthOffset = weekOfMonthOffset;
+		if (weekOfMonthOffset != null && weekOfMonthOffset.intValue() == 0) {
+			this.weekOfMonthOffset = null;
+		} else {
+			this.weekOfMonthOffset = weekOfMonthOffset;
+		}
 	}
 
 	@Override

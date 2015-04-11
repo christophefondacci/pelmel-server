@@ -6,12 +6,22 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.nextep.events.model.EventSeries;
+import com.nextep.geo.model.City;
+import com.nextep.geo.model.GeographicItem;
+import com.nextep.geo.model.Place;
 import com.nextep.proto.services.EventManagementService;
 import com.nextep.users.model.User;
 import com.videopolis.apis.cals.impl.PaginationInfoAdapter;
+import com.videopolis.apis.exception.ApisException;
+import com.videopolis.apis.factory.ApisFactory;
 import com.videopolis.apis.model.ApisContext;
 import com.videopolis.apis.model.ApisCustomAdapter;
+import com.videopolis.apis.model.ApisRequest;
+import com.videopolis.apis.service.ApiResponse;
 import com.videopolis.calm.model.CalmObject;
 import com.videopolis.calm.model.ItemKey;
 import com.videopolis.calm.model.impl.ExpirableItemKeyImpl;
@@ -26,6 +36,8 @@ import com.videopolis.smaug.model.impl.SearchWindowImpl;
 
 public class ApisExpirableLikesCustomAdapter implements ApisCustomAdapter {
 
+	private static final Log LOGGER = LogFactory
+			.getLog(ApisExpirableLikesCustomAdapter.class);
 	public static final String APIS_ALIAS_LIKES = "expirableLikes";
 	private EventManagementService eventManagementService;
 	private String alias;
@@ -47,8 +59,28 @@ public class ApisExpirableLikesCustomAdapter implements ApisCustomAdapter {
 			final CalmObject parent = parents[0];
 			if (parent instanceof EventSeries) {
 				final EventSeries series = (EventSeries) parent;
-				final Date nextEnd = eventManagementService.computeNextStart(
-						series, new Date(), false);
+
+				String timezoneId = null;
+				// Request for getting series location
+				try {
+					ApisRequest request = ApisFactory.createRequest(
+							series.getLocationKey().getType()).uniqueKey(
+							series.getLocationKey().getId());
+					ApiResponse response = context.getApiService().execute(
+							request, context.getCalContext());
+					GeographicItem item = (GeographicItem) response
+							.getUniqueElement();
+					if (item instanceof Place) {
+						timezoneId = ((Place) item).getCity().getTimezoneId();
+					} else if (item instanceof City) {
+						timezoneId = ((City) item).getTimezoneId();
+					}
+				} catch (ApisException e) {
+					LOGGER.error("Cannot get city for event timezone");
+				}
+
+				final Date nextEnd = eventManagementService.computeNext(series,
+						timezoneId, false);
 
 				// Default to series unique key
 				ItemKey likeExpirableKey = series.getKey();

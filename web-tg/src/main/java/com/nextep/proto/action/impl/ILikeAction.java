@@ -6,6 +6,8 @@ import java.util.List;
 
 import net.sf.json.JSONObject;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.nextep.activities.model.Activity;
@@ -14,17 +16,21 @@ import com.nextep.activities.model.ActivityType;
 import com.nextep.activities.model.MutableActivity;
 import com.nextep.cal.util.services.CalPersistenceService;
 import com.nextep.events.model.EventSeries;
+import com.nextep.geo.model.City;
 import com.nextep.json.model.impl.JsonLikeInfo;
+import com.nextep.messages.model.Message;
 import com.nextep.messages.model.MutableMessage;
 import com.nextep.proto.action.base.AbstractAction;
 import com.nextep.proto.action.model.CurrentUserAware;
 import com.nextep.proto.action.model.JsonProvider;
 import com.nextep.proto.action.model.OverviewAware;
+import com.nextep.proto.apis.adapters.ApisEventLocationAdapter;
 import com.nextep.proto.apis.adapters.ApisExpirableLikesCustomAdapter;
 import com.nextep.proto.blocks.CurrentUserSupport;
 import com.nextep.proto.blocks.OverviewSupport;
 import com.nextep.proto.model.Constants;
 import com.nextep.proto.services.EventManagementService;
+import com.nextep.proto.services.NotificationService;
 import com.nextep.proto.spring.ContextHolder;
 import com.nextep.smaug.service.SearchPersistenceService;
 import com.nextep.smaug.solr.model.LikeActionResult;
@@ -33,6 +39,7 @@ import com.videopolis.apis.factory.ApisFactory;
 import com.videopolis.apis.factory.SearchRestriction;
 import com.videopolis.apis.helper.ApisRegistry;
 import com.videopolis.apis.model.ApisCriterion;
+import com.videopolis.apis.model.ApisItemKeyAdapter;
 import com.videopolis.apis.model.ApisRequest;
 import com.videopolis.apis.service.ApiCompositeResponse;
 import com.videopolis.calm.factory.CalmFactory;
@@ -47,6 +54,7 @@ import com.videopolis.smaug.common.model.SearchScope;
 public class ILikeAction extends AbstractAction implements CurrentUserAware,
 		OverviewAware, JsonProvider {
 
+	private static final Log LOGGER = LogFactory.getLog(ILikeAction.class);
 	/**
 	 * 
 	 */
@@ -56,6 +64,9 @@ public class ILikeAction extends AbstractAction implements CurrentUserAware,
 	private static final String APIS_ALIAS_USER_LIKERS = "likers";
 	private static final String APIS_ALIAS_USER_EXPIRABLE_LIKERS = "expLikers";
 	private static final String APIS_ALIAS_LIKED_OBJ = "likedObj";
+
+	private static final ApisItemKeyAdapter eventLocalizationAdapter = new ApisEventLocationAdapter();
+
 	private SearchPersistenceService searchPersistenceService;
 	private CalPersistenceService messageService;
 	private CalPersistenceService activitiesService;
@@ -63,6 +74,8 @@ public class ILikeAction extends AbstractAction implements CurrentUserAware,
 	private EventManagementService eventManagementService;
 	private CurrentUserSupport currentUserSupport;
 	private OverviewSupport overviewSupport;
+	@Autowired
+	private NotificationService notificationService;
 	private LikeActionResult likeResult;
 	private int likes = 0;
 
@@ -81,7 +94,7 @@ public class ILikeAction extends AbstractAction implements CurrentUserAware,
 				.addCriterion(
 						(ApisCriterion) currentUserSupport
 								.createApisCriterionFor(getNxtpUserToken(),
-										true).with(
+										false).with(
 										Activity.class,
 										ActivityRequestTypes.fromUser(-1,
 												ActivityType.LIKE)))
@@ -95,6 +108,11 @@ public class ILikeAction extends AbstractAction implements CurrentUserAware,
 												SearchScope.CHILDREN, 1, 0)
 												.aliasedBy(
 														APIS_ALIAS_USER_LIKERS))
+								// We need event localization for timezone
+								// computation
+								.addCriterion(
+										SearchRestriction
+												.adaptKey(eventLocalizationAdapter))
 								.addCriterion(
 										SearchRestriction
 												.customAdapt(
@@ -160,6 +178,18 @@ public class ILikeAction extends AbstractAction implements CurrentUserAware,
 				msg.setMessage("This user likes you!");
 				msg.setMessageDate(new Date());
 				messageService.saveItem(msg);
+				// Notifying
+				try {
+					final List<? extends Message> messages = currentUser
+							.get(Message.class);
+					notificationService.sendNotification((User) likedItem,
+							msg.getMessage(),
+							(messages == null ? 0 : messages.size()) + 1, null);
+				} catch (Exception e) {
+					LOGGER.error(
+							"Unable to send push notification for ILIKE message: "
+									+ e.getMessage(), e);
+				}
 			}
 
 		} else {
@@ -213,8 +243,9 @@ public class ILikeAction extends AbstractAction implements CurrentUserAware,
 	private ItemKey computeSearchLikeKey(CalmObject likedItem) {
 		if (likedItem instanceof EventSeries) {
 			final EventSeries series = (EventSeries) likedItem;
-			final Date nextEnd = eventManagementService.computeNextStart(
-					series, new Date(), false);
+			final City city = eventManagementService.getEventCity(series);
+			final Date nextEnd = eventManagementService.computeNext(series,
+					city.getTimezoneId(), false);
 			return new ExpirableItemKeyImpl(series.getKey(), nextEnd.getTime());
 		}
 		return likedItem.getKey();
