@@ -378,10 +378,10 @@
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>
-		    <groupId>com.relayrides</groupId>
-		    <artifactId>pushy</artifactId>
-		    <version>0.4</version>
-		</dependency>
+	         <groupId>com.notnoop.apns</groupId>
+	         <artifactId>apns</artifactId>
+	         <version>1.0.0.Beta6</version>
+	    </dependency>
 		<dependency>
 			<groupId>javax.mail</groupId>
 			<artifactId>mail</artifactId>

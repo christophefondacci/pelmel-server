@@ -2,8 +2,6 @@ package com.nextep.proto.services.impl;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -24,7 +22,6 @@ import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
-import javax.net.ssl.SSLHandshakeException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -50,19 +47,9 @@ import com.nextep.proto.services.UrlService;
 import com.nextep.proto.spring.ContextHolder;
 import com.nextep.users.model.MutableUser;
 import com.nextep.users.model.User;
-import com.relayrides.pushy.apns.ApnsEnvironment;
-import com.relayrides.pushy.apns.ExpiredToken;
-import com.relayrides.pushy.apns.ExpiredTokenListener;
-import com.relayrides.pushy.apns.FailedConnectionListener;
-import com.relayrides.pushy.apns.PushManager;
-import com.relayrides.pushy.apns.PushManagerConfiguration;
-import com.relayrides.pushy.apns.RejectedNotificationListener;
-import com.relayrides.pushy.apns.RejectedNotificationReason;
-import com.relayrides.pushy.apns.util.ApnsPayloadBuilder;
-import com.relayrides.pushy.apns.util.MalformedTokenStringException;
-import com.relayrides.pushy.apns.util.SSLContextUtil;
-import com.relayrides.pushy.apns.util.SimpleApnsPushNotification;
-import com.relayrides.pushy.apns.util.TokenUtil;
+import com.notnoop.apns.APNS;
+import com.notnoop.apns.ApnsService;
+import com.notnoop.apns.ApnsServiceBuilder;
 import com.videopolis.apis.exception.ApisException;
 import com.videopolis.apis.factory.ApisFactory;
 import com.videopolis.apis.factory.SearchRestriction;
@@ -109,7 +96,7 @@ public class NotificationServiceImpl implements NotificationService {
 	@Autowired
 	private EventManagementService eventManagementService;
 
-	private PushManager<SimpleApnsPushNotification> pushManager;
+	private ApnsService apnsService;
 
 	// Push information
 	private String pushKeyPath;
@@ -122,120 +109,65 @@ public class NotificationServiceImpl implements NotificationService {
 	// Date formatter
 	private DateFormat dateFormatter = new SimpleDateFormat("yyyy/MM/dd HH:mm");
 
-	private class MyFailedConnectionListener implements
-			FailedConnectionListener<SimpleApnsPushNotification> {
-
-		@Override
-		public void handleFailedConnection(
-				final PushManager<? extends SimpleApnsPushNotification> pushManager,
-				final Throwable cause) {
-
-			LOGGER.error("PUSH: connection failed: " + cause.getMessage(),
-					cause);
-			if (cause instanceof SSLHandshakeException) {
-				// This is probably a permanent failure, and we should shut down
-				// the PushManager.
-				try {
-					pushManager.shutdown();
-				} catch (InterruptedException e) {
-					LOGGER.error("Unable to shutdown: " + e.getMessage(), e);
-				}
-			}
-		}
-	}
-
-	private class MyRejectedNotificationListener implements
-			RejectedNotificationListener<SimpleApnsPushNotification> {
-		@Override
-		public void handleRejectedNotification(
-				PushManager<? extends SimpleApnsPushNotification> pushManager,
-				SimpleApnsPushNotification notification,
-				RejectedNotificationReason rejectionReason) {
-			LOGGER.error("PUSH: Notification rejected (reason: "
-					+ rejectionReason.getErrorCode() + ") '"
-					+ notification.getPayload() + "'");
-		}
-	}
-
-	private class MyExpiredTokenListener implements
-			ExpiredTokenListener<SimpleApnsPushNotification> {
-
-		@Override
-		public void handleExpiredTokens(
-				final PushManager<? extends SimpleApnsPushNotification> pushManager,
-				final Collection<ExpiredToken> expiredTokens) {
-			if (expiredTokens == null) {
-				return;
-			}
-			LOGGER.info("PUSH: Processing " + expiredTokens.size()
-					+ " expired tokens");
-			for (final ExpiredToken expiredToken : expiredTokens) {
-				final String token = Arrays.toString(expiredToken.getToken());
-				LOGGER.info("PUSH: Processing expired token '" + token + "'");
-				// Stop sending push notifications to each expired token if the
-				// expiration
-				// time is after the last time the app registered that token.
-				try {
-					ApisRequest request = ApisFactory.createCompositeRequest();
-					request.addCriterion(SearchRestriction.alternateKey(
-							User.class,
-							CalmFactory.createKey(User.PUSH_TOKEN_TYPE, token))
-							.aliasedBy(APIS_ALIAS_USER));
-					final ApiCompositeResponse response = (ApiCompositeResponse) apiService
-							.execute(request, ContextFactory
-									.createContext(Locale.getDefault()));
-					final User user = response.getUniqueElement(User.class,
-							APIS_ALIAS_USER);
-					if (user != null) {
-						if (user.getOnlineTimeout().compareTo(
-								expiredToken.getExpiration()) < 0) {
-							ContextHolder.toggleWrite();
-							((MutableUser) user).setPushDeviceId(null);
-							usersService.saveItem(user);
-							LOGGER.info("PUSH: unregistering device ID for user "
-									+ user.getKey()
-									+ " - "
-									+ Arrays.toString(expiredToken.getToken()));
-						}
-					}
-				} catch (CalException | ApisException e) {
-					LOGGER.error(
-							"PUSH: unable to create APIS criterion to fetch token ["
-									+ expiredToken + "]", e);
-				}
-			}
-		}
-	}
-
 	public void init() throws Exception {
 		if (pushEnabled) {
-			final ApnsEnvironment apnsEnv = production ? ApnsEnvironment
-					.getProductionEnvironment() : ApnsEnvironment
-					.getSandboxEnvironment();
-			pushManager = new PushManager<SimpleApnsPushNotification>(apnsEnv,
-					SSLContextUtil.createDefaultSSLContext(pushKeyPath,
-							pushKeyPassword), null, null, null,
-					new PushManagerConfiguration(), "PelmelPush");
-			pushManager.start();
-			pushManager
-					.registerFailedConnectionListener(new MyFailedConnectionListener());
-			pushManager
-					.registerExpiredTokenListener(new MyExpiredTokenListener());
-			pushManager
-					.registerRejectedNotificationListener(new MyRejectedNotificationListener());
+			final ApnsServiceBuilder builder = APNS.newService().withCert(
+					pushKeyPath, pushKeyPassword);
+			if (production) {
+				apnsService = builder.withProductionDestination().build();
+			} else {
+				apnsService = builder.withSandboxDestination().build();
+			}
 		}
 	}
 
 	@PreDestroy
 	public void shutdown() throws Exception {
-		if (pushManager != null) {
-			pushManager.shutdown();
-		}
+		apnsService.stop();
 	}
 
 	@Override
 	public void checkExpiredPushDevices() {
-		pushManager.requestExpiredTokens();
+		// pushManager.requestExpiredTokens();
+		final Map<String, Date> expiredTokens = apnsService
+				.getInactiveDevices();
+		if (expiredTokens == null) {
+			return;
+		}
+		LOGGER.info("PUSH: Processing " + expiredTokens.size()
+				+ " expired tokens");
+		for (final String token : expiredTokens.keySet()) {
+			final Date expirationDate = expiredTokens.get(token);
+			LOGGER.info("PUSH: Processing expired token '" + token
+					+ "' expired on '" + expirationDate + "'");
+			// Stop sending push notifications to each expired token if the
+			// expiration
+			// time is after the last time the app registered that token.
+			try {
+				ApisRequest request = ApisFactory.createCompositeRequest();
+				request.addCriterion(SearchRestriction.alternateKey(User.class,
+						CalmFactory.createKey(User.PUSH_TOKEN_TYPE, token))
+						.aliasedBy(APIS_ALIAS_USER));
+				final ApiCompositeResponse response = (ApiCompositeResponse) apiService
+						.execute(request, ContextFactory.createContext(Locale
+								.getDefault()));
+				final User user = response.getUniqueElement(User.class,
+						APIS_ALIAS_USER);
+				if (user != null) {
+					if (user.getOnlineTimeout().compareTo(expirationDate) < 0) {
+						ContextHolder.toggleWrite();
+						((MutableUser) user).setPushDeviceId(null);
+						usersService.saveItem(user);
+						LOGGER.info("PUSH: unregistering device ID for user "
+								+ user.getKey() + " - " + token);
+					}
+				}
+			} catch (CalException | ApisException e) {
+				LOGGER.error(
+						"PUSH: unable to create APIS criterion to fetch token ["
+								+ token + "]", e);
+			}
+		}
 	}
 
 	@Override
@@ -246,30 +178,10 @@ public class NotificationServiceImpl implements NotificationService {
 
 			LOGGER.info("Sending push notification to user [" + user.getKey()
 					+ "]");
-			byte[] token;
-			try {
-				token = TokenUtil
-						.tokenStringToByteArray(user.getPushDeviceId());
 
-				final ApnsPayloadBuilder payloadBuilder = new ApnsPayloadBuilder();
-
-				payloadBuilder.setAlertBody(message);
-				payloadBuilder.setBadgeNumber(badgeCount);
-				// payloadBuilder.setSoundFileName("ring-ring.aiff");
-
-				final String payload = payloadBuilder
-						.buildWithDefaultMaximumLength();
-
-				pushManager.getQueue().put(
-						new SimpleApnsPushNotification(token, payload));
-			} catch (MalformedTokenStringException e) {
-				LOGGER.error(
-						"PUSH: Invalid token string '" + user.getPushDeviceId(),
-						e);
-			} catch (InterruptedException e) {
-				LOGGER.error("PUSH: Interrupted while adding PUSH to queue '"
-						+ user.getPushDeviceId(), e);
-			}
+			String payload = APNS.newPayload().badge(badgeCount)
+					.alertBody(message).build();
+			apnsService.push(user.getPushDeviceId(), payload);
 		}
 		return new AsyncResult<Boolean>(true);
 	}
