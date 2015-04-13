@@ -36,6 +36,9 @@ public class UserSearchItemImpl extends SearchItemImpl {
 	private long currentPlaceTimeout;
 
 	@Field
+	private int available = 0;
+
+	@Field
 	private List<String> places = new ArrayList<String>();
 
 	@Field
@@ -126,5 +129,13 @@ public class UserSearchItemImpl extends SearchItemImpl {
 
 	public void setCurrentPlaceTimeout(long currentPlaceTimeout) {
 		this.currentPlaceTimeout = currentPlaceTimeout;
+	}
+
+	public void setAvailable(boolean available) {
+		this.available = available ? 1 : 0;
+	}
+
+	public boolean isAvailable() {
+		return this.available > 0;
 	}
 }

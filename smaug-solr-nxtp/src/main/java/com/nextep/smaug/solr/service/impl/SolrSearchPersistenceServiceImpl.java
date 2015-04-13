@@ -600,6 +600,12 @@ public class SolrSearchPersistenceServiceImpl implements
 			searchItem.setCurrentPlaceTimeout(user.getLastLocationTime()
 					.getTime() + lastSeenMaxTime);
 		}
+
+		// Availability
+		searchItem.setAvailable(user.getPushDeviceId() != null
+				&& !user.getPushDeviceId().isEmpty());
+
+		// Storing
 		try {
 			userSolrServer.addBean(searchItem);
 			userSolrServer.commit();

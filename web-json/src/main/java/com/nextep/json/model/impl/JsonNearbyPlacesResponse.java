@@ -11,6 +11,9 @@ public class JsonNearbyPlacesResponse {
 	private List<JsonActivity> nearbyActivities = new ArrayList<JsonActivity>();
 	private List<JsonLightUser> nearbyUsers = new ArrayList<JsonLightUser>();
 	private List<JsonLightEvent> nearbyEvents = new ArrayList<JsonLightEvent>();
+	private int nearbyUsersCount;
+	private int nearbyPlacesCount;
+	private int nearbyEventsCount;
 
 	public void setPlaces(List<JsonPlace> places) {
 		this.places = places;
@@ -66,5 +69,29 @@ public class JsonNearbyPlacesResponse {
 
 	public void setNearbyEvents(List<JsonLightEvent> nearbyEvents) {
 		this.nearbyEvents = nearbyEvents;
+	}
+
+	public void setNearbyEventsCount(int nearbyEventsCount) {
+		this.nearbyEventsCount = nearbyEventsCount;
+	}
+
+	public void setNearbyPlacesCount(int nearbyPlacesCount) {
+		this.nearbyPlacesCount = nearbyPlacesCount;
+	}
+
+	public void setNearbyUsersCount(int nearbyUsersCount) {
+		this.nearbyUsersCount = nearbyUsersCount;
+	}
+
+	public int getNearbyEventsCount() {
+		return nearbyEventsCount;
+	}
+
+	public int getNearbyPlacesCount() {
+		return nearbyPlacesCount;
+	}
+
+	public int getNearbyUsersCount() {
+		return nearbyUsersCount;
 	}
 }

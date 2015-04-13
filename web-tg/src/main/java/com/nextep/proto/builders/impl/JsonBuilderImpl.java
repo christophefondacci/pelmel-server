@@ -238,7 +238,7 @@ public class JsonBuilderImpl implements JsonBuilder {
 		final List<? extends Message> unreadMessages = user.get(Message.class);
 		json.setUnreadMsgCount(unreadMessages.size());
 		json.setOnline(user.getOnlineTimeout().getTime() > System
-				.currentTimeMillis());
+				.currentTimeMillis() || user.getPushDeviceId() != null);
 
 		// Filling city
 		try {
@@ -344,7 +344,7 @@ public class JsonBuilderImpl implements JsonBuilder {
 			}
 		}
 		jsonUser.setOnline(user.getOnlineTimeout().getTime() > System
-				.currentTimeMillis());
+				.currentTimeMillis() || user.getPushDeviceId() != null);
 		return jsonUser;
 	}
 

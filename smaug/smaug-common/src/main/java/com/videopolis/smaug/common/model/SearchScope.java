@@ -30,7 +30,7 @@ public enum SearchScope {
 	/** Scope for boosted elements */
 	BOOSTED_PLACES,
 	/** Scope for user-related searches */
-	USERS,
+	USERS, USERS_OFFLINE, USERS_ONLINE,
 	/** Scope for event-related searches */
 	EVENTS, PLACES, NEARBY_ACTIVITIES
 }

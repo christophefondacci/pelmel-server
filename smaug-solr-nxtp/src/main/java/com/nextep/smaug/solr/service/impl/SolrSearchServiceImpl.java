@@ -77,6 +77,8 @@ public class SolrSearchServiceImpl implements SearchService {
 
 	private static final DateFormat EVENT_DATE_FORMAT = new SimpleDateFormat(
 			"yyyyMMddHHmmss");
+	private static final DateFormat USERS_DATE_FORMAT = new SimpleDateFormat(
+			"yyyyMMddHHmmss");
 
 	private final static Log log = LogFactory
 			.getLog(SolrSearchServiceImpl.class);
@@ -155,6 +157,15 @@ public class SolrSearchServiceImpl implements SearchService {
 			query.addSortField(DISTANCE_FIELD, SolrQuery.ORDER.asc);
 			return processSolrQuery(eventsSolrServer, query, settings, window);
 		} else {
+			final Date now = new Date();
+			final String nowTimeStr = USERS_DATE_FORMAT.format(now);
+			if (settings.getSearchScope() == SearchScope.USERS_ONLINE) {
+				query.setQuery("onlineTimeout:[" + nowTimeStr
+						+ " TO *] OR available:1");
+			} else if (settings.getSearchScope() == SearchScope.USERS_OFFLINE) {
+				query.setQuery("onlineTimeout:[* TO " + nowTimeStr
+						+ "] AND available:0");
+			}
 			query.addSortField(DISTANCE_FIELD, SolrQuery.ORDER.asc);
 			return processSolrQuery(userSolrServer, query, settings, window);
 		}
