@@ -397,14 +397,6 @@ public class NearbyPlacesListAction extends AbstractAction implements
 		// List<? extends Activity> activities;
 		List<? extends User> users;
 
-		// Extracting items count
-		PaginationInfo usersPagination = response
-				.getPaginationInfo(APIS_ALIAS_NEARBY_USERS);
-		int usersCount = usersPagination.getItemCount();
-		PaginationInfo placesPagination = response
-				.getPaginationInfo(APIS_ALIAS_NEARBY_PLACES);
-		int placesCount = placesPagination.getItemCount();
-
 		if (parentKey == null) {
 			places = response
 					.getElements(Place.class, APIS_ALIAS_NEARBY_PLACES);
@@ -417,10 +409,6 @@ public class NearbyPlacesListAction extends AbstractAction implements
 				users.addAll((List) offlineUsers);
 			}
 
-			// Adding offline users count
-			PaginationInfo offlinePagination = response
-					.getPaginationInfo(APIS_ALIAS_NEARBY_USERS_OFFLINE);
-			usersCount += offlinePagination.getItemCount();
 		} else {
 			// If we had a parent key set we need to extract places from its
 			// parent geographic element
@@ -431,6 +419,24 @@ public class NearbyPlacesListAction extends AbstractAction implements
 			// APIS_ALIAS_NEARBY_ACTIVITIES);
 			users = city.get(User.class, APIS_ALIAS_NEARBY_USERS);
 		}
+
+		// Extracting items count
+		PaginationInfo usersPagination = response
+				.getPaginationInfo(APIS_ALIAS_NEARBY_USERS);
+		int usersCount = usersPagination == null ? users.size()
+				: usersPagination.getItemCount();
+
+		// Adding offline users count
+		PaginationInfo offlinePagination = response
+				.getPaginationInfo(APIS_ALIAS_NEARBY_USERS_OFFLINE);
+		if (usersPagination != null && offlinePagination != null) {
+			usersCount += offlinePagination.getItemCount();
+		}
+
+		PaginationInfo placesPagination = response
+				.getPaginationInfo(APIS_ALIAS_NEARBY_PLACES);
+		int placesCount = placesPagination == null ? places.size()
+				: placesPagination.getItemCount();
 
 		// Getting events from response root
 		events = response.getElements(Event.class, APIS_ALIAS_NEARBY_EVENTS);
