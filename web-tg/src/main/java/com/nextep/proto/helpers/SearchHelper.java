@@ -256,6 +256,10 @@ public final class SearchHelper {
 		return getFacetCategory("currentPlace");
 	}
 
+	public static FacetCategory getUserAutoPlaceCategory() {
+		return getFacetCategory("currentAutoPlace");
+	}
+
 	public static List<FacetCategory> buildUserPlacesCategories() {
 		return Arrays.asList(getUserCurrentPlaceCategory(),
 				getUserPlacesCategory());

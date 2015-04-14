@@ -63,6 +63,7 @@ public class MobileOverviewPlaceAction extends AbstractAction implements
 	private static final String APIS_ALIAS_PLACE = "p";
 	private static final String APIS_ALIAS_USER_LIKERS = "ulikers";
 	private static final String APIS_ALIAS_USER_CHECKEDIN = "ucheckin";
+	private static final String APIS_ALIAS_USER_AUTO_LOCALIZATION = "autoloc";
 	private static final String APIS_ALIAS_COMMENTS = "comments";
 
 	// Injected supports
@@ -105,6 +106,10 @@ public class MobileOverviewPlaceAction extends AbstractAction implements
 						maxRelatedElements, 0).facettedBy(userFacetCategories)
 				.aliasedBy(APIS_ALIAS_USER_CHECKEDIN)
 				.with(Media.class, MediaRequestTypes.THUMB));
+		// Auto-localization
+		objCriterion.addCriterion(SearchRestriction.withContained(User.class,
+				SearchScope.USER_LOCALIZATION, 1, 0).aliasedBy(
+				APIS_ALIAS_USER_AUTO_LOCALIZATION));
 
 		// Likers
 		objCriterion.addCriterion((ApisCriterion) SearchRestriction
@@ -208,7 +213,10 @@ public class MobileOverviewPlaceAction extends AbstractAction implements
 		// Filling counts of likes and users near
 		final PaginationInfo nearPagination = response
 				.getPaginationInfo(APIS_ALIAS_USER_CHECKEDIN);
-		json.setUsers(nearPagination.getItemCount());
+		final PaginationInfo autoLocPagination = response
+				.getPaginationInfo(APIS_ALIAS_USER_AUTO_LOCALIZATION);
+		json.setUsers(nearPagination.getItemCount()
+				+ autoLocPagination.getItemCount());
 
 		// Users lastly localized in that place
 		final List<? extends User> inUsers = overviewObject.get(User.class,

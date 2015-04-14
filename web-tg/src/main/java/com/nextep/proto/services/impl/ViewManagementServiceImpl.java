@@ -16,6 +16,7 @@ import com.nextep.proto.spring.ContextHolder;
 import com.nextep.statistic.model.MutableItemView;
 import com.nextep.users.model.User;
 import com.videopolis.calm.model.CalmObject;
+import com.videopolis.calm.model.ItemKey;
 
 public class ViewManagementServiceImpl implements ViewManagementService {
 	private static final Log LOGGER = LogFactory
@@ -33,14 +34,20 @@ public class ViewManagementServiceImpl implements ViewManagementService {
 
 	@Override
 	@Async
-	public Future<CalmObject> logViewCount(CalmObject viewedObject, User user,
+	public Future<Object> logViewCount(CalmObject viewedObject, User user,
+			String viewType) {
+		return logViewCountByKey(viewedObject.getKey(), user, viewType);
+	}
+
+	@Override
+	public Future<Object> logViewCountByKey(ItemKey viewedObjectKey, User user,
 			String viewType) {
 		// Counting views
 		try {
 			ContextHolder.toggleWrite();
 			final MutableItemView itemView = (MutableItemView) viewsService
 					.createTransientObject();
-			itemView.setViewedItemKey(viewedObject.getKey());
+			itemView.setViewedItemKey(viewedObjectKey);
 			if (user != null) {
 				itemView.setViewerItemKey(user.getKey());
 			}
@@ -52,7 +59,7 @@ public class ViewManagementServiceImpl implements ViewManagementService {
 		} catch (Throwable t) {
 			LOGGER.error("Unable to store view stat : " + t.getMessage(), t);
 		}
-		return new AsyncResult<CalmObject>(viewedObject);
+		return new AsyncResult<Object>(viewedObjectKey);
 	}
 
 	@Override

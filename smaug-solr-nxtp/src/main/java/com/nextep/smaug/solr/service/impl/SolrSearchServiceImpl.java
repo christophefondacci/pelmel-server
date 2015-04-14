@@ -195,6 +195,13 @@ public class SolrSearchServiceImpl implements SearchService {
 						+ " TO *]");
 				buf.append(" AND currentPlace:" + parent.toString());
 				break;
+			case USER_LOCALIZATION:
+				// USER_LOCALIZATION block is the scope for search of users IN a
+				// place through auto localization
+				buf.append("currentPlaceTimeout:[" + System.currentTimeMillis()
+						+ " TO *]");
+				buf.append(" AND currentAutoPlace:" + parent.toString());
+				break;
 			default:
 				buf.append("places:" + parent.toString());
 			}

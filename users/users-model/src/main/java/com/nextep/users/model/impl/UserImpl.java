@@ -72,6 +72,8 @@ public class UserImpl extends AbstractCalmObject implements User, MutableUser {
 	@Column(name = "LAST_LOCATION_DATE")
 	private Date lastLocationTime;
 
+	private transient ItemKey statLocationKey;
+
 	@Column(name = "FACEBOOK_ID")
 	private String facebookId;
 
@@ -361,4 +363,13 @@ public class UserImpl extends AbstractCalmObject implements User, MutableUser {
 		this.pushDeviceId = pushDeviceId;
 	}
 
+	@Override
+	public ItemKey getStatLocationKey() {
+		return statLocationKey;
+	}
+
+	@Override
+	public void setStatLocationKey(ItemKey statLocationKey) {
+		this.statLocationKey = statLocationKey;
+	}
 }

@@ -6,6 +6,7 @@ import java.util.concurrent.Future;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
 
@@ -16,6 +17,7 @@ import com.nextep.geo.model.City;
 import com.nextep.geo.model.Place;
 import com.nextep.proto.apis.model.impl.ApisLocalizationHelper;
 import com.nextep.proto.services.LocalizationService;
+import com.nextep.proto.services.ViewManagementService;
 import com.nextep.proto.spring.ContextHolder;
 import com.nextep.smaug.service.SearchPersistenceService;
 import com.nextep.users.model.MutableUser;
@@ -32,11 +34,16 @@ public class LocalizationServiceImpl implements LocalizationService {
 	private final static Log LOGGER = LogFactory
 			.getLog(LocalizationServiceImpl.class);
 	private static final Log CHECKIN_LOGGER = LogFactory.getLog("CHECKIN");
+	private static final String LOCALIZATION_AUTO_STAT = "LOCALIZATION_AUTO_STAT";
+	private static final String STAT_CHECKIN = "CHECKIN";
+	private static final String STAT_CHECKOUT = "CHECKOUT";
 
 	private CalPersistenceService usersService;
 	private CalPersistenceService activitiesService;
 	private CalPersistenceService geoService;
 	private SearchPersistenceService searchService;
+	@Autowired
+	private ViewManagementService viewManagementService;
 	private double localizationDistance;
 	private long lastSeenMaxTime;
 
@@ -48,15 +55,12 @@ public class LocalizationServiceImpl implements LocalizationService {
 		final MutableUser currentUser = (MutableUser) user;
 		if (currentUser != null) {
 			ItemKey currentPlaceKey = null;
+			Place currentPlace = null;
 			ContextHolder.toggleWrite();
 
 			// Always saving user lat/lng for nearby user-to-user search
 			currentUser.setLatitude(lat);
 			currentUser.setLongitude(lng);
-
-			// Storing user localization info (lat, long and place)
-			usersService.saveItem(user);
-			searchService.updateUserOnlineStatus(currentUser);
 
 			// If we have places around
 			if (!nearbyPlaces.isEmpty()) {
@@ -67,18 +71,28 @@ public class LocalizationServiceImpl implements LocalizationService {
 				if (stat != null) {
 					if (stat.getNumericValue().doubleValue() < localizationDistance) {
 						currentPlaceKey = p.getKey();
+						currentPlace = p;
 					}
 				}
 
 				// If localized, we store the place
 				if (currentPlaceKey != null) {
+					// Assigning statistic place key
+					((MutableUser) user).setStatLocationKey(currentPlaceKey);
+					viewManagementService.logViewCount(currentPlace,
+							currentUser, LOCALIZATION_AUTO_STAT);
+
 					// Logging lat/lng with checkin
 					CHECKIN_LOGGER.info(currentPlaceKey + ";"
-							+ "LOCALIZATION_AUTO_STAT" + ";"
+							+ LOCALIZATION_AUTO_STAT + ";"
 							+ System.currentTimeMillis() + ";" + user.getKey()
 							+ ";" + lat + ";" + lng);
 				}
 			}
+			// Storing user localization info (lat, long and place)
+			usersService.saveItem(user);
+			searchService.updateUserOnlineStatus(currentUser);
+
 			if (response instanceof ApiCompositeResponse) {
 				try {
 					final City city = ((ApiCompositeResponse) response)
@@ -167,9 +181,11 @@ public class LocalizationServiceImpl implements LocalizationService {
 
 		// Logging lat/lng with checkin
 		CHECKIN_LOGGER.info(placeKey + ";"
-				+ (checkout ? "CHECKOUT" : "CHECKIN") + ";"
+				+ (checkout ? STAT_CHECKOUT : STAT_CHECKIN) + ";"
 				+ System.currentTimeMillis() + ";" + user.getKey() + ";" + lat
 				+ ";" + lng);
+		viewManagementService.logViewCountByKey(placeKey, user,
+				checkout ? STAT_CHECKOUT : STAT_CHECKIN);
 	}
 
 	public void setActivitiesService(CalPersistenceService activitiesService) {

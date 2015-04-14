@@ -600,6 +600,17 @@ public class SolrSearchPersistenceServiceImpl implements
 			searchItem.setCurrentPlaceTimeout(user.getLastLocationTime()
 					.getTime() + lastSeenMaxTime);
 		}
+		// If current last location is expired or not existing and we have an
+		// automatic localization
+		if ((user.getLastLocationTime() == null || (user.getLastLocationTime()
+				.getTime() + lastSeenMaxTime) < System.currentTimeMillis())
+				&& user.getStatLocationKey() != null) {
+			// Then we set the user at the auto localization place for him being
+			// counted
+			searchItem.setCurrentPlace(user.getStatLocationKey().toString());
+			searchItem.setCurrentPlaceTimeout(System.currentTimeMillis()
+					+ lastSeenMaxTime);
+		}
 
 		// Availability
 		searchItem.setAvailable(user.getPushDeviceId() != null
@@ -670,13 +681,25 @@ public class SolrSearchPersistenceServiceImpl implements
 			}
 			final long lastSeenDate = System.currentTimeMillis()
 					- lastLocationTime.getTime();
+
 			if (user.getLastLocationKey() != null
 					&& lastSeenDate < lastSeenMaxTime) {
+				solrUser.setCurrentAutoPlace(null);
 				solrUser.setCurrentPlace(user.getLastLocationKey().toString());
 				solrUser.setCurrentPlaceTimeout(user.getLastLocationTime()
 						.getTime() + lastSeenMaxTime);
 			} else {
+				// If current last location is expired or not existing and we
+				// have an automatic localization
 				solrUser.setCurrentPlace(null);
+				if (user.getStatLocationKey() != null) {
+					// Then we set the user at the auto localization place for
+					// him to be counted
+					solrUser.setCurrentAutoPlace(user.getStatLocationKey()
+							.toString());
+					solrUser.setCurrentPlaceTimeout(System.currentTimeMillis()
+							+ lastSeenMaxTime);
+				}
 			}
 
 			// Adding localization information

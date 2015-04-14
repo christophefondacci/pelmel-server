@@ -112,6 +112,16 @@ public interface User extends CalmObject, Localized {
 	Date getLastLocationTime();
 
 	/**
+	 * Provides the unique key of the location automatically determined by the
+	 * system for statistic information (counting the number of persons at a
+	 * place)
+	 * 
+	 * @return the {@link ItemKey} of the location, or <code>null</code> when
+	 *         not currently near a place
+	 */
+	ItemKey getStatLocationKey();
+
+	/**
 	 * Provides facebook's unique ID. This information is only provided for
 	 * facebook linked users.
 	 * 

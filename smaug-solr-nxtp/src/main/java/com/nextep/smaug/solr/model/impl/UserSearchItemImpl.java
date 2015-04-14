@@ -33,6 +33,8 @@ public class UserSearchItemImpl extends SearchItemImpl {
 	@Field
 	private String currentPlace;
 	@Field
+	private String currentAutoPlace;
+	@Field
 	private long currentPlaceTimeout;
 
 	@Field
@@ -137,5 +139,9 @@ public class UserSearchItemImpl extends SearchItemImpl {
 
 	public boolean isAvailable() {
 		return this.available > 0;
+	}
+
+	public void setCurrentAutoPlace(String currentAutoPlace) {
+		this.currentAutoPlace = currentAutoPlace;
 	}
 }

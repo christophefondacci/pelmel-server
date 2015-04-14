@@ -6,6 +6,7 @@ import com.nextep.geo.model.GeographicItem;
 import com.nextep.proto.model.SearchType;
 import com.nextep.users.model.User;
 import com.videopolis.calm.model.CalmObject;
+import com.videopolis.calm.model.ItemKey;
 
 /**
  * This service factorizes some common management code to count views on a
@@ -49,6 +50,22 @@ public interface ViewManagementService {
 	 * @param viewType
 	 *            an optional type information about the context
 	 */
-	Future<CalmObject> logViewCount(CalmObject viewedObject, User user,
+	Future<Object> logViewCount(CalmObject viewedObject, User user,
+			String viewType);
+
+	/**
+	 * Same as
+	 * {@link ViewManagementService#logViewCount(CalmObject, User, String)}
+	 * except the viewed object is passed via its unique key.
+	 * 
+	 * @param viewedObjectKey
+	 *            the {@link ItemKey} of the viewed object
+	 * @param user
+	 *            the {@link User} who originated the action
+	 * @param viewType
+	 *            the type of information to log
+	 * @return a future for asynchronous execution
+	 */
+	Future<Object> logViewCountByKey(ItemKey viewedObjectKey, User user,
 			String viewType);
 }

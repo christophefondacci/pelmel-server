@@ -318,8 +318,9 @@ public class NearbyPlacesListAction extends AbstractAction implements
 		request.addCriterion(
 				SearchRestriction.searchForAllFacets(User.class,
 						SearchScope.USER_LOCALIZATION).facettedBy(
-						Arrays.asList(SearchHelper
-								.getUserCurrentPlaceCategory())))
+						Arrays.asList(
+								SearchHelper.getUserCurrentPlaceCategory(),
+								SearchHelper.getUserAutoPlaceCategory())))
 				.addCriterion(
 						SearchRestriction.searchForAllFacets(User.class,
 								SearchScope.CHILDREN).facettedBy(
@@ -361,6 +362,22 @@ public class NearbyPlacesListAction extends AbstractAction implements
 			int count = c.getCount();
 
 			currentPlacesMap.put(c.getFacet().getFacetCode(), count);
+		}
+
+		// Adding automatic places
+		final List<FacetCount> currentAutoPlaceCounts = currentPlaceFacetInfo
+				.getFacetCounts(SearchHelper.getUserAutoPlaceCategory());
+		for (FacetCount c : currentAutoPlaceCounts) {
+			int count = c.getCount();
+			// Taking the previous count (current place)
+			Integer previousCount = currentPlacesMap.get(c.getFacet()
+					.getFacetCode());
+			if (previousCount == null) {
+				previousCount = 0;
+			}
+			// Adding auto count
+			currentPlacesMap.put(c.getFacet().getFacetCode(), previousCount
+					+ count);
 		}
 
 		// Hashing liked user places by place key

@@ -37,4 +37,6 @@ public interface MutableUser extends User {
 	void setPushProvider(PushProvider provider);
 
 	void setPushDeviceId(String deviceId);
+
+	void setStatLocationKey(ItemKey locationKey);
 }
