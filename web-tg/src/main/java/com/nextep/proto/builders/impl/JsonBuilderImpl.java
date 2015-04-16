@@ -379,6 +379,7 @@ public class JsonBuilderImpl implements JsonBuilder {
 		json.setToKey(message.getToKey().toString());
 		json.setTime(message.getMessageDate());
 		json.setMessage(message.getMessage());
+		json.setUnread(message.isUnread());
 		try {
 			final Media media = message.getUnique(Media.class);
 			if (media != null) {
@@ -685,7 +686,7 @@ public class JsonBuilderImpl implements JsonBuilder {
 			}
 		}
 		// Misc info
-		p.setItemKey(place.getKey().toString());
+		p.setKey(place.getKey().toString());
 		p.setLat(place.getLatitude());
 		p.setLng(place.getLongitude());
 		p.setType(place.getPlaceType());

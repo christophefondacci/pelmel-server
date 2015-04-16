@@ -9,6 +9,7 @@ public class JsonMessage {
 	private String toKey;
 	private String message;
 	private JsonMedia media;
+	private boolean unread;
 
 	public long getTime() {
 		return time;
@@ -56,5 +57,13 @@ public class JsonMessage {
 
 	public void setMedia(JsonMedia media) {
 		this.media = media;
+	}
+
+	public void setUnread(boolean unread) {
+		this.unread = unread;
+	}
+
+	public boolean isUnread() {
+		return unread;
 	}
 }
