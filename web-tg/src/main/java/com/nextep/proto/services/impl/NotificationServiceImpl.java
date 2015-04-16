@@ -40,6 +40,7 @@ import com.nextep.geo.model.GeographicItem;
 import com.nextep.geo.model.Place;
 import com.nextep.media.model.Media;
 import com.nextep.proto.helpers.DisplayHelper;
+import com.nextep.proto.helpers.MediaHelper;
 import com.nextep.proto.model.Constants;
 import com.nextep.proto.services.EventManagementService;
 import com.nextep.proto.services.NotificationService;
@@ -579,6 +580,17 @@ public class NotificationServiceImpl implements NotificationService {
 		StringBuilder buf = new StringBuilder();
 		fillEmailHeaderFor(buf, obj, user, "commented");
 		buf.append("Comment added: <br><p>" + comment.getMessage() + "</p>");
+		try {
+			final Media m = comment.getUnique(Media.class);
+			if (m != null) {
+				buf.append("Comment Photo: <a href=\""
+						+ MediaHelper.getImageUrl(m.getUrl())
+						+ "\">Comment image</a><br>");
+			}
+		} catch (CalException e) {
+			LOGGER.error("Unable to extract comment image for comment '"
+					+ comment.getKey() + "': " + e.getMessage(), e);
+		}
 		fillEmailFooterFor(buf, obj, user);
 		final String objType = getObjectTypeName(obj);
 		notifyAdminByEmail(

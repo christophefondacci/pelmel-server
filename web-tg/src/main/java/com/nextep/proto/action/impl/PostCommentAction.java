@@ -86,7 +86,8 @@ public class PostCommentAction extends AbstractAction implements
 		c.setAuthorItemKey(currentUser.getKey());
 		c.setCommentedItemKey(commentedItemKey);
 		c.setDate(new Date());
-		c.setMessage(media != null ? getText("message.photoUpgrade") : comment);
+		c.setMessage(media != null ? getText("message.photoUpgrade.comment")
+				: comment);
 		ContextHolder.toggleWrite();
 		commentService.saveItem(c);
 
