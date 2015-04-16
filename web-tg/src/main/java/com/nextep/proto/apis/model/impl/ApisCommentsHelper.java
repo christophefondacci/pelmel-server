@@ -39,12 +39,14 @@ public final class ApisCommentsHelper {
 
 	public static ForCriterion getCommentsFor(ItemKey commentedKey, int page)
 			throws ApisException {
-		return (ForCriterion) SearchRestriction.forKey(Comment.class,
-				commentedKey.getType(), commentedKey.getId(),
-				Constants.MAX_COMMENTS, page).addCriterion(
-				(ApisCriterion) SearchRestriction.adaptKey(
-						commentUserKeyAdapter).with(Media.class,
-						MediaRequestTypes.THUMB));
+		return (ForCriterion) SearchRestriction
+				.forKey(Comment.class, commentedKey.getType(),
+						commentedKey.getId(), Constants.MAX_COMMENTS, page)
+				.with(Media.class)
+				.addCriterion(
+						(ApisCriterion) SearchRestriction.adaptKey(
+								commentUserKeyAdapter).with(Media.class,
+								MediaRequestTypes.THUMB));
 	}
 
 	public static ApisCriterion withComments() throws ApisException {

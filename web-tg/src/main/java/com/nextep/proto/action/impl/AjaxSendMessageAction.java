@@ -1,5 +1,6 @@
 package com.nextep.proto.action.impl;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -11,12 +12,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.nextep.cal.util.services.CalPersistenceService;
 import com.nextep.json.model.impl.JsonMessage;
 import com.nextep.json.model.impl.JsonStatus;
+import com.nextep.media.model.Media;
 import com.nextep.messages.model.Message;
 import com.nextep.messages.model.MutableMessage;
 import com.nextep.messages.model.impl.MessageRequestTypeFactory;
 import com.nextep.proto.action.base.AbstractAction;
 import com.nextep.proto.action.model.JsonProviderWithError;
 import com.nextep.proto.blocks.CurrentUserSupport;
+import com.nextep.proto.blocks.MediaPersistenceSupport;
 import com.nextep.proto.builders.JsonBuilder;
 import com.nextep.proto.services.NotificationService;
 import com.nextep.proto.spring.ContextHolder;
@@ -41,10 +44,14 @@ public class AjaxSendMessageAction extends AbstractAction implements
 	private NotificationService notificationService;
 	@Autowired
 	private JsonBuilder jsonBuilder;
+	@Autowired
+	private MediaPersistenceSupport mediaPersistenceSupport;
 
 	private User currentUser;
 	private String to;
 	private String msgText;
+	private File media;
+	private String mediaContentType, mediaFileName;
 
 	private Message message;
 
@@ -70,15 +77,26 @@ public class AjaxSendMessageAction extends AbstractAction implements
 				CurrentUserSupport.APIS_ALIAS_CURRENT_USER);
 		checkCurrentUser(currentUser);
 		currentUserSupport.initialize(getUrlService(), currentUser);
+
 		// Now sending message
 		ContextHolder.toggleWrite();
 		final MutableMessage msg = (MutableMessage) messageService
 				.createTransientObject();
 		msg.setFromKey(currentUser.getKey());
 		msg.setToKey(toUserKey);
-		msg.setMessage(msgText);
+		msg.setMessage(media != null ? getText("message.photoUpgrade")
+				: msgText);
 		msg.setMessageDate(new Date());
 		messageService.saveItem(msg);
+
+		// If we have an embedded media
+		if (media != null) {
+			ContextHolder.toggleWrite();
+			final Media addedMedia = mediaPersistenceSupport.createMedia(
+					currentUser, msg.getKey(), media, mediaFileName,
+					mediaContentType, null, false, 1);
+			msg.add(addedMedia);
+		}
 
 		// Notifying recipient if deviceId and push enabled
 		final User targetUser = response.getUniqueElement(User.class,
@@ -151,4 +169,29 @@ public class AjaxSendMessageAction extends AbstractAction implements
 	public void setNotificationService(NotificationService notificationService) {
 		this.notificationService = notificationService;
 	}
+
+	public File getMedia() {
+		return media;
+	}
+
+	public void setMedia(File media) {
+		this.media = media;
+	}
+
+	public String getMediaContentType() {
+		return mediaContentType;
+	}
+
+	public void setMediaContentType(String mediaContentType) {
+		this.mediaContentType = mediaContentType;
+	}
+
+	public String getMediaFileName() {
+		return mediaFileName;
+	}
+
+	public void setMediaFileName(String mediaFileName) {
+		this.mediaFileName = mediaFileName;
+	}
+
 }

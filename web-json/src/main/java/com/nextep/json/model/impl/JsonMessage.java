@@ -8,6 +8,7 @@ public class JsonMessage {
 	private String fromKey;
 	private String toKey;
 	private String message;
+	private JsonMedia media;
 
 	public long getTime() {
 		return time;
@@ -49,4 +50,11 @@ public class JsonMessage {
 		return key;
 	}
 
+	public JsonMedia getMedia() {
+		return media;
+	}
+
+	public void setMedia(JsonMedia media) {
+		this.media = media;
+	}
 }

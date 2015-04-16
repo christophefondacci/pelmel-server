@@ -63,6 +63,7 @@ public class MyMessagesAction extends AbstractAction implements MessagingAware,
 				.with((WithCriterion) SearchRestriction
 						.with(Message.class, messagesPerPage, page)
 						.aliasedBy(APIS_ALIAS_PAGE_MESSAGES)
+						.with(Media.class)
 						.addCriterion(
 								(ApisCriterion) SearchRestriction.adaptKey(
 										APIS_MESSAGE_FROM_USER_ADAPTER).with(

@@ -117,6 +117,7 @@ public class MyMessageReplyAction extends AbstractAction implements
 				.list(Message.class, msgRequestType)
 				.paginatedBy(MESSAGES_PER_PAGE, page)
 				.aliasedBy(APIS_ALIAS_PAGE_MESSAGES)
+				.with(Media.class)
 				.addCriterion(
 						(ApisCriterion) SearchRestriction.adaptKey(
 								MSG_FROM_USER_ADAPTER).with(Media.class,

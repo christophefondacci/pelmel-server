@@ -379,6 +379,17 @@ public class JsonBuilderImpl implements JsonBuilder {
 		json.setToKey(message.getToKey().toString());
 		json.setTime(message.getMessageDate());
 		json.setMessage(message.getMessage());
+		try {
+			final Media media = message.getUnique(Media.class);
+			if (media != null) {
+				JsonMedia jsonMedia = buildJsonMedia(media, true);
+				json.setMedia(jsonMedia);
+			}
+		} catch (CalException e) {
+			LOGGER.error(
+					"Unable to get media from message, probably too many media associated: "
+							+ e.getMessage(), e);
+		}
 		return json;
 	}
 
@@ -437,6 +448,16 @@ public class JsonBuilderImpl implements JsonBuilder {
 			msg.setToKey(comment.getCommentedItemKey().toString());
 			msg.setTime(comment.getDate());
 			msg.setMessage(comment.getMessage());
+			try {
+				final Media m = comment.getUnique(Media.class);
+				if (m != null) {
+					final JsonMedia jsonMedia = buildJsonMedia(m, highRes);
+					msg.setMedia(jsonMedia);
+				}
+			} catch (CalException e) {
+				LOGGER.error("Unable to get media associated with comment '"
+						+ comment.getKey() + "': " + e.getMessage(), e);
+			}
 
 			// Adding to our message list
 			messagesList.addMessage(msg);

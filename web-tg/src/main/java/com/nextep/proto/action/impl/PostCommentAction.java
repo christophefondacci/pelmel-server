@@ -1,5 +1,6 @@
 package com.nextep.proto.action.impl;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.Date;
 
@@ -7,6 +8,7 @@ import net.sf.json.JSONObject;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.nextep.activities.model.ActivityType;
 import com.nextep.activities.model.MutableActivity;
@@ -14,10 +16,12 @@ import com.nextep.cal.util.services.CalPersistenceService;
 import com.nextep.comments.model.MutableComment;
 import com.nextep.geo.model.GeographicItem;
 import com.nextep.json.model.impl.JsonStatus;
+import com.nextep.media.model.Media;
 import com.nextep.proto.action.base.AbstractAction;
 import com.nextep.proto.action.model.CurrentUserAware;
 import com.nextep.proto.action.model.JsonProvider;
 import com.nextep.proto.blocks.CurrentUserSupport;
+import com.nextep.proto.blocks.MediaPersistenceSupport;
 import com.nextep.proto.helpers.GeoHelper;
 import com.nextep.proto.services.NotificationService;
 import com.nextep.proto.spring.ContextHolder;
@@ -46,9 +50,13 @@ public class PostCommentAction extends AbstractAction implements
 	private CalPersistenceService activitiesService;
 	private SearchPersistenceService searchService;
 	private NotificationService notificationService;
+	@Autowired
+	private MediaPersistenceSupport mediaPersistenceSupport;
 
 	private String commentItemKey;
 	private String comment;
+	private File media;
+	private String mediaContentType, mediaFileName;
 
 	private boolean success = false;
 
@@ -78,9 +86,18 @@ public class PostCommentAction extends AbstractAction implements
 		c.setAuthorItemKey(currentUser.getKey());
 		c.setCommentedItemKey(commentedItemKey);
 		c.setDate(new Date());
-		c.setMessage(comment);
+		c.setMessage(media != null ? getText("message.photoUpgrade") : comment);
 		ContextHolder.toggleWrite();
 		commentService.saveItem(c);
+
+		// If we have an embedded media
+		if (media != null) {
+			ContextHolder.toggleWrite();
+			final Media addedMedia = mediaPersistenceSupport.createMedia(
+					currentUser, c.getKey(), media, mediaFileName,
+					mediaContentType, null, false, 1);
+			c.add(addedMedia);
+		}
 
 		// Generating activity
 		final MutableActivity activity = (MutableActivity) activitiesService
@@ -158,4 +175,29 @@ public class PostCommentAction extends AbstractAction implements
 	public void setNotificationService(NotificationService notificationService) {
 		this.notificationService = notificationService;
 	}
+
+	public File getMedia() {
+		return media;
+	}
+
+	public void setMedia(File media) {
+		this.media = media;
+	}
+
+	public String getMediaContentType() {
+		return mediaContentType;
+	}
+
+	public void setMediaContentType(String mediaContentType) {
+		this.mediaContentType = mediaContentType;
+	}
+
+	public String getMediaFileName() {
+		return mediaFileName;
+	}
+
+	public void setMediaFileName(String mediaFileName) {
+		this.mediaFileName = mediaFileName;
+	}
+
 }
