@@ -1,6 +1,7 @@
 package com.nextep.proto.action.impl;
 
 import java.io.File;
+import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -101,14 +102,26 @@ public class AjaxSendMessageAction extends AbstractAction implements
 		// Notifying recipient if deviceId and push enabled
 		final User targetUser = response.getUniqueElement(User.class,
 				APIS_ALIAS_TARGET_USER);
-		final String pushMsg = currentUser.getPseudo() + ": \"" + msgText
-				+ "\"";
+
 		if (targetUser.getPushDeviceId() != null) {
+			String pushMsg;
+			// Building push message
+			if (media == null) {
+				pushMsg = MessageFormat.format(
+						getText("message.push.template"),
+						currentUser.getPseudo(), msgText);
+			} else {
+				pushMsg = MessageFormat.format(
+						getText("message.push.photo.template"),
+						currentUser.getPseudo());
+			}
+			// Sending message
 			final List<? extends Message> unreadMessages = targetUser
 					.get(Message.class);
 
+			// Adding +1 because we just added a new unread message
 			notificationService.sendNotification(targetUser, pushMsg,
-					unreadMessages.size(), null);
+					unreadMessages.size() + 1, null);
 		}
 		message = msg;
 		return SUCCESS;
