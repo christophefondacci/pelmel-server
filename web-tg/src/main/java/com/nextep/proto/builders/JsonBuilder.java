@@ -22,7 +22,7 @@ import com.nextep.json.model.impl.JsonManyToOneMessageList;
 import com.nextep.json.model.impl.JsonMedia;
 import com.nextep.json.model.impl.JsonMessage;
 import com.nextep.json.model.impl.JsonOneToOneMessageList;
-import com.nextep.json.model.impl.JsonOverviewElement;
+import com.nextep.json.model.impl.JsonPlaceOverview;
 import com.nextep.json.model.impl.JsonPlace;
 import com.nextep.json.model.impl.JsonUser;
 import com.nextep.media.model.Media;
@@ -46,9 +46,9 @@ public interface JsonBuilder {
 	 * 
 	 * @param o
 	 *            the {@link CalmObject} of the object of the overview
-	 * @return the JSON bean as a {@link JsonOverviewElement}
+	 * @return the JSON bean as a {@link JsonPlaceOverview}
 	 */
-	JsonOverviewElement buildJsonOverview(Locale l, CalmObject o,
+	JsonPlaceOverview buildJsonPlaceOverview(Locale l, Place o,
 			boolean highRes);
 
 	/**
@@ -71,7 +71,7 @@ public interface JsonBuilder {
 	 * @param f
 	 *            the {@link FacetInformation} from which we can extract facets
 	 */
-	void fillJsonLikeFacets(Locale locale, JsonOverviewElement elt,
+	void fillJsonLikeFacets(Locale locale, JsonPlaceOverview elt,
 			FacetInformation f);
 
 	/**
@@ -82,7 +82,7 @@ public interface JsonBuilder {
 	 * @param f
 	 *            the {@link FacetInformation} from which we can extract facets
 	 */
-	void fillJsonUserFacets(Locale locale, JsonOverviewElement elt,
+	void fillJsonUserFacets(Locale locale, JsonPlaceOverview elt,
 			FacetInformation f);
 
 	/**

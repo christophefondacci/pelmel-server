@@ -19,10 +19,11 @@ import com.nextep.geo.model.Place;
 import com.nextep.json.model.impl.JsonHour;
 import com.nextep.json.model.impl.JsonLightEvent;
 import com.nextep.json.model.impl.JsonLightUser;
-import com.nextep.json.model.impl.JsonOverviewElement;
+import com.nextep.json.model.impl.JsonPlaceOverview;
 import com.nextep.media.model.Media;
 import com.nextep.media.model.MediaRequestTypes;
 import com.nextep.messages.model.Message;
+import com.nextep.properties.model.Property;
 import com.nextep.proto.action.base.AbstractAction;
 import com.nextep.proto.action.mobile.model.MobileOverviewService;
 import com.nextep.proto.action.model.JsonProvider;
@@ -85,7 +86,7 @@ public class MobileOverviewPlaceAction extends AbstractAction implements
 	private Double lat, lng;
 
 	// Private work variables
-	private CalmObject overviewObject;
+	private Place overviewObject;
 	private ApiCompositeResponse response;
 	private User currentUser;
 
@@ -94,7 +95,8 @@ public class MobileOverviewPlaceAction extends AbstractAction implements
 		final ItemKey itemKey = CalmFactory.parseKey(id);
 		final ApisCriterion objCriterion = (ApisCriterion) SearchRestriction
 				.uniqueKeys(Arrays.asList(itemKey)).aliasedBy(APIS_ALIAS_PLACE)
-				.with(Description.class).with(Media.class).with(Tag.class);
+				.with(Description.class).with(Media.class).with(Tag.class)
+				.with(Property.class);
 		// For a place overview we would like to know people who currently are
 		// in that place
 		final Collection<FacetCategory> userFacetCategories = Arrays
@@ -165,7 +167,7 @@ public class MobileOverviewPlaceAction extends AbstractAction implements
 				CurrentUserSupport.APIS_ALIAS_CURRENT_USER);
 
 		// Extracting overviewed element
-		overviewObject = response.getUniqueElement(CalmObject.class,
+		overviewObject = response.getUniqueElement(Place.class,
 				APIS_ALIAS_PLACE);
 
 		// Checking user validity and performs any timeout update
@@ -200,8 +202,8 @@ public class MobileOverviewPlaceAction extends AbstractAction implements
 
 	@Override
 	public String getJson() {
-		JsonOverviewElement json = jsonBuilder.buildJsonOverview(getLocale(),
-				overviewObject, highRes);
+		JsonPlaceOverview json = jsonBuilder.buildJsonPlaceOverview(
+				getLocale(), overviewObject, highRes);
 		// Filling like and nearby facetting
 		final FacetInformation likesFacetInfo = response
 				.getFacetInformation(SearchScope.CHILDREN);
@@ -230,7 +232,7 @@ public class MobileOverviewPlaceAction extends AbstractAction implements
 
 		// Filling localization
 		if (overviewObject instanceof Localized) {
-			final Localized localized = (Localized) overviewObject;
+			final Localized localized = overviewObject;
 			json.setLat(localized.getLatitude());
 			json.setLng(localized.getLongitude());
 		}
@@ -250,8 +252,7 @@ public class MobileOverviewPlaceAction extends AbstractAction implements
 				.get(EventSeries.class);
 		if (series != null) {
 			final Collection<JsonHour> hours = jsonBuilder.buildJsonHours(
-					series, ((Place) overviewObject).getCity(), getLocale(),
-					response);
+					series, overviewObject.getCity(), getLocale(), response);
 			json.setHours(hours);
 		}
 		// Filling number of comments

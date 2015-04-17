@@ -42,12 +42,14 @@ import com.nextep.json.model.impl.JsonManyToOneMessageList;
 import com.nextep.json.model.impl.JsonMedia;
 import com.nextep.json.model.impl.JsonMessage;
 import com.nextep.json.model.impl.JsonOneToOneMessageList;
-import com.nextep.json.model.impl.JsonOverviewElement;
 import com.nextep.json.model.impl.JsonPlace;
+import com.nextep.json.model.impl.JsonPlaceOverview;
+import com.nextep.json.model.impl.JsonProperty;
 import com.nextep.json.model.impl.JsonSpecialEvent;
 import com.nextep.json.model.impl.JsonUser;
 import com.nextep.media.model.Media;
 import com.nextep.messages.model.Message;
+import com.nextep.properties.model.Property;
 import com.nextep.proto.builders.JsonBuilder;
 import com.nextep.proto.helpers.DisplayHelper;
 import com.nextep.proto.helpers.MediaHelper;
@@ -88,47 +90,61 @@ public class JsonBuilderImpl implements JsonBuilder {
 	}
 
 	@Override
-	public JsonOverviewElement buildJsonOverview(Locale l, CalmObject o,
+	public JsonPlaceOverview buildJsonPlaceOverview(Locale l, Place place,
 			boolean highRes) {
-		final JsonOverviewElement elt = new JsonOverviewElement(o.getKey()
+		final JsonPlaceOverview json = new JsonPlaceOverview(place.getKey()
 				.toString());
-		elt.setName(DisplayHelper.getName(o));
+		json.setName(DisplayHelper.getName(place));
 
 		// Place specific information
-		if (o instanceof Place) {
-			final Place p = (Place) o;
-			elt.setAddress(p.getAddress1());
-			elt.setType(p.getPlaceType());
-			elt.setCity(p.getCity().getName());
-			elt.setTimezoneId(p.getCity().getTimezoneId());
-		}
+		json.setAddress(place.getAddress1());
+		json.setType(place.getPlaceType());
+		json.setCity(place.getCity().getName());
+		json.setTimezoneId(place.getCity().getTimezoneId());
 
 		// Filling descriptions
-		fillDescription(o, elt, l);
+		fillDescription(place, json, l);
 
 		// Iterating over tags to generate JSON tag beans
-		final List<? extends Tag> tags = o.get(Tag.class);
+		final List<? extends Tag> tags = place.get(Tag.class);
 		for (Tag t : tags) {
-			elt.addTag(t.getCode());
+			json.addTag(t.getCode());
 		}
 
 		// Image & thumb (TODO: need to factorize this with events and
 		// users)
-		final Media m = MediaHelper.getSingleMedia(o);
+		final Media m = MediaHelper.getSingleMedia(place);
 		if (m != null) {
 			final JsonMedia jsonMedia = buildJsonMedia(m, highRes);
 			if (jsonMedia != null) {
-				elt.setThumb(jsonMedia);
+				json.setThumb(jsonMedia);
 			}
 		}
-		for (Media media : o.get(Media.class)) {
+		for (Media media : place.get(Media.class)) {
 			if (media != m) {
 				final JsonMedia jsonMedia = buildJsonMedia(media, highRes);
-				elt.addOtherImage(jsonMedia);
+				json.addOtherImage(jsonMedia);
 			}
 		}
 
-		return elt;
+		// Properties
+		final List<? extends Property> properties = place.get(Property.class);
+		for (Property property : properties) {
+			if (!Constants.PROPERTY_OPENING_HOUR.equals(property.getCode())) {
+				final JsonProperty jsonProp = buildJsonProperty(property);
+				json.addProperty(jsonProp);
+			}
+		}
+		return json;
+	}
+
+	private JsonProperty buildJsonProperty(Property p) {
+		final JsonProperty json = new JsonProperty();
+		json.setKey(p.getKey().toString());
+		json.setCode(p.getCode());
+		json.setLabel(p.getLabel());
+		json.setValue(p.getValue());
+		return json;
 	}
 
 	private void fillDescription(CalmObject object, IJsonDescripted json,
@@ -187,7 +203,7 @@ public class JsonBuilderImpl implements JsonBuilder {
 	}
 
 	@Override
-	public void fillJsonLikeFacets(Locale locale, JsonOverviewElement elt,
+	public void fillJsonLikeFacets(Locale locale, JsonPlaceOverview elt,
 			FacetInformation f) {
 		final List<JsonFacet> jsonFacets = buildJsonFacets(locale, f);
 		// Filling our overview bean
@@ -195,7 +211,7 @@ public class JsonBuilderImpl implements JsonBuilder {
 	}
 
 	@Override
-	public void fillJsonUserFacets(Locale locale, JsonOverviewElement elt,
+	public void fillJsonUserFacets(Locale locale, JsonPlaceOverview elt,
 			FacetInformation f) {
 		final List<JsonFacet> jsonFacets = buildJsonFacets(locale, f);
 		// Filling our overview bean

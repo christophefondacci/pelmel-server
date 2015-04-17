@@ -6,10 +6,10 @@ import java.util.Collections;
 import java.util.List;
 
 import com.nextep.json.model.IJsonDescripted;
-import com.nextep.json.model.IJsonLightPlace;
+import com.nextep.json.model.IJsonPlace;
 
-public class JsonOverviewElement extends JsonLiker implements IJsonDescripted,
-		IJsonLightPlace {
+public class JsonPlaceOverview extends JsonLiker implements IJsonDescripted,
+		IJsonPlace {
 	private String key;
 	private String city;
 	private String timezoneId;
@@ -29,8 +29,9 @@ public class JsonOverviewElement extends JsonLiker implements IJsonDescripted,
 	private List<String> tags = new ArrayList<String>();
 	private List<JsonLightEvent> events = new ArrayList<JsonLightEvent>();
 	private Collection<JsonHour> hours = new ArrayList<JsonHour>();
+	private Collection<JsonProperty> properties = new ArrayList<JsonProperty>();
 
-	public JsonOverviewElement(String key) {
+	public JsonPlaceOverview(String key) {
 		this.key = key;
 	}
 
@@ -54,10 +55,12 @@ public class JsonOverviewElement extends JsonLiker implements IJsonDescripted,
 		this.name = name;
 	}
 
+	@Override
 	public String getAddress() {
 		return address;
 	}
 
+	@Override
 	public void setAddress(String address) {
 		this.address = address;
 	}
@@ -96,10 +99,12 @@ public class JsonOverviewElement extends JsonLiker implements IJsonDescripted,
 		return users;
 	}
 
+	@Override
 	public void addTag(String tagCode) {
 		tags.add(tagCode);
 	}
 
+	@Override
 	public List<String> getTags() {
 		return tags;
 	}
@@ -112,10 +117,12 @@ public class JsonOverviewElement extends JsonLiker implements IJsonDescripted,
 		return inUsers;
 	}
 
+	@Override
 	public String getType() {
 		return type;
 	}
 
+	@Override
 	public void setType(String type) {
 		this.type = type;
 	}
@@ -136,26 +143,32 @@ public class JsonOverviewElement extends JsonLiker implements IJsonDescripted,
 		return commentsCount;
 	}
 
+	@Override
 	public void setLat(double lat) {
 		this.lat = lat;
 	}
 
+	@Override
 	public double getLat() {
 		return lat;
 	}
 
+	@Override
 	public void setLng(double lng) {
 		this.lng = lng;
 	}
 
+	@Override
 	public double getLng() {
 		return lng;
 	}
 
+	@Override
 	public List<JsonMedia> getOtherImages() {
 		return otherImages;
 	}
 
+	@Override
 	public void addOtherImage(JsonMedia media) {
 		otherImages.add(media);
 	}
@@ -198,10 +211,12 @@ public class JsonOverviewElement extends JsonLiker implements IJsonDescripted,
 		return descriptionLanguage;
 	}
 
+	@Override
 	public void setCity(String city) {
 		this.city = city;
 	}
 
+	@Override
 	public String getCity() {
 		return city;
 	}
@@ -222,5 +237,13 @@ public class JsonOverviewElement extends JsonLiker implements IJsonDescripted,
 	@Override
 	public String getTimezoneId() {
 		return timezoneId;
+	}
+
+	public Collection<JsonProperty> getProperties() {
+		return properties;
+	}
+
+	public void addProperty(JsonProperty property) {
+		properties.add(property);
 	}
 }

@@ -27,7 +27,7 @@ import com.nextep.json.model.impl.JsonLightPlace;
 import com.nextep.json.model.impl.JsonLightUser;
 import com.nextep.json.model.impl.JsonLiker;
 import com.nextep.json.model.impl.JsonMedia;
-import com.nextep.json.model.impl.JsonOverviewElement;
+import com.nextep.json.model.impl.JsonPlaceOverview;
 import com.nextep.json.model.impl.JsonUser;
 import com.nextep.media.model.Media;
 import com.nextep.media.model.MediaRequestTypes;
@@ -364,8 +364,8 @@ public class MobileOverviewAction extends AbstractAction implements
 		JsonLiker json = null;
 		final long oldestCheckinTime = System.currentTimeMillis() - checkinTime;
 		if (Place.CAL_TYPE.equals(overviewObject.getKey().getType())) {
-			JsonOverviewElement jsonElement = jsonBuilder.buildJsonOverview(
-					getLocale(), overviewObject, highRes);
+			JsonPlaceOverview jsonElement = jsonBuilder.buildJsonPlaceOverview(
+					getLocale(), (Place) overviewObject, highRes);
 			json = jsonElement;
 			// Filling like and nearby facetting
 			final FacetInformation likesFacetInfo = response

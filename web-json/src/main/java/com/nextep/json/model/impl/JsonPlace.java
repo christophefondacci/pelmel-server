@@ -3,9 +3,9 @@ package com.nextep.json.model.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.nextep.json.model.IJsonLightPlace;
+import com.nextep.json.model.IJsonPlace;
 
-public class JsonPlace implements IJsonLightPlace {
+public class JsonPlace implements IJsonPlace {
 
 	private String itemKey, name, address, city, description, type;
 	private JsonMedia thumb;
@@ -58,50 +58,62 @@ public class JsonPlace implements IJsonLightPlace {
 		this.name = name;
 	}
 
+	@Override
 	public String getAddress() {
 		return address;
 	}
 
+	@Override
 	public void setAddress(String address) {
 		this.address = address;
 	}
 
+	@Override
 	public String getCity() {
 		return city;
 	}
 
+	@Override
 	public void setCity(String city) {
 		this.city = city;
 	}
 
+	@Override
 	public String getDescription() {
 		return description;
 	}
 
+	@Override
 	public void setDescription(String description) {
 		this.description = description;
 	}
 
+	@Override
 	public double getLat() {
 		return lat;
 	}
 
+	@Override
 	public double getLng() {
 		return lng;
 	}
 
+	@Override
 	public void setLat(double lat) {
 		this.lat = lat;
 	}
 
+	@Override
 	public void setLng(double lng) {
 		this.lng = lng;
 	}
 
+	@Override
 	public void setType(String type) {
 		this.type = type;
 	}
 
+	@Override
 	public String getType() {
 		return type;
 	}
@@ -110,10 +122,12 @@ public class JsonPlace implements IJsonLightPlace {
 		this.distance = distance;
 	}
 
+	@Override
 	public void addTag(String tagId) {
 		tags.add(tagId);
 	}
 
+	@Override
 	public List<String> getTags() {
 		return tags;
 	}
@@ -144,10 +158,12 @@ public class JsonPlace implements IJsonLightPlace {
 		return thumb;
 	}
 
+	@Override
 	public List<JsonMedia> getOtherImages() {
 		return otherImages;
 	}
 
+	@Override
 	public void addOtherImage(JsonMedia media) {
 		otherImages.add(media);
 	}
