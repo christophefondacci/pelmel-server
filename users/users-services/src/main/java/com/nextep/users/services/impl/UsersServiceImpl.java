@@ -70,11 +70,12 @@ public class UsersServiceImpl extends AbstractDaoBasedCalServiceImpl implements
 
 	@Override
 	public User login(String email, String password, String deviceId,
-			String pushProvider) throws CalException {
+			String pushProvider, String deviceInfo) throws CalException {
 		final UsersDao dao = (UsersDao) getCalDao();
 		final User user = dao.getUser(email, password);
 		Assert.notNull(user, "Invalid email or password");
 		((MutableUser) user).setPushDeviceId(deviceId);
+		((MutableUser) user).setDeviceInfo(deviceInfo);
 		if (pushProvider != null
 				&& !pushProvider.equals(user.getPushProvider())) {
 			try {

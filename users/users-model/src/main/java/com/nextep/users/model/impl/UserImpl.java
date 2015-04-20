@@ -87,6 +87,9 @@ public class UserImpl extends AbstractCalmObject implements User, MutableUser {
 	@Column(name = "PUSH_DEVICE_ID")
 	private String pushDeviceId;
 
+	@Column(name = "DEVICE_INFO")
+	private String deviceInfo;
+
 	/**
 	 * 
 	 */
@@ -371,5 +374,15 @@ public class UserImpl extends AbstractCalmObject implements User, MutableUser {
 	@Override
 	public void setStatLocationKey(ItemKey statLocationKey) {
 		this.statLocationKey = statLocationKey;
+	}
+
+	@Override
+	public void setDeviceInfo(String deviceInfo) {
+		this.deviceInfo = deviceInfo;
+	}
+
+	@Override
+	public String getDeviceInfo() {
+		return deviceInfo;
 	}
 }

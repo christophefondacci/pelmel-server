@@ -67,6 +67,7 @@ public class UserLoginAction extends AbstractAction implements CookieProvider,
 	private String url;
 	private String queryParams;
 	private boolean highRes;
+	private String deviceInfo;
 
 	// Internal variables
 	private User user;
@@ -79,7 +80,7 @@ public class UserLoginAction extends AbstractAction implements CookieProvider,
 			try {
 				ContextHolder.toggleWrite();
 				user = usersService.login(email, password, pushDeviceId,
-						pushProvider);
+						pushProvider, deviceInfo);
 				searchService.updateUserOnlineStatus(user);
 				if (user != null) {
 					if (isMobileService) {
@@ -300,5 +301,13 @@ public class UserLoginAction extends AbstractAction implements CookieProvider,
 
 	public String getPushDeviceId() {
 		return pushDeviceId;
+	}
+
+	public void setDeviceInfo(String deviceInfo) {
+		this.deviceInfo = deviceInfo;
+	}
+
+	public String getDeviceInfo() {
+		return deviceInfo;
 	}
 }

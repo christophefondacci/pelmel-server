@@ -151,4 +151,12 @@ public interface User extends CalmObject, Localized {
 	 * @return the device ID of this user
 	 */
 	String getPushDeviceId();
+
+	/**
+	 * Get the device information string that contains information about user OS
+	 * version, PELMEL version.
+	 * 
+	 * @return the user's device information
+	 */
+	String getDeviceInfo();
 }

@@ -14,8 +14,8 @@ public interface UsersService {
 	 * @param password
 	 * @return
 	 */
-	User login(String email, String password, String deviceId, String providerId)
-			throws CalException;
+	User login(String email, String password, String deviceId,
+			String providerId, String deviceInfo) throws CalException;
 
 	/**
 	 * Login to the user account by returning the {@link User} bean if and only
