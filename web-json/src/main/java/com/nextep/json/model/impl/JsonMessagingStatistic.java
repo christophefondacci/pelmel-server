@@ -9,6 +9,9 @@ package com.nextep.json.model.impl;
 public abstract class JsonMessagingStatistic {
 
 	private int unreadMsgCount = 0;
+	private int page = 0;
+	private int pageSize = 0;
+	private int totalMsgCount = 0;
 
 	public void setUnreadMsgCount(int unreadMsgCount) {
 		this.unreadMsgCount = unreadMsgCount;
@@ -16,5 +19,29 @@ public abstract class JsonMessagingStatistic {
 
 	public int getUnreadMsgCount() {
 		return unreadMsgCount;
+	}
+
+	public void setTotalMsgCount(int totalMsgCount) {
+		this.totalMsgCount = totalMsgCount;
+	}
+
+	public int getTotalMsgCount() {
+		return totalMsgCount;
+	}
+
+	public int getPage() {
+		return page;
+	}
+
+	public void setPage(int page) {
+		this.page = page;
+	}
+
+	public void setPageSize(int pageSize) {
+		this.pageSize = pageSize;
+	}
+
+	public int getPageSize() {
+		return pageSize;
 	}
 }

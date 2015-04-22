@@ -641,7 +641,7 @@
 		<property name="messagingSupport" ref="messagingSupport"/>
 		<property name="urlService" ref="urlService"/>
 		<property name="myMessagingSupport" ref="messagingSupport"/>
-		<property name="messagesPerPage" value="15"/>
+		<property name="messagesPerPage" value="30"/>
 		<property name="headerSupport" ref="myMessagesHeaderSupport"/>
 		<property name="jsonBuilder" ref="jsonBuilder"/>
 		<property name="radius">

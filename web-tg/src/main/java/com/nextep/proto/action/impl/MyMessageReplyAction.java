@@ -48,7 +48,7 @@ public class MyMessageReplyAction extends AbstractAction implements
 			.getLog(MyMessageReplyAction.class);
 	private static final long serialVersionUID = 7255915412851663750L;
 	private static final String PAGE_STYLE_MSG = "my-messages";
-	private static final int MESSAGES_PER_PAGE = 10;
+	private static final int MESSAGES_PER_PAGE = 15;
 	private static final String APIS_ALIAS_PAGE_MESSAGES = "pmsg";
 	private static final String APIS_ALIAS_FROM_USER = "from";
 	private static final String APIS_ALIAS_NEARBY_PLACES = "nearbyPlaces";
@@ -73,6 +73,7 @@ public class MyMessageReplyAction extends AbstractAction implements
 	private User currentUser;
 	private User fromUser;
 	private int readMsgCount = 0;
+	private PaginationInfo myPaginationInfo;
 
 	@Override
 	protected String doExecute() throws Exception {
@@ -152,8 +153,7 @@ public class MyMessageReplyAction extends AbstractAction implements
 		// Initializing page messages
 		final List<? extends Message> myMessages = response.getElements(
 				Message.class, APIS_ALIAS_PAGE_MESSAGES);
-		final PaginationInfo myPaginationInfo = response
-				.getPaginationInfo(APIS_ALIAS_PAGE_MESSAGES);
+		myPaginationInfo = response.getPaginationInfo(APIS_ALIAS_PAGE_MESSAGES);
 		myMessagingSupport.initialize(getUrlService(), getLocale(), myMessages,
 				myPaginationInfo, currentUser.getKey(), PAGE_STYLE_MSG);
 
@@ -184,6 +184,9 @@ public class MyMessageReplyAction extends AbstractAction implements
 		int unreadMsg = messagingSupport.getMessages().size();
 		unreadMsg -= readMsgCount;
 		messageList.setUnreadMsgCount(unreadMsg);
+		messageList.setTotalMsgCount(myPaginationInfo.getItemCount());
+		messageList.setPage(page);
+		messageList.setPageSize(MESSAGES_PER_PAGE);
 		return JSONObject.fromObject(messageList).toString();
 	}
 

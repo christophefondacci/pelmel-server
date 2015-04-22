@@ -56,6 +56,8 @@ public class MyMessagesAction extends AbstractAction implements MessagingAware,
 	private boolean highRes;
 	private double radius;
 
+	private PaginationInfo msgPagination;
+
 	@Override
 	protected String doExecute() throws Exception {
 		final ApisCriterion userCriterion = (ApisCriterion) currentUserSupport
@@ -107,8 +109,7 @@ public class MyMessagesAction extends AbstractAction implements MessagingAware,
 		// Initilizing message page
 		final List<? extends Message> messages = user.get(Message.class,
 				APIS_ALIAS_PAGE_MESSAGES);
-		final PaginationInfo msgPagination = response
-				.getPaginationInfo(APIS_ALIAS_PAGE_MESSAGES);
+		msgPagination = response.getPaginationInfo(APIS_ALIAS_PAGE_MESSAGES);
 		myMessagingSupport.initialize(getUrlService(), getLocale(), messages,
 				msgPagination, user.getKey(), PAGE_STYLE_MSG);
 
@@ -198,6 +199,9 @@ public class MyMessagesAction extends AbstractAction implements MessagingAware,
 		int unreadCount = instantMessagingSupport.getMessages() == null ? 0
 				: instantMessagingSupport.getMessages().size();
 		messagesList.setUnreadMsgCount(unreadCount);
+		messagesList.setPage(page);
+		messagesList.setPageSize(messagesPerPage);
+		messagesList.setTotalMsgCount(msgPagination.getItemCount());
 
 		// Sending JSON serialized string
 		return JSONObject.fromObject(messagesList).toString();
