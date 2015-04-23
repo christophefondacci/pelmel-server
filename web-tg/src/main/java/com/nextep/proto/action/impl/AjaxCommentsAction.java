@@ -19,6 +19,7 @@ import com.nextep.proto.blocks.CommentSupport;
 import com.nextep.proto.blocks.CurrentUserSupport;
 import com.nextep.proto.blocks.SelectableTagSupport;
 import com.nextep.proto.builders.JsonBuilder;
+import com.nextep.proto.model.Constants;
 import com.nextep.proto.services.LocalizationService;
 import com.nextep.tags.model.Tag;
 import com.nextep.users.model.User;
@@ -61,6 +62,7 @@ public class AjaxCommentsAction extends AbstractAction implements Commentable,
 
 	// Internal variables
 	private List<? extends Comment> comments;
+	private PaginationInfo paginationInfo;
 
 	@SuppressWarnings("unchecked")
 	@Override
@@ -122,8 +124,7 @@ public class AjaxCommentsAction extends AbstractAction implements Commentable,
 		// Retrieving comments, pagination and initializing supports
 		comments = response.getElements(Comment.class, APIS_ALIAS_COMMENTS);
 
-		final PaginationInfo paginationInfo = response
-				.getPaginationInfo(APIS_ALIAS_COMMENTS);
+		paginationInfo = response.getPaginationInfo(APIS_ALIAS_COMMENTS);
 		commentSupport.initialize(getUrlService(), getLocale(), comments,
 				paginationInfo, currentUser, itemKey);
 		final List<Tag> tags = (List<Tag>) response.getElements(Tag.class,
@@ -158,7 +159,9 @@ public class AjaxCommentsAction extends AbstractAction implements Commentable,
 		final List<? extends Message> unreadMessages = currentUserSupport
 				.getCurrentUser().get(Message.class);
 		msgList.setUnreadMsgCount(unreadMessages.size());
-
+		msgList.setPage(page);
+		msgList.setPageSize(Constants.MAX_COMMENTS);
+		msgList.setTotalMsgCount(paginationInfo.getItemCount());
 		// Returning JSON representation
 		return JSONObject.fromObject(msgList).toString();
 	}
