@@ -75,10 +75,11 @@ public class LocalizationServiceImpl implements LocalizationService {
 					}
 				}
 
+				// Assigning statistic place key
+				((MutableUser) user).setStatLocationKey(currentPlaceKey);
+				
 				// If localized, we store the place
 				if (currentPlaceKey != null) {
-					// Assigning statistic place key
-					((MutableUser) user).setStatLocationKey(currentPlaceKey);
 					viewManagementService.logViewCount(currentPlace,
 							currentUser, LOCALIZATION_AUTO_STAT);
 
