@@ -159,7 +159,7 @@ public class MyMessageReplyAction extends AbstractAction implements
 
 		// Marking messages as read
 		final List<ItemKey> keysToMark = new ArrayList<ItemKey>();
-		for (Message message : messages) {
+		for (Message message : myMessagingSupport.getMessages()) {
 			if (message.isUnread()) {
 				keysToMark.add(message.getKey());
 			}
