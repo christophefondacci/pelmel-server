@@ -336,9 +336,20 @@ public class NearbyPlacesListAction extends AbstractAction implements
 								lng, cityRadius));
 
 		if (getNxtpUserToken() != null) {
-			request.addCriterion((ApisCriterion) currentUserSupport
+			ApisCriterion userCriterion = (ApisCriterion) currentUserSupport
 					.createApisCriterionFor(getNxtpUserToken(), true).with(
-							GeographicItem.class));
+							GeographicItem.class);
+
+			// If localization is provided, we fetch the nearest place
+			if (lat != 0 || lng != 0) {
+				userCriterion.addCriterion(SearchRestriction.searchNear(
+						Place.class, SearchScope.NEARBY_BLOCK, lat, lng,
+						radius, 5, 0).aliasedBy(
+						Constants.APIS_ALIAS_NEARBY_PLACES));
+			}
+
+			// Adding criterion
+			request.addCriterion(userCriterion);
 		}
 
 		final ApiCompositeResponse response = (ApiCompositeResponse) getApiService()
@@ -624,11 +635,11 @@ public class NearbyPlacesListAction extends AbstractAction implements
 			geoService.setItemFor(user.getKey(), localizedCity.getKey());
 			// currentUser.add(localizedCity);
 		}
-		if (currentUser != null && searchLat != null && searchLng != null
-				&& lat == searchLat.doubleValue()
-				&& lng == searchLng.doubleValue()) {
-			localizationService.localize(currentUser, places, response, lat,
-					lng);
+		if (currentUser != null && (lat != 0 || lng != 0)) {
+			List<? extends Place> nearbyPlaces = currentUser.get(Place.class,
+					Constants.APIS_ALIAS_NEARBY_PLACES);
+			localizationService.localize(currentUser, nearbyPlaces, response,
+					lat, lng);
 		}
 
 		// Counting views

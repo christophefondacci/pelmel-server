@@ -682,9 +682,9 @@ public class SolrSearchPersistenceServiceImpl implements
 			final long lastSeenDate = System.currentTimeMillis()
 					- lastLocationTime.getTime();
 
+			solrUser.setCurrentAutoPlace(null);
 			if (user.getLastLocationKey() != null
 					&& lastSeenDate < lastSeenMaxTime) {
-				solrUser.setCurrentAutoPlace(null);
 				solrUser.setCurrentPlace(user.getLastLocationKey().toString());
 				solrUser.setCurrentPlaceTimeout(user.getLastLocationTime()
 						.getTime() + lastSeenMaxTime);
