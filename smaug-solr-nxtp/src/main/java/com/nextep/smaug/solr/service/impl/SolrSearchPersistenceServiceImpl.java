@@ -44,6 +44,7 @@ import com.nextep.statistic.model.Statistic;
 import com.nextep.tags.model.Tag;
 import com.nextep.users.model.User;
 import com.videopolis.calm.exception.CalException;
+import com.videopolis.calm.factory.CalmFactory;
 import com.videopolis.calm.model.CalmObject;
 import com.videopolis.calm.model.ItemKey;
 import com.videopolis.calm.model.Localized;
@@ -283,6 +284,25 @@ public class SolrSearchPersistenceServiceImpl implements
 				}
 				searchItem
 						.setActivityType(activity.getActivityType().getCode());
+
+				// Extracting extra info itemKey (if any) and setting as extra
+				// type
+				if (activity.getExtraInformation() != null) {
+					// If this is a list we don't want it
+					if (!activity.getExtraInformation().contains(",")) {
+						// Trying to parse an ItemKey
+						try {
+							final ItemKey itemKey = CalmFactory
+									.parseKey(activity.getExtraInformation());
+							// If we succeed we set as extra type
+							searchItem.setExtraType(itemKey.getType());
+						} catch (CalException e) {
+							log.error("Unable to convert extra info '"
+									+ activity.getExtraInformation()
+									+ "' to itemKey: " + e.getMessage(), e);
+						}
+					}
+				}
 
 				if (location instanceof Place) {
 					fillLocalization(searchItem, ((Place) location).getCity());

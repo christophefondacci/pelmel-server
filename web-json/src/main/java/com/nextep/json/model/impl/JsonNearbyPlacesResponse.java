@@ -14,6 +14,7 @@ public class JsonNearbyPlacesResponse {
 	private int nearbyUsersCount;
 	private int nearbyPlacesCount;
 	private int nearbyEventsCount;
+	private long maxActivityId;
 
 	public void setPlaces(List<JsonPlace> places) {
 		this.places = places;
@@ -93,5 +94,13 @@ public class JsonNearbyPlacesResponse {
 
 	public int getNearbyUsersCount() {
 		return nearbyUsersCount;
+	}
+
+	public void setMaxActivityId(long maxActivityId) {
+		this.maxActivityId = maxActivityId;
+	}
+
+	public long getMaxActivityId() {
+		return maxActivityId;
 	}
 }

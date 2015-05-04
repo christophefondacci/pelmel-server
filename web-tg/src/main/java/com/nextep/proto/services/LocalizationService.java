@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.concurrent.Future;
 
 import com.nextep.activities.model.ActivityType;
+import com.nextep.geo.model.GeographicItem;
 import com.nextep.geo.model.Place;
 import com.nextep.users.model.MutableUser;
 import com.nextep.users.model.User;
@@ -59,8 +60,8 @@ public interface LocalizationService {
 	 * @param lng
 	 *            current user longitude
 	 */
-	void checkin(MutableUser user, ItemKey placeKey, ActivityType activityType,
-			double lat, double lng);
+	void checkin(MutableUser user, GeographicItem place,
+			ActivityType activityType, double lat, double lng);
 
 	/**
 	 * Checks the user out of the given place
@@ -76,6 +77,6 @@ public interface LocalizationService {
 	 * @param lng
 	 *            the user's current longitude
 	 */
-	void checkout(MutableUser user, ItemKey placeKey,
+	void checkout(MutableUser user, GeographicItem place,
 			ActivityType activityType, double lat, double lng);
 }

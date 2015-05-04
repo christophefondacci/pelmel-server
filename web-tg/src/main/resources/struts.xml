@@ -700,5 +700,6 @@
 		<action name="place" class="mobileOverviewPlaceAction"/>
 		<action name="user" class="mobileOverviewUserAction"/>
 		<action name="event" class="mobileOverviewEventAction"/>
+		<action name="activity" class="mobileNearbyActivitiesAction"/>
 	</package>
 </struts>

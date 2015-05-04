@@ -14,6 +14,7 @@ import com.nextep.activities.model.ActivityType;
 import com.nextep.activities.model.MutableActivity;
 import com.nextep.cal.util.services.CalPersistenceService;
 import com.nextep.geo.model.City;
+import com.nextep.geo.model.GeographicItem;
 import com.nextep.geo.model.Place;
 import com.nextep.proto.apis.model.impl.ApisLocalizationHelper;
 import com.nextep.proto.services.LocalizationService;
@@ -28,6 +29,7 @@ import com.videopolis.apis.service.ApiCompositeResponse;
 import com.videopolis.apis.service.ApiResponse;
 import com.videopolis.calm.exception.CalException;
 import com.videopolis.calm.model.ItemKey;
+import com.videopolis.smaug.common.model.SearchScope;
 
 public class LocalizationServiceImpl implements LocalizationService {
 
@@ -113,7 +115,10 @@ public class LocalizationServiceImpl implements LocalizationService {
 						activity.setUserKey(currentUser.getKey());
 						activity.setDate(new Date());
 						activity.setLoggedItemKey(city.getKey());
+						activity.add(city);
 						activitiesService.saveItem(activity);
+						searchService.storeCalmObject(activity,
+								SearchScope.CHILDREN);
 					}
 				} catch (ApisException e) {
 					LOGGER.error(
@@ -131,19 +136,20 @@ public class LocalizationServiceImpl implements LocalizationService {
 	}
 
 	@Override
-	public void checkin(MutableUser user, ItemKey placeKey,
+	public void checkin(MutableUser user, GeographicItem place,
 			ActivityType activityType, double lat, double lng) {
-		checkinOrOut(user, placeKey, activityType, lat, lng, false);
+		checkinOrOut(user, place, activityType, lat, lng, false);
 	}
 
 	@Override
-	public void checkout(MutableUser user, ItemKey placeKey,
+	public void checkout(MutableUser user, GeographicItem place,
 			ActivityType activityType, double lat, double lng) {
-		checkinOrOut(user, placeKey, activityType, lat, lng, true);
+		checkinOrOut(user, place, activityType, lat, lng, true);
 	}
 
-	private void checkinOrOut(MutableUser user, ItemKey placeKey,
+	private void checkinOrOut(MutableUser user, GeographicItem place,
 			ActivityType activityType, double lat, double lng, boolean checkout) {
+		final ItemKey placeKey = place.getKey();
 		if (!checkout) {
 			user.setLastLocationKey(placeKey);
 			user.setLastLocationTime(new Date());
@@ -172,10 +178,11 @@ public class LocalizationServiceImpl implements LocalizationService {
 		activity.setUserKey(user.getKey());
 		activity.setDate(user.getLastLocationTime());
 		activity.setLoggedItemKey(placeKey);
-
+		activity.add(place);
 		ContextHolder.toggleWrite();
 		activitiesService.saveItem(activity);
 		searchService.updateUserOnlineStatus(user);
+		searchService.storeCalmObject(activity, SearchScope.CHILDREN);
 
 		// Saving user
 		usersService.saveItem(user);

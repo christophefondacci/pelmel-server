@@ -175,7 +175,8 @@ public final class SearchHelper {
 		c.setCategoryCode(category);
 		// Temporary workaround until proper XML definition
 		if ("weight_kg".equals(category) || "height_cm".equals(category)
-				|| "birthyear".equals(category) || "age".equals(category)) {
+				|| "birthyear".equals(category) || "age".equals(category)
+				|| "activityDate".equals(category)) {
 			c.setRange(true);
 		}
 		return c;
@@ -232,7 +233,12 @@ public final class SearchHelper {
 	}
 
 	public static List<Sorter> getActivitiesDefaultSorter() {
-		final Sorter sorter = new SorterImpl("activityDate", Order.DESCENDING);
+		return getActivitiesDateSorter(false);
+	}
+
+	public static List<Sorter> getActivitiesDateSorter(boolean ascending) {
+		final Sorter sorter = new SorterImpl("activityDate",
+				ascending ? Order.ASCENDING : Order.DESCENDING);
 		return Arrays.asList(sorter);
 	}
 

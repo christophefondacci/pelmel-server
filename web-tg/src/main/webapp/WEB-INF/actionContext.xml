@@ -164,6 +164,10 @@
 		<property name="localizationService" ref="localizationService"/>
 		<property name="viewManagementService" ref="viewManagementService"/>
 	</bean>
+	<bean id="mobileNearbyActivitiesAction" class="com.nextep.proto.action.mobile.impl.MobileNearbyActivitiesAction" parent="abstractMobileAction" scope="request">
+		<property name="currentUserSupport" ref="currentUserSupport"/>
+		<property name="urlService" ref="mobileUrlService"/>
+	</bean>
 	<bean id="eventUpdateAction" class="com.nextep.proto.action.impl.EventUpdateAction" parent="abstractAction" scope="request">
 		<property name="eventService" ref="eventsService"/>
 		<property name="eventSeriesService" ref="eventSeriesService"/>

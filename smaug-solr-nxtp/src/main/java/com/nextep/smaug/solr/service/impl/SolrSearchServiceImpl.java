@@ -130,21 +130,28 @@ public class SolrSearchServiceImpl implements SearchService {
 			if (filterSeo) {
 				buf.append("seoIndexed:1");
 			}
-			switch (settings.getSearchScope()) {
-			case BOOSTED_PLACES:
+			if (settings.getSearchScope() == SearchScope.BOOSTED_PLACES) {
 				final Date now = new Date();
 				final String nowTag = EVENT_DATE_FORMAT.format(now);
 				buf.append(" AND adBoostEndDate:[" + nowTag + " TO *]");
 				buf.append(" AND adBoostValue:[1 TO *]");
 				query.addSortField("adBoostValue", ORDER.desc);
-				break;
 			}
 			if (buf.length() > 0) {
 				query.setQuery(buf.toString());
 			}
 			return processSolrQuery(placesSolrServer, query, settings, window);
-		} else if (settings.getSearchScope() == SearchScope.NEARBY_ACTIVITIES) {
-			query.addSortField(DISTANCE_FIELD, SolrQuery.ORDER.asc);
+		} else if (Activity.CAL_TYPE.equals(kind)) {
+
+			if (settings.getSearchScope() == SearchScope.PLACES) {
+				query.setQuery("targetType:PLAC");
+			} else if (settings.getSearchScope() == SearchScope.EVENTS) {
+				query.setQuery("targetType:EVNT");
+			} else if (settings.getSearchScope() == SearchScope.PHOTOS) {
+				query.setQuery("extraType:MDIA");
+			}
+			query.addSortField("activityDate", ORDER.desc);
+			// query.addSortField(DISTANCE_FIELD, SolrQuery.ORDER.asc);
 			return processSolrQuery(activitiesSolrServer, query, settings,
 					window);
 		} else if (settings.getSearchScope() == SearchScope.CITY) {

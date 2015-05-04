@@ -9,6 +9,7 @@ package com.nextep.json.model.impl;
 public abstract class JsonMessagingStatistic {
 
 	private int unreadMsgCount = 0;
+	private long maxActivityId = 0;
 	private int page = 0;
 	private int pageSize = 0;
 	private int totalMsgCount = 0;
@@ -43,5 +44,13 @@ public abstract class JsonMessagingStatistic {
 
 	public int getPageSize() {
 		return pageSize;
+	}
+
+	public void setMaxActivityId(long maxActivityId) {
+		this.maxActivityId = maxActivityId;
+	}
+
+	public long getMaxActivityId() {
+		return maxActivityId;
 	}
 }

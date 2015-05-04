@@ -32,5 +32,5 @@ public enum SearchScope {
 	/** Scope for user-related searches */
 	USERS, USERS_OFFLINE, USERS_ONLINE,
 	/** Scope for event-related searches */
-	EVENTS, PLACES, NEARBY_ACTIVITIES
+	EVENTS, PLACES, NEARBY_ACTIVITIES, PHOTOS
 }

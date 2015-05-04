@@ -17,6 +17,9 @@ public class ActivitySearchItemImpl extends SearchItemImpl {
 	private String targetType;
 
 	@Field
+	private String extraType;
+
+	@Field
 	private String placeKey;
 
 	@Field
@@ -73,5 +76,13 @@ public class ActivitySearchItemImpl extends SearchItemImpl {
 
 	public void setActivityType(String activityType) {
 		this.activityType = activityType;
+	}
+
+	public void setExtraType(String extraType) {
+		this.extraType = extraType;
+	}
+
+	public String getExtraType() {
+		return extraType;
 	}
 }

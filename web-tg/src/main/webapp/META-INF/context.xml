@@ -68,6 +68,8 @@
 		value="150" />
 	<Environment name="mobile/nearbyUsersCount" type="java.lang.Integer"
 		value="100" />
+	<Environment name="mobile/maxActivityTimeMs" type="java.lang.Long"
+		value="604800000" />
 	<Environment name="minCityPopulationForIndexation" type="java.lang.Integer"
 		value="50000" />
 	<Environment name="defaultCityKey" type="java.lang.String"

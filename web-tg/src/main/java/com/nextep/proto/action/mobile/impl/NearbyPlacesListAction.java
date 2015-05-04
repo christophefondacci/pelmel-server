@@ -12,6 +12,10 @@ import javax.annotation.Resource;
 
 import net.sf.json.JSONObject;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import com.nextep.activities.model.Activity;
 import com.nextep.advertising.model.AdvertisingBooster;
 import com.nextep.cal.util.services.CalPersistenceService;
 import com.nextep.descriptions.model.Description;
@@ -79,14 +83,15 @@ public class NearbyPlacesListAction extends AbstractAction implements
 		SearchAware, JsonProvider, TagAware, NearbySearchAware {
 
 	private static final long serialVersionUID = 2386753201776395502L;
-	// private static final Log LOGGER = LogFactory
-	// .getLog(NearbyPlacesListAction.class);
+	private static final Log LOGGER = LogFactory
+			.getLog(NearbyPlacesListAction.class);
 
 	private static String APIS_ALIAS_NEARBY_PLACES = "np";
 	private static String APIS_ALIAS_NEARBY_EVENTS = "ne";
 	private static String APIS_ALIAS_NEARBY_USERS = "nu";
 	private static String APIS_ALIAS_NEARBY_USERS_OFFLINE = "nuo";
 	private static String APIS_ALIAS_CITY = "parentCity";
+	private static final String APIS_ALIAS_NEARBY_ACTIVITIES = "nearbyAct";
 
 	@Resource(mappedName = "mobile/nearbyUsersCount")
 	private Integer nearbyUsersCount = 50;
@@ -315,6 +320,10 @@ public class NearbyPlacesListAction extends AbstractAction implements
 					// .addCriterion(activitiesCrit)
 					.addCriterion(usersCrit));
 		}
+		// We need last nearby activity ID to display the "NEW" app activity
+		// badge
+		final List<Sorter> activitiesDateSorter = SearchHelper
+				.getActivitiesDateSorter(false);
 		request.addCriterion(
 				SearchRestriction.searchForAllFacets(User.class,
 						SearchScope.USER_LOCALIZATION).facettedBy(
@@ -333,7 +342,14 @@ public class NearbyPlacesListAction extends AbstractAction implements
 										.getUserEventsCategory())))
 				.addCriterion(
 						ApisLocalizationHelper.buildNearestCityCriterion(lat,
-								lng, cityRadius));
+								lng, cityRadius))
+				.addCriterion(
+						SearchRestriction
+								.searchNear(Activity.class,
+										SearchScope.NEARBY_ACTIVITIES, lat,
+										lng, radius, 1, 0)
+								.sortBy(activitiesDateSorter)
+								.aliasedBy(APIS_ALIAS_NEARBY_ACTIVITIES));
 
 		if (getNxtpUserToken() != null) {
 			ApisCriterion userCriterion = (ApisCriterion) currentUserSupport
@@ -696,6 +712,19 @@ public class NearbyPlacesListAction extends AbstractAction implements
 			}
 		});
 		jsonResponse.setNearbyUsers(jsonUsers);
+
+		// Setting nearby activities count
+		// Filling last activity ID
+		try {
+			final List<? extends Activity> activities = response.getElements(
+					Activity.class, APIS_ALIAS_NEARBY_ACTIVITIES);
+			if (!activities.isEmpty()) {
+				jsonResponse.setMaxActivityId(activities.iterator().next()
+						.getKey().getNumericId());
+			}
+		} catch (ApisException e) {
+			LOGGER.error("Unable to get last activity ID: " + e.getMessage(), e);
+		}
 
 		// Building city JSON
 		if (localizedCity != null) {

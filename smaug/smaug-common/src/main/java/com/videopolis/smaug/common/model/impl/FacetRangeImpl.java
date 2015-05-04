@@ -1,5 +1,8 @@
 package com.videopolis.smaug.common.model.impl;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.videopolis.smaug.common.model.FacetRange;
 import com.videopolis.smaug.common.model.base.AbstractFacet;
 
@@ -11,75 +14,91 @@ import com.videopolis.smaug.common.model.base.AbstractFacet;
  */
 public class FacetRangeImpl extends AbstractFacet implements FacetRange {
 
-    /** Lower bound of the range */
-    private long lowerBound;
+	private static final Log LOGGER = LogFactory.getLog(FacetRangeImpl.class);
 
-    /** Higher bound of the range */
-    private long higherBound;
+	/** Lower bound of the range */
+	private String lowerBound = "*";
 
-    /**
-     * Format of the code, used to generate the facet's code given the two
-     * bounds
-     */
-    private String rangeFormat;
+	/** Higher bound of the range */
+	private String higherBound = "*";
 
-    /**
-     * @param lowerBound
-     *            the lowerBound to set
-     */
-    public void setLowerBound(final long lowerBound) {
-	this.lowerBound = lowerBound;
-    }
+	/**
+	 * @param lowerBound
+	 *            the lowerBound to set
+	 */
+	public void setLowerBound(final long lowerBound) {
+		this.lowerBound = String.valueOf(lowerBound);
+	}
 
-    /**
-     * @param higherBound
-     *            the higherBound to set
-     */
-    public void setHigherBound(final long higherBound) {
-	this.higherBound = higherBound;
-    }
+	public void setLowerBoundExpr(String lowerBound) {
+		this.lowerBound = lowerBound;
+	}
 
-    @Override
-    public String getRangeFormat() {
-	return rangeFormat;
-    }
+	/**
+	 * @param higherBound
+	 *            the higherBound to set
+	 */
+	public void setHigherBound(final long higherBound) {
+		this.higherBound = String.valueOf(higherBound + 1);
+	}
 
-    /**
-     * @param rangeFormat
-     *            the rangeFormat to set
-     */
-    public void setRangeFormat(final String rangeFormat) {
-	this.rangeFormat = rangeFormat;
-    }
+	public void setHigherBoundExpr(String higherBound) {
+		this.higherBound = higherBound;
+	}
 
-    @Override
-    public String getFacetCode() {
-	return String.format(rangeFormat, lowerBound, higherBound + 1);
-    }
+	@Override
+	public String getRangeFormat() {
+		return "[%s TO %s]";
+	}
 
-    @Override
-    public long getLowerBound() {
-	return lowerBound;
-    }
+	/**
+	 * @param rangeFormat
+	 *            the rangeFormat to set
+	 */
+	public void setRangeFormat(final String rangeFormat) {
+		// Does nothing
+	}
 
-    @Override
-    public long getHigherBound() {
-	return higherBound;
-    }
+	@Override
+	public String getFacetCode() {
+		return String.format(getRangeFormat(), lowerBound, higherBound);
+	}
 
-    @Override
-    public String getLowerBoundCode() {
-	return String.valueOf(lowerBound);
-    }
+	@Override
+	public long getLowerBound() {
+		try {
+			return Long.valueOf(lowerBound);
+		} catch (Exception e) {
+			LOGGER.error("Unable to convert FacetRange lowerBound '"
+					+ lowerBound + "' to long: " + e.getMessage(), e);
+		}
+		return 0;
+	}
 
-    @Override
-    public String getHigherBoundCode() {
-	return String.valueOf(higherBound);
-    }
+	@Override
+	public long getHigherBound() {
+		try {
+			return Long.valueOf(higherBound);
+		} catch (Exception e) {
+			LOGGER.error("Unable to convert FacetRange higherBound '"
+					+ higherBound + "' to long: " + e.getMessage(), e);
+		}
+		return 0;
+	}
 
-    @Override
-    public String toString() {
-	return super.toString() + " range from " + lowerBound + " to "
-		+ higherBound + " (" + getFacetCode() + ")";
-    }
+	@Override
+	public String getLowerBoundCode() {
+		return lowerBound;
+	}
+
+	@Override
+	public String getHigherBoundCode() {
+		return higherBound;
+	}
+
+	@Override
+	public String toString() {
+		return super.toString() + " range from " + lowerBound + " to "
+				+ higherBound + " (" + getFacetCode() + ")";
+	}
 }

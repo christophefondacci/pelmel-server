@@ -1,8 +1,11 @@
 package com.nextep.proto.action.mobile.impl;
 
+import java.util.Arrays;
+
 import net.sf.json.JSONObject;
 
 import com.nextep.activities.model.ActivityType;
+import com.nextep.geo.model.GeographicItem;
 import com.nextep.json.model.impl.JsonStatus;
 import com.nextep.proto.action.base.AbstractAction;
 import com.nextep.proto.action.model.JsonProvider;
@@ -11,6 +14,7 @@ import com.nextep.proto.services.LocalizationService;
 import com.nextep.users.model.MutableUser;
 import com.nextep.users.model.User;
 import com.videopolis.apis.factory.ApisFactory;
+import com.videopolis.apis.factory.SearchRestriction;
 import com.videopolis.apis.model.ApisRequest;
 import com.videopolis.apis.service.ApiCompositeResponse;
 import com.videopolis.calm.factory.CalmFactory;
@@ -20,6 +24,9 @@ import com.videopolis.cals.factory.ContextFactory;
 public class MobileCheckInAction extends AbstractAction implements JsonProvider {
 
 	private static final long serialVersionUID = -7836539504850573998L;
+
+	private static final String APIS_ALIAS_CHECKIN_PLACE = "cp";
+
 	// Injected services & support
 	private CurrentUserSupport currentUserSupport;
 	private LocalizationService localizationService;
@@ -35,12 +42,19 @@ public class MobileCheckInAction extends AbstractAction implements JsonProvider 
 
 	@Override
 	protected String doExecute() throws Exception {
+		// Parsing key
+		final ItemKey itemKey = CalmFactory.parseKey(checkInKey);
 		status = new JsonStatus();
 		status.setError(true);
+		// Building request for current user and checkin object
 		final ApisRequest request = (ApisRequest) ApisFactory
-				.createCompositeRequest().addCriterion(
+				.createCompositeRequest()
+				.addCriterion(
 						currentUserSupport.createApisCriterionFor(
-								getNxtpUserToken(), true));
+								getNxtpUserToken(), true))
+				.addCriterion(
+						SearchRestriction.uniqueKeys(Arrays.asList(itemKey))
+								.aliasedBy(APIS_ALIAS_CHECKIN_PLACE));
 
 		final ApiCompositeResponse response = (ApiCompositeResponse) getApiService()
 				.execute(request, ContextFactory.createContext(getLocale()));
@@ -50,13 +64,16 @@ public class MobileCheckInAction extends AbstractAction implements JsonProvider 
 				CurrentUserSupport.APIS_ALIAS_CURRENT_USER);
 		checkCurrentUser(user);
 
+		// Getting checkin place
+		final GeographicItem checkinPlace = response.getUniqueElement(
+				GeographicItem.class, APIS_ALIAS_CHECKIN_PLACE);
+
 		// Checking in
-		final ItemKey checkinItemKey = CalmFactory.parseKey(checkInKey);
 		if (!checkout) {
-			localizationService.checkin((MutableUser) user, checkinItemKey,
+			localizationService.checkin((MutableUser) user, checkinPlace,
 					ActivityType.CHECKIN, lat, lng);
 		} else {
-			localizationService.checkout((MutableUser) user, checkinItemKey,
+			localizationService.checkout((MutableUser) user, checkinPlace,
 					ActivityType.CHECKOUT, lat, lng);
 		}
 		// We're done

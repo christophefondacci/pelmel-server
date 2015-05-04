@@ -17,6 +17,7 @@ import com.nextep.activities.model.MutableActivity;
 import com.nextep.cal.util.services.CalPersistenceService;
 import com.nextep.events.model.EventSeries;
 import com.nextep.geo.model.City;
+import com.nextep.geo.model.GeographicItem;
 import com.nextep.json.model.impl.JsonLikeInfo;
 import com.nextep.messages.model.Message;
 import com.nextep.messages.model.MutableMessage;
@@ -164,6 +165,14 @@ public class ILikeAction extends AbstractAction implements CurrentUserAware,
 					: ActivityType.UNLIKE);
 			activity.setDate(new Date());
 
+			// Adding localization to activity
+			if (likedItem instanceof GeographicItem) {
+				activity.add(likedItem);
+			} else {
+				final GeographicItem geoItem = likedItem
+						.getUnique(GeographicItem.class);
+				activity.add(geoItem);
+			}
 			// Saving it
 			activitiesService.saveItem(activity);
 			searchPersistenceService.storeCalmObject(activity,

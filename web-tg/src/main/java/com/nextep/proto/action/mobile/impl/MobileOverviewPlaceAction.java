@@ -9,8 +9,11 @@ import javax.annotation.Resource;
 
 import net.sf.json.JSONObject;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.nextep.activities.model.Activity;
 import com.nextep.comments.model.Comment;
 import com.nextep.descriptions.model.Description;
 import com.nextep.events.model.Event;
@@ -36,6 +39,7 @@ import com.nextep.proto.services.LocalizationService;
 import com.nextep.proto.services.ViewManagementService;
 import com.nextep.tags.model.Tag;
 import com.nextep.users.model.User;
+import com.videopolis.apis.exception.ApisException;
 import com.videopolis.apis.factory.ApisFactory;
 import com.videopolis.apis.factory.SearchRestriction;
 import com.videopolis.apis.helper.ApisRegistry;
@@ -48,6 +52,7 @@ import com.videopolis.calm.factory.CalmFactory;
 import com.videopolis.calm.model.CalmObject;
 import com.videopolis.calm.model.ItemKey;
 import com.videopolis.calm.model.Localized;
+import com.videopolis.calm.model.Sorter;
 import com.videopolis.cals.factory.ContextFactory;
 import com.videopolis.cals.model.PaginationInfo;
 import com.videopolis.smaug.common.model.FacetCategory;
@@ -56,8 +61,8 @@ import com.videopolis.smaug.common.model.SearchScope;
 public class MobileOverviewPlaceAction extends AbstractAction implements
 		JsonProvider, MobileOverviewService {
 
-	// private static final Log LOGGER = LogFactory
-	// .getLog(MobileOverviewPlaceAction.class);
+	private static final Log LOGGER = LogFactory
+			.getLog(MobileOverviewPlaceAction.class);
 
 	// Constants declaration
 	private static final long serialVersionUID = 154177235838836337L;
@@ -66,6 +71,7 @@ public class MobileOverviewPlaceAction extends AbstractAction implements
 	private static final String APIS_ALIAS_USER_CHECKEDIN = "ucheckin";
 	private static final String APIS_ALIAS_USER_AUTO_LOCALIZATION = "autoloc";
 	private static final String APIS_ALIAS_COMMENTS = "comments";
+	private static final String APIS_ALIAS_NEARBY_ACTIVITIES = "nearbyAct";
 
 	// Injected supports
 	private ViewManagementService viewManagementService;
@@ -131,10 +137,22 @@ public class MobileOverviewPlaceAction extends AbstractAction implements
 		objCriterion.addCriterion(SearchRestriction.with(Comment.class, 1, 0)
 				.aliasedBy(APIS_ALIAS_COMMENTS));
 
+		// We need last nearby activity ID to display the "NEW" app activity
+		// badge
+		final List<Sorter> activitiesDateSorter = SearchHelper
+				.getActivitiesDateSorter(false);
+
 		// Querying along with some global user facetting
 		final ApisRequest request = (ApisRequest) ApisFactory
 				.createCompositeRequest()
 				.addCriterion(objCriterion)
+				.addCriterion(
+						SearchRestriction
+								.searchNear(Activity.class,
+										SearchScope.NEARBY_ACTIVITIES, lat,
+										lng, radius, 1, 0)
+								.sortBy(activitiesDateSorter)
+								.aliasedBy(APIS_ALIAS_NEARBY_ACTIVITIES))
 				.addCriterion(
 						SearchRestriction.searchForAllFacets(User.class,
 								SearchScope.EVENTS).facettedBy(
@@ -279,6 +297,17 @@ public class MobileOverviewPlaceAction extends AbstractAction implements
 		int unreadMessagesCount = currentUser.get(Message.class).size();
 		json.setUnreadMsgCount(unreadMessagesCount);
 
+		// Filling last activity ID
+		try {
+			final List<? extends Activity> activities = response.getElements(
+					Activity.class, APIS_ALIAS_NEARBY_ACTIVITIES);
+			if (!activities.isEmpty()) {
+				json.setMaxActivityId(activities.iterator().next().getKey()
+						.getNumericId());
+			}
+		} catch (ApisException e) {
+			LOGGER.error("Unable to get last activity ID: " + e.getMessage(), e);
+		}
 		// Filling the "liked" flag
 		final List<? extends CalmObject> likedObjects = currentUserSupport
 				.getCurrentUser().get(CalmObject.class,
