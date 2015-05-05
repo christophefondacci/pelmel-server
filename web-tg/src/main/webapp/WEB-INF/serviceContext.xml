@@ -153,9 +153,9 @@
 <!-- 		<property name="messageSource" ref="globalMessages"/> -->
 		<property name="distanceDisplayService" ref="distanceDisplayService"/>
 		<property name="eventManagementService" ref="eventManagementService"/>
-		<property name="baseUrl">
-			<jee:jndi-lookup jndi-name="java:comp/env/mediaBaseUrl"/>
-		</property>
+<!-- 		<property name="baseUrl"> -->
+<!-- 			<jee:jndi-lookup jndi-name="java:comp/env/mediaBaseUrl"/> -->
+<!-- 		</property> -->
 	</bean>
 	
 	<bean id="localizationService" class="com.nextep.proto.services.impl.LocalizationServiceImpl">

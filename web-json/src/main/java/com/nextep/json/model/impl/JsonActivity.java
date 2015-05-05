@@ -10,6 +10,7 @@ public class JsonActivity {
 	private IJsonLightPlace activityPlace;
 	private JsonLightUser activityUser;
 	private String message;
+	private String activityType;
 	private Long activityDate;
 
 	public JsonLightUser getUser() {
@@ -54,5 +55,13 @@ public class JsonActivity {
 
 	public void setActivityUser(JsonLightUser activityUser) {
 		this.activityUser = activityUser;
+	}
+
+	public void setActivityType(String activityType) {
+		this.activityType = activityType;
+	}
+
+	public String getActivityType() {
+		return activityType;
 	}
 }

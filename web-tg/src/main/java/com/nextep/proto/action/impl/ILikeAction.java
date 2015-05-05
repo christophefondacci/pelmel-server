@@ -89,6 +89,28 @@ public class ILikeAction extends AbstractAction implements CurrentUserAware,
 		final ItemKey userKey = CalmFactory.createKey(User.TOKEN_TYPE,
 				getNxtpUserToken());
 
+		final ApisCriterion likedCriterion = (ApisCriterion) SearchRestriction
+				.uniqueKeys(Arrays.asList(likedKey))
+				.aliasedBy(APIS_ALIAS_LIKED_KEY)
+				.addCriterion(
+						SearchRestriction.withContained(User.class,
+								SearchScope.CHILDREN, 1, 0).aliasedBy(
+								APIS_ALIAS_USER_LIKERS))
+				// We need event localization for timezone
+				// computation
+				.addCriterion(
+						SearchRestriction.adaptKey(eventLocalizationAdapter))
+				.addCriterion(
+						SearchRestriction
+								.customAdapt(
+										new ApisExpirableLikesCustomAdapter(
+												eventManagementService,
+												APIS_ALIAS_USER_EXPIRABLE_LIKERS,
+												1, 0),
+										APIS_ALIAS_USER_EXPIRABLE_LIKERS));
+		if (likedKey.getType().equals(User.CAL_TYPE)) {
+			likedCriterion.with(GeographicItem.class);
+		}
 		// Retrieving user from token
 		final ApisRequest userRequest = (ApisRequest) ApisFactory
 				.createCompositeRequest()
@@ -99,29 +121,7 @@ public class ILikeAction extends AbstractAction implements CurrentUserAware,
 										Activity.class,
 										ActivityRequestTypes.fromUser(-1,
 												ActivityType.LIKE)))
-				.addCriterion(
-						(ApisCriterion) SearchRestriction
-								.uniqueKeys(Arrays.asList(likedKey))
-								.aliasedBy(APIS_ALIAS_LIKED_KEY)
-								.addCriterion(
-										SearchRestriction.withContained(
-												User.class,
-												SearchScope.CHILDREN, 1, 0)
-												.aliasedBy(
-														APIS_ALIAS_USER_LIKERS))
-								// We need event localization for timezone
-								// computation
-								.addCriterion(
-										SearchRestriction
-												.adaptKey(eventLocalizationAdapter))
-								.addCriterion(
-										SearchRestriction
-												.customAdapt(
-														new ApisExpirableLikesCustomAdapter(
-																eventManagementService,
-																APIS_ALIAS_USER_EXPIRABLE_LIKERS,
-																1, 0),
-														APIS_ALIAS_USER_EXPIRABLE_LIKERS)));
+				.addCriterion(likedCriterion);
 		final ApiCompositeResponse userResponse = (ApiCompositeResponse) getApiService()
 				.execute(userRequest, ContextFactory.createContext(getLocale()));
 		final User currentUser = userResponse.getUniqueElement(User.class,

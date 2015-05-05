@@ -81,7 +81,7 @@ public class JsonBuilderImpl implements JsonBuilder {
 	private static final Log LOGGER = LogFactory.getLog(JsonBuilderImpl.class);
 	private DistanceDisplayService distanceDisplayService;
 	private EventManagementService eventManagementService;
-	private String baseUrl;
+	// private String baseUrl;
 
 	@Resource(mappedName = "smaug/lastSeenMaxTime")
 	private Long checkinTime;
@@ -177,10 +177,6 @@ public class JsonBuilderImpl implements JsonBuilder {
 		}
 
 		return selectedDesc;
-	}
-
-	public void setBaseUrl(String baseUrl) {
-		this.baseUrl = baseUrl;
 	}
 
 	@Override
@@ -848,6 +844,7 @@ public class JsonBuilderImpl implements JsonBuilder {
 			json.setActivityUser(jsonUser);
 		}
 		json.setActivityDateValue(activity.getDate());
+		json.setActivityType(activity.getActivityType().getCode());
 		return json;
 	}
 

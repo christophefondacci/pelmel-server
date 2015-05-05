@@ -149,6 +149,10 @@ public class SolrSearchServiceImpl implements SearchService {
 				query.setQuery("targetType:EVNT");
 			} else if (settings.getSearchScope() == SearchScope.PHOTOS) {
 				query.setQuery("extraType:MDIA");
+			} else if (settings.getSearchScope() == SearchScope.USERS) {
+				query.setQuery("targetType:USER");
+			} else if (settings.getSearchScope() == SearchScope.CREATION) {
+				query.setQuery("activityType:C");
 			}
 			query.addSortField("activityDate", ORDER.desc);
 			// query.addSortField(DISTANCE_FIELD, SolrQuery.ORDER.asc);
