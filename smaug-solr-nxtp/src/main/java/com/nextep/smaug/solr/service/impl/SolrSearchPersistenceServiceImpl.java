@@ -703,6 +703,7 @@ public class SolrSearchPersistenceServiceImpl implements
 					- lastLocationTime.getTime();
 
 			solrUser.setCurrentAutoPlace(null);
+			solrUser.setCurrentPlaceTimeout(0);
 			if (user.getLastLocationKey() != null
 					&& lastSeenDate < lastSeenMaxTime) {
 				solrUser.setCurrentPlace(user.getLastLocationKey().toString());
@@ -712,14 +713,14 @@ public class SolrSearchPersistenceServiceImpl implements
 				// If current last location is expired or not existing and we
 				// have an automatic localization
 				solrUser.setCurrentPlace(null);
-				if (user.getStatLocationKey() != null) {
-					// Then we set the user at the auto localization place for
-					// him to be counted
-					solrUser.setCurrentAutoPlace(user.getStatLocationKey()
-							.toString());
-					solrUser.setCurrentPlaceTimeout(System.currentTimeMillis()
-							+ lastSeenMaxTime);
-				}
+				// if (user.getStatLocationKey() != null) {
+				// // Then we set the user at the auto localization place for
+				// // him to be counted
+				// solrUser.setCurrentAutoPlace(user.getStatLocationKey()
+				// .toString());
+				// solrUser.setCurrentPlaceTimeout(System.currentTimeMillis()
+				// + lastSeenMaxTime);
+				// }
 			}
 
 			// Adding localization information

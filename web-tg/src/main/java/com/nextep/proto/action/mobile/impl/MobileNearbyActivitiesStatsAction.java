@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.nextep.activities.model.Activity;
 import com.nextep.activities.model.ActivityType;
 import com.nextep.events.model.Event;
+import com.nextep.events.model.EventSeries;
 import com.nextep.geo.model.Place;
 import com.nextep.json.model.impl.JsonActivityStatistic;
 import com.nextep.json.model.impl.JsonMedia;
@@ -227,6 +228,7 @@ public class MobileNearbyActivitiesStatsAction extends AbstractAction implements
 					.unwrapFacets(placesFacetInfo, category);
 			placesFacetsMap.remove(ActivityType.CREATION.getCode());
 			placesFacetsMap.remove(ActivityType.CHECKOUT.getCode());
+			placesFacetsMap.remove(ActivityType.UPDATE.getCode());
 			fillJsonStats(jsonActivityStats, Place.CAL_TYPE, placesFacetsMap,
 					placesActivities);
 
@@ -253,7 +255,7 @@ public class MobileNearbyActivitiesStatsAction extends AbstractAction implements
 			// Creation activities
 			final Map<String, Integer> creationFacetsMap = SearchHelper
 					.unwrapFacets(creationFacetInfo, extraCategory);
-			usersFacetsMap.remove(ActivityType.CREATION.getCode());
+			creationFacetsMap.remove(EventSeries.SERIES_CAL_ID);
 			fillJsonStats(jsonActivityStats, "CREATION", creationFacetsMap,
 					creationActivities);
 
@@ -271,16 +273,34 @@ public class MobileNearbyActivitiesStatsAction extends AbstractAction implements
 		// might be a better way, but it saves us from querying each activity
 		// type independently)
 		final Map<String, Activity> activitiesTypesMap = new HashMap<String, Activity>();
+		final Map<String, Media> activitiesPhotosMap = new HashMap<String, Media>();
 		for (Activity a : activities) {
-			if (activitiesTypesMap.get(a.getActivityType().getCode()) == null) {
-				activitiesTypesMap.put(a.getActivityType().getCode(), a);
+			final Media m = getMediaFor(a);
+			final String activityTypeCode = a.getActivityType().getCode();
+
+			// Storing most recent activity for this type (if not yet defined,
+			// since it is sorted by date DESC, we got most recent first)
+			if (activitiesTypesMap.get(activityTypeCode) == null) {
+				activitiesTypesMap.put(activityTypeCode, a);
 			}
+			// Storing most recent non-null media
+			if (m != null && activitiesPhotosMap.get(activityTypeCode) == null) {
+				activitiesPhotosMap.put(activityTypeCode, m);
+			}
+
 			if (a.getExtraInformation() != null
 					&& a.getExtraInformation().length() >= 4) {
 				final String extraPrefix = a.getExtraInformation().substring(0,
 						4);
+				// Registering activity under extra key prefix for "CREATION"
+				// specific compatibility where the facetting is not by
+				// activityType but by extra key type
 				if (activitiesTypesMap.get(extraPrefix) == null) {
 					activitiesTypesMap.put(extraPrefix, a);
+				}
+				// Registering photo
+				if (m != null && activitiesPhotosMap.get(extraPrefix) == null) {
+					activitiesPhotosMap.put(extraPrefix, m);
 				}
 			}
 		}
@@ -294,27 +314,43 @@ public class MobileNearbyActivitiesStatsAction extends AbstractAction implements
 			final Activity a = activitiesTypesMap.get(activityType);
 			if (a != null) {
 				stat.setLastId(a.getKey().getNumericId());
-				try {
-					final CalmObject target = a.getUnique(CalmObject.class,
-							Constants.ALIAS_ACTIVITY_TARGET);
-					Media media = null;
-					if (target instanceof Media) {
-						media = (Media) target;
-					} else {
-						media = MediaHelper.getSingleMedia(target);
-					}
-					if (media != null) {
-						final JsonMedia m = jsonBuilder.buildJsonMedia(media,
-								highRes);
-						stat.setMedia(m);
-					}
-				} catch (CalException e) {
-					LOGGER.error("Unable to get target object from activity: "
-							+ e.getMessage(), e);
+				// Getting registered media
+				final Media media = activitiesPhotosMap.get(activityType);
+				if (media != null) {
+					final JsonMedia m = jsonBuilder.buildJsonMedia(media,
+							highRes);
+					stat.setMedia(m);
 				}
+
 			}
 			stats.add(stat);
 		}
+	}
+
+	/**
+	 * Extracts a media from the given activity (by all means necessary!)
+	 * 
+	 * @param a
+	 *            {@link Activity} to extract media for
+	 * @return the media or <code>null</code> if no media could be found on this
+	 *         activity
+	 */
+	private Media getMediaFor(Activity a) {
+		Media media = null;
+		try {
+			final CalmObject target = a.getUnique(CalmObject.class,
+					Constants.ALIAS_ACTIVITY_TARGET);
+			if (target instanceof Media) {
+				media = (Media) target;
+			} else {
+				media = MediaHelper.getSingleMedia(target);
+			}
+		} catch (CalException e) {
+			LOGGER.error(
+					"Unable to get target object from activity: "
+							+ e.getMessage(), e);
+		}
+		return media;
 	}
 
 	public void setLat(Double lat) {

@@ -90,7 +90,7 @@ public class LocalizationServiceImpl implements LocalizationService {
 				}
 			}
 			// Assigning statistic place key
-			((MutableUser) user).setStatLocationKey(currentPlaceKey);
+			((MutableUser) user).setStatLocationKey(null); // currentPlaceKey);
 
 			// Storing user localization info (lat, long and place)
 			usersService.saveItem(user);

@@ -1,8 +1,13 @@
 package com.nextep.proto.action.mobile.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 import javax.annotation.Resource;
 
@@ -11,46 +16,39 @@ import net.sf.json.JSONArray;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.nextep.activities.model.Activity;
+import com.nextep.geo.model.Place;
 import com.nextep.json.model.impl.JsonActivity;
+import com.nextep.json.model.impl.JsonLightPlace;
+import com.nextep.json.model.impl.JsonLightUser;
 import com.nextep.media.model.Media;
 import com.nextep.proto.action.base.AbstractAction;
 import com.nextep.proto.action.model.JsonProvider;
-import com.nextep.proto.apis.adapters.ApisActivityExtraKeyAdapter;
-import com.nextep.proto.apis.adapters.ApisActivityTargetKeyAdapter;
-import com.nextep.proto.apis.adapters.ApisActivityUserAdapter;
+import com.nextep.proto.apis.adapters.ApisFacetToItemKeyAdapter;
 import com.nextep.proto.apis.model.impl.ApisActivitiesHelper;
 import com.nextep.proto.blocks.CurrentUserSupport;
 import com.nextep.proto.builders.JsonBuilder;
 import com.nextep.proto.helpers.SearchHelper;
-import com.nextep.proto.model.Constants;
 import com.nextep.users.model.User;
 import com.videopolis.apis.factory.ApisFactory;
 import com.videopolis.apis.factory.SearchRestriction;
 import com.videopolis.apis.model.ApisCriterion;
-import com.videopolis.apis.model.ApisItemKeyAdapter;
+import com.videopolis.apis.model.ApisCustomAdapter;
 import com.videopolis.apis.model.ApisRequest;
+import com.videopolis.apis.model.FacetInformation;
 import com.videopolis.apis.service.ApiCompositeResponse;
+import com.videopolis.calm.model.CalmObject;
 import com.videopolis.calm.model.Sorter;
 import com.videopolis.cals.factory.ContextFactory;
 import com.videopolis.smaug.common.model.Facet;
+import com.videopolis.smaug.common.model.FacetCategory;
 import com.videopolis.smaug.common.model.SearchScope;
 
-/**
- * This action provides the detail of activities of a given type and is designed
- * to be called after the {@link MobileNearbyActivitiesStatsAction} with the
- * activityType information of one item of the array.
- * 
- * @author cfondacci
- *
- */
-public class MobileNearbyActivitiesAction extends AbstractAction implements
-		JsonProvider {
+public class MobileNearbyActivitiesGroupedAction extends AbstractAction
+		implements JsonProvider {
 
 	private static final long serialVersionUID = 1L;
 	private static final String APIS_ALIAS_ACTIVITIES = "activities";
-	private static final ApisItemKeyAdapter activityTargetKeyAdapter = new ApisActivityTargetKeyAdapter();
-	private static final ApisItemKeyAdapter activityExtraKeyAdapter = new ApisActivityExtraKeyAdapter();
-	private static final ApisItemKeyAdapter activityUserKeyAdapter = new ApisActivityUserAdapter();
+	private static final String APIS_ALIAS_FACET_ITEMS = "facetItems";
 
 	// Services
 	@Autowired
@@ -74,6 +72,7 @@ public class MobileNearbyActivitiesAction extends AbstractAction implements
 
 	// Internal variables
 	private ApiCompositeResponse response;
+	private List<? extends CalmObject> objects;
 	private List<? extends Activity> activities;
 
 	@Override
@@ -89,7 +88,14 @@ public class MobileNearbyActivitiesAction extends AbstractAction implements
 		final List<Sorter> activitiesDateSorter = SearchHelper
 				.getActivitiesDateSorter(false);
 
-		// Building request
+		final FacetCategory placeKeyCategory = SearchHelper
+				.getFacetCategory("placeKey");
+		final List<FacetCategory> facetCategories = Arrays
+				.asList(placeKeyCategory);
+		final ApisCustomAdapter facetToItemKeyAdapter = new ApisFacetToItemKeyAdapter(
+				SearchScope.NEARBY_ACTIVITIES, placeKeyCategory, pageSize);
+
+		// Building query
 		final ApisRequest request = (ApisRequest) ApisFactory
 				.createCompositeRequest()
 				.addCriterion(
@@ -101,28 +107,14 @@ public class MobileNearbyActivitiesAction extends AbstractAction implements
 										SearchScope.NEARBY_ACTIVITIES, lat,
 										lng, radius, pageSize, page)
 								.filteredBy(facets)
+								.facettedBy(facetCategories)
 								.sortBy(activitiesDateSorter)
 								.aliasedBy(APIS_ALIAS_ACTIVITIES)
 								.addCriterion(
 										(ApisCriterion) SearchRestriction
-												.adaptKey(
-														activityTargetKeyAdapter)
-												.aliasedBy(
-														Constants.ALIAS_ACTIVITY_TARGET)
-												.with(Media.class))
-								.addCriterion(
-										(ApisCriterion) SearchRestriction
-												.adaptKey(
-														activityExtraKeyAdapter)
-												.aliasedBy(
-														Constants.ALIAS_ACTIVITY_OBJECT)
-												.with(Media.class))
-								.addCriterion(
-										(ApisCriterion) SearchRestriction
-												.adaptKey(
-														activityUserKeyAdapter)
-												.aliasedBy(
-														Constants.ALIAS_ACTIVITY_USER)
+												.customAdapt(
+														facetToItemKeyAdapter,
+														APIS_ALIAS_FACET_ITEMS)
 												.with(Media.class)));
 
 		// Executing
@@ -130,11 +122,13 @@ public class MobileNearbyActivitiesAction extends AbstractAction implements
 				ContextFactory.createContext(getLocale()));
 
 		// Checking user
-		User user = response.getUniqueElement(User.class,
+		final User user = response.getUniqueElement(User.class,
 				CurrentUserSupport.APIS_ALIAS_CURRENT_USER);
 		checkCurrentUser(user);
 
-		// Extracting activities
+		// Extracting information
+		objects = response
+				.getElements(CalmObject.class, APIS_ALIAS_FACET_ITEMS);
 		activities = response
 				.getElements(Activity.class, APIS_ALIAS_ACTIVITIES);
 		return SUCCESS;
@@ -143,29 +137,50 @@ public class MobileNearbyActivitiesAction extends AbstractAction implements
 	@Override
 	public String getJson() {
 		final List<JsonActivity> jsonActivities = new ArrayList<JsonActivity>();
+
+		// Building activities map for date retrieval
+		final Map<String, Date> activitiesDateMap = new HashMap<String, Date>();
 		for (Activity a : activities) {
-			final JsonActivity jsonActivity = jsonBuilder.buildJsonActivity(a,
-					highRes, getLocale());
-			jsonActivities.add(jsonActivity);
+			if (!activitiesDateMap.containsKey(a.getLoggedItemKey().toString())) {
+				activitiesDateMap.put(a.getLoggedItemKey().toString(),
+						a.getDate());
+			}
 		}
+		// Unwrapping facets
+		final FacetInformation facetInfo = response
+				.getFacetInformation(SearchScope.NEARBY_ACTIVITIES);
+		final Map<String, Integer> facetsMap = SearchHelper.unwrapFacets(
+				facetInfo, SearchHelper.getFacetCategory("placeKey"));
 
+		final Locale l = getLocale();
+		// Converting objects to JSON
+		for (CalmObject object : objects) {
+			final JsonActivity activity = new JsonActivity();
+
+			// Converting to JsonUser if User
+			if (object instanceof User) {
+				final JsonLightUser jsonUser = jsonBuilder.buildJsonLightUser(
+						(User) object, highRes, l);
+				activity.setUser(jsonUser);
+			} else if (object instanceof Place) {
+				// Converting to JsonPlace if Place
+				final JsonLightPlace jsonPlace = jsonBuilder
+						.buildJsonLightPlace((Place) object, highRes, l);
+				activity.setActivityPlace(jsonPlace);
+			}
+
+			// Filling activity type and facet counts
+			activity.setActivityType(statActivityType);
+			final Integer count = facetsMap.get(object.getKey().toString());
+			activity.setCount(count);
+
+			// Filling date
+			final Date activityDate = activitiesDateMap.get(object.getKey()
+					.toString());
+			activity.setActivityDateValue(activityDate);
+			jsonActivities.add(activity);
+		}
 		return JSONArray.fromObject(jsonActivities).toString();
-	}
-
-	public void setLat(Double lat) {
-		this.lat = lat;
-	}
-
-	public void setLng(Double lng) {
-		this.lng = lng;
-	}
-
-	public Double getLat() {
-		return lat;
-	}
-
-	public Double getLng() {
-		return lng;
 	}
 
 	public String getStatActivityType() {
@@ -176,27 +191,44 @@ public class MobileNearbyActivitiesAction extends AbstractAction implements
 		this.statActivityType = statActivityType;
 	}
 
-	public void setPage(int page) {
-		this.page = page;
+	public Double getLat() {
+		return lat;
+	}
+
+	public void setLat(Double lat) {
+		this.lat = lat;
+	}
+
+	public Double getLng() {
+		return lng;
+	}
+
+	public void setLng(Double lng) {
+		this.lng = lng;
 	}
 
 	public int getPage() {
 		return page;
 	}
 
-	public void setPageSize(int pageSize) {
-		this.pageSize = pageSize;
+	public void setPage(int page) {
+		this.page = page;
 	}
 
 	public int getPageSize() {
 		return pageSize;
 	}
 
-	public void setHighRes(boolean highRes) {
-		this.highRes = highRes;
+	public void setPageSize(int pageSize) {
+		this.pageSize = pageSize;
 	}
 
 	public boolean isHighRes() {
 		return highRes;
 	}
+
+	public void setHighRes(boolean highRes) {
+		this.highRes = highRes;
+	}
+
 }

@@ -702,5 +702,6 @@
 		<action name="event" class="mobileOverviewEventAction"/>
 		<action name="activityStats" class="mobileNearbyActivitiesStatsAction"/>
 		<action name="activityDetails" class="mobileNearbyActivitiesAction"/>
+		<action name="groupedActivityDetails" class="mobileNearbyActivitiesGroupedAction"/>
 	</package>
 </struts>

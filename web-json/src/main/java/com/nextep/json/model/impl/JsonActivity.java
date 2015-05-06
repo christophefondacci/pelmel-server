@@ -11,6 +11,7 @@ public class JsonActivity {
 	private JsonLightUser activityUser;
 	private String message;
 	private String activityType;
+	private Integer count;
 	private Long activityDate;
 
 	public JsonLightUser getUser() {
@@ -38,7 +39,7 @@ public class JsonActivity {
 	}
 
 	public void setActivityDateValue(Date date) {
-		this.activityDate = date.getTime() / 1000;
+		this.activityDate = date == null ? null : (date.getTime() / 1000);
 	}
 
 	public Long getActivityDate() {
@@ -63,5 +64,13 @@ public class JsonActivity {
 
 	public String getActivityType() {
 		return activityType;
+	}
+
+	public void setCount(Integer count) {
+		this.count = count;
+	}
+
+	public Integer getCount() {
+		return count;
 	}
 }
