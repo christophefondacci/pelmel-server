@@ -7,9 +7,13 @@ public interface Constants {
 	String DEFAULT_LANGUAGE = "en";
 
 	String USER_COOKIE_NAME = "nxtpUserToken";
+
+	// Activities
 	String ALIAS_ACTIVITY_USER = "a.user";
 	String ALIAS_ACTIVITY_OBJECT = "a.obj";
 	String ALIAS_ACTIVITY_TARGET = "a.tgt";
+	String ACTIVITIES_CREATION_TYPE = "CREATION";
+
 	String ALIAS_FROM = "from";
 	String ALIAS_TO = "to";
 	String APIS_ALIAS_FAVORITE = "favorites";

@@ -115,6 +115,18 @@ public final class ApisActivitiesHelper {
 								.with(Media.class));
 	}
 
+	public static Facet buildFacetFromMaxTime(long time) {
+		final long minActivityTime = System.currentTimeMillis() - time;
+
+		// Converting timestamp to date
+		Date lastActivityDate = new Date(minActivityTime);
+		final FacetCategory fc = SearchHelper.getFacetCategory("activityDate");
+		FacetRange facet = FacetFactory.createFacetRange(fc,
+				ActivitySearchItemImpl.DATE_FORMAT.format(lastActivityDate),
+				"*");
+		return facet;
+	}
+
 	/**
 	 * This method builds the facet filters from a statisticActivityType
 	 * information combined with a time in the past to query activities. The
@@ -131,23 +143,18 @@ public final class ApisActivitiesHelper {
 	 *         activities
 	 */
 	public static Collection<Facet> buildFacetsFromStatActivityType(
-			String statActivityType, long maxActivityTime) {
-		// Preparing time facet
-		Collection<Facet> facets = new ArrayList<Facet>();
-		final long minActivityTime = System.currentTimeMillis()
-				- maxActivityTime;
+			String statActivityType, long maxActivityTime,
+			long maxCreationActivityTime) {
 
-		// Converting timestamp to date
-		Date lastActivityDate = new Date(minActivityTime);
-		final FacetCategory fc = SearchHelper.getFacetCategory("activityDate");
-		FacetRange facet = FacetFactory.createFacetRange(fc,
-				ActivitySearchItemImpl.DATE_FORMAT.format(lastActivityDate),
-				"*");
-		facets.add(facet);
+		Collection<Facet> facets = new ArrayList<Facet>();
 
 		// Building stat activity type filter
 		String[] statComponents = statActivityType.split("_");
 		if (statComponents[0].length() == 1) {
+			// Preparing time facet
+			final Facet facet = buildFacetFromMaxTime(maxActivityTime);
+			facets.add(facet);
+
 			// Activity type facet
 			final FacetCategory activityTypeCategory = SearchHelper
 					.getFacetCategory("activityType");
@@ -160,6 +167,9 @@ public final class ApisActivitiesHelper {
 			facets.add(FacetFactory.createFacet(targetTypeCategory,
 					statComponents[1]));
 		} else if (statComponents[1].equals("CREATION")) {
+			// Preparing time facet
+			final Facet facet = buildFacetFromMaxTime(maxCreationActivityTime);
+			facets.add(facet);
 			// Activity type facet = CREATION
 			final FacetCategory activityTypeCategory = SearchHelper
 					.getFacetCategory("activityType");

@@ -3,7 +3,6 @@ package com.nextep.proto.action.mobile.impl;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +19,7 @@ import com.nextep.activities.model.Activity;
 import com.nextep.activities.model.ActivityType;
 import com.nextep.events.model.Event;
 import com.nextep.events.model.EventSeries;
+import com.nextep.geo.model.City;
 import com.nextep.geo.model.Place;
 import com.nextep.json.model.impl.JsonActivityStatistic;
 import com.nextep.json.model.impl.JsonMedia;
@@ -28,12 +28,12 @@ import com.nextep.proto.action.base.AbstractAction;
 import com.nextep.proto.action.model.JsonProvider;
 import com.nextep.proto.apis.adapters.ApisActivityExtraKeyAdapter;
 import com.nextep.proto.apis.adapters.ApisActivityTargetKeyAdapter;
+import com.nextep.proto.apis.model.impl.ApisActivitiesHelper;
 import com.nextep.proto.blocks.CurrentUserSupport;
 import com.nextep.proto.builders.JsonBuilder;
 import com.nextep.proto.helpers.MediaHelper;
 import com.nextep.proto.helpers.SearchHelper;
 import com.nextep.proto.model.Constants;
-import com.nextep.smaug.solr.model.impl.ActivitySearchItemImpl;
 import com.nextep.users.model.User;
 import com.videopolis.apis.exception.ApisException;
 import com.videopolis.apis.factory.ApisFactory;
@@ -47,10 +47,8 @@ import com.videopolis.calm.exception.CalException;
 import com.videopolis.calm.model.CalmObject;
 import com.videopolis.calm.model.Sorter;
 import com.videopolis.cals.factory.ContextFactory;
-import com.videopolis.smaug.common.factory.FacetFactory;
 import com.videopolis.smaug.common.model.Facet;
 import com.videopolis.smaug.common.model.FacetCategory;
-import com.videopolis.smaug.common.model.FacetRange;
 import com.videopolis.smaug.common.model.SearchScope;
 
 /**
@@ -75,13 +73,15 @@ public class MobileNearbyActivitiesStatsAction extends AbstractAction implements
 	private static final String APIS_ALIAS_MEDIA_ACTIVITIES = "ma";
 	private static final String APIS_ALIAS_USERS_ACTIVITIES = "ua";
 	private static final String APIS_ALIAS_CREATION_ACTIVITIES = "ca";
-	private static final int NEARBY_ACTIVITIES_COUNT = 10;
+	private static final int NEARBY_ACTIVITIES_COUNT = 30;
 	private CurrentUserSupport currentUserSupport;
 
 	@Resource(mappedName = "mobile/nearbyPlacesRadius")
 	private Double radius;
 	@Resource(mappedName = "mobile/maxActivityTimeMs")
 	private Long maxActivityTime;
+	@Resource(mappedName = "mobile/maxCreationActivityTimeMs")
+	private Long maxCreationActivityTime;
 
 	@Autowired
 	private JsonBuilder jsonBuilder;
@@ -92,23 +92,14 @@ public class MobileNearbyActivitiesStatsAction extends AbstractAction implements
 
 	private ApiCompositeResponse response;
 
-	@SuppressWarnings({ "unchecked" })
 	@Override
 	protected String doExecute() throws Exception {
 		final ApisRequest request = ApisFactory.createCompositeRequest();
 
 		// Preparing time facet
-		Collection<? extends Facet> facets = null;
-		final long minActivityTime = System.currentTimeMillis()
-				- maxActivityTime;
-
-		// Converting timestamp to date
-		Date lastActivityDate = new Date(minActivityTime);
-		final FacetCategory fc = SearchHelper.getFacetCategory("activityDate");
-		FacetRange facet = FacetFactory.createFacetRange(fc,
-				ActivitySearchItemImpl.DATE_FORMAT.format(lastActivityDate),
-				"*");
-		facets = Arrays.asList(facet);
+		final Facet facet = ApisActivitiesHelper
+				.buildFacetFromMaxTime(maxActivityTime);
+		final Collection<Facet> facets = Arrays.asList(facet);
 
 		// Preparing facetting
 		final Collection<FacetCategory> facetCategories = Arrays
@@ -119,16 +110,16 @@ public class MobileNearbyActivitiesStatsAction extends AbstractAction implements
 				.getActivitiesDateSorter(false);
 		// PLACE activity target type
 		request.addCriterion(buildNearbyFacettedCriterion(SearchScope.PLACES,
-				(Collection<Facet>) facets, facetCategories,
-				activitiesDateSorter, APIS_ALIAS_PLACES_ACTIVITIES));
+				facets, facetCategories, activitiesDateSorter,
+				APIS_ALIAS_PLACES_ACTIVITIES));
 		// EVNT activity target type
 		request.addCriterion(buildNearbyFacettedCriterion(SearchScope.EVENTS,
-				(Collection<Facet>) facets, facetCategories,
-				activitiesDateSorter, APIS_ALIAS_EVENTS_ACTIVITIES));
+				facets, facetCategories, activitiesDateSorter,
+				APIS_ALIAS_EVENTS_ACTIVITIES));
 		// USER activity target type
 		request.addCriterion(buildNearbyFacettedCriterion(SearchScope.USERS,
-				(Collection<Facet>) facets, facetCategories,
-				activitiesDateSorter, APIS_ALIAS_USERS_ACTIVITIES));
+				facets, facetCategories, activitiesDateSorter,
+				APIS_ALIAS_USERS_ACTIVITIES));
 		// Querying media
 		// request.addCriterion(buildNearbyFacettedCriterion(SearchScope.PHOTOS,
 		// (Collection<Facet>) facets, facetCategories,
@@ -142,10 +133,14 @@ public class MobileNearbyActivitiesStatsAction extends AbstractAction implements
 		// alias
 		// so that generic processing of media will work seamlessly
 
+		final Facet creationFacet = ApisActivitiesHelper
+				.buildFacetFromMaxTime(maxCreationActivityTime);
+		final Collection<Facet> creationFacets = Arrays.asList(creationFacet);
+
 		request.addCriterion((ApisCriterion) SearchRestriction
 				.searchNear(Activity.class, SearchScope.CREATION, lat, lng,
 						radius, NEARBY_ACTIVITIES_COUNT, 0)
-				.filteredBy((Collection<Facet>) facets)
+				.filteredBy(creationFacets)
 				.facettedBy(creationFacetCategories)
 				.sortBy(activitiesDateSorter)
 				.aliasedBy(APIS_ALIAS_CREATION_ACTIVITIES)
@@ -256,7 +251,9 @@ public class MobileNearbyActivitiesStatsAction extends AbstractAction implements
 			final Map<String, Integer> creationFacetsMap = SearchHelper
 					.unwrapFacets(creationFacetInfo, extraCategory);
 			creationFacetsMap.remove(EventSeries.SERIES_CAL_ID);
-			fillJsonStats(jsonActivityStats, "CREATION", creationFacetsMap,
+			creationFacetsMap.remove(City.CAL_ID);
+			fillJsonStats(jsonActivityStats,
+					Constants.ACTIVITIES_CREATION_TYPE, creationFacetsMap,
 					creationActivities);
 
 		} catch (ApisException e) {
@@ -342,7 +339,7 @@ public class MobileNearbyActivitiesStatsAction extends AbstractAction implements
 					Constants.ALIAS_ACTIVITY_TARGET);
 			if (target instanceof Media) {
 				media = (Media) target;
-			} else {
+			} else if (target != null) {
 				media = MediaHelper.getSingleMedia(target);
 			}
 		} catch (CalException e) {

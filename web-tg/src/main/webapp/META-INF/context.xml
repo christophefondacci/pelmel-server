@@ -70,6 +70,8 @@
 		value="100" />
 	<Environment name="mobile/maxActivityTimeMs" type="java.lang.Long"
 		value="604800000" />
+	<Environment name="mobile/maxCreationActivityTimeMs" type="java.lang.Long"
+		value="24192000000" />
 	<Environment name="minCityPopulationForIndexation" type="java.lang.Integer"
 		value="50000" />
 	<Environment name="defaultCityKey" type="java.lang.String"

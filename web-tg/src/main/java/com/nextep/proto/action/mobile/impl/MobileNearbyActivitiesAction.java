@@ -8,10 +8,15 @@ import javax.annotation.Resource;
 
 import net.sf.json.JSONArray;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.nextep.activities.model.Activity;
+import com.nextep.events.model.Event;
 import com.nextep.json.model.impl.JsonActivity;
+import com.nextep.json.model.impl.JsonLightEvent;
+import com.nextep.json.model.impl.JsonMedia;
 import com.nextep.media.model.Media;
 import com.nextep.proto.action.base.AbstractAction;
 import com.nextep.proto.action.model.JsonProvider;
@@ -30,6 +35,8 @@ import com.videopolis.apis.model.ApisCriterion;
 import com.videopolis.apis.model.ApisItemKeyAdapter;
 import com.videopolis.apis.model.ApisRequest;
 import com.videopolis.apis.service.ApiCompositeResponse;
+import com.videopolis.calm.exception.CalException;
+import com.videopolis.calm.model.CalmObject;
 import com.videopolis.calm.model.Sorter;
 import com.videopolis.cals.factory.ContextFactory;
 import com.videopolis.smaug.common.model.Facet;
@@ -47,6 +54,9 @@ public class MobileNearbyActivitiesAction extends AbstractAction implements
 		JsonProvider {
 
 	private static final long serialVersionUID = 1L;
+	private static final Log LOGGER = LogFactory
+			.getLog(MobileNearbyActivitiesAction.class);
+
 	private static final String APIS_ALIAS_ACTIVITIES = "activities";
 	private static final ApisItemKeyAdapter activityTargetKeyAdapter = new ApisActivityTargetKeyAdapter();
 	private static final ApisItemKeyAdapter activityExtraKeyAdapter = new ApisActivityExtraKeyAdapter();
@@ -63,6 +73,8 @@ public class MobileNearbyActivitiesAction extends AbstractAction implements
 	private Double radius;
 	@Resource(mappedName = "mobile/maxActivityTimeMs")
 	private Long maxActivityTime;
+	@Resource(mappedName = "mobile/maxCreationActivityTimeMs")
+	private Long maxCreationActivityTimeMs;
 
 	// Dynamic arguments
 	private String statActivityType;
@@ -83,7 +95,7 @@ public class MobileNearbyActivitiesAction extends AbstractAction implements
 		// corresponding to statActivityType and max age
 		Collection<Facet> facets = ApisActivitiesHelper
 				.buildFacetsFromStatActivityType(statActivityType,
-						maxActivityTime);
+						maxActivityTime, maxCreationActivityTimeMs);
 
 		// Activities date sorter
 		final List<Sorter> activitiesDateSorter = SearchHelper
@@ -146,6 +158,37 @@ public class MobileNearbyActivitiesAction extends AbstractAction implements
 		for (Activity a : activities) {
 			final JsonActivity jsonActivity = jsonBuilder.buildJsonActivity(a,
 					highRes, getLocale());
+
+			// Specific processing for creations where we need to consider the
+			// "EXTRA"
+			if (statActivityType.endsWith(Constants.ACTIVITIES_CREATION_TYPE)) {
+				try {
+					// Extracting event extra object
+					CalmObject extraObj = a.getUnique(CalmObject.class,
+							Constants.ALIAS_ACTIVITY_OBJECT);
+					if (extraObj instanceof Event) {
+						final Event e = (Event) extraObj;
+						// Converting to JSON
+						final JsonLightEvent jsonEvent = new JsonLightEvent();
+						jsonBuilder.fillJsonEvent(jsonEvent, e, highRes,
+								getLocale(), response);
+
+						// Appending to JSON activity
+						jsonActivity.setExtraEvent(jsonEvent);
+					} else if (extraObj instanceof Media) {
+						final Media m = (Media) extraObj;
+						final JsonMedia jsonMedia = jsonBuilder.buildJsonMedia(
+								m, highRes);
+						jsonActivity.setExtraMedia(jsonMedia);
+					}
+				} catch (CalException ex) {
+					LOGGER.error(
+							"Unable to extract  EXTRA object '"
+									+ a.getExtraInformation()
+									+ "' from activity '" + a.getKey() + "': "
+									+ ex.getMessage(), ex);
+				}
+			}
 			jsonActivities.add(jsonActivity);
 		}
 

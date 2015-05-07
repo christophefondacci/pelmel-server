@@ -2,13 +2,17 @@ package com.nextep.json.model.impl;
 
 import java.util.Date;
 
+import com.nextep.json.model.IJsonLightEvent;
 import com.nextep.json.model.IJsonLightPlace;
 
 public class JsonActivity {
 
+	private String key;
 	private JsonLightUser user;
 	private IJsonLightPlace activityPlace;
 	private JsonLightUser activityUser;
+	private IJsonLightEvent extraEvent;
+	private JsonMedia extraMedia;
 	private String message;
 	private String activityType;
 	private Integer count;
@@ -72,5 +76,29 @@ public class JsonActivity {
 
 	public Integer getCount() {
 		return count;
+	}
+
+	public void setKey(String key) {
+		this.key = key;
+	}
+
+	public String getKey() {
+		return key;
+	}
+
+	public void setExtraEvent(IJsonLightEvent extraEvent) {
+		this.extraEvent = extraEvent;
+	}
+
+	public IJsonLightEvent getExtraEvent() {
+		return extraEvent;
+	}
+
+	public void setExtraMedia(JsonMedia extraMedia) {
+		this.extraMedia = extraMedia;
+	}
+
+	public JsonMedia getExtraMedia() {
+		return extraMedia;
 	}
 }

@@ -845,6 +845,7 @@ public class JsonBuilderImpl implements JsonBuilder {
 		}
 		json.setActivityDateValue(activity.getDate());
 		json.setActivityType(activity.getActivityType().getCode());
+		json.setKey(activity.getKey().toString());
 		return json;
 	}
 

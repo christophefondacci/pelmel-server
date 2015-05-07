@@ -3,7 +3,6 @@ package com.nextep.proto.action.mobile.impl;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -61,6 +60,8 @@ public class MobileNearbyActivitiesGroupedAction extends AbstractAction
 	private Double radius;
 	@Resource(mappedName = "mobile/maxActivityTimeMs")
 	private Long maxActivityTime;
+	@Resource(mappedName = "mobile/maxCreationActivityTimeMs")
+	private Long maxCreationActivityTimeMs;
 
 	// Dynamic arguments
 	private String statActivityType;
@@ -82,7 +83,7 @@ public class MobileNearbyActivitiesGroupedAction extends AbstractAction
 		// corresponding to statActivityType and max age
 		Collection<Facet> facets = ApisActivitiesHelper
 				.buildFacetsFromStatActivityType(statActivityType,
-						maxActivityTime);
+						maxActivityTime, maxCreationActivityTimeMs);
 
 		// Activities date sorter
 		final List<Sorter> activitiesDateSorter = SearchHelper
@@ -139,11 +140,10 @@ public class MobileNearbyActivitiesGroupedAction extends AbstractAction
 		final List<JsonActivity> jsonActivities = new ArrayList<JsonActivity>();
 
 		// Building activities map for date retrieval
-		final Map<String, Date> activitiesDateMap = new HashMap<String, Date>();
+		final Map<String, Activity> activitiesMap = new HashMap<String, Activity>();
 		for (Activity a : activities) {
-			if (!activitiesDateMap.containsKey(a.getLoggedItemKey().toString())) {
-				activitiesDateMap.put(a.getLoggedItemKey().toString(),
-						a.getDate());
+			if (!activitiesMap.containsKey(a.getLoggedItemKey().toString())) {
+				activitiesMap.put(a.getLoggedItemKey().toString(), a);
 			}
 		}
 		// Unwrapping facets
@@ -155,30 +155,33 @@ public class MobileNearbyActivitiesGroupedAction extends AbstractAction
 		final Locale l = getLocale();
 		// Converting objects to JSON
 		for (CalmObject object : objects) {
-			final JsonActivity activity = new JsonActivity();
+			final JsonActivity jsonActivity = new JsonActivity();
 
 			// Converting to JsonUser if User
 			if (object instanceof User) {
 				final JsonLightUser jsonUser = jsonBuilder.buildJsonLightUser(
 						(User) object, highRes, l);
-				activity.setUser(jsonUser);
+				jsonActivity.setUser(jsonUser);
 			} else if (object instanceof Place) {
 				// Converting to JsonPlace if Place
 				final JsonLightPlace jsonPlace = jsonBuilder
 						.buildJsonLightPlace((Place) object, highRes, l);
-				activity.setActivityPlace(jsonPlace);
+				jsonActivity.setActivityPlace(jsonPlace);
 			}
 
 			// Filling activity type and facet counts
-			activity.setActivityType(statActivityType);
+			jsonActivity.setActivityType(statActivityType);
 			final Integer count = facetsMap.get(object.getKey().toString());
-			activity.setCount(count);
+			jsonActivity.setCount(count);
 
 			// Filling date
-			final Date activityDate = activitiesDateMap.get(object.getKey()
+			final Activity activity = activitiesMap.get(object.getKey()
 					.toString());
-			activity.setActivityDateValue(activityDate);
-			jsonActivities.add(activity);
+			if (activity != null) {
+				jsonActivity.setActivityDateValue(activity.getDate());
+				jsonActivity.setKey(activity.getKey().toString());
+				jsonActivities.add(jsonActivity);
+			}
 		}
 		return JSONArray.fromObject(jsonActivities).toString();
 	}
