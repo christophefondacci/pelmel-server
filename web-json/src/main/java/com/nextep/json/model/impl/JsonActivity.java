@@ -10,6 +10,7 @@ public class JsonActivity {
 	private String key;
 	private JsonLightUser user;
 	private IJsonLightPlace activityPlace;
+	private IJsonLightEvent activityEvent;
 	private JsonLightUser activityUser;
 	private IJsonLightEvent extraEvent;
 	private JsonMedia extraMedia;
@@ -100,5 +101,13 @@ public class JsonActivity {
 
 	public JsonMedia getExtraMedia() {
 		return extraMedia;
+	}
+
+	public void setActivityEvent(IJsonLightEvent activityEvent) {
+		this.activityEvent = activityEvent;
+	}
+
+	public IJsonLightEvent getActivityEvent() {
+		return activityEvent;
 	}
 }

@@ -817,12 +817,15 @@ public class JsonBuilderImpl implements JsonBuilder {
 		User user = null;
 		Place activityPlace = null;
 		User activityUser = null;
+		Event activityEvent = null;
 		try {
 			user = activity
 					.getUnique(User.class, Constants.ALIAS_ACTIVITY_USER);
 			activityPlace = activity.getUnique(Place.class,
 					Constants.ALIAS_ACTIVITY_TARGET);
 			activityUser = activity.getUnique(User.class,
+					Constants.ALIAS_ACTIVITY_TARGET);
+			activityEvent = activity.getUnique(Event.class,
 					Constants.ALIAS_ACTIVITY_TARGET);
 		} catch (CalException e) {
 			LOGGER.error(
@@ -842,6 +845,11 @@ public class JsonBuilderImpl implements JsonBuilder {
 			final JsonLightUser jsonUser = buildJsonLightUser(activityUser,
 					highRes, l);
 			json.setActivityUser(jsonUser);
+		}
+		if (activityEvent != null) {
+			final JsonLightEvent jsonEvent = new JsonLightEvent();
+			fillJsonEvent(jsonEvent, activityEvent, highRes, l, null);
+			json.setActivityEvent(jsonEvent);
 		}
 		json.setActivityDateValue(activity.getDate());
 		json.setActivityType(activity.getActivityType().getCode());
