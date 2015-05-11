@@ -86,7 +86,7 @@ public class MobileNearbyActivitiesStatsAction extends AbstractAction implements
 	@Autowired
 	private JsonBuilder jsonBuilder;
 
-	private Double lat, lng;
+	private double lat, lng;
 	private long lastActivityTime;
 	private boolean highRes;
 
@@ -94,6 +94,7 @@ public class MobileNearbyActivitiesStatsAction extends AbstractAction implements
 
 	@Override
 	protected String doExecute() throws Exception {
+
 		final ApisRequest request = ApisFactory.createCompositeRequest();
 
 		// Preparing time facet
@@ -244,6 +245,7 @@ public class MobileNearbyActivitiesStatsAction extends AbstractAction implements
 			final Map<String, Integer> usersFacetsMap = SearchHelper
 					.unwrapFacets(usersFacetInfo, category);
 			usersFacetsMap.remove(ActivityType.CREATION.getCode());
+			usersFacetsMap.remove(ActivityType.DELETION.getCode());
 			fillJsonStats(jsonActivityStats, User.CAL_TYPE, usersFacetsMap,
 					usersActivities);
 
@@ -350,19 +352,19 @@ public class MobileNearbyActivitiesStatsAction extends AbstractAction implements
 		return media;
 	}
 
-	public void setLat(Double lat) {
+	public void setLat(double lat) {
 		this.lat = lat;
 	}
 
-	public void setLng(Double lng) {
+	public void setLng(double lng) {
 		this.lng = lng;
 	}
 
-	public Double getLat() {
+	public double getLat() {
 		return lat;
 	}
 
-	public Double getLng() {
+	public double getLng() {
 		return lng;
 	}
 

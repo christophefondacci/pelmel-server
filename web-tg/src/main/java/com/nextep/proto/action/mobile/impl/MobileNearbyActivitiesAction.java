@@ -78,8 +78,8 @@ public class MobileNearbyActivitiesAction extends AbstractAction implements
 
 	// Dynamic arguments
 	private String statActivityType;
-	private Double lat;
-	private Double lng;
+	private double lat;
+	private double lng;
 	private int page = 0;
 	private int pageSize = 30;
 	private boolean highRes;
@@ -90,7 +90,6 @@ public class MobileNearbyActivitiesAction extends AbstractAction implements
 
 	@Override
 	protected String doExecute() throws Exception {
-
 		// Preparing facet filters to query the specific activities
 		// corresponding to statActivityType and max age
 		Collection<Facet> facets = ApisActivitiesHelper
@@ -195,19 +194,19 @@ public class MobileNearbyActivitiesAction extends AbstractAction implements
 		return JSONArray.fromObject(jsonActivities).toString();
 	}
 
-	public void setLat(Double lat) {
+	public void setLat(double lat) {
 		this.lat = lat;
 	}
 
-	public void setLng(Double lng) {
+	public void setLng(double lng) {
 		this.lng = lng;
 	}
 
-	public Double getLat() {
+	public double getLat() {
 		return lat;
 	}
 
-	public Double getLng() {
+	public double getLng() {
 		return lng;
 	}
 
