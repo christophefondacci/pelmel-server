@@ -102,6 +102,11 @@ public final class GeoHelper {
 					.get(GeographicItem.class);
 			if (geoItems.size() == 1) {
 				return geoItems.iterator().next();
+			} else {
+				final List<? extends Place> places = o.get(Place.class);
+				if (places.size() == 1) {
+					return places.iterator().next();
+				}
 			}
 		}
 		return null;
