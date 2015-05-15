@@ -53,7 +53,7 @@ public class MessageDaoImpl extends AbstractCalDao<Message> implements
 			int pageOffset) {
 		return entityManager
 				.createQuery(
-						"from MessageImpl where toKey=:toKey order by messageDate desc ")
+						"from MessageImpl where toKey=:toKey and fromKey!=toKey order by messageDate desc ")
 				.setMaxResults(resultsPerPage)
 				.setFirstResult(pageOffset * resultsPerPage)
 				.setParameter("toKey", key.toString()).getResultList();
@@ -69,7 +69,7 @@ public class MessageDaoImpl extends AbstractCalDao<Message> implements
 	public List<Message> getUnreadMessages(ItemKey userKey, int maxResults) {
 		final Query query = entityManager
 				.createQuery(
-						"from MessageImpl where toKey=:toKey and isUnread=1 order by messageDate")
+						"from MessageImpl where toKey=:toKey and fromKey!=toKey and isUnread=1 order by messageDate")
 				.setParameter("toKey", userKey.toString());
 		if (maxResults > 0) {
 			query.setMaxResults(maxResults);
@@ -82,14 +82,14 @@ public class MessageDaoImpl extends AbstractCalDao<Message> implements
 		if (unreadOnly) {
 			final BigInteger count = (BigInteger) entityManager
 					.createNativeQuery(
-							"select count(1) from MESSAGES where to_item_key=:toItemKey and IS_UNREAD=1")
+							"select count(1) from MESSAGES where to_item_key=:toItemKey and IS_UNREAD=1 and from_item_key!=to_item_key")
 					.setParameter("toItemKey", userKey.toString())
 					.getSingleResult();
 			return count.intValue();
 		} else {
 			final BigInteger count = (BigInteger) entityManager
 					.createNativeQuery(
-							"select count(1) from MESSAGES where to_item_key=:toItemKey")
+							"select count(1) from MESSAGES where to_item_key=:toItemKey and from_item_key!=to_item_key")
 					.setParameter("toItemKey", userKey.toString())
 					.getSingleResult();
 			return count.intValue();
