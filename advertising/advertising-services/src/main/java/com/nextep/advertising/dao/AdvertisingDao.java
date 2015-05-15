@@ -46,4 +46,6 @@ public interface AdvertisingDao extends CalDao<CalmObject> {
 	 */
 	Map<ItemKey, List<AdvertisingBanner>> getBannersFor(
 			Collection<ItemKey> geoItemKeys, String searchType, Locale locale);
+
+	List<AdvertisingBanner> getBanners(Collection<ItemKey> itemKeys);
 }

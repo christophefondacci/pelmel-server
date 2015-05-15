@@ -207,6 +207,9 @@
 	<bean id="mobilePlaceUpdateAction" parent="placeUpdateAction" scope="request">
 		<property name="mobile" value="true"></property>
 	</bean>
+	<bean id="mobileBannerUpdateAction" class="com.nextep.proto.action.mobile.impl.MobileCreateBanner" parent="abstractAction" scope="request">
+		<property name="urlService" ref="urlService"/>
+	</bean>
 	<bean id="myMediaAction" class="com.nextep.proto.action.impl.MyMediaAction" parent="abstractAction" scope="request">
 		<property name="mediaProvider" ref="mediaProvider"/>
 		<property name="urlService" ref="urlService"/>

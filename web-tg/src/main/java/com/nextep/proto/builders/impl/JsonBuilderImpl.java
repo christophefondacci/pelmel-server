@@ -16,6 +16,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.nextep.activities.model.Activity;
+import com.nextep.advertising.model.AdvertisingBanner;
 import com.nextep.advertising.model.AdvertisingBooster;
 import com.nextep.comments.model.Comment;
 import com.nextep.descriptions.model.Description;
@@ -30,6 +31,7 @@ import com.nextep.json.model.IJsonLightEvent;
 import com.nextep.json.model.IJsonLightPlace;
 import com.nextep.json.model.IJsonWithParticipants;
 import com.nextep.json.model.impl.JsonActivity;
+import com.nextep.json.model.impl.JsonBanner;
 import com.nextep.json.model.impl.JsonDescription;
 import com.nextep.json.model.impl.JsonEvent;
 import com.nextep.json.model.impl.JsonFacet;
@@ -927,5 +929,53 @@ public class JsonBuilderImpl implements JsonBuilder {
 			jsonHours.add(hour);
 		}
 		return jsonHours;
+	}
+
+	@Override
+	public JsonBanner buildJsonBanner(AdvertisingBanner banner,
+			boolean highRes, Locale l) {
+		final JsonBanner json = new JsonBanner();
+		json.setKey(banner.getKey().toString());
+		json.setClickCount(banner.getClickCount());
+		json.setDisplayCount(banner.getDisplayCount());
+		json.setLat(banner.getLatitude());
+		json.setLng(banner.getLongitude());
+		json.setRadius(banner.getRadius());
+		json.setTargetDisplayCount(banner.getTargetDisplayCount());
+		if (banner.getTargetItemKey() != null) {
+			try {
+				Place p = banner.getUnique(Place.class,
+						Constants.APIS_ALIAS_BANNER_TARGET);
+				if (p != null) {
+					final JsonLightPlace jsonPlace = buildJsonLightPlace(p,
+							highRes, l);
+					json.setTargetPlace(jsonPlace);
+				}
+			} catch (CalException e1) {
+				LOGGER.error(
+						"Unable to extract place for banner '"
+								+ banner.getKey() + "': " + e1.getMessage(), e1);
+			}
+			try {
+				final Event e = banner.getUnique(Event.class,
+						Constants.APIS_ALIAS_BANNER_TARGET);
+				if (e != null) {
+					final JsonLightEvent jsonEvent = new JsonLightEvent();
+					fillJsonEvent(jsonEvent, e, highRes, l, null);
+					json.setTargetEvent(jsonEvent);
+				}
+			} catch (CalException e1) {
+				LOGGER.error(
+						"Unable to extract event for banner '"
+								+ banner.getKey() + "': " + e1.getMessage(), e1);
+			}
+		}
+		json.setTargetUrl(banner.getTargetUrl());
+		final Media m = MediaHelper.getSingleMedia(banner);
+		if (m != null) {
+			final JsonMedia jsonMedia = buildJsonMedia(m, highRes);
+			json.setBannerImage(jsonMedia);
+		}
+		return json;
 	}
 }

@@ -30,7 +30,11 @@ public class BannersServiceImpl extends AbstractDaoBasedCalServiceImpl
 	@Override
 	public ItemsResponse getItems(List<ItemKey> ids, CalContext context)
 			throws CalException {
-		throw new UnsupportedCalServiceException("Unsupported");
+		final List<AdvertisingBanner> banners = ((AdvertisingDao) getCalDao())
+				.getBanners(ids);
+		final ItemsResponseImpl response = new ItemsResponseImpl();
+		response.setItems(banners);
+		return response;
 	}
 
 	@Override

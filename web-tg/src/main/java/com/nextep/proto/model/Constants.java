@@ -26,6 +26,7 @@ public interface Constants {
 	String APIS_ALIAS_USER_COUNT = "userCount";
 	String APIS_ALIAS_EVENT_COUNT = "eventCount";
 	String APIS_ALIAS_LIKES = "likeActivity";
+	String APIS_ALIAS_BANNER_TARGET = "bannerTarget";
 
 	int TOP_PLACES_PER_PAGE = 20;
 	int OVERVIEW_NEARBY_PLACES = 20;

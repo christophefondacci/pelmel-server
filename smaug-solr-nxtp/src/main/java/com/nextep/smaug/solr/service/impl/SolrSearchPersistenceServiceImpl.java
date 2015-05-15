@@ -11,6 +11,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import javax.annotation.Resource;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.solr.client.solrj.SolrQuery;
@@ -20,6 +22,8 @@ import org.apache.solr.client.solrj.impl.CommonsHttpSolrServer;
 import org.apache.solr.client.solrj.response.QueryResponse;
 
 import com.nextep.activities.model.Activity;
+import com.nextep.activities.model.ActivityType;
+import com.nextep.advertising.model.AdvertisingBanner;
 import com.nextep.advertising.model.AdvertisingBooster;
 import com.nextep.cal.util.helpers.CalHelper;
 import com.nextep.events.model.Event;
@@ -33,6 +37,7 @@ import com.nextep.geo.model.Place;
 import com.nextep.smaug.service.SearchPersistenceService;
 import com.nextep.smaug.solr.model.LikeActionResult;
 import com.nextep.smaug.solr.model.impl.ActivitySearchItemImpl;
+import com.nextep.smaug.solr.model.impl.BannerSearchItemImpl;
 import com.nextep.smaug.solr.model.impl.CitiesSearchItemImpl;
 import com.nextep.smaug.solr.model.impl.EventSearchItemImpl;
 import com.nextep.smaug.solr.model.impl.LikeActionResultImpl;
@@ -68,12 +73,15 @@ public class SolrSearchPersistenceServiceImpl implements
 	private String placesSolrUrl;
 	private String eventsSolrUrl;
 	private String activitiesSolrUrl;
+	@Resource(mappedName = "smaug/masterBannersSolrServer")
+	private String bannersSolrUrl;
 	private String suggestSolrUrl;
 	private String citiesSolrUrl;
 	private CommonsHttpSolrServer userSolrServer;
 	private CommonsHttpSolrServer placesSolrServer;
 	private CommonsHttpSolrServer eventsSolrServer;
 	private CommonsHttpSolrServer activitiesSolrServer;
+	private CommonsHttpSolrServer bannersSolrServer;
 	private CommonsHttpSolrServer suggestSolrServer;
 	private CommonsHttpSolrServer citiesSolrServer;
 	private long lastSeenMaxTime;
@@ -83,6 +91,7 @@ public class SolrSearchPersistenceServiceImpl implements
 		placesSolrServer = new CommonsHttpSolrServer(placesSolrUrl);
 		eventsSolrServer = new CommonsHttpSolrServer(eventsSolrUrl);
 		activitiesSolrServer = new CommonsHttpSolrServer(activitiesSolrUrl);
+		bannersSolrServer = new CommonsHttpSolrServer(bannersSolrUrl);
 		suggestSolrServer = new CommonsHttpSolrServer(suggestSolrUrl);
 		citiesSolrServer = new CommonsHttpSolrServer(citiesSolrUrl);
 	}
@@ -127,6 +136,8 @@ public class SolrSearchPersistenceServiceImpl implements
 			storeActivity((Activity) object);
 		} else if (object instanceof City) {
 			storeCity((City) object);
+		} else if (object instanceof AdvertisingBanner) {
+			storeBanner((AdvertisingBanner) object);
 		} else {
 			throw new SearchException(
 					"Unsupported CAL object to store in index: "
@@ -140,6 +151,28 @@ public class SolrSearchPersistenceServiceImpl implements
 		searchItem.setLat(city.getLatitude());
 		searchItem.setLng(city.getLongitude());
 		saveBean(searchItem, citiesSolrServer);
+	}
+
+	private void storeBanner(AdvertisingBanner banner) throws SearchException {
+		if (banner.getEndValidity() != null
+				&& banner.getEndValidity().getTime() < System
+						.currentTimeMillis()) {
+			try {
+				bannersSolrServer.deleteById(banner.getKey().toString());
+				bannersSolrServer.commit();
+			} catch (IOException | SolrServerException e) {
+				throw new SearchException("Cannot unindex banner with key '"
+						+ banner.getKey() + "':" + e.getMessage(), e);
+			}
+		} else {
+			BannerSearchItemImpl searchItem = new BannerSearchItemImpl();
+			searchItem.setKey(banner.getKey());
+			searchItem.setLat(banner.getLatitude());
+			searchItem.setLng(banner.getLongitude());
+			searchItem.setOwnerItemKey(banner.getOwnerItemKey());
+			searchItem.setTargetItemKey(banner.getTargetItemKey());
+			saveBean(searchItem, bannersSolrServer);
+		}
 	}
 
 	@Override
@@ -256,7 +289,10 @@ public class SolrSearchPersistenceServiceImpl implements
 	}
 
 	private void storeActivity(Activity activity) throws SearchException {
-		if (!activity.isVisible()) {
+		if (activity.getActivityType() == ActivityType.CITY_CHANGE) {
+			log.info("Skipping SOLR indexation of CITY_CHANGE activitiy");
+			return;
+		} else if (!activity.isVisible()) {
 			// Getting place entry
 			if (activity != null) {
 				try {

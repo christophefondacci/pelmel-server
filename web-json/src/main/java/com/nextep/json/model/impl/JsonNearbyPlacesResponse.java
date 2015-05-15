@@ -11,6 +11,7 @@ public class JsonNearbyPlacesResponse {
 	private List<JsonActivity> nearbyActivities = new ArrayList<JsonActivity>();
 	private List<JsonLightUser> nearbyUsers = new ArrayList<JsonLightUser>();
 	private List<JsonLightEvent> nearbyEvents = new ArrayList<JsonLightEvent>();
+	private JsonBanner banner;
 	private int nearbyUsersCount;
 	private int nearbyPlacesCount;
 	private int nearbyEventsCount;
@@ -102,5 +103,13 @@ public class JsonNearbyPlacesResponse {
 
 	public long getMaxActivityId() {
 		return maxActivityId;
+	}
+
+	public void setBanner(JsonBanner banner) {
+		this.banner = banner;
+	}
+
+	public JsonBanner getBanner() {
+		return banner;
 	}
 }

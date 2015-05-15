@@ -4,6 +4,7 @@ import java.util.Date;
 
 import com.videopolis.calm.model.CalmObject;
 import com.videopolis.calm.model.ItemKey;
+import com.videopolis.calm.model.Localized;
 
 /**
  * This interface represents a banner for advertising
@@ -11,7 +12,7 @@ import com.videopolis.calm.model.ItemKey;
  * @author cfondacci
  * 
  */
-public interface AdvertisingBanner extends CalmObject {
+public interface AdvertisingBanner extends CalmObject, Localized {
 
 	String CAL_ID = "BANR";
 
@@ -86,4 +87,36 @@ public interface AdvertisingBanner extends CalmObject {
 	 */
 	String getLocale();
 
+	/**
+	 * Radius of this banner. Banner is eligible to be displayed for someone who
+	 * is located at less than <code>radius</code> miles of the banner lat/lng.
+	 * 
+	 * @return the banner's radius
+	 */
+	Double getRadius();
+
+	/**
+	 * The {@link ItemKey} of the element to which this banner points. A click
+	 * on the banner would bring the user to this item key. A banner should have
+	 * targetItemKey OR targetUrl, never both.
+	 * 
+	 * @return the banner's target {@link ItemKey} or <code>null</code> if
+	 *         link-based banner
+	 */
+	ItemKey getTargetItemKey();
+
+	/**
+	 * The target URL to which this banner points when a user clicks on it.
+	 * 
+	 * @return an external URL to which this banner points
+	 */
+	String getTargetUrl();
+
+	/**
+	 * The target number of displays for this banner. Beyond this number, the
+	 * banner will stop to be displayed.
+	 * 
+	 * @return the total number of displays for this banner.
+	 */
+	long getTargetDisplayCount();
 }

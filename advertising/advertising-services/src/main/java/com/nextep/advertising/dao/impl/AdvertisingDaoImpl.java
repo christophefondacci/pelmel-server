@@ -162,4 +162,17 @@ public class AdvertisingDaoImpl extends AbstractCalDao<CalmObject> implements
 		}
 		return bannersMap;
 	}
+
+	@Override
+	public List<AdvertisingBanner> getBanners(Collection<ItemKey> itemKeys) {
+		final Collection<Long> keys = CalHelper.unwrapItemKeyIds(itemKeys);
+
+		@SuppressWarnings("unchecked")
+		final List<AdvertisingBanner> banners = entityManager
+				.createQuery(
+						"from AdvertisingBannerImpl where id in (:itemKeys)")
+				.setParameter("itemKeys", keys).getResultList();
+
+		return banners;
+	}
 }

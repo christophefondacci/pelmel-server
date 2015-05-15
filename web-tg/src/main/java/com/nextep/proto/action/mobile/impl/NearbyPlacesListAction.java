@@ -14,8 +14,10 @@ import net.sf.json.JSONObject;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.nextep.activities.model.Activity;
+import com.nextep.advertising.model.AdvertisingBanner;
 import com.nextep.advertising.model.AdvertisingBooster;
 import com.nextep.cal.util.services.CalPersistenceService;
 import com.nextep.descriptions.model.Description;
@@ -24,6 +26,7 @@ import com.nextep.events.model.EventSeries;
 import com.nextep.geo.model.City;
 import com.nextep.geo.model.GeographicItem;
 import com.nextep.geo.model.Place;
+import com.nextep.json.model.impl.JsonBanner;
 import com.nextep.json.model.impl.JsonLightCity;
 import com.nextep.json.model.impl.JsonLightEvent;
 import com.nextep.json.model.impl.JsonLightUser;
@@ -51,6 +54,7 @@ import com.nextep.proto.helpers.MediaHelper;
 import com.nextep.proto.helpers.SearchHelper;
 import com.nextep.proto.model.Constants;
 import com.nextep.proto.model.SearchType;
+import com.nextep.proto.services.BannerDisplayService;
 import com.nextep.proto.services.DistanceDisplayService;
 import com.nextep.proto.services.LocalizationService;
 import com.nextep.proto.services.ViewManagementService;
@@ -115,6 +119,8 @@ public class NearbyPlacesListAction extends AbstractAction implements
 	private CalPersistenceService geoService;
 	private ViewManagementService viewManagementService;
 	private JsonBuilder jsonBuilder;
+	@Autowired
+	private BannerDisplayService bannerDisplayService;
 
 	// Actions arguments
 	private double lat, lng;
@@ -367,6 +373,9 @@ public class NearbyPlacesListAction extends AbstractAction implements
 			// Adding criterion
 			request.addCriterion(userCriterion);
 		}
+
+		// Adding banner query
+		bannerDisplayService.addBannersRequest(request, lat, lng);
 
 		final ApiCompositeResponse response = (ApiCompositeResponse) getApiService()
 				.execute(request, ContextFactory.createContext(getLocale()));
@@ -731,6 +740,20 @@ public class NearbyPlacesListAction extends AbstractAction implements
 			final JsonLightCity jsonCity = jsonBuilder.buildJsonLightCity(
 					localizedCity, highRes, getLocale());
 			jsonResponse.setLocalizedCity(jsonCity);
+		}
+
+		// Building banner
+		AdvertisingBanner banner = bannerDisplayService
+				.getBannerSelection(response);
+		if (banner != null) {
+
+			// Building JSON banner and filling JSON response
+			final JsonBanner jsonBanner = jsonBuilder.buildJsonBanner(banner,
+					highRes, getLocale());
+			jsonResponse.setBanner(jsonBanner);
+
+			// Considering 1 display
+			bannerDisplayService.displayBanner(banner);
 		}
 		return SUCCESS;
 	}

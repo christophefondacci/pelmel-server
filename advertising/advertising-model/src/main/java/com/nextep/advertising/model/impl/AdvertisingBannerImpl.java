@@ -53,6 +53,18 @@ public class AdvertisingBannerImpl extends AbstractCalmObject implements
 	private String searchType;
 	@Column(name = "LOCALE")
 	private String locale;
+	@Column(name = "LATITUDE")
+	private Double latitude;
+	@Column(name = "longitude")
+	private Double longitude;
+	@Column(name = "RADIUS")
+	private Double radius;
+	@Column(name = "TARGET_ITEM_KEY")
+	private String targetItemKey;
+	@Column(name = "TARGET_URL")
+	private String targetUrl;
+	@Column(name = "TARGET_DISPLAY_COUNT")
+	private long targetDisplayCount;
 
 	public AdvertisingBannerImpl() {
 		super(null);
@@ -130,7 +142,7 @@ public class AdvertisingBannerImpl extends AbstractCalmObject implements
 	@Override
 	public void setOwnerItemKey(ItemKey ownerItemKey) {
 		if (ownerItemKey != null) {
-			this.ownerItemKey = this.ownerItemKey.toString();
+			this.ownerItemKey = ownerItemKey.toString();
 		} else {
 			this.ownerItemKey = null;
 		}
@@ -200,4 +212,73 @@ public class AdvertisingBannerImpl extends AbstractCalmObject implements
 	public void setLocale(String locale) {
 		this.locale = locale;
 	}
+
+	@Override
+	public double getLatitude() {
+		return latitude == null ? 0 : latitude;
+	}
+
+	@Override
+	public double getLongitude() {
+		return longitude == null ? null : longitude;
+	}
+
+	@Override
+	public Double getRadius() {
+		return radius;
+	}
+
+	@Override
+	public long getTargetDisplayCount() {
+		return targetDisplayCount;
+	}
+
+	@Override
+	public ItemKey getTargetItemKey() {
+		try {
+			return targetItemKey == null ? null : CalmFactory
+					.parseKey(targetItemKey);
+		} catch (CalException e) {
+			LOGGER.error("Unable to parse banner itemkey '" + targetItemKey
+					+ "': " + e.getMessage(), e);
+		}
+		return null;
+	}
+
+	@Override
+	public String getTargetUrl() {
+		return targetUrl;
+	}
+
+	@Override
+	public void setLatitude(double latitude) {
+		this.latitude = latitude;
+	}
+
+	@Override
+	public void setLongitude(double longitude) {
+		this.longitude = longitude;
+	}
+
+	@Override
+	public void setRadius(double radius) {
+		this.radius = radius;
+	}
+
+	@Override
+	public void setTargetItemKey(ItemKey targetItemKey) {
+		this.targetItemKey = targetItemKey == null ? null : this.targetItemKey
+				.toString();
+	}
+
+	@Override
+	public void setTargetUrl(String targetUrl) {
+		this.targetUrl = targetUrl;
+	}
+
+	@Override
+	public void setTargetDisplayCount(long targetDisplayCount) {
+		this.targetDisplayCount = targetDisplayCount;
+	}
+
 }

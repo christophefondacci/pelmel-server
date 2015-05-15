@@ -27,6 +27,8 @@
 		value="http://127.0.0.1:8983/solr-activities/activities/" />
 	<Environment name="smaug/suggestSolrServer" type="java.lang.String"
 		value="http://127.0.0.1:8983/solr-suggest/suggest/" />
+	<Environment name="smaug/bannersSolrServer" type="java.lang.String"
+		value="http://127.0.0.1:8983/solr-banners/banners/" />
 		
 	<!-- Solr Master servers for write -->
 	<Environment name="smaug/masterUsersSolrServer" type="java.lang.String"
@@ -41,6 +43,8 @@
 		value="http://127.0.0.1:8983/solr-activities/activities/" />
 	<Environment name="smaug/masterSuggestSolrServer" type="java.lang.String"
 		value="http://127.0.0.1:8983/solr-suggest/suggest/" />
+	<Environment name="smaug/masterBannersSolrServer" type="java.lang.String"
+		value="http://127.0.0.1:8983/solr-banners/banners/" />
 		
 	<Environment name="smaug/lastSeenMaxTime" type="java.lang.Long"
 		value="12000000" />	

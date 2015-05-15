@@ -12,6 +12,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Resource;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.solr.client.solrj.SolrQuery;
@@ -25,6 +27,7 @@ import org.apache.solr.client.solrj.response.FieldStatsInfo;
 import org.apache.solr.client.solrj.response.QueryResponse;
 
 import com.nextep.activities.model.Activity;
+import com.nextep.advertising.model.AdvertisingBanner;
 import com.nextep.cal.util.helpers.CalHelper;
 import com.nextep.events.model.Event;
 import com.nextep.events.model.EventSeries;
@@ -86,6 +89,8 @@ public class SolrSearchServiceImpl implements SearchService {
 	private String placesSolrUrl;
 	private String eventsSolrUrl;
 	private String activitiesSolrUrl;
+	@Resource(mappedName = "smaug/bannersSolrServer")
+	private String bannersSolrUrl;
 	private String suggestSolrUrl;
 	private String citiesSolrUrl;
 	private boolean filterSeo;
@@ -94,6 +99,7 @@ public class SolrSearchServiceImpl implements SearchService {
 	private CommonsHttpSolrServer placesSolrServer;
 	private CommonsHttpSolrServer eventsSolrServer;
 	private CommonsHttpSolrServer activitiesSolrServer;
+	private CommonsHttpSolrServer bannersSolrServer;
 	private CommonsHttpSolrServer suggestSolrServer;
 	private CommonsHttpSolrServer citiesSolrServer;
 	private QueryBuilder queryBuilder;
@@ -103,6 +109,7 @@ public class SolrSearchServiceImpl implements SearchService {
 		placesSolrServer = new CommonsHttpSolrServer(placesSolrUrl);
 		eventsSolrServer = new CommonsHttpSolrServer(eventsSolrUrl);
 		activitiesSolrServer = new CommonsHttpSolrServer(activitiesSolrUrl);
+		bannersSolrServer = new CommonsHttpSolrServer(bannersSolrUrl);
 		suggestSolrServer = new CommonsHttpSolrServer(suggestSolrUrl);
 		citiesSolrServer = new CommonsHttpSolrServer(citiesSolrUrl);
 	}
@@ -153,6 +160,9 @@ public class SolrSearchServiceImpl implements SearchService {
 				query.setQuery("targetType:USER");
 			} else if (settings.getSearchScope() == SearchScope.CREATION) {
 				query.setQuery("activityType:C");
+				// } else if (settings.getSearchScope() ==
+				// SearchScope.NEARBY_ACTIVITIES) {
+				// query.setQuery("-activityType:Y");
 			}
 			query.addSortField("activityDate", ORDER.desc);
 			// query.addSortField(DISTANCE_FIELD, SolrQuery.ORDER.asc);
@@ -167,6 +177,8 @@ public class SolrSearchServiceImpl implements SearchService {
 			query.addSortField("start_date", ORDER.asc);
 			query.addSortField(DISTANCE_FIELD, SolrQuery.ORDER.asc);
 			return processSolrQuery(eventsSolrServer, query, settings, window);
+		} else if (AdvertisingBanner.CAL_ID.equals(settings.getReturnedType())) {
+			return processSolrQuery(bannersSolrServer, query, settings, window);
 		} else {
 			final Date now = new Date();
 			final String nowTimeStr = USERS_DATE_FORMAT.format(now);

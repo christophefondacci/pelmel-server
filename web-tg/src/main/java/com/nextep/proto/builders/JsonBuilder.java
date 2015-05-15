@@ -6,6 +6,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import com.nextep.activities.model.Activity;
+import com.nextep.advertising.model.AdvertisingBanner;
 import com.nextep.comments.model.Comment;
 import com.nextep.events.model.Event;
 import com.nextep.events.model.EventSeries;
@@ -14,6 +15,7 @@ import com.nextep.geo.model.GeographicItem;
 import com.nextep.geo.model.Place;
 import com.nextep.json.model.IJsonLightEvent;
 import com.nextep.json.model.impl.JsonActivity;
+import com.nextep.json.model.impl.JsonBanner;
 import com.nextep.json.model.impl.JsonHour;
 import com.nextep.json.model.impl.JsonLightCity;
 import com.nextep.json.model.impl.JsonLightPlace;
@@ -22,8 +24,8 @@ import com.nextep.json.model.impl.JsonManyToOneMessageList;
 import com.nextep.json.model.impl.JsonMedia;
 import com.nextep.json.model.impl.JsonMessage;
 import com.nextep.json.model.impl.JsonOneToOneMessageList;
-import com.nextep.json.model.impl.JsonPlaceOverview;
 import com.nextep.json.model.impl.JsonPlace;
+import com.nextep.json.model.impl.JsonPlaceOverview;
 import com.nextep.json.model.impl.JsonUser;
 import com.nextep.media.model.Media;
 import com.nextep.messages.model.Message;
@@ -48,8 +50,7 @@ public interface JsonBuilder {
 	 *            the {@link CalmObject} of the object of the overview
 	 * @return the JSON bean as a {@link JsonPlaceOverview}
 	 */
-	JsonPlaceOverview buildJsonPlaceOverview(Locale l, Place o,
-			boolean highRes);
+	JsonPlaceOverview buildJsonPlaceOverview(Locale l, Place o, boolean highRes);
 
 	/**
 	 * Builds a JSON media bean from a CAL media bean
@@ -103,6 +104,20 @@ public interface JsonBuilder {
 			ApiResponse response);
 
 	JsonActivity buildJsonActivity(Activity activity, boolean highRes, Locale l);
+
+	/**
+	 * Builds a JSON banner from a {@link AdvertisingBanner} bean
+	 * 
+	 * @param banner
+	 *            the {@link AdvertisingBanner} to convert to JSON
+	 * @param highRes
+	 *            whether or not we want HD images
+	 * @param l
+	 *            the current {@link Locale}
+	 * @return the serializable {@link JsonBanner} JSON bean
+	 */
+	JsonBanner buildJsonBanner(AdvertisingBanner banner, boolean highRes,
+			Locale l);
 
 	/**
 	 * Builds a JSON place bean from a {@link Place} bean
