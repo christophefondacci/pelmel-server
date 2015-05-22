@@ -112,6 +112,7 @@ public abstract class AbstractAction extends ActionSupport implements
 			lastException = e;
 			response.setStatus(HttpStatus.SC_NOT_FOUND);
 		} catch (UserLoginTimeoutException e) {
+			setErrorMessage("Unauthorized user token");
 			lastException = e;
 			return loginTimeoutError(e.getMessage());
 		} catch (Exception e) {

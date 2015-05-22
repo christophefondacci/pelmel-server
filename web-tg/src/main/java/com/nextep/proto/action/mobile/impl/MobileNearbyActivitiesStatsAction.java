@@ -232,6 +232,7 @@ public class MobileNearbyActivitiesStatsAction extends AbstractAction implements
 			final Map<String, Integer> eventsFacetsMap = SearchHelper
 					.unwrapFacets(eventsFacetInfo, category);
 			eventsFacetsMap.remove(ActivityType.DELETION.getCode());
+			eventsFacetsMap.remove(ActivityType.CREATION.getCode());
 			fillJsonStats(jsonActivityStats, Event.CAL_ID, eventsFacetsMap,
 					eventsActivities);
 

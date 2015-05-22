@@ -119,4 +119,19 @@ public interface AdvertisingBanner extends CalmObject, Localized {
 	 * @return the total number of displays for this banner.
 	 */
 	long getTargetDisplayCount();
+
+	/**
+	 * Provides the status of this banner
+	 * 
+	 * @return the banner status as a {@link BannerStatus}
+	 */
+	BannerStatus getStatus();
+
+	/**
+	 * Provides the transaction ID of the in-app purchase at the origin of this
+	 * banner
+	 * 
+	 * @return the payment transaction ID
+	 */
+	String getTransactionId();
 }

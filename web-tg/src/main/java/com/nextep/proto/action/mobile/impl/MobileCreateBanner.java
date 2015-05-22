@@ -2,7 +2,6 @@ package com.nextep.proto.action.mobile.impl;
 
 import java.io.File;
 import java.util.Arrays;
-import java.util.Date;
 
 import net.sf.json.JSONObject;
 
@@ -10,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 import com.nextep.advertising.model.AdvertisingBanner;
+import com.nextep.advertising.model.BannerStatus;
 import com.nextep.advertising.model.BannerType;
 import com.nextep.advertising.model.MutableAdvertisingBanner;
 import com.nextep.cal.util.services.CalPersistenceService;
@@ -59,6 +59,7 @@ public class MobileCreateBanner extends AbstractAction implements JsonProvider {
 	// Dynamic arguments
 	private String bannerKey;
 	private String targetItemKey;
+	private String targetUrl;
 	private double lat;
 	private double lng;
 	private double radius;
@@ -116,11 +117,11 @@ public class MobileCreateBanner extends AbstractAction implements JsonProvider {
 				mutableBanner.setTargetItemKey(CalmFactory
 						.parseKey(targetItemKey));
 			}
+			mutableBanner.setTargetUrl(targetUrl);
 			mutableBanner.setEndValidity(null);
 		} else {
 			// Setting end validity in the past to de-activate it
-			mutableBanner.setEndValidity(new Date(
-					System.currentTimeMillis() - 1));
+			mutableBanner.setStatus(BannerStatus.OFFLINE);
 		}
 
 		// Saving banner
@@ -234,5 +235,13 @@ public class MobileCreateBanner extends AbstractAction implements JsonProvider {
 
 	public boolean isActive() {
 		return active;
+	}
+
+	public void setTargetUrl(String targetUrl) {
+		this.targetUrl = targetUrl;
+	}
+
+	public String getTargetUrl() {
+		return targetUrl;
 	}
 }

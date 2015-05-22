@@ -140,4 +140,20 @@ public interface MutableAdvertisingBanner extends AdvertisingBanner {
 	 *            the total number of impressions.
 	 */
 	void setTargetDisplayCount(long targetDisplayCount);
+
+	/**
+	 * Updates the status for this banner
+	 * 
+	 * @param bannerStatus
+	 *            the new {@link BannerStatus}
+	 */
+	void setStatus(BannerStatus bannerStatus);
+
+	/**
+	 * Sets the payment transaction ID for this banner
+	 * 
+	 * @param transactionId
+	 *            the payment transaction ID
+	 */
+	void setTransactionId(String transactionId);
 }

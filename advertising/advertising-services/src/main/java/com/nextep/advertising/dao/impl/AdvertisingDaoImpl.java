@@ -2,6 +2,7 @@ package com.nextep.advertising.dao.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -165,14 +166,18 @@ public class AdvertisingDaoImpl extends AbstractCalDao<CalmObject> implements
 
 	@Override
 	public List<AdvertisingBanner> getBanners(Collection<ItemKey> itemKeys) {
-		final Collection<Long> keys = CalHelper.unwrapItemKeyIds(itemKeys);
+		if (!itemKeys.isEmpty()) {
+			final Collection<Long> keys = CalHelper.unwrapItemKeyIds(itemKeys);
 
-		@SuppressWarnings("unchecked")
-		final List<AdvertisingBanner> banners = entityManager
-				.createQuery(
-						"from AdvertisingBannerImpl where id in (:itemKeys)")
-				.setParameter("itemKeys", keys).getResultList();
+			@SuppressWarnings("unchecked")
+			final List<AdvertisingBanner> banners = entityManager
+					.createQuery(
+							"from AdvertisingBannerImpl where id in (:itemKeys)")
+					.setParameter("itemKeys", keys).getResultList();
 
-		return banners;
+			return banners;
+		} else {
+			return Collections.emptyList();
+		}
 	}
 }

@@ -1,5 +1,6 @@
 package com.nextep.proto.services;
 
+import java.util.Map;
 import java.util.concurrent.Future;
 
 import com.nextep.advertising.model.AdvertisingBanner;
@@ -54,5 +55,14 @@ public interface BannerDisplayService {
 	 *            the {@link AdvertisingBanner} that has been displayed
 	 */
 	Future<Boolean> displayBanner(AdvertisingBanner banner);
+
+	/**
+	 * Validates the payment receipt with Apple backend servers
+	 * 
+	 * @param receipt
+	 *            the receipt to validate in its BASE64 representation
+	 * @return the receipt JSON representation expressed as a map
+	 */
+	Map<String, Object> validateAppleReceipt(String receipt);
 
 }

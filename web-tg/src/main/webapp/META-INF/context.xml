@@ -112,7 +112,8 @@
 	<Environment name="push.key.password" type="java.lang.String" value="tDk@1558"/>
 	<Environment name="push.production" type="java.lang.Boolean" value="false"/>
 	<Environment name="push.enabled" type="java.lang.Boolean" value="true"/>
-
+	<Environment name="payment.production" type="java.lang.Boolean" value="false"/>
+	
 	<Environment name="gcloud.appName" type="java.lang.String" value="PelMel"/>
 	<Environment name="gcloud.bucketName" type="java.lang.String" value="media.pelmelguide.com"/>
 	<Environment name="gcloud.accountId" type="java.lang.String" value="363040793981-u2h22k9ld1h90ohnnoe0nlmsu7nbbbar@developer.gserviceaccount.com"/>

@@ -11,6 +11,7 @@ import javax.persistence.Table;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.nextep.advertising.model.BannerStatus;
 import com.nextep.advertising.model.BannerType;
 import com.nextep.advertising.model.MutableAdvertisingBanner;
 import com.nextep.cal.util.helpers.CalHelper;
@@ -65,6 +66,10 @@ public class AdvertisingBannerImpl extends AbstractCalmObject implements
 	private String targetUrl;
 	@Column(name = "TARGET_DISPLAY_COUNT")
 	private long targetDisplayCount;
+	@Column(name = "STATUS")
+	private String status = BannerStatus.PENDING_PAYMENT.name();
+	@Column(name = "TRANSACTION_ID")
+	private String transactionId;
 
 	public AdvertisingBannerImpl() {
 		super(null);
@@ -267,7 +272,7 @@ public class AdvertisingBannerImpl extends AbstractCalmObject implements
 
 	@Override
 	public void setTargetItemKey(ItemKey targetItemKey) {
-		this.targetItemKey = targetItemKey == null ? null : this.targetItemKey
+		this.targetItemKey = targetItemKey == null ? null : targetItemKey
 				.toString();
 	}
 
@@ -281,4 +286,25 @@ public class AdvertisingBannerImpl extends AbstractCalmObject implements
 		this.targetDisplayCount = targetDisplayCount;
 	}
 
+	@Override
+	public void setStatus(BannerStatus bannerStatus) {
+		status = bannerStatus != null ? bannerStatus.name()
+				: BannerStatus.PENDING_PAYMENT.name();
+	}
+
+	@Override
+	public BannerStatus getStatus() {
+		return BannerStatus.READY.name().equals(status) ? BannerStatus.READY
+				: BannerStatus.PENDING_PAYMENT;
+	}
+
+	@Override
+	public String getTransactionId() {
+		return transactionId;
+	}
+
+	@Override
+	public void setTransactionId(String transactionId) {
+		this.transactionId = transactionId;
+	}
 }

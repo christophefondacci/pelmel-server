@@ -25,6 +25,7 @@ import com.nextep.activities.model.Activity;
 import com.nextep.activities.model.ActivityType;
 import com.nextep.advertising.model.AdvertisingBanner;
 import com.nextep.advertising.model.AdvertisingBooster;
+import com.nextep.advertising.model.BannerStatus;
 import com.nextep.cal.util.helpers.CalHelper;
 import com.nextep.events.model.Event;
 import com.nextep.events.model.EventSeries;
@@ -154,9 +155,9 @@ public class SolrSearchPersistenceServiceImpl implements
 	}
 
 	private void storeBanner(AdvertisingBanner banner) throws SearchException {
-		if (banner.getEndValidity() != null
-				&& banner.getEndValidity().getTime() < System
-						.currentTimeMillis()) {
+		if (banner.getStatus() != BannerStatus.READY
+				|| (banner.getEndValidity() != null && banner.getEndValidity()
+						.getTime() < System.currentTimeMillis())) {
 			try {
 				bannersSolrServer.deleteById(banner.getKey().toString());
 				bannersSolrServer.commit();
