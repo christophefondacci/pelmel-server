@@ -294,8 +294,9 @@ public class AdvertisingBannerImpl extends AbstractCalmObject implements
 
 	@Override
 	public BannerStatus getStatus() {
-		return BannerStatus.READY.name().equals(status) ? BannerStatus.READY
-				: BannerStatus.PENDING_PAYMENT;
+
+		return status == null ? BannerStatus.PENDING_PAYMENT : BannerStatus
+				.valueOf(status);
 	}
 
 	@Override

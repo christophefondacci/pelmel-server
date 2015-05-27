@@ -942,6 +942,8 @@ public class JsonBuilderImpl implements JsonBuilder {
 		json.setLng(banner.getLongitude());
 		json.setRadius(banner.getRadius());
 		json.setTargetDisplayCount(banner.getTargetDisplayCount());
+		json.setStartDate(banner.getStartValidity().getTime());
+		json.setStatus(banner.getStatus().name());
 		if (banner.getTargetItemKey() != null) {
 			try {
 				Place p = banner.getUnique(Place.class,

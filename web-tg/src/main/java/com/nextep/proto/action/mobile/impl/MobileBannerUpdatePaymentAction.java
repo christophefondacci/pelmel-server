@@ -34,11 +34,11 @@ import com.videopolis.calm.model.ItemKey;
 import com.videopolis.cals.factory.ContextFactory;
 import com.videopolis.smaug.common.model.SearchScope;
 
-public class MobileUpdateBannerPayment extends AbstractAction implements
+public class MobileBannerUpdatePaymentAction extends AbstractAction implements
 		JsonProviderWithError {
 
 	private static final Log LOGGER = LogFactory
-			.getLog(MobileUpdateBannerPayment.class);
+			.getLog(MobileBannerUpdatePaymentAction.class);
 	private static final long serialVersionUID = 1L;
 	private static final String APIS_ALIAS_BANNER = "banner";
 	private static final String JSON_TRANSACTION_ID = "transaction_id";

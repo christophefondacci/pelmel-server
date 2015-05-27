@@ -207,10 +207,19 @@
 	<bean id="mobilePlaceUpdateAction" parent="placeUpdateAction" scope="request">
 		<property name="mobile" value="true"></property>
 	</bean>
-	<bean id="mobileBannerUpdateAction" class="com.nextep.proto.action.mobile.impl.MobileCreateBanner" parent="abstractAction" scope="request">
+	<bean id="mobileBannerUpdateAction" class="com.nextep.proto.action.mobile.impl.MobileBannerCreateAction" parent="abstractAction" scope="request">
 		<property name="urlService" ref="urlService"/>
 	</bean>
-	<bean id="mobileBannerUpdatePaymentAction" class="com.nextep.proto.action.mobile.impl.MobileUpdateBannerPayment" parent="abstractAction" scope="request">
+	<bean id="mobileBannerUpdatePaymentAction" class="com.nextep.proto.action.mobile.impl.MobileBannerUpdatePaymentAction" parent="abstractAction" scope="request">
+		<property name="urlService" ref="urlService"/>
+	</bean>
+	<bean id="mobileBannerListAction" class="com.nextep.proto.action.mobile.impl.MobileBannerListAction" parent="abstractAction" scope="request">
+		<property name="urlService" ref="urlService"/>
+	</bean>
+	<bean id="mobileBannerUpdateStatusAction" class="com.nextep.proto.action.mobile.impl.MobileBannerUpdateStatusAction" parent="abstractAction" scope="request">
+		<property name="urlService" ref="urlService"/>
+	</bean>
+	<bean id="mobileBannerCycleAction" class="com.nextep.proto.action.mobile.impl.MobileBannerCycleAction" parent="abstractAction" scope="request">
 		<property name="urlService" ref="urlService"/>
 	</bean>
 	<bean id="myMediaAction" class="com.nextep.proto.action.impl.MyMediaAction" parent="abstractAction" scope="request">

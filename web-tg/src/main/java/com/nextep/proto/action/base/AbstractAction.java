@@ -517,11 +517,12 @@ public abstract class AbstractAction extends ActionSupport implements
 			} else {
 				final JsonStatus status = new JsonStatus();
 				status.setError(true);
-				status.setMessage(lastException != null ? lastException
-						.getMessage() : "[No exception caught]");
-				LOGGER.error("Error catched by safeJsonError: "
-						+ (lastException != null ? lastException.getMessage()
-								: "[No exception caught]"), lastException);
+				status.setMessage(getErrorMessage() != null ? getErrorMessage()
+						: (lastException != null ? lastException.getMessage()
+								: "[No exception caught]"));
+				LOGGER.error(
+						"Error catched by safeJsonError: "
+								+ status.getMessage(), lastException);
 				return JSONObject.fromObject(status).toString();
 			}
 		} catch (Throwable e) {

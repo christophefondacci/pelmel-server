@@ -38,7 +38,8 @@ import com.videopolis.smaug.common.model.SearchScope;
  * @author cfondacci
  *
  */
-public class MobileCreateBanner extends AbstractAction implements JsonProvider {
+public class MobileBannerCreateAction extends AbstractAction implements
+		JsonProvider {
 
 	private static final long serialVersionUID = 1L;
 	private static final String APIS_ALIAS_BANNER = "banner";
@@ -121,7 +122,7 @@ public class MobileCreateBanner extends AbstractAction implements JsonProvider {
 			mutableBanner.setEndValidity(null);
 		} else {
 			// Setting end validity in the past to de-activate it
-			mutableBanner.setStatus(BannerStatus.OFFLINE);
+			mutableBanner.setStatus(BannerStatus.DELETED);
 		}
 
 		// Saving banner

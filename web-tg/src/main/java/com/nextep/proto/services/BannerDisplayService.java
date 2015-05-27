@@ -8,6 +8,7 @@ import com.videopolis.apis.exception.ApisException;
 import com.videopolis.apis.model.ApisRequest;
 import com.videopolis.apis.service.ApiCompositeResponse;
 import com.videopolis.apis.service.ApiResponse;
+import com.videopolis.calm.model.ItemKey;
 
 /**
  * This service manages displays of banners.<br>
@@ -47,6 +48,22 @@ public interface BannerDisplayService {
 	 * @return the banner to display
 	 */
 	AdvertisingBanner getBannerSelection(ApiCompositeResponse response);
+
+	/**
+	 * Same as
+	 * {@link BannerDisplayService#getBannerSelection(ApiCompositeResponse)}
+	 * except that it takes the {@link ItemKey} of a banner currently being
+	 * displayed to make sure the selection take another one, if possible.
+	 * 
+	 * @param response
+	 *            the {@link ApiResponse} to extract banners from
+	 * @param currentBannerKey
+	 *            the {@link ItemKey} of any currently displayed banner. This
+	 *            method will try to avoid reselecting the same banner.
+	 * @return the {@link AdvertisingBanner} to display
+	 */
+	AdvertisingBanner getBannerSelection(ApiCompositeResponse response,
+			ItemKey currentBannerKey);
 
 	/**
 	 * Handles update of banner information to reflect a display of this banner

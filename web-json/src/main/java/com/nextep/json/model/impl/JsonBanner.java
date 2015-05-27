@@ -9,6 +9,8 @@ public class JsonBanner {
 	private JsonLightEvent targetEvent;
 	private String targetUrl;
 	private JsonMedia bannerImage;
+	private long startDate;
+	private String status;
 
 	public String getKey() {
 		return key;
@@ -96,5 +98,21 @@ public class JsonBanner {
 
 	public JsonMedia getBannerImage() {
 		return bannerImage;
+	}
+
+	public void setStartDate(long startDate) {
+		this.startDate = startDate / 1000;
+	}
+
+	public long getStartDate() {
+		return startDate;
+	}
+
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
 	}
 }

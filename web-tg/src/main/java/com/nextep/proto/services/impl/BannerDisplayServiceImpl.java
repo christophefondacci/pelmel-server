@@ -38,6 +38,7 @@ import com.videopolis.apis.model.ApisCriterion;
 import com.videopolis.apis.model.ApisItemKeyAdapter;
 import com.videopolis.apis.model.ApisRequest;
 import com.videopolis.apis.service.ApiCompositeResponse;
+import com.videopolis.calm.model.ItemKey;
 import com.videopolis.smaug.common.model.SearchScope;
 
 @Service("bannerDisplayService")
@@ -76,6 +77,13 @@ public class BannerDisplayServiceImpl implements BannerDisplayService {
 
 	@Override
 	public AdvertisingBanner getBannerSelection(ApiCompositeResponse response) {
+		return getBannerSelection(response, null);
+	}
+
+	@Override
+	public AdvertisingBanner getBannerSelection(ApiCompositeResponse response,
+			ItemKey currentBannerKey) {
+
 		try {
 			final List<? extends AdvertisingBanner> banners = response
 					.getElements(AdvertisingBanner.class, APIS_ALIAS_BANNER);
@@ -84,7 +92,15 @@ public class BannerDisplayServiceImpl implements BannerDisplayService {
 			final List<AdvertisingBanner> availableBanners = new ArrayList<AdvertisingBanner>();
 			for (AdvertisingBanner banner : banners) {
 				if (banner.getStatus() == BannerStatus.READY) {
-					availableBanners.add(banner);
+					// We add the banner to the choices if no current banner, or
+					// if only one banner available or if different than the
+					// current banner
+					// To sum-up, it will avoid to select the specified current
+					// banner if we have at least another choice
+					if (currentBannerKey == null || banners.size() == 1
+							|| !banner.getKey().equals(currentBannerKey)) {
+						availableBanners.add(banner);
+					}
 				}
 			}
 

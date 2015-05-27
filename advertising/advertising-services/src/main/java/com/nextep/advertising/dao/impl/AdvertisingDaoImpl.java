@@ -98,9 +98,8 @@ public class AdvertisingDaoImpl extends AbstractCalDao<CalmObject> implements
 		}
 		final List<AdvertisingBooster> adBoosters = entityManager
 				.createQuery(
-						"from AdvertisingBoosterImpl where purchaserItemKey in (:itemKeys) and fromDate<=:currentDate and toDate>:currentDate")
-				.setParameter("itemKeys", itemKeysStr)
-				.setParameter("currentDate", new Date()).getResultList();
+						"from AdvertisingBoosterImpl where purchaserItemKey in (:itemKeys)")
+				.setParameter("itemKeys", itemKeysStr).getResultList();
 		final Map<ItemKey, List<AdvertisingBooster>> adBoostersKeyMap = new HashMap<ItemKey, List<AdvertisingBooster>>();
 		for (AdvertisingBooster adBooster : adBoosters) {
 			final ItemKey itemKey = adBooster.getPurchaserItemKey();
@@ -162,6 +161,16 @@ public class AdvertisingDaoImpl extends AbstractCalDao<CalmObject> implements
 			geoBanners.add(banner);
 		}
 		return bannersMap;
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public List<AdvertisingBanner> getBannersForUser(ItemKey userKey) {
+		final List<AdvertisingBanner> banners = entityManager
+				.createQuery(
+						"from AdvertisingBannerImpl where ownerItemKey=:itemKey and status!='DELETED' order by startValidity desc")
+				.setParameter("itemKey", userKey.toString()).getResultList();
+		return banners;
 	}
 
 	@Override

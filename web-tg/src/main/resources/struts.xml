@@ -446,6 +446,11 @@
 			<result name="input">/jsp/pages/json.jsp</result>
 			<result name="error">/jsp/pages/json.jsp</result>
 		</action>
+		<action name="mobileUpdateBannerStatus" class="mobileBannerUpdateStatusAction">
+			<result>/jsp/pages/json.jsp</result>
+			<result name="input">/jsp/pages/json.jsp</result>
+			<result name="error">/jsp/pages/json.jsp</result>
+		</action>
 		<action name="mobileUpdateBannerPayment" class="mobileBannerUpdatePaymentAction">
 			<result>/jsp/pages/json.jsp</result>
 			<result name="input">/jsp/pages/json.jsp</result>
@@ -710,6 +715,8 @@
 		<action name="place" class="mobileOverviewPlaceAction"/>
 		<action name="user" class="mobileOverviewUserAction"/>
 		<action name="event" class="mobileOverviewEventAction"/>
+		<action name="banners" class="mobileBannerListAction"/>
+		<action name="banner" class="mobileBannerCycleAction"/>
 		<action name="activityStats" class="mobileNearbyActivitiesStatsAction"/>
 		<action name="activityDetails" class="mobileNearbyActivitiesAction"/>
 		<action name="groupedActivityDetails" class="mobileNearbyActivitiesGroupedAction"/>

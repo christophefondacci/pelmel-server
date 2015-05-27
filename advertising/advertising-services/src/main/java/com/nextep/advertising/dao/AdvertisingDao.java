@@ -47,5 +47,25 @@ public interface AdvertisingDao extends CalDao<CalmObject> {
 	Map<ItemKey, List<AdvertisingBanner>> getBannersFor(
 			Collection<ItemKey> geoItemKeys, String searchType, Locale locale);
 
+	/**
+	 * Provides the banner attached to any of the given item keys
+	 * 
+	 * @param itemKeys
+	 *            the list of {@link ItemKey} of the object that might have
+	 *            associated banners (will typically be geographical
+	 *            administrative areas
+	 * @return the list of {@link AdvertisingBanner} associated with any of the
+	 *         provided item keys
+	 */
 	List<AdvertisingBanner> getBanners(Collection<ItemKey> itemKeys);
+
+	/**
+	 * Lists all banners that the user identified by the given {@link ItemKey}
+	 * has created
+	 * 
+	 * @param userKey
+	 *            the {@link ItemKey} of the user who created the banners
+	 * @return the list of all {@link AdvertisingBanner} that this user created
+	 */
+	List<AdvertisingBanner> getBannersForUser(ItemKey userKey);
 }
