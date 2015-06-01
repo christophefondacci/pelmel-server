@@ -299,6 +299,7 @@ public class SolrSearchPersistenceServiceImpl implements
 				try {
 					activitiesSolrServer.deleteById(activity.getKey()
 							.toString());
+					activitiesSolrServer.commit();
 				} catch (SolrServerException | IOException e) {
 					// Not deleting an activity is OK
 					log.error("Unable to delete activity: " + e.getMessage(), e);

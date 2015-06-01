@@ -169,8 +169,7 @@ public class DeleteCalObjectAction extends AbstractAction implements
 							searchPersistenceService.remove(activity);
 							// Setting a date in the past so that it does not
 							// pop in latest changes
-							((MutableActivity) activity).setDate(new Date(
-									100000000));
+							((MutableActivity) activity).setVisible(false);
 							activitiesService.saveItem(activity);
 						}
 					}

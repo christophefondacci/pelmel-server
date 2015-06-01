@@ -85,8 +85,9 @@ public class MobileBannerUpdateStatusAction extends AbstractAction implements
 				APIS_ALIAS_BANNER);
 
 		// The only way to change a "pending payment" state is to pay
-		if (banner.getStatus() == BannerStatus.PENDING_PAYMENT) {
-			return ERROR;
+		if (banner.getStatus() == BannerStatus.PENDING_PAYMENT
+				&& !BannerStatus.DELETED.name().equals(status)) {
+			return error(401);
 		} else {
 			ContextHolder.toggleWrite();
 			try {

@@ -13,8 +13,10 @@ import com.nextep.json.model.impl.JsonBanner;
 import com.nextep.media.model.Media;
 import com.nextep.proto.action.base.AbstractAction;
 import com.nextep.proto.action.model.JsonProvider;
+import com.nextep.proto.apis.adapters.ApisBannerTargetAdapter;
 import com.nextep.proto.blocks.CurrentUserSupport;
 import com.nextep.proto.builders.JsonBuilder;
+import com.nextep.proto.model.Constants;
 import com.nextep.users.model.User;
 import com.videopolis.apis.factory.ApisFactory;
 import com.videopolis.apis.factory.SearchRestriction;
@@ -48,6 +50,12 @@ public class MobileBannerListAction extends AbstractAction implements
 										(ApisCriterion) SearchRestriction
 												.with(AdvertisingBanner.class,
 														AdvertisingRequestTypes.USER_BANNERS)
+												.addCriterion(
+														SearchRestriction
+																.adaptKey(
+																		new ApisBannerTargetAdapter())
+																.aliasedBy(
+																		Constants.APIS_ALIAS_BANNER_TARGET))
 												.with(Media.class)));
 
 		final ApiCompositeResponse response = (ApiCompositeResponse) getApiService()

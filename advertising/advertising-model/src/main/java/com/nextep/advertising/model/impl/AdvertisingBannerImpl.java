@@ -35,7 +35,7 @@ public class AdvertisingBannerImpl extends AbstractCalmObject implements
 	@Column(name = "BANNER_ID")
 	private long id;
 	@Column(name = "START_VALIDITY")
-	private Date startValidity;
+	private Date startValidity = new Date();
 	@Column(name = "END_VALIDITY")
 	private Date endValidity;
 	@Column(name = "HTML_CODE")

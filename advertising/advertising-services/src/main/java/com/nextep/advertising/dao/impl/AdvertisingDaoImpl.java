@@ -141,7 +141,7 @@ public class AdvertisingDaoImpl extends AbstractCalDao<CalmObject> implements
 		@SuppressWarnings("unchecked")
 		final List<AdvertisingBanner> banners = entityManager
 				.createQuery(
-						"from AdvertisingBannerImpl where topGeographicItemKey in (:geoItemKey) and (searchType is null or searchType=:searchType) and (locale is null or locale=:locale) order by display_count asc")
+						"from AdvertisingBannerImpl where topGeographicItemKey in (:geoItemKey) and (searchType is null or searchType=:searchType) and (locale is null or locale=:locale) and status!='DELETED' order by display_count asc")
 				.setParameter("geoItemKey", keys)
 				.setParameter("searchType", searchType)
 				.setParameter("locale", locale.getLanguage()).getResultList();

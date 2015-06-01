@@ -2,11 +2,17 @@ package com.nextep.proto.action.impl;
 
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 import net.sf.json.JSONObject;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import com.nextep.activities.model.Activity;
 import com.nextep.activities.model.ActivityType;
 import com.nextep.activities.model.MutableActivity;
+import com.nextep.activities.model.impl.RequestTypeLatestActivities;
 import com.nextep.cal.util.services.CalPersistenceService;
 import com.nextep.geo.model.GeographicItem;
 import com.nextep.geo.model.Place;
@@ -30,6 +36,7 @@ import com.videopolis.apis.model.ApisCriterion;
 import com.videopolis.apis.model.ApisItemKeyAdapter;
 import com.videopolis.apis.model.ApisRequest;
 import com.videopolis.apis.service.ApiCompositeResponse;
+import com.videopolis.calm.exception.CalException;
 import com.videopolis.calm.factory.CalmFactory;
 import com.videopolis.calm.model.CalmObject;
 import com.videopolis.calm.model.ItemKey;
@@ -40,6 +47,8 @@ public class DeleteMediaAction extends AbstractAction implements
 		CurrentUserAware, JsonProviderWithError {
 
 	private static final long serialVersionUID = -2984157457110022157L;
+	private static final Log LOGGER = LogFactory
+			.getLog(DeleteMediaAction.class);
 	private static final String APIS_ALIAS_MEDIA = "media";
 	private static final String APIS_ALIAS_MEDIA_PARENT = "parent";
 	private static final String REDIRECT_ACTION_PLACE_OVERVIEW = "placeOverview";
@@ -78,7 +87,11 @@ public class DeleteMediaAction extends AbstractAction implements
 												.adaptKey(MEDIA_PARENT_ADAPTER)
 												.aliasedBy(
 														APIS_ALIAS_MEDIA_PARENT)
-												.with(GeographicItem.class)));
+												.with(GeographicItem.class)
+												.with(Activity.class,
+														new RequestTypeLatestActivities(
+																20,
+																ActivityType.CREATION))));
 		final ApiCompositeResponse response = (ApiCompositeResponse) getApiService()
 				.execute(request, ContextFactory.createContext(getLocale()));
 		// Extracting current user
@@ -123,6 +136,33 @@ public class DeleteMediaAction extends AbstractAction implements
 			activity.add(localization);
 			activitiesService.saveItem(activity);
 			searchService.storeCalmObject(activity, SearchScope.CHILDREN);
+
+			// And we remove previous activity that mentioned creation of this
+			// photo otherwise the photo would still appear in the nearby
+			// activity list
+			final List<? extends Activity> activities = mediaParent
+					.get(Activity.class);
+			for (Activity a : activities) {
+				if (a.getExtraInformation() != null) {
+					try {
+						final ItemKey extraItemKey = CalmFactory.parseKey(a
+								.getExtraInformation());
+						if (extraItemKey.equals(media.getKey())) {
+							((MutableActivity) a).setVisible(false);
+							activitiesService.saveItem(a);
+							searchService.storeCalmObject(a,
+									SearchScope.NEARBY_ACTIVITIES);
+							break;
+						}
+					} catch (CalException e) {
+						LOGGER.warn(
+								"Cannot parse extra information '"
+										+ a.getExtraInformation()
+										+ "' as itemKey for activity "
+										+ a.getKey(), e);
+					}
+				}
+			}
 
 			if (Place.CAL_TYPE.equals(media.getRelatedItemKey().getType())) {
 				redirectAction = REDIRECT_ACTION_PLACE_OVERVIEW;
