@@ -29,6 +29,7 @@ import com.nextep.geo.model.Place;
 import com.nextep.json.model.IJsonDescripted;
 import com.nextep.json.model.IJsonLightEvent;
 import com.nextep.json.model.IJsonLightPlace;
+import com.nextep.json.model.IJsonLightUser;
 import com.nextep.json.model.IJsonWithParticipants;
 import com.nextep.json.model.impl.JsonActivity;
 import com.nextep.json.model.impl.JsonBanner;
@@ -368,8 +369,8 @@ public class JsonBuilderImpl implements JsonBuilder {
 			User fromUser, User toUser) {
 
 		// Building from and to users
-		final JsonLightUser jsonFrom = buildJsonLightUser(fromUser, highRes, l);
-		final JsonLightUser jsonTo = buildJsonLightUser(toUser, highRes, l);
+		final IJsonLightUser jsonFrom = buildJsonLightUser(fromUser, highRes, l);
+		final IJsonLightUser jsonTo = buildJsonLightUser(toUser, highRes, l);
 
 		// Initializing resulting structure
 		final JsonOneToOneMessageList messagesList = new JsonOneToOneMessageList();
@@ -835,7 +836,7 @@ public class JsonBuilderImpl implements JsonBuilder {
 							+ " : " + e.getMessage(), e);
 		}
 		if (user != null) {
-			final JsonLightUser jsonUser = buildJsonLightUser(user, highRes, l);
+			final IJsonLightUser jsonUser = buildJsonLightUser(user, highRes, l);
 			json.setUser(jsonUser);
 		}
 		if (activityPlace != null) {
@@ -844,7 +845,7 @@ public class JsonBuilderImpl implements JsonBuilder {
 			json.setActivityPlace(jsonPlace);
 		}
 		if (activityUser != null) {
-			final JsonLightUser jsonUser = buildJsonLightUser(activityUser,
+			final IJsonLightUser jsonUser = buildJsonLightUser(activityUser,
 					highRes, l);
 			json.setActivityUser(jsonUser);
 		}

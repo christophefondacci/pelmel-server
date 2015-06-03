@@ -3,6 +3,8 @@ package com.nextep.json.model.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.nextep.json.model.IJsonLightUser;
+
 /**
  * This JSON bean represents a single conversation between 2 (and only 2)
  * persons.
@@ -12,24 +14,24 @@ import java.util.List;
  */
 public class JsonOneToOneMessageList extends JsonMessagingStatistic {
 
-	private JsonLightUser fromUser;
-	private JsonLightUser toUser;
+	private IJsonLightUser fromUser;
+	private IJsonLightUser toUser;
 
 	private List<JsonMessage> messages = new ArrayList<JsonMessage>();
 
-	public void setFromUser(JsonLightUser fromUser) {
+	public void setFromUser(IJsonLightUser fromUser) {
 		this.fromUser = fromUser;
 	}
 
-	public JsonLightUser getFromUser() {
+	public IJsonLightUser getFromUser() {
 		return fromUser;
 	}
 
-	public void setToUser(JsonLightUser toUser) {
+	public void setToUser(IJsonLightUser toUser) {
 		this.toUser = toUser;
 	}
 
-	public JsonLightUser getToUser() {
+	public IJsonLightUser getToUser() {
 		return toUser;
 	}
 

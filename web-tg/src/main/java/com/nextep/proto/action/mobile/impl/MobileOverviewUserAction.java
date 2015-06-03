@@ -30,6 +30,7 @@ import com.nextep.proto.apis.adapters.ApisEventLocationAdapter;
 import com.nextep.proto.apis.adapters.ApisUserLocationItemKeyAdapter;
 import com.nextep.proto.blocks.CurrentUserSupport;
 import com.nextep.proto.builders.JsonBuilder;
+import com.nextep.proto.helpers.GeoHelper;
 import com.nextep.proto.helpers.SearchHelper;
 import com.nextep.proto.model.Constants;
 import com.nextep.proto.services.EventManagementService;
@@ -229,6 +230,11 @@ public class MobileOverviewUserAction extends AbstractAction implements
 					place, highRes, getLocale());
 			jsonUser.addLikedPlace(jsonPlace);
 		}
+
+		// Setting distance
+		final double distance = GeoHelper.distanceBetween(lat, lng,
+				user.getLatitude(), user.getLongitude());
+		jsonUser.setRawDistanceMeters(distance * Constants.METERS_PER_MILE);
 
 		// Extracting activities for checkin information
 		boolean checkedIn = false;

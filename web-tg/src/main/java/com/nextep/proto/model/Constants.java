@@ -101,4 +101,6 @@ public interface Constants {
 	public static final String APIS_ALIAS_NEARBY_PLACES = "nearbyPlaces";
 
 	public static final String APIS_ALIAS_PLACE = "place";
+
+	double METERS_PER_MILE = 1609.344;
 }

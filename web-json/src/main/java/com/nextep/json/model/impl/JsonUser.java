@@ -7,8 +7,9 @@ import java.util.List;
 
 import com.nextep.json.model.IJsonLightEvent;
 import com.nextep.json.model.IJsonLightPlace;
+import com.nextep.json.model.IJsonLightUser;
 
-public class JsonUser extends JsonLiker {
+public class JsonUser extends JsonLiker implements IJsonLightUser {
 
 	private String key;
 	private String nxtpUserToken;
@@ -31,7 +32,9 @@ public class JsonUser extends JsonLiker {
 	private IJsonLightPlace lastLocation;
 	private Long lastLocationTime;
 	private boolean newUser;
+	private double rawDistance;
 
+	@Override
 	public String getKey() {
 		return key;
 	}
@@ -48,10 +51,12 @@ public class JsonUser extends JsonLiker {
 		this.nxtpUserToken = nxtpUserToken;
 	}
 
+	@Override
 	public String getPseudo() {
 		return pseudo;
 	}
 
+	@Override
 	public void setPseudo(String pseudo) {
 		this.pseudo = pseudo;
 	}
@@ -116,10 +121,12 @@ public class JsonUser extends JsonLiker {
 		tags.add(tag);
 	}
 
+	@Override
 	public void setOnline(boolean online) {
 		this.online = online;
 	}
 
+	@Override
 	public boolean isOnline() {
 		return online;
 	}
@@ -156,14 +163,17 @@ public class JsonUser extends JsonLiker {
 		return lastLocation;
 	}
 
+	@Override
 	public Long getLastLocationTime() {
 		return lastLocationTime;
 	}
 
+	@Override
 	public void setLastLocationTime(Long lastLocationTime) {
 		this.lastLocationTime = lastLocationTime;
 	}
 
+	@Override
 	public void setLastLocationTimeValue(Date lastLocationTime) {
 		this.lastLocationTime = lastLocationTime.getTime() / 1000;
 	}
@@ -218,5 +228,15 @@ public class JsonUser extends JsonLiker {
 
 	public void addRecurringEvent(JsonHour recurringEvent) {
 		this.recurringEvents.add(recurringEvent);
+	}
+
+	@Override
+	public void setRawDistanceMeters(double rawDistance) {
+		this.rawDistance = rawDistance;
+	}
+
+	@Override
+	public double getRawDistanceMeters() {
+		return rawDistance;
 	}
 }

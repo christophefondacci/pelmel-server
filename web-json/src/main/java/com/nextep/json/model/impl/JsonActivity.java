@@ -4,14 +4,15 @@ import java.util.Date;
 
 import com.nextep.json.model.IJsonLightEvent;
 import com.nextep.json.model.IJsonLightPlace;
+import com.nextep.json.model.IJsonLightUser;
 
 public class JsonActivity {
 
 	private String key;
-	private JsonLightUser user;
+	private IJsonLightUser user;
 	private IJsonLightPlace activityPlace;
 	private IJsonLightEvent activityEvent;
-	private JsonLightUser activityUser;
+	private IJsonLightUser activityUser;
 	private IJsonLightEvent extraEvent;
 	private JsonMedia extraMedia;
 	private String message;
@@ -19,11 +20,11 @@ public class JsonActivity {
 	private Integer count;
 	private Long activityDate;
 
-	public JsonLightUser getUser() {
+	public IJsonLightUser getUser() {
 		return user;
 	}
 
-	public void setUser(JsonLightUser user) {
+	public void setUser(IJsonLightUser user) {
 		this.user = user;
 	}
 
@@ -55,11 +56,11 @@ public class JsonActivity {
 		this.activityDate = activityDate;
 	}
 
-	public JsonLightUser getActivityUser() {
+	public IJsonLightUser getActivityUser() {
 		return activityUser;
 	}
 
-	public void setActivityUser(JsonLightUser activityUser) {
+	public void setActivityUser(IJsonLightUser activityUser) {
 		this.activityUser = activityUser;
 	}
 

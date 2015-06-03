@@ -16,9 +16,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.nextep.activities.model.Activity;
 import com.nextep.geo.model.Place;
+import com.nextep.json.model.IJsonLightUser;
 import com.nextep.json.model.impl.JsonActivity;
 import com.nextep.json.model.impl.JsonLightPlace;
-import com.nextep.json.model.impl.JsonLightUser;
 import com.nextep.media.model.Media;
 import com.nextep.proto.action.base.AbstractAction;
 import com.nextep.proto.action.model.JsonProvider;
@@ -158,7 +158,7 @@ public class MobileNearbyActivitiesGroupedAction extends AbstractAction
 
 			// Converting to JsonUser if User
 			if (object instanceof User) {
-				final JsonLightUser jsonUser = jsonBuilder.buildJsonLightUser(
+				final IJsonLightUser jsonUser = jsonBuilder.buildJsonLightUser(
 						(User) object, highRes, l);
 				jsonActivity.setUser(jsonUser);
 			} else if (object instanceof Place) {
