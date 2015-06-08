@@ -104,6 +104,10 @@ public class MobileBannerUpdatePaymentAction extends AbstractAction implements
 		// Validating receipt with apple and getting JSON back
 		final Map<String, Object> receipt = bannerDisplayService
 				.validateAppleReceipt(appStoreReceipt);
+		if (receipt == null) {
+			setErrorMessage("Invalid payment receipt confirmation received from App Store");
+			return ERROR;
+		}
 		final List<Map<String, Object>> inAppPurchases = (List<Map<String, Object>>) receipt
 				.get("in_app");
 

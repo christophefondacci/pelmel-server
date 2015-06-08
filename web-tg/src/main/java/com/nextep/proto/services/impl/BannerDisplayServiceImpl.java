@@ -128,9 +128,20 @@ public class BannerDisplayServiceImpl implements BannerDisplayService {
 		return new AsyncResult<Boolean>(true);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public Map<String, Object> validateAppleReceipt(String receipt) {
+		// Always trying production first
+		Map<String, Object> jsonReceipt = validateAppleReceipt(receipt, true);
+		// Then sandbox
+		if (jsonReceipt == null) {
+			jsonReceipt = validateAppleReceipt(receipt, false);
+		}
+		return jsonReceipt;
+	}
+
+	@SuppressWarnings("unchecked")
+	private Map<String, Object> validateAppleReceipt(String receipt,
+			boolean production) {
 		final String json = "{\"receipt-data\":\"" + receipt + "\"}";
 		final String url = production ? URL_PAYMENT_PRODUCTION
 				: URL_PAYMENT_SANDBOX;
@@ -166,7 +177,8 @@ public class BannerDisplayServiceImpl implements BannerDisplayService {
 			if (status.intValue() == 0) {
 				LOGGER.info("RECEIPT success");
 			} else {
-				LOGGER.error("RECEIPT error");
+				LOGGER.error("RECEIPT error status " + status);
+				return null;
 			}
 			return (Map<String, Object>) obj.get("receipt");
 		} catch (IOException e) {

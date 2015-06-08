@@ -174,8 +174,8 @@ public class MobileCheckInAction extends AbstractAction implements JsonProvider 
 			jsonResponse.setNewPlaceKey(checkedInPlace.getKey().toString());
 			final PaginationInfo paginationInfo = response
 					.getPaginationInfo(APIS_ALIAS_USER_CHECKEDIN);
-			jsonResponse
-					.setNewPlaceUsersCount(paginationInfo.getItemCount() + 1);
+			jsonResponse.setNewPlaceUsersCount(paginationInfo.getItemCount()
+					+ (checkout ? -1 : 1));
 		}
 		return JSONObject.fromObject(jsonResponse).toString();
 	}
