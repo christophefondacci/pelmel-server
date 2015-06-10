@@ -375,4 +375,28 @@ public class UsersDaoImpl extends AbstractCalDao<User> implements UsersDao,
 	public int getListItemsCount(RequestType requestType) {
 		return getCount();
 	}
+
+	@SuppressWarnings({ "unchecked" })
+	@Override
+	public List<User> getUsersBeforeLoginDate(Date lastLoginMaxDate,
+			boolean oldestFirst, int pageSize, int pageOffset) {
+
+		List<User> users = entityManager
+				.createQuery(
+						"from UserImpl where onlineTimeout<:lastLoginMaxDate order by onlineTimeout "
+								+ (oldestFirst ? "ASC" : "DESC"))
+				.setParameter("lastLoginMaxDate", lastLoginMaxDate)
+				.setMaxResults(pageSize).setFirstResult(pageSize * pageOffset)
+				.getResultList();
+		return users;
+	}
+
+	@Override
+	public long getUsersCountBeforeLoginDate(Date lastLoginMaxDate) {
+		return ((Number) entityManager
+				.createQuery(
+						"UserImpl.findAllCount where onlineTimeout<:lastLoginMaxDate")
+				.setParameter("lastLoginMaxDate", lastLoginMaxDate)
+				.getSingleResult()).longValue();
+	}
 }

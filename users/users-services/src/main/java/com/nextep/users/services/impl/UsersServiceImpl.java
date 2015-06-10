@@ -14,15 +14,19 @@ import com.nextep.users.dao.UsersDao;
 import com.nextep.users.model.MutableUser;
 import com.nextep.users.model.PushProvider;
 import com.nextep.users.model.User;
+import com.nextep.users.model.UserLastLoginRequestType;
 import com.nextep.users.model.impl.UserImpl;
 import com.nextep.users.services.UsersService;
 import com.videopolis.calm.exception.CalException;
 import com.videopolis.calm.helper.Assert;
 import com.videopolis.calm.model.CalmObject;
 import com.videopolis.calm.model.ItemKey;
+import com.videopolis.calm.model.RequestType;
 import com.videopolis.cals.model.CalContext;
 import com.videopolis.cals.model.ItemsResponse;
 import com.videopolis.cals.model.PaginatedItemsResponse;
+import com.videopolis.cals.model.PaginationRequestSettings;
+import com.videopolis.cals.model.RequestSettings;
 import com.videopolis.cals.model.impl.ItemsResponseImpl;
 import com.videopolis.cals.model.impl.PaginatedItemsResponseImpl;
 
@@ -180,6 +184,37 @@ public class UsersServiceImpl extends AbstractDaoBasedCalServiceImpl implements
 		int pagesMod = usersCount % resultsPerPage;
 		response.setPageCount(pages + (pagesMod > 0 ? 1 : 0));
 		return response;
+	}
+
+	@Override
+	public ItemsResponse listItems(CalContext context, RequestType requestType,
+			RequestSettings requestSettings) throws CalException {
+		if (requestType instanceof UserLastLoginRequestType) {
+			UserLastLoginRequestType rType = (UserLastLoginRequestType) requestType;
+
+			// Converting days without login into date
+			final int days = rType.getDaysWithoutLogin();
+			final Date lastLoginDate = new Date(System.currentTimeMillis()
+					- (days * 24 * 60 * 60 * 1000));
+
+			// Extracting paging info
+			int pageNumber = 0;
+			int pageSize = 100; // Default page size
+			if (requestSettings instanceof PaginationRequestSettings) {
+				pageNumber = ((PaginationRequestSettings) requestSettings)
+						.getPageNumber();
+				pageSize = ((PaginationRequestSettings) requestSettings)
+						.getResultsPerPage();
+			}
+
+			// Querying DAO
+			UsersDao dao = (UsersDao) getCalDao();
+			final List<User> users = dao.getUsersBeforeLoginDate(lastLoginDate,
+					rType.isOldestFirst(), pageSize, pageNumber);
+
+		}
+		// TODO Auto-generated method stub
+		return super.listItems(context, requestType, requestSettings);
 	}
 
 	public void setConnectionTimeoutInMinutes(int connectionTimeoutInMinutes) {

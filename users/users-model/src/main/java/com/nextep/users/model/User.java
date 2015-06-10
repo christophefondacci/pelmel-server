@@ -159,4 +159,11 @@ public interface User extends CalmObject, Localized {
 	 * @return the user's device information
 	 */
 	String getDeviceInfo();
+
+	/**
+	 * Provides the last time when we sent an email to that user.
+	 * 
+	 * @return the last date when we sent an email to that user
+	 */
+	Date getLastEmailDate();
 }

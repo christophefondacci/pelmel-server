@@ -136,4 +136,27 @@ public interface UsersDao {
 	List<User> getUsersFor(ItemKey itemKey, int pageSize, int pageOffset);
 
 	int getUsersForCount(ItemKey itemKey);
+
+	/**
+	 * Lists all users whose last login date is older than the provided one.
+	 * 
+	 * @param lastLoginMaxDate
+	 *            the maximum last login date. Any user that has not logged in
+	 *            after this date will be returned
+	 * @param oldestFirst
+	 *            whether users with oldest last login date should be returned
+	 *            first or last
+	 * @return the list of corresponding {@link User}
+	 */
+	List<User> getUsersBeforeLoginDate(Date lastLoginMaxDate,
+			boolean oldestFirst, int pageSize, int pageOffset);
+
+	/**
+	 * Get the number of users who have not logged in after the given date
+	 * 
+	 * @param lastLoginMaxDate
+	 *            the max last login date
+	 * @return the number of users who have not logged in since
+	 */
+	long getUsersCountBeforeLoginDate(Date lastLoginMaxDate);
 }

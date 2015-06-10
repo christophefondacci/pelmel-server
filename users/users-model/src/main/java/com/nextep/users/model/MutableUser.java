@@ -41,4 +41,6 @@ public interface MutableUser extends User {
 	void setStatLocationKey(ItemKey locationKey);
 
 	void setDeviceInfo(String deviceInfo);
+
+	void setLastEmailDate(Date lastEmailDate);
 }

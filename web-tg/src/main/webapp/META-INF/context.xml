@@ -67,7 +67,7 @@
 	<Environment name="mobile/nearbyPlacesRadius" type="java.lang.Double"
 		value="40" />
 	<Environment name="mobile/nearbyCitiesRadius" type="java.lang.Double"
-		value="100" />
+		value="200" />
 	<Environment name="mobile/nearbyPlacesCount" type="java.lang.Integer"
 		value="150" />
 	<Environment name="mobile/nearbyUsersCount" type="java.lang.Integer"
@@ -125,7 +125,9 @@
 	<Environment name="notification.email" type="java.lang.String" value="cfondacci@gmail.com christophet49@gmail.com"/>
 	<Environment name="notification.enabled" type="java.lang.Boolean" value="true"/>
 	<Environment name="smtpHostName" type="java.lang.String" value="smtp.pelmelguide.com"/>
-	<Environment name="smtpAuthUser" type="java.lang.String" value="christophe@pelmelguide.com"/>
+<!-- 	<Environment name="smtpAuthUser" type="java.lang.String" value="christophe@pelmelguide.com"/> -->
+<!-- 	<Environment name="smtpAuthPassword" type="java.lang.String" value="tdk;1558"/> -->
+	<Environment name="smtpAuthUser" type="java.lang.String" value="cfondacci"/>
 	<Environment name="smtpAuthPassword" type="java.lang.String" value="tdk;1558"/>
 	<Environment name="smtpAuthPort" type="java.lang.Integer" value="587"/>
 

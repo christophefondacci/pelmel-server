@@ -42,9 +42,6 @@ public class UserImpl extends AbstractCalmObject implements User, MutableUser {
 	@Column(name = "CREDITS_COUNT")
 	private int credits = 0;
 
-	@Column(name = "USER_STATUS")
-	private String status;
-
 	@Column(name = "BIRTHDAY")
 	private Date birthday = new Date();
 
@@ -90,6 +87,8 @@ public class UserImpl extends AbstractCalmObject implements User, MutableUser {
 	@Column(name = "DEVICE_INFO")
 	private String deviceInfo;
 
+	@Column(name = "EMAIL_LAST_DATE")
+	private Date lastEmailDate;
 	/**
 	 * 
 	 */
@@ -172,12 +171,11 @@ public class UserImpl extends AbstractCalmObject implements User, MutableUser {
 
 	@Override
 	public String getStatusMessage() {
-		return status;
+		return null;
 	}
 
 	@Override
 	public void setStatus(String status) {
-		this.status = status;
 	}
 
 	@Override
@@ -384,5 +382,15 @@ public class UserImpl extends AbstractCalmObject implements User, MutableUser {
 	@Override
 	public String getDeviceInfo() {
 		return deviceInfo;
+	}
+
+	@Override
+	public void setLastEmailDate(Date lastEmailDate) {
+		this.lastEmailDate = lastEmailDate;
+	}
+
+	@Override
+	public Date getLastEmailDate() {
+		return lastEmailDate;
 	}
 }

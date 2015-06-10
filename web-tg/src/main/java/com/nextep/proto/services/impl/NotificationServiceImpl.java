@@ -8,20 +8,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Properties;
 import java.util.TimeZone;
 import java.util.concurrent.Future;
 
 import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
-import javax.mail.Authenticator;
-import javax.mail.Message;
-import javax.mail.MessagingException;
 import javax.mail.PasswordAuthentication;
-import javax.mail.Session;
-import javax.mail.Transport;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -51,6 +43,10 @@ import com.nextep.users.model.User;
 import com.notnoop.apns.APNS;
 import com.notnoop.apns.ApnsService;
 import com.notnoop.apns.ApnsServiceBuilder;
+import com.sendgrid.SendGrid;
+import com.sendgrid.SendGrid.Email;
+import com.sendgrid.SendGrid.Response;
+import com.sendgrid.SendGridException;
 import com.videopolis.apis.exception.ApisException;
 import com.videopolis.apis.factory.ApisFactory;
 import com.videopolis.apis.factory.SearchRestriction;
@@ -98,6 +94,7 @@ public class NotificationServiceImpl implements NotificationService {
 	private EventManagementService eventManagementService;
 
 	private ApnsService apnsService;
+	private SendGrid sendgrid;
 
 	// Push information
 	private String pushKeyPath;
@@ -120,6 +117,8 @@ public class NotificationServiceImpl implements NotificationService {
 				apnsService = builder.withSandboxDestination().build();
 			}
 		}
+		// Initializing sendgrid client
+		sendgrid = new SendGrid(smtpAuthUser, smtpAuthPassword);
 	}
 
 	@PreDestroy
@@ -211,43 +210,59 @@ public class NotificationServiceImpl implements NotificationService {
 				|| !emailEnabled) {
 			return;
 		}
+		Email sendgridEmail = new Email();
+
+		// Properties props = new Properties();
+		// props.put("mail.transport.protocol", "smtp");
+		// props.put("mail.smtp.auth", "true");
+
+		// Authenticator auth = new SMTPAuthenticator();
+		// Session mailSession = Session.getDefaultInstance(props, auth);
+		// Transport transport = mailSession.getTransport();
+		//
+		// MimeMessage message = new MimeMessage(mailSession);
+
+		// message.setContent(html, "text/html");
+		// message.setFrom(new InternetAddress("no-reply@pelmelguide.com"));
+		// message.setSubject(title);
+		sendgridEmail.setHtml(html);
+		sendgridEmail.setFrom("no-reply@pelmelguide.com");
+		sendgridEmail.setTemplateId("43c9d208-8167-48f8-bc90-0edc03575c5f");
+		sendgridEmail.setSubject(title);
+		String[] emails = toAddress.split(" ");
+		sendgridEmail.addTo(emails);
+		// for (String email : emails) {
+		// message.addRecipient(Message.RecipientType.TO,
+		// new InternetAddress(email));
+		// }
+		emails = bccAddress.split(" ");
+		sendgridEmail.addBcc(emails);
+		// for (String email : emails) {
+		// try {
+		// message.addRecipient(Message.RecipientType.BCC,
+		// new InternetAddress(email));
+		// } catch (MessagingException e) {
+		// LOGGER.error("Unable to add recepient to email: " + email
+		// + " reason '" + e.getMessage() + "'", e);
+		// }
+		// }
+
+		// Sends the email
+		// transport.connect(smtpHostName, smtpPort, smtpAuthUser,
+		// smtpAuthPassword);
+		// transport.sendMessage(message, message.getAllRecipients());
+		// transport.close();
 		try {
-			Properties props = new Properties();
-			props.put("mail.transport.protocol", "smtp");
-			props.put("mail.smtp.auth", "true");
 
-			Authenticator auth = new SMTPAuthenticator();
-			Session mailSession = Session.getDefaultInstance(props, auth);
-			Transport transport = mailSession.getTransport();
-
-			MimeMessage message = new MimeMessage(mailSession);
-
-			message.setContent(html, "text/html");
-			message.setFrom(new InternetAddress("no-reply@pelmelguide.com"));
-			message.setSubject(title);
-			String[] emails = toAddress.split(" ");
-			for (String email : emails) {
-				message.addRecipient(Message.RecipientType.TO,
-						new InternetAddress(email));
+			Response response = sendgrid.send(sendgridEmail);
+			if (response.getStatus()) {
+				LOGGER.info("SUCCESS: Sent email notification");
+			} else {
+				LOGGER.error("ERROR: Unable to send email - error #"
+						+ response.getCode() + " '" + response.getMessage()
+						+ "'");
 			}
-			emails = bccAddress.split(" ");
-			for (String email : emails) {
-				try {
-					message.addRecipient(Message.RecipientType.BCC,
-							new InternetAddress(email));
-				} catch (MessagingException e) {
-					LOGGER.error("Unable to add recepient to email: " + email
-							+ " reason '" + e.getMessage() + "'", e);
-				}
-			}
-
-			// Sends the email
-			transport.connect(smtpHostName, smtpPort, smtpAuthUser,
-					smtpAuthPassword);
-			transport.sendMessage(message, message.getAllRecipients());
-			transport.close();
-			LOGGER.info("SUCCESS: Sent email notification");
-		} catch (MessagingException e) {
+		} catch (SendGridException e) {
 			LOGGER.error(
 					"Unable to send email notification: " + e.getMessage(), e);
 		}
@@ -553,7 +568,7 @@ public class NotificationServiceImpl implements NotificationService {
 	private void fillEmailFooterFor(StringBuilder buf, CalmObject object,
 			User user) {
 		buf.append("<br>");
-		buf.append("<span style=\"float:right;padding-top:10px;padding-bottom:10px;\">The PELMEL server ;)</span>");
+		// buf.append("<span style=\"float:right;padding-top:10px;padding-bottom:10px;\">The PELMEL server ;)</span>");
 	}
 
 	@Override
