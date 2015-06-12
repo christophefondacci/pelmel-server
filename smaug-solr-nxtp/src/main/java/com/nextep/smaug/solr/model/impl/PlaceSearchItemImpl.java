@@ -16,10 +16,6 @@ public class PlaceSearchItemImpl extends SearchItemImpl {
 	@Field
 	private String placeType;
 	@Field
-	private Double lat;
-	@Field
-	private Double lng;
-	@Field
 	private final List<String> amenities = new ArrayList<String>();
 	@Field
 	private int seoIndexed;
@@ -32,14 +28,6 @@ public class PlaceSearchItemImpl extends SearchItemImpl {
 
 	public void setPlaceType(String placeType) {
 		this.placeType = placeType;
-	}
-
-	public void setLat(Double lat) {
-		this.lat = lat;
-	}
-
-	public void setLng(Double lng) {
-		this.lng = lng;
 	}
 
 	public void addAmenity(String amenity) {

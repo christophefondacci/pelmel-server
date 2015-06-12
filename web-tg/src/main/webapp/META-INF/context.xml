@@ -16,35 +16,35 @@
 
 	<!-- Locally deployed Solr slave instances -->
 	<Environment name="smaug/usersSolrServer" type="java.lang.String"
-		value="http://127.0.0.1:8983/solr-users/users/" />
+		value="http://127.0.0.1:8983/solr/users/" />
 	<Environment name="smaug/placesSolrServer" type="java.lang.String"
-		value="http://127.0.0.1:8983/solr-geoplaces/geocore/" />
+		value="http://127.0.0.1:8983/solr/places/" />
 	<Environment name="smaug/citiesSolrServer" type="java.lang.String"
-		value="http://127.0.0.1:8983/solr-geocities/geocities/" />
+		value="http://127.0.0.1:8983/solr/cities/" />
 	<Environment name="smaug/eventsSolrServer" type="java.lang.String"
-		value="http://127.0.0.1:8983/solr-events/events/" />
+		value="http://127.0.0.1:8983/solr/events/" />
 	<Environment name="smaug/activitiesSolrServer" type="java.lang.String"
-		value="http://127.0.0.1:8983/solr-activities/activities/" />
+		value="http://127.0.0.1:8983/solr/activities/" />
 	<Environment name="smaug/suggestSolrServer" type="java.lang.String"
-		value="http://127.0.0.1:8983/solr-suggest/suggest/" />
+		value="http://127.0.0.1:8983/solr/suggest/" />
 	<Environment name="smaug/bannersSolrServer" type="java.lang.String"
-		value="http://127.0.0.1:8983/solr-banners/banners/" />
+		value="http://127.0.0.1:8983/solr/banners/" />
 		
 	<!-- Solr Master servers for write -->
 	<Environment name="smaug/masterUsersSolrServer" type="java.lang.String"
-		value="http://127.0.0.1:8983/solr-users/users/" />
+		value="http://127.0.0.1:8983/solr/users/" />
 	<Environment name="smaug/masterPlacesSolrServer" type="java.lang.String"
-		value="http://127.0.0.1:8983/solr-geoplaces/geocore/" />
+		value="http://127.0.0.1:8983/solr/places/" />
 	<Environment name="smaug/masterCitiesSolrServer" type="java.lang.String"
-		value="http://127.0.0.1:8983/solr-geocities/geocities/" />
+		value="http://127.0.0.1:8983/solr/cities/" />
 	<Environment name="smaug/masterEventsSolrServer" type="java.lang.String"
-		value="http://127.0.0.1:8983/solr-events/events/" />
+		value="http://127.0.0.1:8983/solr/events/" />
 	<Environment name="smaug/masterActivitiesSolrServer" type="java.lang.String"
-		value="http://127.0.0.1:8983/solr-activities/activities/" />
+		value="http://127.0.0.1:8983/solr/activities/" />
 	<Environment name="smaug/masterSuggestSolrServer" type="java.lang.String"
-		value="http://127.0.0.1:8983/solr-suggest/suggest/" />
+		value="http://127.0.0.1:8983/solr/suggest/" />
 	<Environment name="smaug/masterBannersSolrServer" type="java.lang.String"
-		value="http://127.0.0.1:8983/solr-banners/banners/" />
+		value="http://127.0.0.1:8983/solr/banners/" />
 		
 	<Environment name="smaug/lastSeenMaxTime" type="java.lang.Long"
 		value="12000000" />	
@@ -72,8 +72,10 @@
 		value="150" />
 	<Environment name="mobile/nearbyUsersCount" type="java.lang.Integer"
 		value="100" />
+	<Environment name="mobile/activityPageSize" type="java.lang.Integer"
+		value="102" />
 	<Environment name="mobile/maxActivityTimeMs" type="java.lang.Long"
-		value="604800000" />
+		value="24192000000" />
 	<Environment name="mobile/maxCreationActivityTimeMs" type="java.lang.Long"
 		value="24192000000" />
 	<Environment name="minCityPopulationForIndexation" type="java.lang.Integer"

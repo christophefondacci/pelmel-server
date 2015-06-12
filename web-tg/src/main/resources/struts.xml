@@ -658,7 +658,7 @@
 		<action name="refreshEventSeries" class="refreshEventSeriesAction">
 			<result>/jsp/tools/messages.jsp</result>
 		</action>
-		<action name="reindexUsers" class="reindexUsersAction">
+		<action name="indexUsers" class="reindexUsersAction">
 			<result>/jsp/tools/messages.jsp</result>
 		</action>
 		<action name="indexEvents" class="indexEventsAction">
@@ -674,6 +674,9 @@
 			<result>/jsp/tools/messages.jsp</result>
 		</action>
 		<action name="indexActivities" class="indexActivitiesAction">
+			<result>/jsp/tools/messages.jsp</result>
+		</action>
+		<action name="indexBanners" class="indexBannersAction">
 			<result>/jsp/tools/messages.jsp</result>
 		</action>
 		<action name="indexGeoCities" class="indexGeoCitiesAction">

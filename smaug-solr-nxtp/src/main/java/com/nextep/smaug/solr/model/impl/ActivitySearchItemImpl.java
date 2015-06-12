@@ -26,12 +26,6 @@ public class ActivitySearchItemImpl extends SearchItemImpl {
 	private String userKey;
 
 	@Field
-	private Double lat;
-
-	@Field
-	private Double lng;
-
-	@Field
 	private String activityType;
 
 	public void setActivityDate(Date activityDate) {
@@ -56,22 +50,6 @@ public class ActivitySearchItemImpl extends SearchItemImpl {
 
 	public void setUserKey(String userKey) {
 		this.userKey = userKey;
-	}
-
-	public Double getLat() {
-		return lat;
-	}
-
-	public void setLat(Double lat) {
-		this.lat = lat;
-	}
-
-	public Double getLng() {
-		return lng;
-	}
-
-	public void setLng(Double lng) {
-		this.lng = lng;
 	}
 
 	public void setActivityType(String activityType) {

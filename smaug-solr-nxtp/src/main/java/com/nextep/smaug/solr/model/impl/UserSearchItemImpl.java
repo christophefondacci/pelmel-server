@@ -25,12 +25,6 @@ public class UserSearchItemImpl extends SearchItemImpl {
 	private long onlineTimeout;
 
 	@Field
-	private Double lat;
-
-	@Field
-	private Double lng;
-
-	@Field
 	private String currentPlace;
 	@Field
 	private String currentAutoPlace;
@@ -115,14 +109,6 @@ public class UserSearchItemImpl extends SearchItemImpl {
 
 	public void setOnlineTimeout(Date date) {
 		this.onlineTimeout = Long.valueOf(DATE_FORMAT.format(date));
-	}
-
-	public void setLat(Double lat) {
-		this.lat = lat;
-	}
-
-	public void setLng(Double lng) {
-		this.lng = lng;
 	}
 
 	public void setCurrentPlace(String currentPlace) {

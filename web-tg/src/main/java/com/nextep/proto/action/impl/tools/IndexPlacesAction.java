@@ -35,7 +35,8 @@ public class IndexPlacesAction extends AbstractAction {
 	private static final long serialVersionUID = 8242078679018166793L;
 	private SearchPersistenceService searchService;
 	private TaskRunnerService taskRunnerService;
-	private List<String> messages = new ArrayList<String>();;
+	private List<String> messages = new ArrayList<String>();
+	private boolean clearPlaces = false;
 
 	@Override
 	protected String doExecute() throws Exception {
@@ -74,9 +75,11 @@ public class IndexPlacesAction extends AbstractAction {
 		final Collection<Place> places = (Collection<Place>) response
 				.getElements();
 		// Now that we have the elements, we can safely remove
-		// TODO remove this for PROD
-		// searchService.removeAll(Place.CAL_TYPE);
 		ContextHolder.toggleWrite();
+		if (clearPlaces) {
+			LOGGER.warn("REMOVING ALL PLACES");
+			searchService.removeAll(Place.CAL_TYPE);
+		}
 		// Reindexing places
 		final int count = places.size();
 		int i = 1;
@@ -104,5 +107,13 @@ public class IndexPlacesAction extends AbstractAction {
 
 	public void setTaskRunnerService(TaskRunnerService taskRunnerService) {
 		this.taskRunnerService = taskRunnerService;
+	}
+
+	public void setClearPlaces(boolean clearPlaces) {
+		this.clearPlaces = clearPlaces;
+	}
+
+	public boolean isClearPlaces() {
+		return clearPlaces;
 	}
 }

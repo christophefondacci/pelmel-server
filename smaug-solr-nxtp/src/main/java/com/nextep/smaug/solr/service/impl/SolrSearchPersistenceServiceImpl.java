@@ -15,10 +15,10 @@ import javax.annotation.Resource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
-import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
-import org.apache.solr.client.solrj.impl.CommonsHttpSolrServer;
+import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.client.solrj.response.QueryResponse;
 
 import com.nextep.activities.model.Activity;
@@ -78,34 +78,33 @@ public class SolrSearchPersistenceServiceImpl implements
 	private String bannersSolrUrl;
 	private String suggestSolrUrl;
 	private String citiesSolrUrl;
-	private CommonsHttpSolrServer userSolrServer;
-	private CommonsHttpSolrServer placesSolrServer;
-	private CommonsHttpSolrServer eventsSolrServer;
-	private CommonsHttpSolrServer activitiesSolrServer;
-	private CommonsHttpSolrServer bannersSolrServer;
-	private CommonsHttpSolrServer suggestSolrServer;
-	private CommonsHttpSolrServer citiesSolrServer;
+	private SolrClient userSolrServer;
+	private SolrClient placesSolrServer;
+	private SolrClient eventsSolrServer;
+	private SolrClient activitiesSolrServer;
+	private SolrClient bannersSolrServer;
+	private SolrClient suggestSolrServer;
+	private SolrClient citiesSolrServer;
 	private long lastSeenMaxTime;
 
 	public void init() throws MalformedURLException {
-		userSolrServer = new CommonsHttpSolrServer(userSolrUrl);
-		placesSolrServer = new CommonsHttpSolrServer(placesSolrUrl);
-		eventsSolrServer = new CommonsHttpSolrServer(eventsSolrUrl);
-		activitiesSolrServer = new CommonsHttpSolrServer(activitiesSolrUrl);
-		bannersSolrServer = new CommonsHttpSolrServer(bannersSolrUrl);
-		suggestSolrServer = new CommonsHttpSolrServer(suggestSolrUrl);
-		citiesSolrServer = new CommonsHttpSolrServer(citiesSolrUrl);
+		userSolrServer = new HttpSolrClient(userSolrUrl);
+		placesSolrServer = new HttpSolrClient(placesSolrUrl);
+		eventsSolrServer = new HttpSolrClient(eventsSolrUrl);
+		activitiesSolrServer = new HttpSolrClient(activitiesSolrUrl);
+		bannersSolrServer = new HttpSolrClient(bannersSolrUrl);
+		suggestSolrServer = new HttpSolrClient(suggestSolrUrl);
+		citiesSolrServer = new HttpSolrClient(citiesSolrUrl);
 	}
 
-	private <T extends SearchItemImpl> T getSearchItem(
-			CommonsHttpSolrServer solrServer, ItemKey itemKey,
-			Class<T> searchClass) {
+	private <T extends SearchItemImpl> T getSearchItem(SolrClient solrServer,
+			ItemKey itemKey, Class<T> searchClass) {
 		// First we fetch user from SOLR
 		final SolrQuery query = new SolrQuery("id:" + itemKey.toString());
 		QueryResponse response = null;
 		try {
 			response = solrServer.query(query);
-		} catch (SolrServerException e) {
+		} catch (SolrServerException | IOException e) {
 			throw new SearchException("Cannot fetch user from SOLR: "
 					+ e.getMessage(), e);
 		}
@@ -275,7 +274,7 @@ public class SolrSearchPersistenceServiceImpl implements
 
 	@Override
 	public void updateRating(ItemKey itemKey, int rating) {
-		CommonsHttpSolrServer server = null;
+		SolrClient server = null;
 		final String itemType = itemKey.getType();
 		if (Place.CAL_TYPE.equals(itemType)) {
 			server = placesSolrServer;
@@ -337,7 +336,7 @@ public class SolrSearchPersistenceServiceImpl implements
 						} catch (CalException e) {
 							log.error("Unable to convert extra info '"
 									+ activity.getExtraInformation()
-									+ "' to itemKey: " + e.getMessage(), e);
+									+ "' to itemKey: " + e.getMessage());
 						}
 					}
 				}
@@ -778,7 +777,7 @@ public class SolrSearchPersistenceServiceImpl implements
 		}
 	}
 
-	private void saveBean(Object item, SolrServer server) {
+	private void saveBean(Object item, SolrClient server) {
 		try {
 			server.addBean(item);
 			server.commit();
@@ -793,11 +792,17 @@ public class SolrSearchPersistenceServiceImpl implements
 
 	@Override
 	public void removeAll(String type) throws SearchException {
-		SolrServer server = null;
+		SolrClient server = null;
 		if (Place.CAL_TYPE.equals(type)) {
 			server = placesSolrServer;
 		} else if (User.CAL_TYPE.equals(type)) {
 			server = userSolrServer;
+		} else if (Activity.CAL_TYPE.equals(type)) {
+			server = activitiesSolrServer;
+		} else if (AdvertisingBanner.CAL_ID.equals(type)) {
+			server = bannersSolrServer;
+		} else if (Event.CAL_ID.equals(type)) {
+			server = eventsSolrServer;
 		}
 		if (server != null) {
 			try {

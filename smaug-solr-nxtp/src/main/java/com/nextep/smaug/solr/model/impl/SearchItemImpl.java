@@ -6,13 +6,15 @@ import java.util.Locale;
 
 import org.apache.solr.client.solrj.beans.Field;
 
+import com.nextep.smaug.solr.model.base.AbstractLocalizedSearchItem;
 import com.videopolis.calm.exception.CalException;
 import com.videopolis.calm.factory.CalmFactory;
 import com.videopolis.calm.model.ItemKey;
 import com.videopolis.smaug.exception.SearchException;
 import com.videopolis.smaug.model.SearchItem;
 
-public class SearchItemImpl implements SearchItem {
+public class SearchItemImpl extends AbstractLocalizedSearchItem implements
+		SearchItem {
 
 	@Field
 	private String id;
@@ -32,8 +34,6 @@ public class SearchItemImpl implements SearchItem {
 	private String adm2;
 	@Field
 	private String cityId;
-	@Field
-	private String geo_distance;
 
 	private String matchedText;
 
@@ -64,7 +64,7 @@ public class SearchItemImpl implements SearchItem {
 	public Number getInfo(String type) {
 		if (SearchItem.DISTANCE.equals(type)
 				|| SearchItem.GEO_DISTANCE.equals(type)) {
-			return Double.valueOf(geo_distance);
+			return getGeodistance();
 		} else {
 			return null;
 		}

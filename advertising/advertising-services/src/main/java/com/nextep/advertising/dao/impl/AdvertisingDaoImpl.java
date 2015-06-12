@@ -1,5 +1,6 @@
 package com.nextep.advertising.dao.impl;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -22,12 +23,14 @@ import com.nextep.advertising.model.AdvertisingBanner;
 import com.nextep.advertising.model.AdvertisingBooster;
 import com.nextep.advertising.model.Payment;
 import com.nextep.cal.util.helpers.CalHelper;
+import com.nextep.cal.util.model.CalDaoExt;
 import com.nextep.cal.util.model.base.AbstractCalDao;
 import com.videopolis.calm.model.CalmObject;
 import com.videopolis.calm.model.ItemKey;
+import com.videopolis.calm.model.RequestType;
 
 public class AdvertisingDaoImpl extends AbstractCalDao<CalmObject> implements
-		AdvertisingDao {
+		AdvertisingDao, CalDaoExt<CalmObject> {
 
 	private static final Log LOGGER = LogFactory
 			.getLog(AdvertisingDaoImpl.class);
@@ -188,5 +191,30 @@ public class AdvertisingDaoImpl extends AbstractCalDao<CalmObject> implements
 		} else {
 			return Collections.emptyList();
 		}
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<CalmObject> listItems(RequestType requestType,
+			Integer pageSize, Integer pageOffset) {
+
+		List<CalmObject> banners = entityManager
+				.createQuery("from AdvertisingBannerImpl")
+				.setMaxResults(pageSize).setFirstResult(pageOffset * pageSize)
+				.getResultList();
+
+		return banners;
+	}
+
+	@Override
+	public int getCount() {
+		final BigInteger count = (BigInteger) entityManager.createNativeQuery(
+				"select count(1) from ADS_BANNERS").getSingleResult();
+		return count.intValue();
+	}
+
+	@Override
+	public int getListItemsCount(RequestType requestType) {
+		return getCount();
 	}
 }

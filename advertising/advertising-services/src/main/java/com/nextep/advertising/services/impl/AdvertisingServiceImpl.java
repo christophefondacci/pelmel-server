@@ -16,7 +16,9 @@ import com.videopolis.calm.model.ItemKey;
 import com.videopolis.calm.model.RequestType;
 import com.videopolis.cals.exception.UnsupportedCalServiceException;
 import com.videopolis.cals.model.CalContext;
+import com.videopolis.cals.model.ItemsResponse;
 import com.videopolis.cals.model.MultiKeyItemsResponse;
+import com.videopolis.cals.model.RequestSettings;
 import com.videopolis.cals.model.impl.MultiKeyItemsResponseImpl;
 
 public class AdvertisingServiceImpl extends AbstractDaoBasedCalServiceImpl
@@ -72,4 +74,10 @@ public class AdvertisingServiceImpl extends AbstractDaoBasedCalServiceImpl
 		return response;
 	}
 
+	@Override
+	public ItemsResponse listItems(CalContext context, RequestType requestType,
+			RequestSettings requestSettings) throws CalException {
+		throw new UnsupportedCalServiceException(
+				"Unsupported AdvertisingService.list");
+	}
 }

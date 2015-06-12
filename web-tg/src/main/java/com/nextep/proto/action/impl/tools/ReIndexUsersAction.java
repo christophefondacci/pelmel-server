@@ -35,6 +35,7 @@ public class ReIndexUsersAction extends AbstractAction {
 	private SearchPersistenceService searchPersistenceService;
 	private TaskRunnerService taskRunnerService;
 	private List<String> messages = new ArrayList<String>();
+	private boolean clearUsers = false;
 
 	@Override
 	protected String doExecute() throws Exception {
@@ -74,7 +75,10 @@ public class ReIndexUsersAction extends AbstractAction {
 		final ApiResponse response = getApiService().execute(request,
 				ContextFactory.createContext(getLocale()));
 		// Removing all previous users
-		searchPersistenceService.removeAll(User.CAL_TYPE);
+		if (clearUsers) {
+			LOGGER.warn("REMOVING ALL USERS");
+			searchPersistenceService.removeAll(User.CAL_TYPE);
+		}
 		// Reindexing everything
 		final List<User> users = (List<User>) response.getElements();
 		for (User u : users) {
@@ -106,5 +110,13 @@ public class ReIndexUsersAction extends AbstractAction {
 
 	public void setTaskRunnerService(TaskRunnerService taskRunnerService) {
 		this.taskRunnerService = taskRunnerService;
+	}
+
+	public void setClearUsers(boolean clearUsers) {
+		this.clearUsers = clearUsers;
+	}
+
+	public boolean isClearUsers() {
+		return clearUsers;
 	}
 }

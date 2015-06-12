@@ -4,13 +4,15 @@ import java.util.Locale;
 
 import org.apache.solr.client.solrj.beans.Field;
 
+import com.nextep.smaug.solr.model.base.AbstractLocalizedSearchItem;
 import com.videopolis.calm.exception.CalException;
 import com.videopolis.calm.factory.CalmFactory;
 import com.videopolis.calm.model.ItemKey;
 import com.videopolis.smaug.exception.SearchException;
 import com.videopolis.smaug.model.SearchItem;
 
-public class BannerSearchItemImpl implements SearchItem {
+public class BannerSearchItemImpl extends AbstractLocalizedSearchItem implements
+		SearchItem {
 
 	@Field
 	private String id;
@@ -18,10 +20,6 @@ public class BannerSearchItemImpl implements SearchItem {
 	private String ownerItemKey;
 	@Field
 	private String targetItemKey;
-	@Field
-	private Double lat;
-	@Field
-	private Double lng;
 
 	private String matchedText;
 
@@ -71,14 +69,6 @@ public class BannerSearchItemImpl implements SearchItem {
 	public void setTargetItemKey(ItemKey targetItemKey) {
 		this.targetItemKey = targetItemKey == null ? null : targetItemKey
 				.toString();
-	}
-
-	public void setLat(Double lat) {
-		this.lat = lat;
-	}
-
-	public void setLng(Double lng) {
-		this.lng = lng;
 	}
 
 }

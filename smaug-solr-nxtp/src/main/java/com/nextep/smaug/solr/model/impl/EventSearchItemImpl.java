@@ -20,12 +20,6 @@ public class EventSearchItemImpl extends SearchItemImpl {
 	@Field
 	private String end_date;
 
-	@Field
-	private Double lat;
-
-	@Field
-	private Double lng;
-
 	public void setPlaceId(String placeId) {
 		this.placeId = placeId;
 	}
@@ -49,11 +43,4 @@ public class EventSearchItemImpl extends SearchItemImpl {
 		}
 	}
 
-	public void setLat(Double lat) {
-		this.lat = lat;
-	}
-
-	public void setLng(Double lng) {
-		this.lng = lng;
-	}
 }

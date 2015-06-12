@@ -68,7 +68,8 @@ public class MobileNearbyActivitiesGroupedAction extends AbstractAction
 	private double lat;
 	private double lng;
 	private int page = 0;
-	private int pageSize = 30;
+	@Resource(mappedName = "mobile/activityPageSize")
+	private Integer pageSize;
 	private boolean highRes;
 
 	// Internal variables

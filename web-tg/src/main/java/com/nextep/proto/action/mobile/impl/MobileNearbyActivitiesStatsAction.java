@@ -225,6 +225,10 @@ public class MobileNearbyActivitiesStatsAction extends AbstractAction implements
 			placesFacetsMap.remove(ActivityType.CREATION.getCode());
 			placesFacetsMap.remove(ActivityType.CHECKOUT.getCode());
 			placesFacetsMap.remove(ActivityType.UPDATE.getCode());
+			placesFacetsMap.remove(ActivityType.DELETION.getCode());
+			placesFacetsMap.remove(ActivityType.REMOVAL_REQUESTED.getCode());
+			placesFacetsMap.remove(ActivityType.SEO_OPEN.getCode());
+			placesFacetsMap.remove(ActivityType.UNLIKE.getCode());
 			fillJsonStats(jsonActivityStats, Place.CAL_TYPE, placesFacetsMap,
 					placesActivities);
 
@@ -232,6 +236,7 @@ public class MobileNearbyActivitiesStatsAction extends AbstractAction implements
 			final Map<String, Integer> eventsFacetsMap = SearchHelper
 					.unwrapFacets(eventsFacetInfo, category);
 			eventsFacetsMap.remove(ActivityType.DELETION.getCode());
+			eventsFacetsMap.remove(ActivityType.REMOVAL_REQUESTED.getCode());
 			eventsFacetsMap.remove(ActivityType.CREATION.getCode());
 			fillJsonStats(jsonActivityStats, Event.CAL_ID, eventsFacetsMap,
 					eventsActivities);
@@ -247,6 +252,8 @@ public class MobileNearbyActivitiesStatsAction extends AbstractAction implements
 					.unwrapFacets(usersFacetInfo, category);
 			usersFacetsMap.remove(ActivityType.CREATION.getCode());
 			usersFacetsMap.remove(ActivityType.DELETION.getCode());
+			usersFacetsMap.remove(ActivityType.UNLIKE.getCode());
+			usersFacetsMap.remove(ActivityType.CHECKIN.getCode());
 			fillJsonStats(jsonActivityStats, User.CAL_TYPE, usersFacetsMap,
 					usersActivities);
 

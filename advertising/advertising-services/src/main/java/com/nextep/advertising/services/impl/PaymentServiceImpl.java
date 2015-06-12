@@ -11,10 +11,12 @@ import com.nextep.cal.util.services.CalPersistenceService;
 import com.videopolis.calm.exception.CalException;
 import com.videopolis.calm.model.CalmObject;
 import com.videopolis.calm.model.ItemKey;
+import com.videopolis.calm.model.RequestType;
 import com.videopolis.cals.exception.UnsupportedCalServiceException;
 import com.videopolis.cals.model.CalContext;
 import com.videopolis.cals.model.ItemsResponse;
 import com.videopolis.cals.model.PaginatedItemsResponse;
+import com.videopolis.cals.model.RequestSettings;
 import com.videopolis.cals.model.impl.ItemsResponseImpl;
 import com.videopolis.cals.service.base.AbstractCalService;
 
@@ -80,5 +82,12 @@ public class PaymentServiceImpl extends AbstractCalService implements
 
 	public void setDao(AdvertisingDao dao) {
 		this.dao = dao;
+	}
+
+	@Override
+	public ItemsResponse listItems(CalContext context, RequestType requestType,
+			RequestSettings requestSettings) throws CalException {
+		throw new UnsupportedCalServiceException(
+				"Unsupported PaymentService.list");
 	}
 }

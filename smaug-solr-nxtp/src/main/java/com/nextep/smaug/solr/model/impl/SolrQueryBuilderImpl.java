@@ -199,9 +199,10 @@ public class SolrQueryBuilderImpl implements QueryBuilder {
 					}
 					facetBuf.append(")");
 					facetQueries.add(facetBuf.toString());
+					solrQuery.addFilterQuery(facetBuf.toString());
 				}
-				solrQuery.setFilterQueries(facetQueries
-						.toArray(new String[facetQueries.size()]));
+				// solrQuery.setFilterQueries(facetQueries
+				// .toArray(new String[facetQueries.size()]));
 			}
 		}
 	}
@@ -275,7 +276,7 @@ public class SolrQueryBuilderImpl implements QueryBuilder {
 			solrOrder = sorter.getOrder() == Sorter.Order.ASCENDING ? SolrQuery.ORDER.asc
 					: SolrQuery.ORDER.desc;
 
-			solrQuery.addSortField(sorter.getCriterion(), solrOrder);
+			solrQuery.addSort(sorter.getCriterion(), solrOrder);
 		}
 
 	}

@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.nextep.activities.model.Activity;
+import com.nextep.advertising.model.AdvertisingBanner;
 import com.nextep.advertising.model.AdvertisingBooster;
 import com.nextep.events.model.Event;
 import com.nextep.geo.model.GeographicItem;
@@ -58,24 +59,27 @@ public class RightsManagementServiceImpl implements RightsManagementService {
 	private ItemKey getOwnerKey(CalmObject object) {
 		if (object == null) {
 			return null;
-		}
-		// Retrieving existing boosters
-		final List<? extends AdvertisingBooster> boosters = object
-				.get(AdvertisingBooster.class);
-		// Getting current time
-		final long currentTime = System.currentTimeMillis();
-		// For all defined boosters
-		for (AdvertisingBooster booster : boosters) {
-			// If the booster is active (=current time is inside the booster
-			// period)
-			if (booster.getStartDate().getTime() <= currentTime
-					&& booster.getEndDate().getTime() > currentTime) {
-				// We return the purchaser key
-				return booster.getPurchaserItemKey();
+		} else if (object instanceof AdvertisingBanner) {
+			return ((AdvertisingBanner) object).getOwnerItemKey();
+		} else {
+			// Retrieving existing boosters
+			final List<? extends AdvertisingBooster> boosters = object
+					.get(AdvertisingBooster.class);
+			// Getting current time
+			final long currentTime = System.currentTimeMillis();
+			// For all defined boosters
+			for (AdvertisingBooster booster : boosters) {
+				// If the booster is active (=current time is inside the booster
+				// period)
+				if (booster.getStartDate().getTime() <= currentTime
+						&& booster.getEndDate().getTime() > currentTime) {
+					// We return the purchaser key
+					return booster.getPurchaserItemKey();
+				}
 			}
+			// We end up here if no booster conflicts, so it is not locked
+			return null;
 		}
-		// We end up here if no booster conflicts, so it is not locked
-		return null;
 	}
 
 	@Override
@@ -92,7 +96,7 @@ public class RightsManagementServiceImpl implements RightsManagementService {
 				&& !(object instanceof Place)) {
 			return isAdministrator(user);
 		} else {
-			return ownerKey == null;
+			return ownerKey == null || isAdministrator(user);
 		}
 	}
 

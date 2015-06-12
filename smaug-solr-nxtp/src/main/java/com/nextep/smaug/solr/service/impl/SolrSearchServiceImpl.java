@@ -1,5 +1,6 @@
 package com.nextep.smaug.solr.service.impl;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -16,11 +17,11 @@ import javax.annotation.Resource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrQuery.ORDER;
-import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
-import org.apache.solr.client.solrj.impl.CommonsHttpSolrServer;
+import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.client.solrj.response.FacetField;
 import org.apache.solr.client.solrj.response.FacetField.Count;
 import org.apache.solr.client.solrj.response.FieldStatsInfo;
@@ -64,19 +65,24 @@ import com.videopolis.smaug.model.impl.FacetCountImpl;
 import com.videopolis.smaug.service.SearchService;
 
 public class SolrSearchServiceImpl implements SearchService {
-	private static final String DISTANCE_FIELD = "geo_distance";
+	private static final String DISTANCE_FIELD = "geodist()";
+	private static final String FILTER_QUERY = "fq";
+
 	/** Label of geo query type. */
-	private static final String GEO_QUERY_TYPE = "geo";
+	private static final String GEO_QUERY_TYPE = "{!geofilt}";
 	/** Label of latitude field for geo query. */
+	private static final String POINT_PARAMETER = "pt";
 	private static final String LATITUDE_PARAMETER = "lat";
 	/** Label of longitude field for geo query. */
 	private static final String LONGITUDE_PARAMETER = "long";
 	/** Label of radius field for geo query. */
-	private static final String RADIUS_PARAMETER = "radius";
+	private static final String RADIUS_PARAMETER = "d";
 	private static final String HIGHLIGHTING_PARAMETER = "hl";
 	private static final String HIGHLIGHTING_FIELD_LIST = "hl.fl";
 	private static final String SUGGEST_HL_PARAMETER = "name";
 	private static final String ID_FIELD = "id";
+	private static final String GEO_FIELD = "latlon";
+	private static final String SFIELD = "sfield";
 
 	private static final DateFormat EVENT_DATE_FORMAT = new SimpleDateFormat(
 			"yyyyMMddHHmmss");
@@ -95,23 +101,23 @@ public class SolrSearchServiceImpl implements SearchService {
 	private String citiesSolrUrl;
 	private boolean filterSeo;
 
-	private CommonsHttpSolrServer userSolrServer;
-	private CommonsHttpSolrServer placesSolrServer;
-	private CommonsHttpSolrServer eventsSolrServer;
-	private CommonsHttpSolrServer activitiesSolrServer;
-	private CommonsHttpSolrServer bannersSolrServer;
-	private CommonsHttpSolrServer suggestSolrServer;
-	private CommonsHttpSolrServer citiesSolrServer;
+	private SolrClient userSolrServer;
+	private SolrClient placesSolrServer;
+	private SolrClient eventsSolrServer;
+	private SolrClient activitiesSolrServer;
+	private SolrClient bannersSolrServer;
+	private SolrClient suggestSolrServer;
+	private SolrClient citiesSolrServer;
 	private QueryBuilder queryBuilder;
 
 	public void init() throws MalformedURLException {
-		userSolrServer = new CommonsHttpSolrServer(userSolrUrl);
-		placesSolrServer = new CommonsHttpSolrServer(placesSolrUrl);
-		eventsSolrServer = new CommonsHttpSolrServer(eventsSolrUrl);
-		activitiesSolrServer = new CommonsHttpSolrServer(activitiesSolrUrl);
-		bannersSolrServer = new CommonsHttpSolrServer(bannersSolrUrl);
-		suggestSolrServer = new CommonsHttpSolrServer(suggestSolrUrl);
-		citiesSolrServer = new CommonsHttpSolrServer(citiesSolrUrl);
+		userSolrServer = new HttpSolrClient(userSolrUrl);
+		placesSolrServer = new HttpSolrClient(placesSolrUrl);
+		eventsSolrServer = new HttpSolrClient(eventsSolrUrl);
+		activitiesSolrServer = new HttpSolrClient(activitiesSolrUrl);
+		bannersSolrServer = new HttpSolrClient(bannersSolrUrl);
+		suggestSolrServer = new HttpSolrClient(suggestSolrUrl);
+		citiesSolrServer = new HttpSolrClient(citiesSolrUrl);
 	}
 
 	@Override
@@ -122,17 +128,27 @@ public class SolrSearchServiceImpl implements SearchService {
 		if (query.getQuery() == null || query.getQuery().equals("")) {
 			query.setQuery("*:*");
 		}
-		query.setQueryType(GEO_QUERY_TYPE);
-		query.setParam(LATITUDE_PARAMETER, String.valueOf(point.getLatitude()));
-		query.setParam(LONGITUDE_PARAMETER,
-				String.valueOf(point.getLongitude()));
-		query.setParam(RADIUS_PARAMETER, String.valueOf(radius));
-		query.setFields(ID_FIELD, DISTANCE_FIELD);
+		query.addFilterQuery(GEO_QUERY_TYPE);
+		query.setParam(POINT_PARAMETER, String.valueOf(point.getLatitude())
+				+ "," + String.valueOf(point.getLongitude()));
+		// query.setParam(LATITUDE_PARAMETER,
+		// String.valueOf(point.getLatitude()));
+		// query.setParam(LONGITUDE_PARAMETER,
+		// String.valueOf(point.getLongitude()));
+		query.setParam(RADIUS_PARAMETER, String.valueOf(radius * 1.60934)); // SOLR
+																			// 5:
+																			// Radius
+																			// is
+																			// now
+																			// in
+																			// km
+		query.setFields(ID_FIELD, "geodistance:" + DISTANCE_FIELD);
+		query.setParam(SFIELD, GEO_FIELD);
 
 		final String kind = settings.getReturnedType();
-		log.info("Solr geo query = " + query);
+
 		if (Place.CAL_TYPE.equals(kind)) {
-			query.addSortField(DISTANCE_FIELD, SolrQuery.ORDER.asc);
+			query.addSort(DISTANCE_FIELD, SolrQuery.ORDER.asc);
 			StringBuilder buf = new StringBuilder();
 			if (filterSeo) {
 				buf.append("seoIndexed:1");
@@ -142,7 +158,7 @@ public class SolrSearchServiceImpl implements SearchService {
 				final String nowTag = EVENT_DATE_FORMAT.format(now);
 				buf.append(" AND adBoostEndDate:[" + nowTag + " TO *]");
 				buf.append(" AND adBoostValue:[1 TO *]");
-				query.addSortField("adBoostValue", ORDER.desc);
+				query.addSort("adBoostValue", ORDER.desc);
 			}
 			if (buf.length() > 0) {
 				query.setQuery(buf.toString());
@@ -164,18 +180,18 @@ public class SolrSearchServiceImpl implements SearchService {
 				// SearchScope.NEARBY_ACTIVITIES) {
 				// query.setQuery("-activityType:Y");
 			}
-			query.addSortField("activityDate", ORDER.desc);
+			query.addSort("activityDate", ORDER.desc);
 			// query.addSortField(DISTANCE_FIELD, SolrQuery.ORDER.asc);
 			return processSolrQuery(activitiesSolrServer, query, settings,
 					window);
 		} else if (settings.getSearchScope() == SearchScope.CITY) {
-			query.addSortField(DISTANCE_FIELD, SolrQuery.ORDER.asc);
+			query.addSort(DISTANCE_FIELD, SolrQuery.ORDER.asc);
 			return processSolrQuery(citiesSolrServer, query, settings, window);
 		} else if (Event.CAL_ID.equals(settings.getReturnedType())) {
 			final String dateTag = EVENT_DATE_FORMAT.format(new Date());
 			query.setQuery("end_date:[" + dateTag + " TO *]");
-			query.addSortField("start_date", ORDER.asc);
-			query.addSortField(DISTANCE_FIELD, SolrQuery.ORDER.asc);
+			query.addSort("start_date", ORDER.asc);
+			query.addSort(DISTANCE_FIELD, SolrQuery.ORDER.asc);
 			return processSolrQuery(eventsSolrServer, query, settings, window);
 		} else if (AdvertisingBanner.CAL_ID.equals(settings.getReturnedType())) {
 			return processSolrQuery(bannersSolrServer, query, settings, window);
@@ -189,7 +205,7 @@ public class SolrSearchServiceImpl implements SearchService {
 				query.setQuery("onlineTimeout:[* TO " + nowTimeStr
 						+ "] AND available:0");
 			}
-			query.addSortField(DISTANCE_FIELD, SolrQuery.ORDER.asc);
+			query.addSort(DISTANCE_FIELD, SolrQuery.ORDER.asc);
 			return processSolrQuery(userSolrServer, query, settings, window);
 		}
 	}
@@ -255,12 +271,12 @@ public class SolrSearchServiceImpl implements SearchService {
 			final String nowTag = EVENT_DATE_FORMAT.format(now);
 			buf.append(" AND adBoostEndDate:[" + nowTag + " TO *]");
 			buf.append(" AND adBoostValue:[1 TO *]");
-			query.addSortField("adBoostValue", ORDER.desc);
+			query.addSort("adBoostValue", ORDER.desc);
 			break;
 		}
 
 		// Targetting the Solr server
-		SolrServer solrServer = userSolrServer;
+		SolrClient solrServer = userSolrServer;
 		if (settings.getSearchScope() == SearchScope.POI
 				|| Place.CAL_TYPE.equals(settings.getReturnedType())) {
 			solrServer = placesSolrServer;
@@ -272,12 +288,12 @@ public class SolrSearchServiceImpl implements SearchService {
 			solrServer = eventsSolrServer;
 			final String dateTag = EVENT_DATE_FORMAT.format(new Date());
 			buf.append(" AND end_date:[" + dateTag + " TO *]");
-			query.addSortField("start_date", ORDER.asc);
+			query.addSort("start_date", ORDER.asc);
 		} else if (Activity.CAL_TYPE.equals(settings.getReturnedType())) {
 			solrServer = activitiesSolrServer;
 		}
 		query.setQuery(buf.toString());
-		log.info("Solr query = " + query);
+
 		return processSolrQuery(solrServer, query, settings, window);
 	}
 
@@ -346,7 +362,7 @@ public class SolrSearchServiceImpl implements SearchService {
 			// Builds response and returns
 			return new SuggestResponseImpl((List) items, settings, window,
 					items.size());
-		} catch (SolrServerException e) {
+		} catch (SolrServerException | IOException e) {
 			throw new SearchException(
 					"Unable to complete suggest SOLR query : " + e.getMessage(),
 					e);
@@ -364,7 +380,7 @@ public class SolrSearchServiceImpl implements SearchService {
 		String prefix = "";
 
 		// Selecting SOLR server
-		SolrServer server = userSolrServer;
+		SolrClient server = userSolrServer;
 		if (Place.CAL_TYPE.equals(settings.getReturnedType())) {
 			server = placesSolrServer;
 		} else if (Event.CAL_ID.equals(settings.getReturnedType())) {
@@ -403,16 +419,16 @@ public class SolrSearchServiceImpl implements SearchService {
 		}
 		// Setting query
 		query.setQuery(queryBuf.toString());
-		log.info("Solr ALL query ["
-				+ ((CommonsHttpSolrServer) server).getBaseURL() + "] = "
-				+ query);
+		log.info("Solr ALL query [" + ((HttpSolrClient) server).getBaseURL()
+				+ "] = " + query);
 		// Processing searchAll query
 		return processSolrQuery(server, query, settings, window);
 	}
 
-	private SearchResponse processSolrQuery(SolrServer solrServer,
+	private SearchResponse processSolrQuery(SolrClient solrServer,
 			SolrQuery query, SearchSettings settings, SearchWindow window) {
 		try {
+			log.info("Solr query = " + query);
 			final QueryResponse response = solrServer.query(query);
 			final List<? extends SearchItem> items = response
 					.getBeans(SearchItemImpl.class);
@@ -486,7 +502,7 @@ public class SolrSearchServiceImpl implements SearchService {
 			}
 			return new SearchResponseImpl(items, facetMap, settings, window,
 					(int) response.getResults().getNumFound());
-		} catch (SolrServerException e) {
+		} catch (SolrServerException | IOException e) {
 			log.error("Error during search : " + e.getMessage(), e);
 		}
 
@@ -516,9 +532,12 @@ public class SolrSearchServiceImpl implements SearchService {
 					c.setCategoryCode(field);
 					// Preparing our facet count
 					final FacetCountImpl facetCount = new FacetCountImpl();
+					long min = stats.getMin() == null ? 0 : ((Number) stats
+							.getMin()).longValue();
+					long max = stats.getMax() == null ? 0 : ((Number) stats
+							.getMax()).longValue() + 1;
 					facetCount.setFacet(FacetFactory.createFacetRange(c, "",
-							stats.getMin().longValue(), stats.getMax()
-									.longValue() + 1));
+							min, max));
 					facetCount.setCount(0);
 					// Filling our map
 					List<FacetCount> counts = facetMap.get(c);

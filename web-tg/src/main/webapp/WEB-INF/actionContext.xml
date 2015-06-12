@@ -549,6 +549,9 @@
 		<property name="taskRunnerService" ref="apisToolsTaskRunnerService"/>
 		<property name="apiService" ref="toolsApiService"/>
 	</bean>
+	<bean id="indexBannersAction" class="com.nextep.proto.action.impl.tools.IndexBannersAction" parent="abstractAction" scope="request">
+		<property name="apiService" ref="toolsApiService"/>
+	</bean>
 	<bean id="openPlacesSeoAction" class="com.nextep.proto.action.impl.tools.OpenPlacesSEOAction" parent="abstractAction" scope="request">
 		<property name="searchService" ref="searchPersistenceService"/>
 		<property name="apiService" ref="toolsApiService"/>

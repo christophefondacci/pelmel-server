@@ -228,7 +228,7 @@ public final class SearchHelper {
 	}
 
 	public static Sorter getDistanceSorter() {
-		final Sorter sorter = new SorterImpl("geo_distance", Order.ASCENDING);
+		final Sorter sorter = new SorterImpl("geodist()", Order.ASCENDING);
 		return sorter;
 	}
 

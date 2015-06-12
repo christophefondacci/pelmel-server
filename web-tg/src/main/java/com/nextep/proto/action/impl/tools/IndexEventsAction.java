@@ -46,6 +46,7 @@ public class IndexEventsAction extends AbstractAction {
 	private SearchPersistenceService searchService;
 	private TaskRunnerService taskRunnerService;
 	private boolean all = false;
+	private boolean clearEvents = false;
 	private List<String> messages = new ArrayList<String>();
 
 	@Override
@@ -100,7 +101,9 @@ public class IndexEventsAction extends AbstractAction {
 
 			ContextHolder.toggleWrite();
 			// Now we safely fetched our events we purge solr
-			// searchService.removeAll(Event.CAL_ID);
+			if (clearEvents) {
+				searchService.removeAll(Event.CAL_ID);
+			}
 			final long count = pagination.getItemCount();
 			for (Event event : events) {
 				String msg = "Storing event '" + event.getName() + "' ["
@@ -162,5 +165,13 @@ public class IndexEventsAction extends AbstractAction {
 
 	public boolean isAll() {
 		return all;
+	}
+
+	public void setClearEvents(boolean clearEvents) {
+		this.clearEvents = clearEvents;
+	}
+
+	public boolean isClearEvents() {
+		return clearEvents;
 	}
 }

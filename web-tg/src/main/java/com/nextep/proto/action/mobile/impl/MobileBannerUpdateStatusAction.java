@@ -16,6 +16,7 @@ import com.nextep.proto.action.base.AbstractAction;
 import com.nextep.proto.action.model.JsonProvider;
 import com.nextep.proto.blocks.CurrentUserSupport;
 import com.nextep.proto.builders.JsonBuilder;
+import com.nextep.proto.services.RightsManagementService;
 import com.nextep.proto.spring.ContextHolder;
 import com.nextep.smaug.service.SearchPersistenceService;
 import com.nextep.users.model.User;
@@ -46,6 +47,9 @@ public class MobileBannerUpdateStatusAction extends AbstractAction implements
 
 	@Autowired
 	private JsonBuilder jsonBuilder;
+
+	@Autowired
+	private RightsManagementService rightsManagementService;
 
 	// Dynamic arguments
 	private String bannerKey;
@@ -91,8 +95,10 @@ public class MobileBannerUpdateStatusAction extends AbstractAction implements
 		} else {
 			ContextHolder.toggleWrite();
 			try {
-				((MutableAdvertisingBanner) banner).setStatus(BannerStatus
-						.valueOf(status));
+				if (rightsManagementService.canModify(user, banner)) {
+					((MutableAdvertisingBanner) banner).setStatus(BannerStatus
+							.valueOf(status));
+				}
 			} catch (IllegalArgumentException | NullPointerException e) {
 				setErrorMessage("Invalid banner status '" + status + "'");
 				return ERROR;
