@@ -17,6 +17,7 @@ import net.sf.json.JSONObject;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.nextep.activities.model.ActivityType;
 import com.nextep.activities.model.MutableActivity;
@@ -26,7 +27,6 @@ import com.nextep.events.model.Event;
 import com.nextep.geo.model.City;
 import com.nextep.geo.model.Place;
 import com.nextep.json.model.impl.JsonUser;
-import com.nextep.messages.model.MutableMessage;
 import com.nextep.properties.model.Property;
 import com.nextep.proto.action.base.AbstractAction;
 import com.nextep.proto.action.model.DescriptionsUpdateAware;
@@ -41,6 +41,7 @@ import com.nextep.proto.helpers.LocalizationHelper;
 import com.nextep.proto.model.Constants;
 import com.nextep.proto.model.CookieProvider;
 import com.nextep.proto.services.DescriptionsManagementService;
+import com.nextep.proto.services.MessagingService;
 import com.nextep.proto.services.PropertiesManagementService;
 import com.nextep.proto.spring.ContextHolder;
 import com.nextep.smaug.service.SearchPersistenceService;
@@ -57,7 +58,6 @@ import com.videopolis.apis.model.ApisCriterion;
 import com.videopolis.apis.model.ApisCustomAdapter;
 import com.videopolis.apis.model.ApisRequest;
 import com.videopolis.apis.service.ApiCompositeResponse;
-import com.videopolis.calm.exception.CalException;
 import com.videopolis.calm.factory.CalmFactory;
 import com.videopolis.calm.model.CalmObject;
 import com.videopolis.calm.model.ItemKey;
@@ -87,7 +87,6 @@ public class UserRegistrationAction extends AbstractAction implements
 	private final static String APIS_ALIAS_USER = "user";
 	private final static String APIS_ALIAS_EMAIL_EXISTS = "email";
 	private final static String APIS_ALIAS_CITY_NEARBY_DEFAULT = "citydefault";
-	private final static String MESSAGE_KEY_WELCOME = "register.welcomeMsg";
 	private static ApisCustomAdapter cityLocalizerAdapter = new ApisCityLocalizerAdapter();
 
 	// Injected services
@@ -102,6 +101,8 @@ public class UserRegistrationAction extends AbstractAction implements
 	private double cityRadius;
 	private JsonBuilder jsonBuilder;
 	private String welcomeMsgUser;
+	@Autowired
+	private MessagingService messagingService;
 
 	private File media;
 	// Dynamic arguments
@@ -310,31 +311,12 @@ public class UserRegistrationAction extends AbstractAction implements
 			searchPersistenceService.storeCalmObject(activity,
 					SearchScope.CHILDREN);
 			// Sending the welcome message for new users
-			try {
-				sendWelcomeMessage(user);
-			} catch (CalException e) {
-				log.error(
-						"Unable to send welcome message to user "
-								+ user.getKey() + ": " + e.getMessage(), e);
-			}
+			messagingService.sendWelcomeMessage(user.getKey(), getLocale());
 		}
 
 		redirectUrl = getUrlService().getUserOverviewUrl(
 				DisplayHelper.getDefaultAjaxContainer(), user);
 		return SUCCESS;
-	}
-
-	private void sendWelcomeMessage(User user) throws CalException {
-		final MutableMessage msg = (MutableMessage) messagePersistenceService
-				.createTransientObject();
-		final ItemKey userKey = CalmFactory.parseKey(welcomeMsgUser);
-		msg.setFromKey(userKey);
-		msg.setToKey(user.getKey());
-		msg.setMessage(getMessageSource().getMessage(MESSAGE_KEY_WELCOME, null,
-				getLocale()));
-		msg.setMessageDate(new Date());
-		ContextHolder.toggleWrite();
-		messagePersistenceService.saveItem(msg);
 	}
 
 	@Override

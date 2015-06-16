@@ -51,6 +51,7 @@ import com.nextep.proto.helpers.DisplayHelper;
 import com.nextep.proto.helpers.LocalizationHelper;
 import com.nextep.proto.model.Constants;
 import com.nextep.proto.model.CookieProvider;
+import com.nextep.proto.services.MessagingService;
 import com.nextep.proto.spring.ContextHolder;
 import com.nextep.smaug.service.SearchPersistenceService;
 import com.nextep.tags.model.Tag;
@@ -98,6 +99,8 @@ public class FacebookLoginAction extends AbstractAction implements
 	private CalPersistenceService activitiesService;
 	@Autowired
 	private JsonBuilder jsonBuilder;
+	@Autowired
+	private MessagingService messagingService;
 
 	private String state;
 	private String code;
@@ -202,12 +205,16 @@ public class FacebookLoginAction extends AbstractAction implements
 						// ((MutableUser) user).setFacebookToken(accessToken);
 						ContextHolder.toggleWrite();
 						getUsersService().saveItem(user);
+
 					} else {
 						// Creating a new user from facebook info
 						try {
 							user = buildUserFromFacebookUser(accessToken,
 									jsonUser);
 							newUser = true;
+							// Sending welcome message
+							messagingService.sendWelcomeMessage(user.getKey(),
+									getLocale());
 						} catch (SearchException ex) {
 							setErrorMessage("login.facebook.error");
 							LOGGER.error(
