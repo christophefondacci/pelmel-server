@@ -6,7 +6,7 @@ package com.nextep.json.model.impl;
  * @author cfondacci
  * 
  */
-public abstract class JsonMessagingStatistic {
+public class JsonMessagingStatistic {
 
 	private int unreadMsgCount = 0;
 	private long maxActivityId = 0;

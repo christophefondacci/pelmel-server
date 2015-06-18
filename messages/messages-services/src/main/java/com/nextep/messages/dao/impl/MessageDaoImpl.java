@@ -59,6 +59,18 @@ public class MessageDaoImpl extends AbstractCalDao<Message> implements
 				.setParameter("toKey", key.toString()).getResultList();
 	}
 
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<Message> getMessagesForAfterId(ItemKey userKey, int page,
+			int pageSize, ItemKey afterId) {
+		return entityManager
+				.createQuery(
+						"from MessageImpl where (toKey=:toKey or fromKey=:toKey) and id>:minId and fromKey!=toKey order by messageDate asc ")
+				.setMaxResults(pageSize).setFirstResult(page * pageSize)
+				.setParameter("toKey", userKey.toString())
+				.setParameter("minId", afterId.getNumericId()).getResultList();
+	}
+
 	@Override
 	public List<Message> getUnreadMessages(ItemKey userKey) {
 		return getUnreadMessages(userKey, -1);
@@ -94,6 +106,17 @@ public class MessageDaoImpl extends AbstractCalDao<Message> implements
 					.getSingleResult();
 			return count.intValue();
 		}
+	}
+
+	@Override
+	public int getMessageCountAfterId(ItemKey userKey, ItemKey minItemKey) {
+		final BigInteger count = (BigInteger) entityManager
+				.createNativeQuery(
+						"select count(1) from MESSAGES where to_item_key=:toItemKey and MSG_ID>:minId and from_item_key!=to_item_key ")
+				.setParameter("toItemKey", userKey.toString())
+				.setParameter("minId", minItemKey.getNumericId())
+				.getSingleResult();
+		return count.intValue();
 	}
 
 	@SuppressWarnings("unchecked")

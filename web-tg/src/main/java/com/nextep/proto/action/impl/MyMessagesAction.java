@@ -10,14 +10,17 @@ import com.nextep.json.model.impl.JsonManyToOneMessageList;
 import com.nextep.media.model.Media;
 import com.nextep.media.model.MediaRequestTypes;
 import com.nextep.messages.model.Message;
+import com.nextep.messages.model.MessageRequestTypeAfterId;
 import com.nextep.proto.action.base.AbstractAction;
 import com.nextep.proto.action.model.CurrentUserAware;
 import com.nextep.proto.action.model.JsonProvider;
 import com.nextep.proto.action.model.MessagingAware;
 import com.nextep.proto.apis.adapters.ApisMessageFromUserAdapter;
+import com.nextep.proto.apis.adapters.ApisMessageToUserAdapter;
 import com.nextep.proto.blocks.CurrentUserSupport;
 import com.nextep.proto.blocks.MessagingSupport;
 import com.nextep.proto.builders.JsonBuilder;
+import com.nextep.proto.model.Constants;
 import com.nextep.proto.services.LocalizationService;
 import com.nextep.users.model.User;
 import com.videopolis.apis.factory.ApisFactory;
@@ -27,6 +30,8 @@ import com.videopolis.apis.model.ApisItemKeyAdapter;
 import com.videopolis.apis.model.ApisRequest;
 import com.videopolis.apis.model.WithCriterion;
 import com.videopolis.apis.service.ApiCompositeResponse;
+import com.videopolis.calm.factory.CalmFactory;
+import com.videopolis.calm.model.RequestType;
 import com.videopolis.cals.factory.ContextFactory;
 import com.videopolis.cals.model.PaginationInfo;
 import com.videopolis.smaug.common.model.SearchScope;
@@ -37,8 +42,10 @@ public class MyMessagesAction extends AbstractAction implements MessagingAware,
 	private static final long serialVersionUID = -6729501217111087845L;
 	private static final String APIS_ALIAS_PAGE_MESSAGES = "pmsg";
 	private static final String APIS_ALIAS_NEARBY_PLACES = "nearbyPlaces";
+
 	private static final String PAGE_STYLE_MSG = "my-messages";
 	private static final ApisItemKeyAdapter APIS_MESSAGE_FROM_USER_ADAPTER = new ApisMessageFromUserAdapter();
+	private static final ApisItemKeyAdapter APIS_MESSAGE_TO_USER_ADAPTER = new ApisMessageToUserAdapter();
 
 	private CurrentUserSupport currentUserSupport;
 
@@ -55,21 +62,37 @@ public class MyMessagesAction extends AbstractAction implements MessagingAware,
 	private int page;
 	private boolean highRes;
 	private double radius;
+	private Long fromMessageId;
 
 	private PaginationInfo msgPagination;
 
 	@Override
 	protected String doExecute() throws Exception {
+		RequestType requestType = null;
+		if (fromMessageId != null) {
+			requestType = new MessageRequestTypeAfterId(CalmFactory.createKey(
+					Message.CAL_TYPE, fromMessageId));
+		}
 		final ApisCriterion userCriterion = (ApisCriterion) currentUserSupport
 				.createApisCriterionFor(getNxtpUserToken(), false)
 				.with((WithCriterion) SearchRestriction
-						.with(Message.class, messagesPerPage, page)
+						.with(Message.class, requestType)
+						.paginatedBy(messagesPerPage, page)
 						.aliasedBy(APIS_ALIAS_PAGE_MESSAGES)
 						.with(Media.class)
 						.addCriterion(
-								(ApisCriterion) SearchRestriction.adaptKey(
-										APIS_MESSAGE_FROM_USER_ADAPTER).with(
-										Media.class, MediaRequestTypes.THUMB)));
+								(ApisCriterion) SearchRestriction
+										.adaptKey(
+												APIS_MESSAGE_FROM_USER_ADAPTER)
+										.aliasedBy(Constants.ALIAS_FROM)
+										.with(Media.class,
+												MediaRequestTypes.THUMB))
+						.addCriterion(
+								(ApisCriterion) SearchRestriction
+										.adaptKey(APIS_MESSAGE_TO_USER_ADAPTER)
+										.aliasedBy(Constants.ALIAS_TO)
+										.with(Media.class,
+												MediaRequestTypes.THUMB)));
 		// If localization is provided, we fetch the nearest place
 		if (lat != null && lng != null) {
 			userCriterion.addCriterion(SearchRestriction.searchNear(
@@ -156,6 +179,10 @@ public class MyMessagesAction extends AbstractAction implements MessagingAware,
 		return page;
 	}
 
+	public int getMessagesPerPage() {
+		return messagesPerPage;
+	}
+
 	public void setHighRes(boolean highRes) {
 		this.highRes = highRes;
 	}
@@ -215,4 +242,11 @@ public class MyMessagesAction extends AbstractAction implements MessagingAware,
 		this.radius = radius;
 	}
 
+	public void setFromMessageId(Long fromMessageId) {
+		this.fromMessageId = fromMessageId;
+	}
+
+	public Long getFromMessageId() {
+		return fromMessageId;
+	}
 }

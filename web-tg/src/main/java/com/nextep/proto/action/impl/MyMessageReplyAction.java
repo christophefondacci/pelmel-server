@@ -10,6 +10,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.nextep.geo.model.Place;
+import com.nextep.json.model.impl.JsonMessagingStatistic;
 import com.nextep.json.model.impl.JsonOneToOneMessageList;
 import com.nextep.media.model.Media;
 import com.nextep.media.model.MediaRequestTypes;
@@ -68,6 +69,8 @@ public class MyMessageReplyAction extends AbstractAction implements
 	private boolean highRes;
 	private int page = 0;
 	private Double lat, lng;
+	private boolean markUnreadOnly = false;
+	private Long unreadMaxId;
 
 	// Internal variable
 	private User currentUser;
@@ -160,7 +163,9 @@ public class MyMessageReplyAction extends AbstractAction implements
 		// Marking messages as read
 		final List<ItemKey> keysToMark = new ArrayList<ItemKey>();
 		for (Message message : myMessagingSupport.getMessages()) {
-			if (message.isUnread()) {
+			if (message.isUnread()
+					&& (unreadMaxId == null || message.getKey().getNumericId() <= unreadMaxId
+							.longValue())) {
 				keysToMark.add(message.getKey());
 			}
 		}
@@ -176,18 +181,25 @@ public class MyMessageReplyAction extends AbstractAction implements
 
 	@Override
 	public String getJson() {
-		final List<? extends Message> messages = myMessagingSupport
-				.getMessages();
-		final JsonOneToOneMessageList messageList = jsonBuilder
-				.buildJsonOneToOneMessages(messages, highRes, getLocale(),
-						currentUser, fromUser);
 		int unreadMsg = messagingSupport.getMessages().size();
 		unreadMsg -= readMsgCount;
-		messageList.setUnreadMsgCount(unreadMsg);
-		messageList.setTotalMsgCount(myPaginationInfo.getItemCount());
-		messageList.setPage(page);
-		messageList.setPageSize(MESSAGES_PER_PAGE);
-		return JSONObject.fromObject(messageList).toString();
+		if (!markUnreadOnly) {
+			final List<? extends Message> messages = myMessagingSupport
+					.getMessages();
+			final JsonOneToOneMessageList messageList = jsonBuilder
+					.buildJsonOneToOneMessages(messages, highRes, getLocale(),
+							currentUser, fromUser);
+			messageList.setUnreadMsgCount(unreadMsg);
+			messageList.setTotalMsgCount(myPaginationInfo.getItemCount());
+			messageList.setPage(page);
+			messageList.setPageSize(MESSAGES_PER_PAGE);
+			return JSONObject.fromObject(messageList).toString();
+		} else {
+			JsonMessagingStatistic stat = new JsonMessagingStatistic();
+			stat.setUnreadMsgCount(unreadMsg);
+			stat.setTotalMsgCount(myPaginationInfo.getItemCount());
+			return JSONObject.fromObject(stat).toString();
+		}
 	}
 
 	@Override
@@ -272,5 +284,21 @@ public class MyMessageReplyAction extends AbstractAction implements
 
 	public void setMessageService(MessageService messageService) {
 		this.messageService = messageService;
+	}
+
+	public void setMarkUnreadOnly(boolean markUnreadOnly) {
+		this.markUnreadOnly = markUnreadOnly;
+	}
+
+	public boolean isMarkUnreadOnly() {
+		return markUnreadOnly;
+	}
+
+	public void setUnreadMaxId(Long unreadMaxId) {
+		this.unreadMaxId = unreadMaxId;
+	}
+
+	public Long getUnreadMaxId() {
+		return unreadMaxId;
 	}
 }

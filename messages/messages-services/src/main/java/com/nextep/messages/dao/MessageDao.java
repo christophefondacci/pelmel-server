@@ -17,6 +17,37 @@ public interface MessageDao extends CalDao<Message> {
 	List<? extends Message> markRead(List<ItemKey> messageKeys);
 
 	/**
+	 * Returns paginated list of messages to the given user received after the
+	 * given date
+	 * 
+	 * @param userKey
+	 *            the {@link ItemKey} of the user for which messages should be
+	 *            retrieved
+	 * @param page
+	 *            the page number, 0 based
+	 * @param pageSize
+	 *            the number of elements per page
+	 * @param minMessageItemKey
+	 *            the item key after which messages should be returned
+	 * @return the corresponding list of messages.
+	 */
+	List<Message> getMessagesForAfterId(ItemKey userKey, int page,
+			int pageSize, ItemKey minMessageItemKey);
+
+	/**
+	 * Gives the total number of messages for this user received after the given
+	 * date.
+	 * 
+	 * @param userKey
+	 *            the {@link ItemKey} of the user who received the messages
+	 * @param minMessageItemKey
+	 *            the minimum itemKey to count messages from
+	 * @return the number of {@link Message} that this user received after the
+	 *         given date
+	 */
+	int getMessageCountAfterId(ItemKey userKey, ItemKey minMessageItemKey);
+
+	/**
 	 * Lists messages from the specified conversation between the 2 persons.
 	 * "From" and "To" elements can be exchanged as messages of both directions
 	 * will be returned.

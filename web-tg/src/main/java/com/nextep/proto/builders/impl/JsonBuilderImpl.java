@@ -426,16 +426,12 @@ public class JsonBuilderImpl implements JsonBuilder {
 
 			// Building the map of referenced users
 			try {
-				final User user = message.getUnique(User.class);
-				if (user != null) {
-					// Have we already built this user ?
-					JsonLightUser jsonUser = msgUsersMap.get(user.getKey());
-					if (jsonUser == null) {
-						// If no, we build it and add it to our map
-						jsonUser = buildJsonLightUser(user, highRes, l);
-						msgUsersMap.put(user.getKey(), jsonUser);
-					}
-				}
+				final User fromUser = message.getUnique(User.class,
+						Constants.ALIAS_FROM);
+				fillUserMap(fromUser, msgUsersMap, highRes, l);
+				final User toUser = message.getUnique(User.class,
+						Constants.ALIAS_TO);
+				fillUserMap(toUser, msgUsersMap, highRes, l);
 			} catch (CalException e) {
 				LOGGER.error("Unable to retrieve from/to user of message "
 						+ message.getKey() + ": " + e.getMessage(), e);
@@ -447,6 +443,19 @@ public class JsonBuilderImpl implements JsonBuilder {
 			messagesList.addUser(jsonUser);
 		}
 		return messagesList;
+	}
+
+	private void fillUserMap(User user,
+			Map<ItemKey, JsonLightUser> msgUsersMap, boolean highRes, Locale l) {
+		if (user != null) {
+			// Have we already built this user ?
+			JsonLightUser jsonUser = msgUsersMap.get(user.getKey());
+			if (jsonUser == null) {
+				// If no, we build it and add it to our map
+				jsonUser = buildJsonLightUser(user, highRes, l);
+				msgUsersMap.put(user.getKey(), jsonUser);
+			}
+		}
 	}
 
 	@Override

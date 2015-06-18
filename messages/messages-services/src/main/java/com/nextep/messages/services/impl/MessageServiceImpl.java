@@ -3,10 +3,12 @@ package com.nextep.messages.services.impl;
 import java.util.Collections;
 import java.util.List;
 
+import com.nextep.cal.util.helpers.CalHelper;
 import com.nextep.cal.util.services.CalPersistenceService;
 import com.nextep.cal.util.services.base.AbstractDaoBasedCalServiceImpl;
 import com.nextep.messages.dao.MessageDao;
 import com.nextep.messages.model.Message;
+import com.nextep.messages.model.MessageRequestTypeAfterId;
 import com.nextep.messages.model.MessageRequestTypeUnread;
 import com.nextep.messages.model.impl.MessageImpl;
 import com.nextep.messages.model.impl.MessageRequestTypeListConversation;
@@ -71,6 +73,40 @@ public class MessageServiceImpl extends AbstractDaoBasedCalServiceImpl
 		response.setPageCount(pages + (pagesMod > 0 ? 1 : 0));
 		response.setItems(messages);
 		return response;
+	}
+
+	@Override
+	public PaginatedItemsResponse getPaginatedItemsFor(ItemKey itemKey,
+			CalContext context, int resultsPerPage, int pageNumber,
+			RequestType requestType) throws CalException {
+		if (requestType == null) {
+			return getPaginatedItemsFor(itemKey, context, resultsPerPage,
+					pageNumber);
+		} else if (requestType instanceof MessageRequestTypeAfterId) {
+			// Extracting messages after this date
+			final MessageRequestTypeAfterId dateRequestType = (MessageRequestTypeAfterId) requestType;
+			final MessageDao dao = (MessageDao) getCalDao();
+			final List<Message> messages = dao.getMessagesForAfterId(itemKey,
+					pageNumber, resultsPerPage,
+					dateRequestType.getMinMessageItemKey());
+
+			// Querying total count
+			final int messagesCount = dao.getMessageCountAfterId(itemKey,
+					dateRequestType.getMinMessageItemKey());
+
+			// Building response
+			final PaginatedItemsResponseImpl response = new PaginatedItemsResponseImpl(
+					resultsPerPage, pageNumber);
+			response.setItems(messages);
+			response.setPageCount(CalHelper.getPageCount(resultsPerPage,
+					messagesCount));
+			response.setItemCount(messagesCount);
+			return response;
+
+		}
+		// Defaulting to super implementation
+		return super.getPaginatedItemsFor(itemKey, context, resultsPerPage,
+				pageNumber, requestType);
 	}
 
 	@Override
