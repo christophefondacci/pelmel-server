@@ -8,6 +8,7 @@ import java.util.Random;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.nextep.cal.util.helpers.CalHelper;
 import com.nextep.cal.util.services.CalPersistenceService;
 import com.nextep.cal.util.services.base.AbstractDaoBasedCalServiceImpl;
 import com.nextep.users.dao.UsersDao;
@@ -211,10 +212,20 @@ public class UsersServiceImpl extends AbstractDaoBasedCalServiceImpl implements
 			UsersDao dao = (UsersDao) getCalDao();
 			final List<User> users = dao.getUsersBeforeLoginDate(lastLoginDate,
 					rType.isOldestFirst(), pageSize, pageNumber);
+			final long count = dao.getUsersCountBeforeLoginDate(lastLoginDate);
 
+			// Building response
+			final PaginatedItemsResponseImpl response = new PaginatedItemsResponseImpl(
+					pageSize, pageNumber);
+			response.setItemCount((int) count);
+			response.setPageCount(CalHelper.getPageCount(pageSize, (int) count));
+			response.setItems(users);
+			return response;
+
+		} else {
+			// Default behavior
+			return super.listItems(context, requestType, requestSettings);
 		}
-		// TODO Auto-generated method stub
-		return super.listItems(context, requestType, requestSettings);
 	}
 
 	public void setConnectionTimeoutInMinutes(int connectionTimeoutInMinutes) {

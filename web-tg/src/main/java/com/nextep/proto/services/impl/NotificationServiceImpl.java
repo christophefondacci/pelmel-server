@@ -2,6 +2,8 @@ package com.nextep.proto.services.impl;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -13,7 +15,6 @@ import java.util.concurrent.Future;
 
 import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
-import javax.mail.PasswordAuthentication;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -186,16 +187,6 @@ public class NotificationServiceImpl implements NotificationService {
 		return new AsyncResult<Boolean>(true);
 	}
 
-	// Authenticates to SendGrid
-	private class SMTPAuthenticator extends javax.mail.Authenticator {
-		@Override
-		public PasswordAuthentication getPasswordAuthentication() {
-			String username = smtpAuthUser;
-			String password = smtpAuthPassword;
-			return new PasswordAuthentication(username, password);
-		}
-	}
-
 	@Override
 	public void notifyAdminByEmail(String title, String html) {
 		notifyByEmail(title, html, "christophe@pelmelguide.com",
@@ -204,6 +195,14 @@ public class NotificationServiceImpl implements NotificationService {
 
 	private void notifyByEmail(String title, String html, String toAddress,
 			String bccAddress) {
+		notifyByEmail(title, html, Arrays.asList(toAddress.split(" ")),
+				"43c9d208-8167-48f8-bc90-0edc03575c5f", bccAddress);
+	}
+
+	@Override
+	public void notifyByEmail(String title, String html,
+			Collection<String> toAddress, String templateId,
+			String... bccAddress) {
 		LOGGER.info("<br>=================<br>" + title + "<br>" + html);
 
 		if (adminEmailAlias == null || adminEmailAlias.trim().isEmpty()
@@ -212,46 +211,20 @@ public class NotificationServiceImpl implements NotificationService {
 		}
 		Email sendgridEmail = new Email();
 
-		// Properties props = new Properties();
-		// props.put("mail.transport.protocol", "smtp");
-		// props.put("mail.smtp.auth", "true");
-
-		// Authenticator auth = new SMTPAuthenticator();
-		// Session mailSession = Session.getDefaultInstance(props, auth);
-		// Transport transport = mailSession.getTransport();
-		//
-		// MimeMessage message = new MimeMessage(mailSession);
-
-		// message.setContent(html, "text/html");
-		// message.setFrom(new InternetAddress("no-reply@pelmelguide.com"));
-		// message.setSubject(title);
 		sendgridEmail.setHtml(html);
 		sendgridEmail.setFrom("no-reply@pelmelguide.com");
-		sendgridEmail.setTemplateId("43c9d208-8167-48f8-bc90-0edc03575c5f");
+		sendgridEmail.setFromName("The PELMEL Team");
+		sendgridEmail.setTemplateId(templateId);
 		sendgridEmail.setSubject(title);
-		String[] emails = toAddress.split(" ");
-		sendgridEmail.addTo(emails);
-		// for (String email : emails) {
-		// message.addRecipient(Message.RecipientType.TO,
-		// new InternetAddress(email));
-		// }
-		emails = bccAddress.split(" ");
-		sendgridEmail.addBcc(emails);
-		// for (String email : emails) {
-		// try {
-		// message.addRecipient(Message.RecipientType.BCC,
-		// new InternetAddress(email));
-		// } catch (MessagingException e) {
-		// LOGGER.error("Unable to add recepient to email: " + email
-		// + " reason '" + e.getMessage() + "'", e);
-		// }
-		// }
+
+		sendgridEmail.addTo(toAddress.toArray(new String[toAddress.size()]));
+
+		if (bccAddress != null) {
+			// emails = bccAddress.split(" ");
+			sendgridEmail.addBcc(bccAddress);
+		}
 
 		// Sends the email
-		// transport.connect(smtpHostName, smtpPort, smtpAuthUser,
-		// smtpAuthPassword);
-		// transport.sendMessage(message, message.getAllRecipients());
-		// transport.close();
 		try {
 
 			Response response = sendgrid.send(sendgridEmail);
@@ -381,6 +354,7 @@ public class NotificationServiceImpl implements NotificationService {
 		return new AsyncResult<Boolean>(true);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Async
 	@Override
 	public Future<Boolean> sendEventDeletedNotification(Event event,

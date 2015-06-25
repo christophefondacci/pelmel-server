@@ -394,8 +394,8 @@ public class UsersDaoImpl extends AbstractCalDao<User> implements UsersDao,
 	@Override
 	public long getUsersCountBeforeLoginDate(Date lastLoginMaxDate) {
 		return ((Number) entityManager
-				.createQuery(
-						"UserImpl.findAllCount where onlineTimeout<:lastLoginMaxDate")
+				.createNativeQuery(
+						"select count(1) from USERS where ONLINE_TIMEOUT<:lastLoginMaxDate")
 				.setParameter("lastLoginMaxDate", lastLoginMaxDate)
 				.getSingleResult()).longValue();
 	}

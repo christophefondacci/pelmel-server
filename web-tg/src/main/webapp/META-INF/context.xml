@@ -78,6 +78,14 @@
 		value="24192000000" />
 	<Environment name="mobile/maxCreationActivityTimeMs" type="java.lang.Long"
 		value="24192000000" />
+	<Environment name="email/daysFromLastLogin" type="java.lang.Integer"
+		value="0" />
+	<Environment name="email/daysFromLastEmail" type="java.lang.Integer"
+		value="14" />
+	<Environment name="email/maxSentEmails" type="java.lang.Integer"
+		value="1" />
+	<Environment name="email/newsletterTemplateId" type="java.lang.String"
+		value="279d5b70-6075-4df5-91d4-9753e5898fe7" />
 	<Environment name="minCityPopulationForIndexation" type="java.lang.Integer"
 		value="50000" />
 	<Environment name="defaultCityKey" type="java.lang.String"

@@ -1,5 +1,6 @@
 package com.nextep.proto.services;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Future;
 
@@ -49,6 +50,23 @@ public interface NotificationService {
 	 *            the HTML source of the mail to send
 	 */
 	void notifyAdminByEmail(String title, String html);
+
+	/**
+	 * Sends an email notification to the given address(es)
+	 * 
+	 * @param title
+	 *            title of the email
+	 * @param html
+	 *            HTML content of the email
+	 * @param toAddress
+	 *            list of TO addresses
+	 * @param templateId
+	 *            ID of the sendgrid template
+	 * @param bccAddress
+	 *            optional list of BCC address
+	 */
+	void notifyByEmail(String title, String html, Collection<String> toAddress,
+			String templateId, String... bccAddress);
 
 	/**
 	 * Notifies administrators about place update
