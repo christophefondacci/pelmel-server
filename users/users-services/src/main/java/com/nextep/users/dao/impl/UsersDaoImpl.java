@@ -383,9 +383,10 @@ public class UsersDaoImpl extends AbstractCalDao<User> implements UsersDao,
 
 		List<User> users = entityManager
 				.createQuery(
-						"from UserImpl where onlineTimeout<:lastLoginMaxDate order by onlineTimeout "
+				// "from UserImpl where onlineTimeout<:lastLoginMaxDate order by onlineTimeout "
+						"from UserImpl order by onlineTimeout "
 								+ (oldestFirst ? "ASC" : "DESC"))
-				.setParameter("lastLoginMaxDate", lastLoginMaxDate)
+				// .setParameter("lastLoginMaxDate", lastLoginMaxDate)
 				.setMaxResults(pageSize).setFirstResult(pageSize * pageOffset)
 				.getResultList();
 		return users;
@@ -393,10 +394,10 @@ public class UsersDaoImpl extends AbstractCalDao<User> implements UsersDao,
 
 	@Override
 	public long getUsersCountBeforeLoginDate(Date lastLoginMaxDate) {
-		return ((Number) entityManager
-				.createNativeQuery(
-						"select count(1) from USERS where ONLINE_TIMEOUT<:lastLoginMaxDate")
-				.setParameter("lastLoginMaxDate", lastLoginMaxDate)
+		return ((Number) entityManager.createNativeQuery(
+		// "select count(1) from USERS where ONLINE_TIMEOUT<:lastLoginMaxDate")
+				"select count(1) from USERS ")
+		// .setParameter("lastLoginMaxDate", lastLoginMaxDate)
 				.getSingleResult()).longValue();
 	}
 }

@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 
 import javax.annotation.Resource;
 
@@ -59,6 +60,7 @@ public class EmailBatchAction extends AbstractAction {
 	private static final String APIS_ALIAS_USERS = "users";
 	private static final String APIS_ALIAS_PLACES = "places";
 	private static final String APIS_ALIAS_EVENTS = "events";
+	private static final String EMAIL_STATUS_BUG = "EMAIL_DATES_BUG";
 	private static final Log LOGGER = LogFactory.getLog(EmailBatchAction.class);
 	private static final String URL_APPSTORE = "https://itunes.apple.com/us/app/pelmel-guide-your-mobile-guide/id603515989?mt=8";
 
@@ -85,6 +87,12 @@ public class EmailBatchAction extends AbstractAction {
 
 	@Resource(mappedName = "email/newsletterTemplateId")
 	private String newsletterTemplateId;
+
+	@Resource(mappedName = "email/erratumNewsletterTemplateId")
+	private String erratumNewsletterTemplateId;
+
+	@Resource(mappedName = "email/dryRun")
+	private Boolean dryRun;
 
 	@Resource(mappedName = "mobile/nearbyPlacesRadius")
 	private Double nearbyPlacesRadius;
@@ -137,14 +145,17 @@ public class EmailBatchAction extends AbstractAction {
 						orCount++;
 					}
 				}
+				if (dryRun && !user.getKey().toString().equals("USER1")) {
+					// && !user.getKey().toString().equals("USER308")) {
+					continue;
+				}
 				if (adm1 != null
 						&& user != null
-						&& user.getLastEmailDate() == null
+						&& (user.getLastEmailDate() == null || dryRun || EMAIL_STATUS_BUG
+								.equals(user.getStatusMessage()))
 						&& ("WA".equals(adm1.getAdminCode())
 								|| "CA".equals(adm1.getAdminCode()) || "OR"
 									.equals(adm1.getAdminCode()))) {
-					// if (user.getKey().toString().equals("USER1")) {
-					// || user.getKey().toString().equals("USER308")) {
 
 					// Querying nearby users for email customization
 					final ApisRequest userRequest = (ApisRequest) ApisFactory
@@ -197,21 +208,32 @@ public class EmailBatchAction extends AbstractAction {
 							.execute(userRequest,
 									ContextFactory.createContext(getLocale()));
 
-					// Filling nearby users section
-					fillNearbyUsers(buf, user, userResponse);
+					// Preparing subject / template
+					String subject = "Your events this week";
+					String templateId = newsletterTemplateId;
+					String newStatus = null;
+					if (EMAIL_STATUS_BUG.equals(user.getStatusMessage())) {
+						subject = "Oops, we messed up the dates";
+						templateId = erratumNewsletterTemplateId;
+						newStatus = "BUGGED";
+					} else {
+						// Filling nearby users section
+						fillNearbyUsers(buf, user, userResponse);
+					}
 
 					fillNearbyEvents(buf, user, userResponse);
 					usersEmails.add(user.getEmail());
 
 					// Flagging last email date for this user
 					((MutableUser) user).setLastEmailDate(emailDate);
+					((MutableUser) user).setStatus(newStatus);
 					usersService.saveItem(user);
 
 					// Sending message
 					messages.add("Sending message to " + user.getEmail());
-					notificationService.notifyByEmail("Your events this week",
-							buf.toString(), Arrays.asList(user.getEmail()),
-							newsletterTemplateId);
+
+					notificationService.notifyByEmail(subject, buf.toString(),
+							Arrays.asList(user.getEmail()), templateId);
 
 					// notificationService.not
 					emailsSent++;
@@ -252,7 +274,11 @@ public class EmailBatchAction extends AbstractAction {
 		final List<? extends Event> events = userResponse.getElements(
 				Event.class, APIS_ALIAS_EVENTS);
 		for (Event event : events) {
-			final String eventDay = format.format(event.getStartDate());
+			final Place p = event.getUnique(Place.class);
+			final Date startDate = eventManagementService.convertDate(event
+					.getStartDate(), TimeZone.getDefault().getID(), p.getCity()
+					.getTimezoneId());
+			final String eventDay = format.format(startDate);
 			List<Event> dayEvents = seriesDayMap.get(eventDay);
 			if (dayEvents == null) {
 				dayEvents = new ArrayList<Event>();
@@ -297,7 +323,13 @@ public class EmailBatchAction extends AbstractAction {
 		if (!seriesDayMap.isEmpty()) {
 			List<String> days = new ArrayList<String>(seriesDayMap.keySet());
 			Collections.sort(days);
-			buf.append("<p style='margin-top:0;padding-top:50px;'><span style='text-align: center; font-size:36px;'>Coming up</span></p>");
+			int padding = 50;
+			if (EMAIL_STATUS_BUG.equals(user.getStatusMessage())) {
+				padding = 10;
+			}
+			buf.append("<p style='margin-top:0;padding-top:"
+					+ padding
+					+ "px;'><span style='text-align: center; font-size:36px;'>Coming up</span></p>");
 
 			int dayCount = 0;
 			for (String dayStr : days) {
@@ -394,7 +426,7 @@ public class EmailBatchAction extends AbstractAction {
 		return fullUrl;
 	}
 
-	private String getTimeRange(Event e) {
+	private String getTimeRange(Event e) throws CalException {
 		if (e instanceof EventSeries) {
 			try {
 				final Place p = e.getUnique(Place.class);
@@ -412,7 +444,15 @@ public class EmailBatchAction extends AbstractAction {
 						+ ex.getMessage() + ")");
 			}
 		} else {
-			return buildTimeRange(e.getStartDate(), e.getEndDate());
+			final Place p = e.getUnique(Place.class);
+			final Date startDate = eventManagementService.convertDate(e
+					.getStartDate(), TimeZone.getDefault().getID(), p.getCity()
+					.getTimezoneId());
+			final Date endDate = eventManagementService.convertDate(e
+					.getEndDate(), TimeZone.getDefault().getID(), p.getCity()
+					.getTimezoneId());
+
+			return buildTimeRange(startDate, endDate);
 		}
 		return "n/a";
 	}

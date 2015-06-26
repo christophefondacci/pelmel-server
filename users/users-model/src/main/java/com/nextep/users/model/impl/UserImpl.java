@@ -42,6 +42,9 @@ public class UserImpl extends AbstractCalmObject implements User, MutableUser {
 	@Column(name = "CREDITS_COUNT")
 	private int credits = 0;
 
+	@Column(name = "USER_STATUS")
+	private String status;
+
 	@Column(name = "BIRTHDAY")
 	private Date birthday = new Date();
 
@@ -171,11 +174,12 @@ public class UserImpl extends AbstractCalmObject implements User, MutableUser {
 
 	@Override
 	public String getStatusMessage() {
-		return null;
+		return status;
 	}
 
 	@Override
 	public void setStatus(String status) {
+		this.status = status;
 	}
 
 	@Override
