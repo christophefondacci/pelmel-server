@@ -165,7 +165,8 @@ public class MyMessageReplyAction extends AbstractAction implements
 		for (Message message : myMessagingSupport.getMessages()) {
 			if (message.isUnread()
 					&& (unreadMaxId == null || message.getKey().getNumericId() <= unreadMaxId
-							.longValue())) {
+							.longValue())
+					&& !message.getFromKey().equals(user.getKey())) {
 				keysToMark.add(message.getKey());
 			}
 		}
