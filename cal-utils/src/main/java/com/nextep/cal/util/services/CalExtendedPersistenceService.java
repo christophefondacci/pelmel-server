@@ -1,5 +1,9 @@
 package com.nextep.cal.util.services;
 
+import java.util.List;
+
+import com.videopolis.calm.exception.CalException;
+import com.videopolis.calm.model.CalmObject;
 import com.videopolis.calm.model.ItemKey;
 import com.videopolis.cals.service.CalService;
 
@@ -26,4 +30,42 @@ public interface CalExtendedPersistenceService extends CalPersistenceService {
 	 *            the {@link ItemKey} of the object to delete
 	 */
 	void delete(ItemKey objectKey);
+
+	/**
+	 * Registers the association between an internal item and an external
+	 * contributed item by specifying the type of connection with a name. The
+	 * contributed item is the one whose {@link ItemKey} passed to a getItemsFor
+	 * call will return the internalItem. <br>
+	 * This method allows to store same type of items in different collections
+	 * (for example: a list of users/places that are like VERSUS a list of users
+	 * for a private network)
+	 * 
+	 * @param internalItemKey
+	 * @param contributedItemKeys
+	 *            an array of all items to bind to the external item
+	 */
+	List<? extends CalmObject> setItemFor(ItemKey contributedItemKey,
+			String connectionType, ItemKey... internalItemKeys)
+			throws CalException;
+
+	/**
+	 * Deletes the given association
+	 * 
+	 * @param contributedItemKey
+	 *            the external item key that can be passed to a getItemsFor
+	 *            request on a CAL service to get internal objects contributing
+	 *            to this key
+	 * @param connectionType
+	 *            the type of connection to target
+	 * @param internalItemKey
+	 *            the {@link ItemKey} of internal item currently associated with
+	 *            the contributedItemKey
+	 * @return <code>true</code> if an item has been deleted or
+	 *         <code>false</code> if it was already deleted, up to the caller to
+	 *         decide if this is an exception case or not
+	 * @throws CalException
+	 */
+	boolean deleteItemFor(ItemKey contributedItemKey, String connectionType,
+			ItemKey internalItemKey) throws CalException;
+
 }

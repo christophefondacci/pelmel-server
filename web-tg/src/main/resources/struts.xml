@@ -547,23 +547,28 @@
 		</action>
 		<action name="mobileMyMessagesReply" class="myMessageReplyAction">
 			<result>/jsp/pages/json.jsp</result>
-			<result name="input">/jsp/pages/json.jsp</result>
-			<result name="error">/jsp/pages/json.jsp</result>
+			<result name="input">/jsp/pages/json-error.jsp</result>
+			<result name="error">/jsp/pages/json-error.jsp</result>
 		</action>
 		<action name="mobileGallery" class="mobileGalleryAction">
 			<result>/jsp/pages/json.jsp</result>
-			<result name="input">/jsp/pages/json.jsp</result>
-			<result name="error">/jsp/pages/json.jsp</result>
+			<result name="input">/jsp/pages/json-error.jsp</result>
+			<result name="error">/jsp/pages/json-error.jsp</result>
 		</action>
 		<action name="mobileComments" class="ajaxCommentsAction">
 			<result>/jsp/pages/json.jsp</result>
-			<result name="input">/jsp/pages/json.jsp</result>
-			<result name="error">/jsp/pages/json.jsp</result>
+			<result name="input">/jsp/pages/json-error.jsp</result>
+			<result name="error">/jsp/pages/json-error.jsp</result>
+		</action>
+		<action name="mobilePrivateList" class="mobilePrivateListAction">
+			<result>/jsp/pages/json.jsp</result>
+			<result name="input">/jsp/pages/json-error.jsp</result>
+			<result name="error">/jsp/pages/json-error.jsp</result>
 		</action>
 		<action name="mobilePostComment" class="postCommentAction">
 			<result>/jsp/pages/json.jsp</result>
-			<result name="input">/jsp/pages/json.jsp</result>
-			<result name="error">/jsp/pages/json.jsp</result>
+			<result name="input">/jsp/pages/json-error.jsp</result>
+			<result name="error">/jsp/pages/json-error.jsp</result>
 		</action>
 		<action name="mobileRegisterToken" class="mobileRegisterToken">
 			<result>/jsp/pages/json.jsp</result>

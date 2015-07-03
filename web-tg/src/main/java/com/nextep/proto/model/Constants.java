@@ -28,6 +28,7 @@ public interface Constants {
 	String APIS_ALIAS_LIKES = "likeActivity";
 	String APIS_ALIAS_BANNER_TARGET = "bannerTarget";
 
+	// Counts
 	int TOP_PLACES_PER_PAGE = 20;
 	int OVERVIEW_NEARBY_PLACES = 20;
 	int EVENTS_PER_PAGE = 16;
@@ -103,4 +104,9 @@ public interface Constants {
 	public static final String APIS_ALIAS_PLACE = "place";
 
 	double METERS_PER_MILE = 1609.344;
+
+	// APIS query aliases for private network
+	String APIS_ALIAS_NETWORK_MEMBER = "connected";
+	String APIS_ALIAS_NETWORK_TOAPPROVE = "request";
+	String APIS_ALIAS_NETWORK_PENDING = "pending";
 }

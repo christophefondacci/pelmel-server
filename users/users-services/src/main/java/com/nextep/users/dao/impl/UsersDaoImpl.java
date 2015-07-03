@@ -246,10 +246,11 @@ public class UsersDaoImpl extends AbstractCalDao<User> implements UsersDao,
 	}
 
 	@Override
-	public List<User> bindUsers(ItemKey externalItem, List<ItemKey> userKeys) {
+	public List<User> bindUsers(ItemKey externalItem, String connectionType,
+			List<ItemKey> userKeys) {
 		// Looking for any pre-existing city definition for this user
 		final List<ItemUserImpl> itemPlaces = findItemUsersFor(externalItem,
-				1000, 0);
+				connectionType, 1000, 0);
 		// Hashing the found places by place key for fast lookup
 		final Map<ItemKey, ItemUserImpl> itemPlacesMap = new HashMap<ItemKey, ItemUserImpl>();
 		for (ItemUserImpl itemPlace : itemPlaces) {
@@ -282,12 +283,28 @@ public class UsersDaoImpl extends AbstractCalDao<User> implements UsersDao,
 			// final Place mergedPlace = entityManager.merge(p);
 			// Setting up new association
 			final ItemUserImpl itemUser = new ItemUserImpl(externalItem,
-					p.getKey());
+					p.getKey(), connectionType);
 			entityManager.persist(itemUser);
 		}
 		entityManager.flush();
 		allUsers.addAll(users);
 		return allUsers;
+	}
+
+	public boolean deleteItemUser(ItemKey contributedItemKey,
+			ItemKey internalItemKey, String connectionType) {
+
+		// Building query
+		final Query query = entityManager
+				.createQuery(
+						"delete from ItemUserImpl where itemKey=:contributedKey and userId=:userId and connectionType=:connectionType")
+				.setParameter("contributedKey", contributedItemKey.toString())
+				.setParameter("userId", internalItemKey.getNumericId())
+				.setParameter("connectionType", connectionType);
+
+		// Executing deletion
+		final int deletedRows = query.executeUpdate();
+		return deletedRows == 1;
 	}
 
 	/**
@@ -298,14 +315,16 @@ public class UsersDaoImpl extends AbstractCalDao<User> implements UsersDao,
 	 * @return the list of places for this item
 	 */
 	@SuppressWarnings("unchecked")
-	private List<ItemUserImpl> findItemUsersFor(ItemKey key, int pageSize,
-			int pageOffset) {
+	private List<ItemUserImpl> findItemUsersFor(ItemKey key,
+			String connectionType, int pageSize, int pageOffset) {
 		if (key == null) {
 			return null;
 		} else {
-			final Query query = entityManager.createQuery(
-					"from ItemUserImpl where itemKey=:key").setParameter("key",
-					key.toString());
+			final Query query = entityManager
+					.createQuery(
+							"from ItemUserImpl where itemKey=:key and connectionType=:connectionType")
+					.setParameter("key", key.toString())
+					.setParameter("connectionType", connectionType);
 			if (pageSize > 0) {
 				query.setMaxResults(pageSize).setFirstResult(
 						pageOffset * pageSize);
@@ -336,9 +355,10 @@ public class UsersDaoImpl extends AbstractCalDao<User> implements UsersDao,
 	}
 
 	@Override
-	public List<User> getUsersFor(ItemKey itemKey, int pageSize, int pageOffset) {
+	public List<User> getUsersFor(ItemKey itemKey, String connectionType,
+			int pageSize, int pageOffset) {
 		final List<ItemUserImpl> itemUsers = findItemUsersFor(itemKey,
-				pageSize, pageOffset);
+				connectionType, pageSize, pageOffset);
 		final List<Long> userIds = new ArrayList<Long>();
 		for (ItemUserImpl itemUser : itemUsers) {
 			userIds.add(Long.valueOf(itemUser.getUserId()));

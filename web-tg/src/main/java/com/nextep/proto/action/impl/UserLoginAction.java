@@ -28,6 +28,7 @@ import com.nextep.proto.spring.ContextHolder;
 import com.nextep.smaug.service.SearchPersistenceService;
 import com.nextep.tags.model.Tag;
 import com.nextep.users.model.User;
+import com.nextep.users.model.UserPrivateListRequestType;
 import com.nextep.users.services.UsersService;
 import com.opensymphony.xwork2.ActionContext;
 import com.videopolis.apis.factory.ApisFactory;
@@ -35,6 +36,7 @@ import com.videopolis.apis.factory.SearchRestriction;
 import com.videopolis.apis.model.ApisCriterion;
 import com.videopolis.apis.model.ApisItemKeyAdapter;
 import com.videopolis.apis.model.ApisRequest;
+import com.videopolis.apis.model.WithCriterion;
 import com.videopolis.apis.service.ApiCompositeResponse;
 import com.videopolis.calm.exception.CalException;
 import com.videopolis.cals.factory.ContextFactory;
@@ -119,7 +121,32 @@ public class UserLoginAction extends AbstractAction implements CookieProvider,
 																	.aliasedBy(
 																			Constants.APIS_ALIAS_USER_LOCATION)
 																	.with(Media.class,
-																			MediaRequestTypes.THUMB)));
+																			MediaRequestTypes.THUMB))
+													.with((WithCriterion) SearchRestriction
+															.with(User.class,
+																	new UserPrivateListRequestType(
+																			UserPrivateListRequestType.LIST_PENDING_APPROVAL))
+															.aliasedBy(
+																	Constants.APIS_ALIAS_NETWORK_PENDING)
+															.with(Media.class,
+																	MediaRequestTypes.THUMB))
+													.with((WithCriterion) SearchRestriction
+															.with(User.class,
+																	new UserPrivateListRequestType(
+																			UserPrivateListRequestType.LIST_REQUESTED))
+															.aliasedBy(
+																	Constants.APIS_ALIAS_NETWORK_TOAPPROVE)
+															.with(Media.class,
+																	MediaRequestTypes.THUMB))
+
+													.with((WithCriterion) SearchRestriction
+															.with(User.class,
+																	new UserPrivateListRequestType(
+																			UserPrivateListRequestType.LIST_PRIVATE_NETWORK))
+															.aliasedBy(
+																	Constants.APIS_ALIAS_NETWORK_MEMBER)
+															.with(Media.class,
+																	MediaRequestTypes.THUMB)));
 							ApiCompositeResponse response = (ApiCompositeResponse) getApiService()
 									.execute(
 											request,

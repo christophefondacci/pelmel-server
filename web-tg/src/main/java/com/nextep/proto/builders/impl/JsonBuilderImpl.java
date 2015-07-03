@@ -335,7 +335,34 @@ public class JsonBuilderImpl implements JsonBuilder {
 			fillJsonEvent(jsonEvent, event, highRes, l, response);
 			json.addEvent(jsonEvent);
 		}
+
+		// Getting lists
+		final List<? extends User> pendingApprovals = user.get(User.class,
+				Constants.APIS_ALIAS_NETWORK_PENDING);
+		final List<? extends User> pendingRequests = user.get(User.class,
+				Constants.APIS_ALIAS_NETWORK_TOAPPROVE);
+		final List<? extends User> networkUsers = user.get(User.class,
+				Constants.APIS_ALIAS_NETWORK_MEMBER);
+		final List<IJsonLightUser> jsonPendingApprovals = convertUserListToJsonUserList(
+				pendingApprovals, highRes, l);
+		final List<IJsonLightUser> jsonPendingRequests = convertUserListToJsonUserList(
+				pendingRequests, highRes, l);
+		final List<IJsonLightUser> jsonNetworkUsers = convertUserListToJsonUserList(
+				networkUsers, highRes, l);
+		json.setPendingApprovals(jsonPendingApprovals);
+		json.setPendingRequests(jsonPendingRequests);
+		json.setNetworkUsers(jsonNetworkUsers);
 		return json;
+	}
+
+	private List<IJsonLightUser> convertUserListToJsonUserList(
+			List<? extends User> users, boolean highRes, Locale l) {
+		final List<IJsonLightUser> jsonUsers = new ArrayList<IJsonLightUser>();
+		for (User user : users) {
+			final IJsonLightUser jsonUser = buildJsonLightUser(user, highRes, l);
+			jsonUsers.add(jsonUser);
+		}
+		return jsonUsers;
 	}
 
 	/**

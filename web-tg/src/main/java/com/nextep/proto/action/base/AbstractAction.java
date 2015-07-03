@@ -15,7 +15,7 @@ import org.apache.http.HttpStatus;
 import org.apache.struts2.ServletActionContext;
 import org.springframework.context.MessageSource;
 
-import com.nextep.cal.util.services.CalPersistenceService;
+import com.nextep.cal.util.services.CalExtendedPersistenceService;
 import com.nextep.json.model.impl.JsonStatus;
 import com.nextep.proto.action.model.AdBannerAware;
 import com.nextep.proto.action.model.HeaderAware;
@@ -69,7 +69,7 @@ public abstract class AbstractAction extends ActionSupport implements
 	private ApiService noSeoApiService;
 	private HeaderSupport headerSupport;
 	private MessageSource messageSource;
-	private CalPersistenceService usersService;
+	private CalExtendedPersistenceService usersService;
 	private SearchPersistenceService searchService;
 	private RightsManagementService rightsManagementService;
 	private LoginSupport loginSupport;
@@ -321,11 +321,11 @@ public abstract class AbstractAction extends ActionSupport implements
 		this.refreshTimeoutMillisec = connectionTimeoutInMinutes * 60 * 1000 / 2;
 	}
 
-	public final void setUsersService(CalPersistenceService usersService) {
+	public final void setUsersService(CalExtendedPersistenceService usersService) {
 		this.usersService = usersService;
 	}
 
-	protected CalPersistenceService getUsersService() {
+	protected CalExtendedPersistenceService getUsersService() {
 		return usersService;
 	}
 

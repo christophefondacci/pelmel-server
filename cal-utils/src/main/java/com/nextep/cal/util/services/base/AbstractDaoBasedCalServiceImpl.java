@@ -123,4 +123,5 @@ public abstract class AbstractDaoBasedCalServiceImpl extends AbstractCalService 
 		}
 		return response;
 	}
+
 }

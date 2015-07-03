@@ -19,13 +19,17 @@ public class ItemUserImpl {
 	@Id
 	@Column(name = "ITEM_KEY")
 	private String itemKey;
+	@Id
+	@Column(name = "CONNECTION_TYPE")
+	private String connectionType;
 
 	public ItemUserImpl() {
 	}
 
-	public ItemUserImpl(ItemKey itemKey, ItemKey userKey) {
+	public ItemUserImpl(ItemKey itemKey, ItemKey userKey, String connectionType) {
 		this.userId = userKey.getNumericId();
 		this.itemKey = itemKey.toString();
+		this.connectionType = connectionType;
 	}
 
 	public String getItemKey() {

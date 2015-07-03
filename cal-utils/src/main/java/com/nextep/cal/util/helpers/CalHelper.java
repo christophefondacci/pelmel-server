@@ -2,12 +2,15 @@ package com.nextep.cal.util.helpers;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 
 import com.videopolis.calm.exception.CalException;
 import com.videopolis.calm.factory.CalmFactory;
 import com.videopolis.calm.helper.Assert;
+import com.videopolis.calm.model.CalmObject;
 import com.videopolis.calm.model.ItemKey;
 import com.videopolis.calm.model.impl.ExpirableItemKeyImpl;
 
@@ -167,5 +170,14 @@ public final class CalHelper {
 			}
 		}
 		return type;
+	}
+
+	public static <T extends CalmObject> Map<String, T> buildItemKeyMap(
+			List<? extends T> objects) {
+		final Map<String, T> users = new HashMap<String, T>();
+		for (T o : objects) {
+			users.put(o.getKey().toString(), o);
+		}
+		return users;
 	}
 }

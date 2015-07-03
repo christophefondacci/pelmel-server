@@ -118,11 +118,14 @@ public interface UsersDao {
 	 * 
 	 * @param externalItem
 	 *            external item key
+	 * @param connectionType
+	 *            connection type
 	 * @param userKeys
 	 *            user to bind to this external item
 	 * @return a list of bound users
 	 */
-	List<User> bindUsers(ItemKey externalItem, List<ItemKey> userKeys);
+	List<User> bindUsers(ItemKey externalItem, String connectionType,
+			List<ItemKey> userKeys);
 
 	/**
 	 * Provides the list of users registered under the specified external key.
@@ -133,7 +136,23 @@ public interface UsersDao {
 	 *            the external item key which can contain users
 	 * @return the list of users
 	 */
-	List<User> getUsersFor(ItemKey itemKey, int pageSize, int pageOffset);
+	List<User> getUsersFor(ItemKey itemKey, String connectionType,
+			int pageSize, int pageOffset);
+
+	/**
+	 * Deletes the given association between external key and internal user ID
+	 * 
+	 * @param contributedItemKey
+	 *            the {@link ItemKey} of the external contributed item key
+	 * @param internalItemKey
+	 *            the {@link ItemKey} of the internal user ID
+	 * @param connectionType
+	 *            the type of connection to target
+	 * @return <code>true</code> if element was deleted or <code>false</code> if
+	 *         nothing was deleted
+	 */
+	boolean deleteItemUser(ItemKey contributedItemKey, ItemKey internalItemKey,
+			String connectionType);
 
 	int getUsersForCount(ItemKey itemKey);
 

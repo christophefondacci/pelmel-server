@@ -7,11 +7,14 @@ public class ItemUserPK implements Serializable {
 	private static final long serialVersionUID = -2164878006136916915L;
 	private Long userId;
 	private String itemKey;
+	private String connectionType;
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
+		result = prime * result
+				+ ((connectionType == null) ? 0 : connectionType.hashCode());
 		result = prime * result + ((itemKey == null) ? 0 : itemKey.hashCode());
 		result = prime * result + ((userId == null) ? 0 : userId.hashCode());
 		return result;
@@ -26,6 +29,11 @@ public class ItemUserPK implements Serializable {
 		if (getClass() != obj.getClass())
 			return false;
 		ItemUserPK other = (ItemUserPK) obj;
+		if (connectionType == null) {
+			if (other.connectionType != null)
+				return false;
+		} else if (!connectionType.equals(other.connectionType))
+			return false;
 		if (itemKey == null) {
 			if (other.itemKey != null)
 				return false;

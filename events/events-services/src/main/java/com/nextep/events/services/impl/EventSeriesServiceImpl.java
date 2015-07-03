@@ -17,6 +17,7 @@ import com.videopolis.calm.helper.Assert;
 import com.videopolis.calm.model.CalmObject;
 import com.videopolis.calm.model.ItemKey;
 import com.videopolis.calm.model.RequestType;
+import com.videopolis.cals.exception.UnsupportedCalServiceException;
 import com.videopolis.cals.model.CalContext;
 import com.videopolis.cals.model.MultiKeyItemsResponse;
 import com.videopolis.cals.model.impl.MultiKeyItemsResponseImpl;
@@ -110,5 +111,20 @@ public class EventSeriesServiceImpl extends AbstractDaoBasedCalServiceImpl
 	@Override
 	public void delete(ItemKey itemKey) {
 		((EventSeriesDao) getCalDao()).delete(itemKey);
+	}
+
+	@Override
+	public List<? extends CalmObject> setItemFor(ItemKey contributedItemKey,
+			String connectionType, ItemKey... internalItemKeys)
+			throws CalException {
+		throw new UnsupportedCalServiceException(
+				"setItemFor(ItemKey, connectionType, ItemKey...) is not implemented");
+	}
+
+	@Override
+	public boolean deleteItemFor(ItemKey contributedItemKey,
+			String connectionType, ItemKey internalItemKey) throws CalException {
+		throw new UnsupportedCalServiceException(
+				"deleteItemFor not implemented");
 	}
 }

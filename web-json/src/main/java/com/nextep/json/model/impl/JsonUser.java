@@ -8,8 +8,10 @@ import java.util.List;
 import com.nextep.json.model.IJsonLightEvent;
 import com.nextep.json.model.IJsonLightPlace;
 import com.nextep.json.model.IJsonLightUser;
+import com.nextep.json.model.IPrivateListContainer;
 
-public class JsonUser extends JsonLiker implements IJsonLightUser {
+public class JsonUser extends JsonLiker implements IJsonLightUser,
+		IPrivateListContainer {
 
 	private String key;
 	private String nxtpUserToken;
@@ -33,6 +35,9 @@ public class JsonUser extends JsonLiker implements IJsonLightUser {
 	private Long lastLocationTime;
 	private boolean newUser;
 	private double rawDistance;
+	private List<IJsonLightUser> pendingApprovals = new ArrayList<IJsonLightUser>();
+	private List<IJsonLightUser> pendingRequests = new ArrayList<IJsonLightUser>();
+	private List<IJsonLightUser> networkUsers = new ArrayList<IJsonLightUser>();
 
 	@Override
 	public String getKey() {
@@ -239,4 +244,35 @@ public class JsonUser extends JsonLiker implements IJsonLightUser {
 	public double getRawDistanceMeters() {
 		return rawDistance;
 	}
+
+	@Override
+	public List<IJsonLightUser> getPendingApprovals() {
+		return pendingApprovals;
+	}
+
+	@Override
+	public void setPendingApprovals(List<IJsonLightUser> pendingApprovals) {
+		this.pendingApprovals = pendingApprovals;
+	}
+
+	@Override
+	public List<IJsonLightUser> getPendingRequests() {
+		return pendingRequests;
+	}
+
+	@Override
+	public void setPendingRequests(List<IJsonLightUser> pendingRequests) {
+		this.pendingRequests = pendingRequests;
+	}
+
+	@Override
+	public List<IJsonLightUser> getNetworkUsers() {
+		return networkUsers;
+	}
+
+	@Override
+	public void setNetworkUsers(List<IJsonLightUser> networkUsers) {
+		this.networkUsers = networkUsers;
+	}
+
 }

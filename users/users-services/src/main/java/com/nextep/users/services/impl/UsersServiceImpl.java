@@ -9,6 +9,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.nextep.cal.util.helpers.CalHelper;
+import com.nextep.cal.util.services.CalExtendedPersistenceService;
 import com.nextep.cal.util.services.CalPersistenceService;
 import com.nextep.cal.util.services.base.AbstractDaoBasedCalServiceImpl;
 import com.nextep.users.dao.UsersDao;
@@ -16,6 +17,7 @@ import com.nextep.users.model.MutableUser;
 import com.nextep.users.model.PushProvider;
 import com.nextep.users.model.User;
 import com.nextep.users.model.UserLastLoginRequestType;
+import com.nextep.users.model.UserPrivateListRequestType;
 import com.nextep.users.model.impl.UserImpl;
 import com.nextep.users.services.UsersService;
 import com.videopolis.calm.exception.CalException;
@@ -32,7 +34,7 @@ import com.videopolis.cals.model.impl.ItemsResponseImpl;
 import com.videopolis.cals.model.impl.PaginatedItemsResponseImpl;
 
 public class UsersServiceImpl extends AbstractDaoBasedCalServiceImpl implements
-		CalPersistenceService, UsersService {
+		CalPersistenceService, CalExtendedPersistenceService, UsersService {
 
 	private static final Log LOGGER = LogFactory.getLog(UsersServiceImpl.class);
 	private static ThreadLocal<Random> random = new ThreadLocal<Random>();
@@ -70,7 +72,16 @@ public class UsersServiceImpl extends AbstractDaoBasedCalServiceImpl implements
 			ItemKey... internalItemKeys) {
 		final List<ItemKey> userKeys = Arrays.asList(internalItemKeys);
 		return (List) ((UsersDao) getCalDao()).bindUsers(contributedItemKey,
-				userKeys);
+				UserPrivateListRequestType.LIST_LIKER, userKeys);
+	}
+
+	@Override
+	public List<? extends CalmObject> setItemFor(ItemKey contributedItemKey,
+			String connectionType, ItemKey... internalItemKeys)
+			throws CalException {
+		final List<ItemKey> userKeys = Arrays.asList(internalItemKeys);
+		return ((UsersDao) getCalDao()).bindUsers(contributedItemKey,
+				connectionType, userKeys);
 	}
 
 	@Override
@@ -162,8 +173,29 @@ public class UsersServiceImpl extends AbstractDaoBasedCalServiceImpl implements
 	@Override
 	protected ItemsResponse getItemsFor(ItemKey itemKey, CalContext context)
 			throws CalException {
+		return getItemsFor(itemKey, context, (RequestType) null);
+	}
+
+	@Override
+	public boolean deleteItemFor(ItemKey contributedItemKey,
+			String connectionType, ItemKey internalItemKey) throws CalException {
+		// Passing plates to the DAO, no logic here
+		return ((UsersDao) getCalDao()).deleteItemUser(contributedItemKey,
+				internalItemKey, connectionType);
+	}
+
+	@Override
+	protected ItemsResponse getItemsFor(ItemKey itemKey, CalContext context,
+			RequestType requestType) throws CalException {
+
+		// Setting up requested connection type
+		String connectionType = UserPrivateListRequestType.LIST_LIKER;
+		if (requestType instanceof UserPrivateListRequestType) {
+			connectionType = ((UserPrivateListRequestType) requestType)
+					.getListName();
+		}
 		final List<User> users = ((UsersDao) getCalDao()).getUsersFor(itemKey,
-				-1, -1);
+				connectionType, -1, -1);
 		final ItemsResponseImpl response = new ItemsResponseImpl();
 		response.setItems(users);
 		return response;
@@ -174,7 +206,8 @@ public class UsersServiceImpl extends AbstractDaoBasedCalServiceImpl implements
 			CalContext context, int resultsPerPage, int pageNumber)
 			throws CalException {
 		final UsersDao usersDao = ((UsersDao) getCalDao());
-		final List<User> users = usersDao.getUsersFor(itemKey, resultsPerPage,
+		final List<User> users = usersDao.getUsersFor(itemKey,
+				UserPrivateListRequestType.LIST_LIKER, resultsPerPage,
 				pageNumber);
 		final int usersCount = usersDao.getUsersForCount(itemKey);
 		final PaginatedItemsResponseImpl response = new PaginatedItemsResponseImpl(
@@ -249,5 +282,11 @@ public class UsersServiceImpl extends AbstractDaoBasedCalServiceImpl implements
 			((UserImpl) user).setOnlineTimeout(newTimeout);
 			((UserImpl) user).setToken(token);
 		}
+	}
+
+	@Override
+	public void delete(ItemKey objectKey) {
+		throw new UnsupportedOperationException(
+				"delete not supported by usersCalService");
 	}
 }
