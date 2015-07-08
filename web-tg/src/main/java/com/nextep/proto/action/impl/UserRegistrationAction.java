@@ -42,6 +42,7 @@ import com.nextep.proto.model.Constants;
 import com.nextep.proto.model.CookieProvider;
 import com.nextep.proto.services.DescriptionsManagementService;
 import com.nextep.proto.services.MessagingService;
+import com.nextep.proto.services.NotificationService;
 import com.nextep.proto.services.PropertiesManagementService;
 import com.nextep.proto.spring.ContextHolder;
 import com.nextep.smaug.service.SearchPersistenceService;
@@ -98,6 +99,8 @@ public class UserRegistrationAction extends AbstractAction implements
 	private PropertiesManagementService propertiesManagementService;
 	private DescriptionsManagementService descriptionManagementService;
 	private CalPersistenceService activitiesService;
+	@Autowired
+	private NotificationService notificationService;
 	private double cityRadius;
 	private JsonBuilder jsonBuilder;
 	private String welcomeMsgUser;
@@ -312,6 +315,7 @@ public class UserRegistrationAction extends AbstractAction implements
 					SearchScope.CHILDREN);
 			// Sending the welcome message for new users
 			messagingService.sendWelcomeMessage(user.getKey(), getLocale());
+			notificationService.sendUserRegisteredEmailNotification(user);
 		}
 
 		redirectUrl = getUrlService().getUserOverviewUrl(

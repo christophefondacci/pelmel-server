@@ -223,6 +223,7 @@ public class MobileNearbyActivitiesStatsAction extends AbstractAction implements
 			final Map<String, Integer> placesFacetsMap = SearchHelper
 					.unwrapFacets(placesFacetInfo, category);
 			placesFacetsMap.remove(ActivityType.CREATION.getCode());
+			placesFacetsMap.remove(ActivityType.CHECKIN.getCode());
 			placesFacetsMap.remove(ActivityType.CHECKOUT.getCode());
 			placesFacetsMap.remove(ActivityType.UPDATE.getCode());
 			placesFacetsMap.remove(ActivityType.DELETION.getCode());

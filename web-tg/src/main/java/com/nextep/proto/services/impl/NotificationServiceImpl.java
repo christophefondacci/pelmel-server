@@ -196,7 +196,7 @@ public class NotificationServiceImpl implements NotificationService {
 	private void notifyByEmail(String title, String html, String toAddress,
 			String bccAddress) {
 		notifyByEmail(title, html, Arrays.asList(toAddress.split(" ")),
-				"43c9d208-8167-48f8-bc90-0edc03575c5f", bccAddress);
+				"43c9d208-8167-48f8-bc90-0edc03575c5f", bccAddress.split(" "));
 	}
 
 	@Override
@@ -552,8 +552,11 @@ public class NotificationServiceImpl implements NotificationService {
 		StringBuilder buf = new StringBuilder();
 		fillEmailHeaderFor(buf, obj, user, "modified with a new photo");
 
-		buf.append("Photo added: <a href=\"" + baseUrl + media.getUrl()
+		buf.append("Photo added: <a href=\""
+				+ MediaHelper.getImageUrl(media.getUrl())
 				+ "\">New photo</a><br>");
+		buf.append("<img src=\"" + MediaHelper.getImageUrl(media.getUrl())
+				+ "\">");
 		fillEmailFooterFor(buf, obj, user);
 		final String objType = getObjectTypeName(obj);
 		notifyAdminByEmail(
@@ -586,6 +589,18 @@ public class NotificationServiceImpl implements NotificationService {
 				"Comment added to " + objType + " "
 						+ DisplayHelper.getName(obj) + " by "
 						+ user.getPseudo(), buf.toString());
+		return new AsyncResult<Boolean>(true);
+	}
+
+	@Override
+	@Async
+	public Future<Boolean> sendUserRegisteredEmailNotification(User user) {
+		StringBuilder buf = new StringBuilder();
+		fillEmailHeaderFor(buf, user, user, "signed up");
+		fillEmailFooterFor(buf, user, user);
+
+		notifyAdminByEmail("User " + user.getPseudo() + " registered",
+				buf.toString());
 		return new AsyncResult<Boolean>(true);
 	}
 

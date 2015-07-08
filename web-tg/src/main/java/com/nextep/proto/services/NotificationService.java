@@ -204,4 +204,6 @@ public interface NotificationService {
 	 *            the {@link User} to send the email to
 	 */
 	void sendChangePasswordEmail(User user);
+
+	Future<Boolean> sendUserRegisteredEmailNotification(User user);
 }

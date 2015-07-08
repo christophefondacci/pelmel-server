@@ -119,13 +119,13 @@ public class MobilePrivateListAction extends AbstractAction implements
 			case ACTION_CONFIRM:
 				// We can only confirm a user who is in pending approval list
 				if (pendingApprovalUser != null) {
-					getUsersService()
-							.deleteItemFor(userItemKey,
-									Constants.APIS_ALIAS_NETWORK_PENDING,
-									user.getKey());
+					getUsersService().deleteItemFor(userItemKey,
+							UserPrivateListRequestType.LIST_REQUESTED,
+							user.getKey());
 					final boolean wasRequested = getUsersService()
-							.deleteItemFor(user.getKey(),
-									Constants.APIS_ALIAS_NETWORK_TOAPPROVE,
+							.deleteItemFor(
+									user.getKey(),
+									UserPrivateListRequestType.LIST_PENDING_APPROVAL,
 									userItemKey);
 					if (!wasRequested) {
 						// If user is no longer in the request list, that means
