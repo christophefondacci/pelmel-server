@@ -48,10 +48,12 @@ import com.nextep.json.model.impl.JsonOneToOneMessageList;
 import com.nextep.json.model.impl.JsonPlace;
 import com.nextep.json.model.impl.JsonPlaceOverview;
 import com.nextep.json.model.impl.JsonProperty;
+import com.nextep.json.model.impl.JsonRecipientsGroup;
 import com.nextep.json.model.impl.JsonSpecialEvent;
 import com.nextep.json.model.impl.JsonUser;
 import com.nextep.media.model.Media;
 import com.nextep.messages.model.Message;
+import com.nextep.messages.model.MessageRecipientsGroup;
 import com.nextep.properties.model.Property;
 import com.nextep.proto.builders.JsonBuilder;
 import com.nextep.proto.helpers.DisplayHelper;
@@ -422,6 +424,10 @@ public class JsonBuilderImpl implements JsonBuilder {
 		json.setTime(message.getMessageDate());
 		json.setMessage(message.getMessage());
 		json.setUnread(message.isUnread());
+		if (message.getRecipientsGroupKey() != null) {
+			json.setRecipientsGroupKey(message.getRecipientsGroupKey()
+					.toString());
+		}
 		try {
 			final Media media = message.getUnique(Media.class);
 			if (media != null) {
@@ -1016,6 +1022,22 @@ public class JsonBuilderImpl implements JsonBuilder {
 		if (m != null) {
 			final JsonMedia jsonMedia = buildJsonMedia(m, highRes);
 			json.setBannerImage(jsonMedia);
+		}
+		return json;
+	}
+
+	public JsonRecipientsGroup buildJsonRecipientsGroup(
+			MessageRecipientsGroup group, boolean highRes, Locale l) {
+		// Building JSON object
+		final JsonRecipientsGroup json = new JsonRecipientsGroup();
+		json.setKey(group.getKey().toString());
+
+		// Extracting users, converting to JSON and filling parent JSON
+		final List<? extends User> groupUsers = group.get(User.class);
+		for (User groupUser : groupUsers) {
+			final IJsonLightUser jsonUser = buildJsonLightUser(groupUser,
+					highRes, l);
+			json.addUser(jsonUser);
 		}
 		return json;
 	}

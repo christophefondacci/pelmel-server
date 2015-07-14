@@ -15,6 +15,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.nextep.messages.model.Message;
+import com.nextep.messages.model.MessageType;
 import com.nextep.messages.model.MutableMessage;
 import com.videopolis.calm.base.AbstractCalmObject;
 import com.videopolis.calm.exception.CalException;
@@ -51,6 +52,12 @@ public class MessageImpl extends AbstractCalmObject implements MutableMessage {
 
 	@Column(name = "IS_UNREAD")
 	private boolean isUnread = true;
+
+	@Column(name = "RECIPIENTS_ITEM_KEY")
+	private String recipientsGroupKey;
+
+	@Column(name = "MSG_TYPE")
+	private String messageType = MessageType.MESSAGE.name();
 
 	public MessageImpl() {
 		super(null);
@@ -141,5 +148,30 @@ public class MessageImpl extends AbstractCalmObject implements MutableMessage {
 	@Override
 	public boolean isUnread() {
 		return isUnread;
+	}
+
+	@Override
+	public void setRecipientsGroupKey(ItemKey key) {
+		this.recipientsGroupKey = key == null ? null : key.toString();
+	}
+
+	@Override
+	public ItemKey getRecipientsGroupKey() {
+		try {
+			return recipientsGroupKey == null ? null : CalmFactory.parseKey(recipientsGroupKey);
+		} catch (CalException e) {
+			log.error("Unparseable Recipients group item key: " + recipientsGroupKey);
+			return null;
+		}
+	}
+
+	@Override
+	public void setMessageType(MessageType messageType) {
+		this.messageType = messageType == null ? MessageType.MESSAGE.name() : messageType.name();
+	}
+
+	@Override
+	public MessageType getMessageType() {
+		return messageType == null ? MessageType.MESSAGE : MessageType.valueOf(messageType);
 	}
 }

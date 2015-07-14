@@ -1,8 +1,11 @@
 package com.nextep.proto.services;
 
+import java.io.File;
 import java.util.Locale;
 import java.util.concurrent.Future;
 
+import com.nextep.messages.model.Message;
+import com.nextep.users.model.User;
 import com.videopolis.calm.model.ItemKey;
 
 /**
@@ -17,5 +20,8 @@ public interface MessagingService {
 
 	Future<Boolean> sendWelcomeMessage(ItemKey toKey, Locale locale);
 
-	Future<Boolean> sendMessage(ItemKey fromKey, ItemKey toKey, String message);
+	Message sendMessage(User from, User to, ItemKey recipientsGroupKey, String message);
+
+	Message sendMessageWithMedia(User from, User to, ItemKey recipientsGroupKey, String message, File mediaFile,
+			String mediaContentType, String mediaFilename);
 }

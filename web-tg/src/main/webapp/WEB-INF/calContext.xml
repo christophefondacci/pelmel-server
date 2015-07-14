@@ -20,6 +20,7 @@
 	<bean id="tagsService" parent="abstractTagsService" />
 	<bean id="geoService" parent="abstractGeoService" />
 	<bean id="messagesService" parent="abstractMessageService" />
+	<bean id="messageRecipientsGroupService" parent="abstractMessageRecipientsGroupService" />
 	<bean id="eventsService" parent="abstractEventsService" />
 	<bean id="eventSeriesService" parent="abstractEventSeriesService" />
 	<bean id="activitiesService" parent="abstractActivitiesService" />

@@ -21,9 +21,6 @@ import java.util.Map;
 
 import javax.servlet.http.Cookie;
 
-import net.sf.json.JSONObject;
-import net.sf.json.JSONSerializer;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +46,7 @@ import com.nextep.proto.apis.adapters.ApisUserLocationItemKeyAdapter;
 import com.nextep.proto.builders.JsonBuilder;
 import com.nextep.proto.helpers.DisplayHelper;
 import com.nextep.proto.helpers.LocalizationHelper;
+import com.nextep.proto.helpers.UserHelper;
 import com.nextep.proto.model.Constants;
 import com.nextep.proto.model.CookieProvider;
 import com.nextep.proto.services.MessagingService;
@@ -76,12 +74,13 @@ import com.videopolis.smaug.common.model.SearchScope;
 import com.videopolis.smaug.common.model.SuggestScope;
 import com.videopolis.smaug.exception.SearchException;
 
-public class FacebookLoginAction extends AbstractAction implements
-		CookieProvider, JsonProvider {
+import net.sf.json.JSONObject;
+import net.sf.json.JSONSerializer;
+
+public class FacebookLoginAction extends AbstractAction implements CookieProvider, JsonProvider {
 
 	private static final long serialVersionUID = -2932724792527026339L;
-	private static final Log LOGGER = LogFactory
-			.getLog(FacebookLoginAction.class);
+	private static final Log LOGGER = LogFactory.getLog(FacebookLoginAction.class);
 	private static final String APIS_ALIAS_CITY = "city";
 	private static final String APIS_ALIAS_FB = "fb";
 	private static final String APIS_ALIAS_EMAIL = "email";
@@ -92,8 +91,7 @@ public class FacebookLoginAction extends AbstractAction implements
 	private static final ApisItemKeyAdapter userLocationAdapter = new ApisUserLocationItemKeyAdapter();
 	private static final ApisItemKeyAdapter messageFromUserAdapter = new ApisMessageFromUserAdapter();
 
-	private static final DateFormat FACEBOOK_DATE_FORMAT = new SimpleDateFormat(
-			"MM/dd/yyyy");
+	private static final DateFormat FACEBOOK_DATE_FORMAT = new SimpleDateFormat("MM/dd/yyyy");
 	private CalPersistenceService mediaService;
 	private CalPersistenceService geoService;
 	private SearchPersistenceService searchService;
@@ -117,29 +115,22 @@ public class FacebookLoginAction extends AbstractAction implements
 	@Override
 	protected String doExecute() throws Exception {
 		newUser = false;
-		getLoginSupport().initialize(getLocale(), getUrlService(),
-				getHeaderSupport(), redirectUrl);
+		getLoginSupport().initialize(getLocale(), getUrlService(), getHeaderSupport(), redirectUrl);
 		getLoginSupport().setForceRedirect(forceRedirect);
-		final String callbackUrl = URLEncoder.encode(getLoginSupport()
-				.getFacebookCallbackUrl(redirectUrl), "UTF-8");
+		final String callbackUrl = URLEncoder.encode(getLoginSupport().getFacebookCallbackUrl(redirectUrl), "UTF-8");
 		String accessToken = fbAccessToken;
 
 		// Getting token from Facebook API if we don't have it
 		if (accessToken == null) {
-			String fbUrl = "https://graph.facebook.com/oauth/access_token?client_id="
-					+ facebookAppId
-					+ "&client_secret="
-					+ facebookSecret
-					+ "&code=" + code + "&redirect_uri=" + callbackUrl;
+			String fbUrl = "https://graph.facebook.com/oauth/access_token?client_id=" + facebookAppId
+					+ "&client_secret=" + facebookSecret + "&code=" + code + "&redirect_uri=" + callbackUrl;
 			final URL url = new URL(fbUrl);
-			final HttpURLConnection connection = (HttpURLConnection) url
-					.openConnection();
+			final HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 			final InputStream is = connection.getInputStream();
 			if (connection.getResponseCode() == 200) {
 				final StringWriter writer = new StringWriter();
 				try {
-					final Reader reader = new BufferedReader(
-							new InputStreamReader(is, "UTF-8"));
+					final Reader reader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
 					char[] buffer = new char[10240];
 					int i = 0;
 					while ((i = reader.read(buffer)) != -1) {
@@ -148,8 +139,7 @@ public class FacebookLoginAction extends AbstractAction implements
 				} finally {
 					is.close();
 				}
-				final String accessStr = URLDecoder.decode(writer.toString(),
-						"UTF-8");
+				final String accessStr = URLDecoder.decode(writer.toString(), "UTF-8");
 				final Map<String, String> accessMap = decodeAccess(accessStr);
 				accessToken = accessMap.get(PARAM_ACCESS_TOKEN);
 			}
@@ -158,50 +148,32 @@ public class FacebookLoginAction extends AbstractAction implements
 		if (jsonUser != null) {
 			final String id = jsonUser.getString("id");
 			final String email = jsonUser.getString("email");
+
+			// Building user criterion
+			final ApisCriterion userCriterion = (ApisCriterion) SearchRestriction
+					.alternateKey(User.class, CalmFactory.createKey(User.FACEBOOK_TYPE, id)).aliasedBy(APIS_ALIAS_FB)
+					.with(Media.class).with(SearchRestriction.with(GeographicItem.class))
+					.with((WithCriterion) SearchRestriction.with(Message.class, MessageRequestTypeFactory.UNREAD)
+							.addCriterion((ApisCriterion) SearchRestriction.adaptKey(messageFromUserAdapter)
+									.with(Media.class)))
+					.with(Description.class).with(Tag.class)
+					.addCriterion((ApisCriterion) SearchRestriction.adaptKey(userLocationAdapter)
+							.aliasedBy(Constants.APIS_ALIAS_USER_LOCATION).with(Media.class, MediaRequestTypes.THUMB));
+
+			// Query private network
+			UserHelper.addPrivateNetworkCriteria(userCriterion);
+
 			// Looking for existing user
-			final ApisRequest request = (ApisRequest) ApisFactory
-					.createCompositeRequest()
+			final ApisRequest request = (ApisRequest) ApisFactory.createCompositeRequest().addCriterion(userCriterion)
 					.addCriterion(
-							(ApisCriterion) SearchRestriction
-									.alternateKey(
-											User.class,
-											CalmFactory.createKey(
-													User.FACEBOOK_TYPE, id))
-									.aliasedBy(APIS_ALIAS_FB)
-									.with(Media.class)
-									.with(SearchRestriction
-											.with(GeographicItem.class))
-									.with((WithCriterion) SearchRestriction
-											.with(Message.class,
-													MessageRequestTypeFactory.UNREAD)
-											.addCriterion(
-													(ApisCriterion) SearchRestriction
-															.adaptKey(
-																	messageFromUserAdapter)
-															.with(Media.class)))
-									.with(Description.class)
-									.with(Tag.class)
-									.addCriterion(
-											(ApisCriterion) SearchRestriction
-													.adaptKey(
-															userLocationAdapter)
-													.aliasedBy(
-															Constants.APIS_ALIAS_USER_LOCATION)
-													.with(Media.class,
-															MediaRequestTypes.THUMB)))
-					.addCriterion(
-							SearchRestriction.alternateKey(
-									User.class,
-									CalmFactory.createKey(User.EMAIL_TYPE,
-											email)).aliasedBy(APIS_ALIAS_EMAIL));
+							SearchRestriction.alternateKey(User.class, CalmFactory.createKey(User.EMAIL_TYPE, email))
+									.aliasedBy(APIS_ALIAS_EMAIL));
 			try {
-				final ApiCompositeResponse response = (ApiCompositeResponse) getApiService()
-						.execute(request,
-								ContextFactory.createContext(getLocale()));
+				final ApiCompositeResponse response = (ApiCompositeResponse) getApiService().execute(request,
+						ContextFactory.createContext(getLocale()));
 				user = response.getUniqueElement(User.class, APIS_ALIAS_FB);
 				if (user == null) {
-					user = response.getUniqueElement(User.class,
-							APIS_ALIAS_EMAIL);
+					user = response.getUniqueElement(User.class, APIS_ALIAS_EMAIL);
 					if (user != null) {
 						// Connecting existing user to facebook account
 						((MutableUser) user).setFacebookId(id);
@@ -212,19 +184,14 @@ public class FacebookLoginAction extends AbstractAction implements
 					} else {
 						// Creating a new user from facebook info
 						try {
-							user = buildUserFromFacebookUser(accessToken,
-									jsonUser);
+							user = buildUserFromFacebookUser(accessToken, jsonUser);
 							newUser = true;
 							// Sending welcome message
-							messagingService.sendWelcomeMessage(user.getKey(),
-									getLocale());
-							notificationService
-									.sendUserRegisteredEmailNotification(user);
+							messagingService.sendWelcomeMessage(user.getKey(), getLocale());
+							notificationService.sendUserRegisteredEmailNotification(user);
 						} catch (SearchException ex) {
 							setErrorMessage("login.facebook.error");
-							LOGGER.error(
-									"Facebook login exception during search registration: "
-											+ ex.getMessage(), ex);
+							LOGGER.error("Facebook login exception during search registration: " + ex.getMessage(), ex);
 							return error();
 						}
 					}
@@ -235,13 +202,11 @@ public class FacebookLoginAction extends AbstractAction implements
 			// Updating PELMEL token
 			ContextHolder.toggleWrite();
 			((UsersService) getUsersService()).refreshUserOnlineTimeout(user,
-					((UsersService) getUsersService())
-							.generateUniqueToken(user));
+					((UsersService) getUsersService()).generateUniqueToken(user));
 		}
 		// Generating redirection URL if needed
 		if (forceRedirect) {
-			redirectUrl = getUrlService().getOverviewUrl(
-					DisplayHelper.getDefaultAjaxContainer(), user);
+			redirectUrl = getUrlService().getOverviewUrl(DisplayHelper.getDefaultAjaxContainer(), user);
 		}
 		if (redirectUrl != null) {
 			return "redirect";
@@ -261,12 +226,10 @@ public class FacebookLoginAction extends AbstractAction implements
 		}
 	}
 
-	private User buildUserFromFacebookUser(String accessToken,
-			JSONObject jsonUser) throws ApisException, CalException,
-			SearchException {
+	private User buildUserFromFacebookUser(String accessToken, JSONObject jsonUser)
+			throws ApisException, CalException, SearchException {
 		final String id = jsonUser.getString("id");
-		final MutableUser newUser = (MutableUser) getUsersService()
-				.createTransientObject();
+		final MutableUser newUser = (MutableUser) getUsersService().createTransientObject();
 		user = newUser;
 		String username = null;
 		if (jsonUser.containsKey("username")) {
@@ -286,25 +249,19 @@ public class FacebookLoginAction extends AbstractAction implements
 			birthDate = FACEBOOK_DATE_FORMAT.parse(birthday);
 			newUser.setBirthday(birthDate);
 		} catch (ParseException e) {
-			LOGGER.error(
-					"Unable to parse facebook birthdate: " + e.getMessage(), e);
+			LOGGER.error("Unable to parse facebook birthdate: " + e.getMessage(), e);
 		}
 		// Setting a media using the facebook profile URLs
-		final String mediaUrl = "http://graph.facebook.com/" + id
-				+ "/picture?type=large";
-		final String thumbUrl = "http://graph.facebook.com/" + id
-				+ "/picture?type=normal";
-		final String smallUrl = "http://graph.facebook.com/" + id
-				+ "/picture?type=square";
-		final MutableMedia media = (MutableMedia) mediaService
-				.createTransientObject();
+		final String mediaUrl = "http://graph.facebook.com/" + id + "/picture?type=large";
+		final String thumbUrl = "http://graph.facebook.com/" + id + "/picture?type=normal";
+		final String smallUrl = "http://graph.facebook.com/" + id + "/picture?type=square";
+		final MutableMedia media = (MutableMedia) mediaService.createTransientObject();
 		media.setUrl(mediaUrl);
 		media.setThumbUrl(thumbUrl);
 		media.setMiniThumbUrl(smallUrl);
 		media.setOnline(true);
 		media.setUploadDate(new Date());
-		media.setTitle(getMessageSource().getMessage(
-				"login.facebook.photoTitle", null, getLocale()));
+		media.setTitle(getMessageSource().getMessage("login.facebook.photoTitle", null, getLocale()));
 		newUser.setPseudo(username);
 		newUser.setEmail(email);
 
@@ -323,8 +280,7 @@ public class FacebookLoginAction extends AbstractAction implements
 			String userLocaleStr = jsonUser.getString("locale");
 			city = findLocation(location, userLocaleStr);
 			if (city != null) {
-				final List<? extends CalmObject> cities = geoService
-						.setItemFor(user.getKey(), city.getKey());
+				final List<? extends CalmObject> cities = geoService.setItemFor(user.getKey(), city.getKey());
 				user.addAll(cities);
 			}
 		}
@@ -334,8 +290,7 @@ public class FacebookLoginAction extends AbstractAction implements
 		searchService.storeCalmObject(newUser, SearchScope.CHILDREN);
 
 		// Generating activity
-		final MutableActivity activity = (MutableActivity) activitiesService
-				.createTransientObject();
+		final MutableActivity activity = (MutableActivity) activitiesService.createTransientObject();
 		activity.setActivityType(ActivityType.REGISTER);
 		activity.setDate(new Date());
 		activity.setUserKey(user.getKey());
@@ -349,8 +304,7 @@ public class FacebookLoginAction extends AbstractAction implements
 		return newUser;
 	}
 
-	private GeographicItem findLocation(String location, String userLocaleStr)
-			throws ApisException {
+	private GeographicItem findLocation(String location, String userLocaleStr) throws ApisException {
 		// Parsing Facebook's locale so that we extract country code
 		String[] localeInfo = userLocaleStr.split("_");
 		String countryCode = null;
@@ -366,15 +320,12 @@ public class FacebookLoginAction extends AbstractAction implements
 			}
 			location = location.substring(0, commaIndex).trim();
 		}
-		final ApisRequest request = (ApisRequest) ApisFactory
-				.createCompositeRequest().addCriterion(
-						SearchRestriction.searchFromText(GeographicItem.class,
-								SuggestScope.DESTINATION, location, 40)
-								.aliasedBy(APIS_ALIAS_CITY));
-		final ApiCompositeResponse response = (ApiCompositeResponse) getApiService()
-				.execute(request, ContextFactory.createContext(getLocale()));
-		final List<? extends City> cities = response.getElements(City.class,
-				APIS_ALIAS_CITY);
+		final ApisRequest request = (ApisRequest) ApisFactory.createCompositeRequest().addCriterion(
+				SearchRestriction.searchFromText(GeographicItem.class, SuggestScope.DESTINATION, location, 40)
+						.aliasedBy(APIS_ALIAS_CITY));
+		final ApiCompositeResponse response = (ApiCompositeResponse) getApiService().execute(request,
+				ContextFactory.createContext(getLocale()));
+		final List<? extends City> cities = response.getElements(City.class, APIS_ALIAS_CITY);
 		GeographicItem city = null;
 		// First pass, we look for exact match with all parameters
 		city = getCity(cities, state, countryCode, location, true);
@@ -397,32 +348,28 @@ public class FacebookLoginAction extends AbstractAction implements
 		return city;
 	}
 
-	private GeographicItem getCity(List<? extends City> cities, String state,
-			String countryCode, String location, boolean exact) {
+	private GeographicItem getCity(List<? extends City> cities, String state, String countryCode, String location,
+			boolean exact) {
 		for (City city : cities) {
 			if (state != null) {
 				// If we got the state we try to match the state otherwise we
 				// cannot find a match
 				final Admin adm1 = city.getAdm1();
 				if (adm1 != null && adm1.getName().equalsIgnoreCase(state)) {
-					if ((exact && city.getName().equalsIgnoreCase(location))
-							|| !exact) {
+					if ((exact && city.getName().equalsIgnoreCase(location)) || !exact) {
 						return city;
 					}
 				} else {
 					final Admin adm2 = city.getAdm2();
 					if (adm2 != null && adm2.getName().equalsIgnoreCase(state)) {
-						if ((exact && city.getName().equalsIgnoreCase(location))
-								|| !exact) {
+						if ((exact && city.getName().equalsIgnoreCase(location)) || !exact) {
 							return city;
 						}
 					} else {
 						// Last try is to match country name on "state" fragment
 						final Country country = city.getCountry();
 						if (country.getName().equalsIgnoreCase(state)) {
-							if ((exact && city.getName().equalsIgnoreCase(
-									location))
-									|| !exact) {
+							if ((exact && city.getName().equalsIgnoreCase(location)) || !exact) {
 								return city;
 							}
 						}
@@ -431,15 +378,13 @@ public class FacebookLoginAction extends AbstractAction implements
 			} else if (countryCode != null) {
 				// If we have a country code, we try to match it
 				if (city.getCountry().getCode().equalsIgnoreCase(countryCode)) {
-					if ((exact && city.getName().equalsIgnoreCase(location))
-							|| !exact) {
+					if ((exact && city.getName().equalsIgnoreCase(location)) || !exact) {
 						return city;
 					}
 				}
 			} else {
 				// Last attempt is an exact name match
-				if ((exact && city.getName().equalsIgnoreCase(location))
-						|| !exact) {
+				if ((exact && city.getName().equalsIgnoreCase(location)) || !exact) {
 					return city;
 				}
 			}
@@ -455,16 +400,14 @@ public class FacebookLoginAction extends AbstractAction implements
 		int currentEqualsIndex = accessStr.indexOf('=');
 		while (currentEqualsIndex >= 0) {
 			// Extracting key string (before "=")
-			final String key = accessStr.substring(currentIndex,
-					currentEqualsIndex);
+			final String key = accessStr.substring(currentIndex, currentEqualsIndex);
 			// Computing end index of value
 			int endIndex = accessStr.indexOf('&', currentEqualsIndex);
 			if (endIndex < 0) {
 				// We are at the end so we are done
 				endIndex = accessStr.length();
 			}
-			final String value = accessStr.substring(currentEqualsIndex + 1,
-					endIndex);
+			final String value = accessStr.substring(currentEqualsIndex + 1, endIndex);
 			paramsMap.put(key, value);
 			currentEqualsIndex = accessStr.indexOf('=', endIndex);
 		}
@@ -480,22 +423,19 @@ public class FacebookLoginAction extends AbstractAction implements
 	// }
 
 	private JSONObject getJsonUser(String accessToken) throws IOException {
-		final String fbUrl = "https://graph.facebook.com/me?access_token="
-				+ accessToken;
+		final String fbUrl = "https://graph.facebook.com/me?access_token=" + accessToken;
 		return buildJsonFromUrl(fbUrl);
 	}
 
 	private JSONObject buildJsonFromUrl(String fbUrl) throws IOException {
 		final URL url = new URL(fbUrl);
 		LOGGER.debug("Facebook user URL = " + fbUrl);
-		final HttpURLConnection connection = (HttpURLConnection) url
-				.openConnection();
+		final HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 		final InputStream is = connection.getInputStream();
 		if (connection.getResponseCode() == 200) {
 			final StringWriter writer = new StringWriter();
 			try {
-				final Reader reader = new BufferedReader(new InputStreamReader(
-						is, "UTF-8"));
+				final Reader reader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
 				char[] buffer = new char[10240];
 				int i = 0;
 				while ((i = reader.read(buffer)) != -1) {
@@ -504,8 +444,7 @@ public class FacebookLoginAction extends AbstractAction implements
 			} finally {
 				is.close();
 			}
-			final JSONObject json = (JSONObject) JSONSerializer.toJSON(writer
-					.toString());
+			final JSONObject json = (JSONObject) JSONSerializer.toJSON(writer.toString());
 			return json;
 		} else {
 			return null;
@@ -516,11 +455,9 @@ public class FacebookLoginAction extends AbstractAction implements
 	public List<Cookie> getCookies() {
 		final List<Cookie> cookies = new ArrayList<Cookie>(1);
 		if (user != null) {
-			final List<String> domainExts = LocalizationHelper
-					.getSupportedDomains();
+			final List<String> domainExts = LocalizationHelper.getSupportedDomains();
 			for (String domainExt : domainExts) {
-				final Cookie c = new Cookie(Constants.USER_COOKIE_NAME, user
-						.getToken().toString());
+				final Cookie c = new Cookie(Constants.USER_COOKIE_NAME, user.getToken().toString());
 				c.setDomain("." + getDomainName() + "." + domainExt);
 				cookies.add(c);
 			}

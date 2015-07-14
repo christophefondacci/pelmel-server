@@ -1,28 +1,25 @@
 package com.nextep.proto.action.impl;
 
 import java.io.File;
-import java.text.MessageFormat;
-import java.util.Arrays;
-import java.util.Date;
+import java.util.ArrayList;
 import java.util.List;
 
-import net.sf.json.JSONObject;
-
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 import com.nextep.cal.util.services.CalPersistenceService;
 import com.nextep.json.model.impl.JsonMessage;
 import com.nextep.json.model.impl.JsonStatus;
-import com.nextep.media.model.Media;
 import com.nextep.messages.model.Message;
-import com.nextep.messages.model.MutableMessage;
+import com.nextep.messages.model.MessageRecipientsGroup;
+import com.nextep.messages.model.MutableMessageRecipientsGroup;
 import com.nextep.messages.model.impl.MessageRequestTypeFactory;
 import com.nextep.proto.action.base.AbstractAction;
 import com.nextep.proto.action.model.JsonProviderWithError;
+import com.nextep.proto.apis.adapters.ApisMessageRecipientsGroupItemKeyAdapter;
 import com.nextep.proto.blocks.CurrentUserSupport;
-import com.nextep.proto.blocks.MediaPersistenceSupport;
 import com.nextep.proto.builders.JsonBuilder;
-import com.nextep.proto.services.NotificationService;
+import com.nextep.proto.services.MessagingService;
 import com.nextep.proto.spring.ContextHolder;
 import com.nextep.users.model.User;
 import com.videopolis.apis.factory.ApisFactory;
@@ -34,96 +31,107 @@ import com.videopolis.calm.factory.CalmFactory;
 import com.videopolis.calm.model.ItemKey;
 import com.videopolis.cals.factory.ContextFactory;
 
-public class AjaxSendMessageAction extends AbstractAction implements
-		JsonProviderWithError {
+import net.sf.json.JSONObject;
+
+public class AjaxSendMessageAction extends AbstractAction implements JsonProviderWithError {
 
 	private static final long serialVersionUID = -4442024505781884882L;
 	private static final String APIS_ALIAS_TARGET_USER = "to";
+	private static final String APIS_ALIAS_GROUP_RECIPIENTS = "rcpt";
 
-	private CalPersistenceService messageService;
 	private CurrentUserSupport currentUserSupport;
-	private NotificationService notificationService;
+	@Autowired
+	private MessagingService messagingService;
+	@Autowired
+	@Qualifier("messageRecipientsGroupService")
+	private CalPersistenceService messageRecipientsGroupService;
 	@Autowired
 	private JsonBuilder jsonBuilder;
-	@Autowired
-	private MediaPersistenceSupport mediaPersistenceSupport;
 
 	private User currentUser;
 	private String to;
 	private String msgText;
+	private String recipients;
 	private File media;
 	private String mediaContentType, mediaFileName;
 
 	private Message message;
 
+	@SuppressWarnings("unchecked")
 	@Override
 	protected String doExecute() throws Exception {
 		// Parsing destination user key
-		final ItemKey toUserKey = CalmFactory.parseKey(to);
+		final List<ItemKey> toUserKeys = new ArrayList<ItemKey>();
+
+		if (!to.contains(",")) {
+			final ItemKey toUserKey = CalmFactory.parseKey(to);
+			toUserKeys.add(toUserKey);
+		} else {
+			// Splitting every comma-separated key
+			final String[] toList = to.split(",");
+			// Parsing each key and appending to our list
+			for (String toKey : toList) {
+				final ItemKey toUserKey = CalmFactory.parseKey(toKey);
+				toUserKeys.add(toUserKey);
+			}
+		}
 
 		// Getting users
 		final ApisRequest request = ApisFactory.createCompositeRequest();
-		request.addCriterion(
-				currentUserSupport.createApisCriterionFor(getNxtpUserToken(),
-						true)).addCriterion(
-				(ApisCriterion) SearchRestriction
-						.uniqueKeys(Arrays.asList(toUserKey))
-						.aliasedBy(APIS_ALIAS_TARGET_USER)
-						.with(SearchRestriction.with(Message.class,
-								MessageRequestTypeFactory.UNREAD)));
-		final ApiCompositeResponse response = (ApiCompositeResponse) getApiService()
-				.execute(request, ContextFactory.createContext(getLocale()));
-		// Extracting user
-		currentUser = response.getUniqueElement(User.class,
-				CurrentUserSupport.APIS_ALIAS_CURRENT_USER);
+		request.addCriterion(currentUserSupport.createApisCriterionFor(getNxtpUserToken(), true))
+				.addCriterion((ApisCriterion) SearchRestriction.uniqueKeys(toUserKeys).aliasedBy(APIS_ALIAS_TARGET_USER)
+						.with(SearchRestriction.with(Message.class, MessageRequestTypeFactory.UNREAD))
+						.addCriterion(SearchRestriction.customAdapt(new ApisMessageRecipientsGroupItemKeyAdapter(),
+								APIS_ALIAS_GROUP_RECIPIENTS)));
+		final ApiCompositeResponse response = (ApiCompositeResponse) getApiService().execute(request,
+				ContextFactory.createContext(getLocale()));
+
+		// Extracting current user
+		currentUser = response.getUniqueElement(User.class, CurrentUserSupport.APIS_ALIAS_CURRENT_USER);
 		checkCurrentUser(currentUser);
 		currentUserSupport.initialize(getUrlService(), currentUser);
 
-		// Now sending message
-		ContextHolder.toggleWrite();
-		final MutableMessage msg = (MutableMessage) messageService
-				.createTransientObject();
-		msg.setFromKey(currentUser.getKey());
-		msg.setToKey(toUserKey);
-		msg.setMessage(media != null ? getText("message.photoUpgrade")
-				: msgText);
-		msg.setMessageDate(new Date());
-		messageService.saveItem(msg);
-
-		// If we have an embedded media
-		if (media != null) {
-			ContextHolder.toggleWrite();
-			final Media addedMedia = mediaPersistenceSupport.createMedia(
-					currentUser, msg.getKey(), media, mediaFileName,
-					mediaContentType, null, false, 1);
-			msg.add(addedMedia);
+		// Default recipients user list
+		List<? extends User> users = response.getElements(User.class, APIS_ALIAS_TARGET_USER);
+		// If no users there, we must have a recipients group
+		if (users == null || users.isEmpty()) {
+			users = response.getElements(User.class, APIS_ALIAS_GROUP_RECIPIENTS);
 		}
 
-		// Notifying recipient if deviceId and push enabled
-		final User targetUser = response.getUniqueElement(User.class,
+		ContextHolder.toggleWrite();
+		// Retrieving any passed recipients group
+		MessageRecipientsGroup recipientsGroup = response.getUniqueElement(MessageRecipientsGroup.class,
 				APIS_ALIAS_TARGET_USER);
 
-		if (targetUser.getPushDeviceId() != null) {
-			String pushMsg;
-			// Building push message
-			if (media == null) {
-				pushMsg = MessageFormat.format(
-						getText("message.push.template"),
-						currentUser.getPseudo(), msgText);
-			} else {
-				pushMsg = MessageFormat.format(
-						getText("message.push.photo.template"),
-						currentUser.getPseudo());
-			}
-			// Sending message
-			final List<? extends Message> unreadMessages = targetUser
-					.get(Message.class);
+		// If multi recipients users and no group, we need to create one
+		if (users.size() > 1 && recipientsGroup == null) {
 
-			// Adding +1 because we just added a new unread message
-			notificationService.sendNotification(targetUser, pushMsg,
-					unreadMessages.size() + 1, null);
+			// Creating a new recipients group
+			recipientsGroup = (MessageRecipientsGroup) messageRecipientsGroupService.createTransientObject();
+
+			// Adding ourselves to the group
+			if (!toUserKeys.contains(currentUser.getKey())) {
+				toUserKeys.add(currentUser.getKey());
+				((List<User>) users).add(currentUser);
+			}
+
+			// Setting the current list of recipients
+			((MutableMessageRecipientsGroup) recipientsGroup).setRecipients(toUserKeys);
+
+			// Saving to get an ID
+			messageRecipientsGroupService.saveItem(recipientsGroup);
 		}
-		message = msg;
+
+		// Now sending message
+		for (User targetUser : users) {
+			final Message msg = messagingService.sendMessageWithMedia(currentUser, targetUser,
+					recipientsGroup == null ? null : recipientsGroup.getKey(), media == null ? msgText : null, media,
+					mediaContentType, mediaFileName);
+			// Our returning message is the message to self
+			if (targetUser.getKey().equals(currentUser.getKey()) || users.size() == 1) {
+				message = msg;
+			}
+		}
 		return SUCCESS;
 	}
 
@@ -138,8 +146,7 @@ public class AjaxSendMessageAction extends AbstractAction implements
 		final JsonStatus s = new JsonStatus();
 		final Exception e = getLastException();
 		s.setError(true);
-		s.setMessage("Unable to send message: "
-				+ (e == null ? " unknown reason" : e.getMessage()));
+		s.setMessage("Unable to send message: " + (e == null ? " unknown reason" : e.getMessage()));
 		return JSONObject.fromObject(s).toString();
 	}
 
@@ -167,20 +174,12 @@ public class AjaxSendMessageAction extends AbstractAction implements
 		return msgText;
 	}
 
-	public void setMessageService(CalPersistenceService messageService) {
-		this.messageService = messageService;
-	}
-
 	public void setCurrentUserSupport(CurrentUserSupport currentUserSupport) {
 		this.currentUserSupport = currentUserSupport;
 	}
 
 	public CurrentUserSupport getCurrentUserSupport() {
 		return currentUserSupport;
-	}
-
-	public void setNotificationService(NotificationService notificationService) {
-		this.notificationService = notificationService;
 	}
 
 	public File getMedia() {
@@ -207,4 +206,11 @@ public class AjaxSendMessageAction extends AbstractAction implements
 		this.mediaFileName = mediaFileName;
 	}
 
+	public void setRecipients(String recipients) {
+		this.recipients = recipients;
+	}
+
+	public String getRecipients() {
+		return recipients;
+	}
 }

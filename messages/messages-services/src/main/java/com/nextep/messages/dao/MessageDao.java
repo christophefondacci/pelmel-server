@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.nextep.cal.util.model.CalDao;
 import com.nextep.messages.model.Message;
+import com.nextep.messages.model.MessageRecipientsGroup;
 import com.videopolis.calm.model.ItemKey;
 
 public interface MessageDao extends CalDao<Message> {
@@ -73,4 +74,14 @@ public interface MessageDao extends CalDao<Message> {
 	 * @return total number of exchanged messages
 	 */
 	int getConversationMessageCount(ItemKey from, ItemKey to);
+
+	/**
+	 * Loads the corresponding message groups
+	 * 
+	 * @param itemKeys
+	 *            the list of item keys of the groups to retrieve
+	 * @return the list of corresponding {@link MessageRecipientsGroup}
+	 *         instances
+	 */
+	List<MessageRecipientsGroup> getMessageGroups(List<ItemKey> itemKeys);
 }

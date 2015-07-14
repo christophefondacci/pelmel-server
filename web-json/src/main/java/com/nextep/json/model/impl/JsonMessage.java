@@ -7,6 +7,7 @@ public class JsonMessage {
 	private String key;
 	private String fromKey;
 	private String toKey;
+	private String recipientsGroupKey;
 	private String message;
 	private JsonMedia media;
 	private boolean unread;
@@ -65,5 +66,13 @@ public class JsonMessage {
 
 	public boolean isUnread() {
 		return unread;
+	}
+
+	public void setRecipientsGroupKey(String recipientsGroupKey) {
+		this.recipientsGroupKey = recipientsGroupKey;
+	}
+
+	public String getRecipientsGroupKey() {
+		return recipientsGroupKey;
 	}
 }

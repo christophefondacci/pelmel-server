@@ -6,8 +6,6 @@ import java.util.List;
 
 import javax.servlet.http.Cookie;
 
-import net.sf.json.JSONObject;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.context.NoSuchMessageException;
@@ -22,13 +20,13 @@ import com.nextep.proto.apis.adapters.ApisUserLocationItemKeyAdapter;
 import com.nextep.proto.blocks.CurrentUserSupport;
 import com.nextep.proto.builders.JsonBuilder;
 import com.nextep.proto.helpers.LocalizationHelper;
+import com.nextep.proto.helpers.UserHelper;
 import com.nextep.proto.model.Constants;
 import com.nextep.proto.model.CookieProvider;
 import com.nextep.proto.spring.ContextHolder;
 import com.nextep.smaug.service.SearchPersistenceService;
 import com.nextep.tags.model.Tag;
 import com.nextep.users.model.User;
-import com.nextep.users.model.UserPrivateListRequestType;
 import com.nextep.users.services.UsersService;
 import com.opensymphony.xwork2.ActionContext;
 import com.videopolis.apis.factory.ApisFactory;
@@ -36,14 +34,14 @@ import com.videopolis.apis.factory.SearchRestriction;
 import com.videopolis.apis.model.ApisCriterion;
 import com.videopolis.apis.model.ApisItemKeyAdapter;
 import com.videopolis.apis.model.ApisRequest;
-import com.videopolis.apis.model.WithCriterion;
 import com.videopolis.apis.service.ApiCompositeResponse;
 import com.videopolis.calm.exception.CalException;
 import com.videopolis.cals.factory.ContextFactory;
 import com.videopolis.smaug.exception.SearchException;
 
-public class UserLoginAction extends AbstractAction implements CookieProvider,
-		JsonProvider {
+import net.sf.json.JSONObject;
+
+public class UserLoginAction extends AbstractAction implements CookieProvider, JsonProvider {
 
 	private static final long serialVersionUID = 8931650837836559418L;
 	private static final Log LOGGER = LogFactory.getLog(UserLoginAction.class);
@@ -81,8 +79,7 @@ public class UserLoginAction extends AbstractAction implements CookieProvider,
 		if (email != null && !"".equals(email.trim())) {
 			try {
 				ContextHolder.toggleWrite();
-				user = usersService.login(email, password, pushDeviceId,
-						pushProvider, deviceInfo);
+				user = usersService.login(email, password, pushDeviceId, pushProvider, deviceInfo);
 				searchService.updateUserOnlineStatus(user);
 				if (user != null) {
 					if (isMobileService) {
@@ -100,58 +97,27 @@ public class UserLoginAction extends AbstractAction implements CookieProvider,
 								try {
 									Thread.sleep(500);
 								} catch (InterruptedException e) {
-									LOGGER.warn(
-											"Thread interrupted while waiting read replica: "
-													+ e.getMessage(), e);
+									LOGGER.warn("Thread interrupted while waiting read replica: " + e.getMessage(), e);
 								}
 							}
-							ApisRequest request = (ApisRequest) ApisFactory
-									.createCompositeRequest()
-									.addCriterion(
-											(ApisCriterion) currentUserSupport
-													.createApisCriterionFor(
-															user.getToken(),
-															false)
-													.with(Description.class)
-													.with(Tag.class)
-													.addCriterion(
-															(ApisCriterion) SearchRestriction
-																	.adaptKey(
-																			userLocationAdapter)
-																	.aliasedBy(
-																			Constants.APIS_ALIAS_USER_LOCATION)
-																	.with(Media.class,
-																			MediaRequestTypes.THUMB))
-													.with((WithCriterion) SearchRestriction
-															.with(User.class,
-																	new UserPrivateListRequestType(
-																			UserPrivateListRequestType.LIST_PENDING_APPROVAL))
-															.aliasedBy(
-																	Constants.APIS_ALIAS_NETWORK_PENDING)
-															.with(Media.class,
-																	MediaRequestTypes.THUMB))
-													.with((WithCriterion) SearchRestriction
-															.with(User.class,
-																	new UserPrivateListRequestType(
-																			UserPrivateListRequestType.LIST_REQUESTED))
-															.aliasedBy(
-																	Constants.APIS_ALIAS_NETWORK_TOAPPROVE)
-															.with(Media.class,
-																	MediaRequestTypes.THUMB))
+							// Building user criterion
+							final ApisCriterion userCriterion = (ApisCriterion) currentUserSupport
+									.createApisCriterionFor(user.getToken(), false).with(Description.class)
+									.with(Tag.class)
+									.addCriterion((ApisCriterion) SearchRestriction.adaptKey(userLocationAdapter)
+											.aliasedBy(Constants.APIS_ALIAS_USER_LOCATION)
+											.with(Media.class, MediaRequestTypes.THUMB));
 
-													.with((WithCriterion) SearchRestriction
-															.with(User.class,
-																	new UserPrivateListRequestType(
-																			UserPrivateListRequestType.LIST_PRIVATE_NETWORK))
-															.aliasedBy(
-																	Constants.APIS_ALIAS_NETWORK_MEMBER)
-															.with(Media.class,
-																	MediaRequestTypes.THUMB)));
-							ApiCompositeResponse response = (ApiCompositeResponse) getApiService()
-									.execute(
-											request,
-											ContextFactory
-													.createContext(getLocale()));
+							// We need his private network information
+							UserHelper.addPrivateNetworkCriteria(userCriterion);
+
+							// Assembling request
+							ApisRequest request = (ApisRequest) ApisFactory.createCompositeRequest()
+									.addCriterion(userCriterion);
+
+							// Querying
+							ApiCompositeResponse response = (ApiCompositeResponse) getApiService().execute(request,
+									ContextFactory.createContext(getLocale()));
 							loggedUser = response.getUniqueElement(User.class,
 									CurrentUserSupport.APIS_ALIAS_CURRENT_USER);
 							retries++;
@@ -159,25 +125,20 @@ public class UserLoginAction extends AbstractAction implements CookieProvider,
 						user = loggedUser;
 						return SUCCESS;
 					} else {
-						return url != null
-								&& !"".equals(url.trim())
-								&& !url.toLowerCase()
-										.endsWith("togayther.net/") ? "redirect"
-								: SUCCESS;
+						return url != null && !"".equals(url.trim()) && !url.toLowerCase().endsWith("togayther.net/")
+								? "redirect" : SUCCESS;
 					}
 				} else {
 					return unauthorized();
 				}
 			} catch (CalException e) {
-				LOGGER.error("Login error for " + email + " : "
-						+ e.getMessage());
+				LOGGER.error("Login error for " + email + " : " + e.getMessage());
 				if (email != null && !"".equals(email.trim())) {
 					loginErrorMessage = "index.login.invalid";
 				}
 				return unauthorized();
 			} catch (SearchException e) {
-				LOGGER.error(
-						"Search exception during login: " + e.getMessage(), e);
+				LOGGER.error("Search exception during login: " + e.getMessage(), e);
 				loginErrorMessage = "error.search.unavailable";
 				return error();
 			}
@@ -189,8 +150,7 @@ public class UserLoginAction extends AbstractAction implements CookieProvider,
 	@Override
 	public String getJson() {
 		if (user != null) {
-			final JsonUser json = jsonBuilder
-					.buildJsonUser(user, highRes, null);
+			final JsonUser json = jsonBuilder.buildJsonUser(user, highRes, null);
 			return JSONObject.fromObject(json).toString();
 		} else {
 			return "";
@@ -219,13 +179,10 @@ public class UserLoginAction extends AbstractAction implements CookieProvider,
 	public List<Cookie> getCookies() {
 		final List<Cookie> cookies = new ArrayList<Cookie>(1);
 		if (user != null) {
-			final List<String> domainExts = LocalizationHelper
-					.getSupportedDomains();
+			final List<String> domainExts = LocalizationHelper.getSupportedDomains();
 			for (String domainExt : domainExts) {
-				final Cookie c = new Cookie(Constants.USER_COOKIE_NAME, user
-						.getToken().toString());
-				final String subdomain = (String) ActionContext.getContext()
-						.get(Constants.ACTION_CONTEXT_SUBDOMAIN);
+				final Cookie c = new Cookie(Constants.USER_COOKIE_NAME, user.getToken().toString());
+				final String subdomain = (String) ActionContext.getContext().get(Constants.ACTION_CONTEXT_SUBDOMAIN);
 				c.setDomain(subdomain + "." + getDomainName() + "." + domainExt);
 				cookies.add(c);
 			}
@@ -252,11 +209,9 @@ public class UserLoginAction extends AbstractAction implements CookieProvider,
 	public String getLoginErrorMessageLabel() {
 		if (loginErrorMessage != null) {
 			try {
-				return getMessageSource().getMessage(loginErrorMessage, null,
-						getLocale());
+				return getMessageSource().getMessage(loginErrorMessage, null, getLocale());
 			} catch (NoSuchMessageException e) {
-				return getMessageSource().getMessage(KEY_DEFAULT_ERROR_MESSAGE,
-						null, getLocale());
+				return getMessageSource().getMessage(KEY_DEFAULT_ERROR_MESSAGE, null, getLocale());
 			}
 		} else {
 			return null;

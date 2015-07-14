@@ -382,9 +382,7 @@
 		<property name="apiService" ref="apiService" />
 	</bean>
 	<bean id="ajaxSendMessageAction" class="com.nextep.proto.action.impl.AjaxSendMessageAction"  parent="abstractAction" scope="request">
-		<property name="messageService" ref="messagesService" />
 		<property name="currentUserSupport" ref="currentUserSupport"/>
-		<property name="notificationService" ref="notificationService"/>
 	</bean>
 	<bean id="ajaxInstantMessagesAction" class="com.nextep.proto.action.impl.AjaxInstantMessagesAction" parent="abstractAction" scope="request">
 		<property name="apiService" ref="apiService"/>

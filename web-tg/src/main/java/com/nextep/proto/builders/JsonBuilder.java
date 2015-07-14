@@ -26,9 +26,11 @@ import com.nextep.json.model.impl.JsonMessage;
 import com.nextep.json.model.impl.JsonOneToOneMessageList;
 import com.nextep.json.model.impl.JsonPlace;
 import com.nextep.json.model.impl.JsonPlaceOverview;
+import com.nextep.json.model.impl.JsonRecipientsGroup;
 import com.nextep.json.model.impl.JsonUser;
 import com.nextep.media.model.Media;
 import com.nextep.messages.model.Message;
+import com.nextep.messages.model.MessageRecipientsGroup;
 import com.nextep.users.model.User;
 import com.videopolis.apis.model.FacetInformation;
 import com.videopolis.apis.service.ApiResponse;
@@ -230,4 +232,19 @@ public interface JsonBuilder {
 			Collection<? extends EventSeries> eventSeries, City eventCity,
 			Locale l, ApiResponse response);
 
+	/**
+	 * Builds the JSON representation of the given recipients group, expecting
+	 * users of the group to be directly connected to the parent group with no
+	 * alias.
+	 * 
+	 * @param group
+	 *            the {@link MessageRecipientsGroup} to convert to JSON
+	 * @param highRes
+	 *            a flag for HD images
+	 * @param l
+	 *            the current locale
+	 * @return the {@link JsonRecipientsGroup} JSON bean
+	 */
+	JsonRecipientsGroup buildJsonRecipientsGroup(MessageRecipientsGroup group,
+			boolean highRes, Locale l);
 }

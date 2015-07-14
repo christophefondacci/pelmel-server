@@ -81,6 +81,7 @@
 				<ref bean="tagsService" />
 				<ref bean="geoService" />
 				<ref bean="messagesService" />
+				<ref bean="messageRecipientsGroupService" />
 				<ref bean="placesService"/>
 				<ref bean="alternateNamesService"/>
 				<ref bean="eventsService"/>

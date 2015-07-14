@@ -17,8 +17,11 @@
 	<aop:config>
 		<aop:pointcut id="messagesServicePointcut"
 			expression="execution(* com.nextep.messages.services.impl.MessageServiceImpl.*(..))" />
+		<aop:pointcut id="messageRecipientsGroupServicePointcut"
+			expression="execution(* com.nextep.messages.services.impl.MessageRecipientsGroupServiceImpl.*(..))" />
 
 		<aop:advisor advice-ref="messagesTransactionAdvice" pointcut-ref="messagesServicePointcut" />
+		<aop:advisor advice-ref="messagesTransactionAdvice" pointcut-ref="messageRecipientsGroupServicePointcut" />
 	</aop:config>
 
 	<bean id="messagesTransactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">

@@ -20,6 +20,11 @@
 			<artifactId>cal-services</artifactId>
 			<version>${cal.version}</version>
 		</dependency>
+<!-- 		<dependency> -->
+<!-- 			<groupId>org.springframework</groupId> -->
+<!-- 			<artifactId>spring-beans</artifactId> -->
+<!-- 			<version>3.0.5.RELEASE</version> -->
+<!-- 		</dependency> -->
 		<dependency>
 			<groupId>neXtep</groupId>
 			<artifactId>cal-utils</artifactId>

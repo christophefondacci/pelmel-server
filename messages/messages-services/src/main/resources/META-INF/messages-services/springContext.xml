@@ -22,4 +22,10 @@
 			<bean class="com.nextep.messages.dao.impl.MessageDaoImpl" />
 		</property>
 	</bean>
+	<bean id="abstractMessageRecipientsGroupService" class="com.nextep.messages.services.impl.MessageRecipientsGroupServiceImpl"
+		abstract="true">
+		<property name="messageDao">
+			<bean class="com.nextep.messages.dao.impl.MessageDaoImpl" />
+		</property>
+	</bean>
 </beans>

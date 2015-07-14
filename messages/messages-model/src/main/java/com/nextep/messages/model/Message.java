@@ -61,4 +61,20 @@ public interface Message extends CalmObject {
 	 *         <code>true</code> after the user has opened this message
 	 */
 	boolean isUnread();
+
+	/**
+	 * Provides the {@link ItemKey} of the recipients group of this message when
+	 * this message is a group message
+	 * 
+	 * @return the {@link ItemKey} of a {@link MessageRecipientsGroup} instance,
+	 *         or <code>null</code> for one to one messages
+	 */
+	ItemKey getRecipientsGroupKey();
+
+	/**
+	 * Provides the message type for this message.
+	 * 
+	 * @return the {@link MessageType} of this message
+	 */
+	MessageType getMessageType();
 }
