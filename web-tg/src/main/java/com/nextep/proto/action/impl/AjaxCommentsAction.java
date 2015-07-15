@@ -4,8 +4,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import net.sf.json.JSONObject;
-
 import com.nextep.comments.model.Comment;
 import com.nextep.geo.model.Place;
 import com.nextep.json.model.impl.JsonManyToOneMessageList;
@@ -36,8 +34,9 @@ import com.videopolis.cals.factory.ContextFactory;
 import com.videopolis.cals.model.PaginationInfo;
 import com.videopolis.smaug.common.model.SearchScope;
 
-public class AjaxCommentsAction extends AbstractAction implements Commentable,
-		JsonProvider {
+import net.sf.json.JSONObject;
+
+public class AjaxCommentsAction extends AbstractAction implements Commentable, JsonProvider {
 
 	private static final long serialVersionUID = -5577138128198119138L;
 	private static final String APIS_ALIAS_COMMENTS = "comments";
@@ -71,40 +70,30 @@ public class AjaxCommentsAction extends AbstractAction implements Commentable,
 
 		// Building user criterion
 		final ApisCriterion userCriterion = (ApisCriterion) currentUserSupport
-				.createApisCriterionFor(getNxtpUserToken(), false).with(
-						ApisCommentsHelper.getUserTagsFor(itemKey));
+				.createApisCriterionFor(getNxtpUserToken(), false).with(ApisCommentsHelper.getUserTagsFor(itemKey));
 
 		// If localization is provided, we fetch the nearest place
 		if (lat != null && lng != null) {
-			userCriterion.addCriterion(SearchRestriction.searchNear(
-					Place.class, SearchScope.NEARBY_BLOCK, lat, lng, radius, 5,
-					0).aliasedBy(APIS_ALIAS_NEARBY_PLACES));
+			userCriterion.addCriterion(
+					SearchRestriction.searchNear(Place.class, SearchScope.NEARBY_BLOCK, lat, lng, radius, 5, 0)
+							.aliasedBy(APIS_ALIAS_NEARBY_PLACES));
 		}
 
-		final ApisRequest request = (ApisRequest) ApisFactory
-				.createCompositeRequest()
-				.addCriterion(userCriterion)
+		final ApisRequest request = (ApisRequest) ApisFactory.createCompositeRequest().addCriterion(userCriterion)
+				.addCriterion(ApisCommentsHelper.getCommentsFor(itemKey, page).aliasedBy(APIS_ALIAS_COMMENTS))
+				.addCriterion(ApisCommentsHelper.listCommentTags(itemKey.getType()).aliasedBy(APIS_ALIAS_TAGS))
 				.addCriterion(
-						ApisCommentsHelper.getCommentsFor(itemKey, page)
-								.aliasedBy(APIS_ALIAS_COMMENTS))
-				.addCriterion(
-						ApisCommentsHelper.listCommentTags(itemKey.getType())
-								.aliasedBy(APIS_ALIAS_TAGS))
-				.addCriterion(
-						SearchRestriction.uniqueKeys(Arrays.asList(itemKey))
-								.aliasedBy(APIS_ALIAS_COMMENTED_ITEM));
+						SearchRestriction.uniqueKeys(Arrays.asList(itemKey)).aliasedBy(APIS_ALIAS_COMMENTED_ITEM));
 
-		final ApiCompositeResponse response = (ApiCompositeResponse) getApiService()
-				.execute(request, ContextFactory.createContext(getLocale()));
+		final ApiCompositeResponse response = (ApiCompositeResponse) getApiService().execute(request,
+				ContextFactory.createContext(getLocale()));
 
 		// Header initialization for style customization
-		final CalmObject commentedItem = response.getUniqueElement(
-				CalmObject.class, APIS_ALIAS_COMMENTED_ITEM);
+		final CalmObject commentedItem = response.getUniqueElement(CalmObject.class, APIS_ALIAS_COMMENTED_ITEM);
 		getHeaderSupport().initialize(getLocale(), commentedItem, null, null);
 
 		// Initializing current user
-		final User currentUser = response.getUniqueElement(User.class,
-				CurrentUserSupport.APIS_ALIAS_CURRENT_USER);
+		final User currentUser = response.getUniqueElement(User.class, CurrentUserSupport.APIS_ALIAS_CURRENT_USER);
 		currentUserSupport.initialize(getUrlService(), currentUser);
 
 		// User authorization and timeout management
@@ -113,25 +102,20 @@ public class AjaxCommentsAction extends AbstractAction implements Commentable,
 		// Localizing user if information is provided
 		if (lat != null && lng != null) {
 			// Getting the nearest places from lat / lng
-			final List<? extends Place> places = currentUser.get(Place.class,
-					APIS_ALIAS_NEARBY_PLACES);
+			final List<? extends Place> places = currentUser.get(Place.class, APIS_ALIAS_NEARBY_PLACES);
 
 			// Localizing user
-			localizationService.localize(currentUser, places, response, lat,
-					lng);
+			localizationService.localize(currentUser, places, response, lat, lng);
 		}
 
 		// Retrieving comments, pagination and initializing supports
 		comments = response.getElements(Comment.class, APIS_ALIAS_COMMENTS);
 
 		paginationInfo = response.getPaginationInfo(APIS_ALIAS_COMMENTS);
-		commentSupport.initialize(getUrlService(), getLocale(), comments,
-				paginationInfo, currentUser, itemKey);
-		final List<Tag> tags = (List<Tag>) response.getElements(Tag.class,
-				APIS_ALIAS_TAGS);
+		commentSupport.initialize(getUrlService(), getLocale(), comments, paginationInfo, currentUser, itemKey);
+		final List<Tag> tags = (List<Tag>) response.getElements(Tag.class, APIS_ALIAS_TAGS);
 		commentTagSupport.initialize(getLocale(), tags);
-		commentTagSupport.initializeSelection(getUrlService(), itemKey,
-				currentUser);
+		commentTagSupport.initializeSelection(getUrlService(), itemKey, currentUser);
 
 		return SUCCESS;
 	}
@@ -152,12 +136,12 @@ public class AjaxCommentsAction extends AbstractAction implements Commentable,
 		Collections.reverse(comments);
 
 		// Building the response as a message response
-		final JsonManyToOneMessageList msgList = jsonBuilder
-				.buildJsonMessagesFromComments(comments, highRes, getLocale());
+		final JsonManyToOneMessageList msgList = jsonBuilder.buildJsonMessagesFromComments(comments, highRes,
+				getLocale());
 
 		// Setting the number of unread messages
-		final List<? extends Message> unreadMessages = currentUserSupport
-				.getCurrentUser().get(Message.class);
+		final List<? extends Message> unreadMessages = currentUserSupport.getCurrentUser().get(Message.class);
+		jsonBuilder.fillMessagingUnreadCount(msgList, currentUserSupport.getCurrentUser());
 		msgList.setUnreadMsgCount(unreadMessages.size());
 		msgList.setPage(page);
 		msgList.setPageSize(Constants.MAX_COMMENTS);

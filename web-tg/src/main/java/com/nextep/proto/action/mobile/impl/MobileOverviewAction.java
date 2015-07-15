@@ -9,8 +9,6 @@ import java.util.Set;
 
 import javax.annotation.Resource;
 
-import net.sf.json.JSONObject;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +29,6 @@ import com.nextep.json.model.impl.JsonPlaceOverview;
 import com.nextep.json.model.impl.JsonUser;
 import com.nextep.media.model.Media;
 import com.nextep.media.model.MediaRequestTypes;
-import com.nextep.messages.model.Message;
 import com.nextep.proto.action.base.AbstractAction;
 import com.nextep.proto.action.model.DescriptionAware;
 import com.nextep.proto.action.model.JsonProvider;
@@ -76,11 +73,12 @@ import com.videopolis.cals.model.PaginationInfo;
 import com.videopolis.smaug.common.model.FacetCategory;
 import com.videopolis.smaug.common.model.SearchScope;
 
-public class MobileOverviewAction extends AbstractAction implements
-		OverviewAware, MediaAware, TagAware, DescriptionAware, JsonProvider {
+import net.sf.json.JSONObject;
 
-	private static final Log LOGGER = LogFactory
-			.getLog(MobileOverviewAction.class);
+public class MobileOverviewAction extends AbstractAction
+		implements OverviewAware, MediaAware, TagAware, DescriptionAware, JsonProvider {
+
+	private static final Log LOGGER = LogFactory.getLog(MobileOverviewAction.class);
 
 	// Constants declaration
 	private static final long serialVersionUID = 154177235838836337L;
@@ -124,93 +122,49 @@ public class MobileOverviewAction extends AbstractAction implements
 	@Override
 	protected String doExecute() throws Exception {
 		final ItemKey itemKey = CalmFactory.parseKey(id);
-		final ApisCriterion objCriterion = (ApisCriterion) SearchRestriction
-				.uniqueKeys(Arrays.asList(itemKey)).aliasedBy(APIS_ALIAS_PLACE)
-				.with(Description.class).with(Media.class).with(Tag.class);
+		final ApisCriterion objCriterion = (ApisCriterion) SearchRestriction.uniqueKeys(Arrays.asList(itemKey))
+				.aliasedBy(APIS_ALIAS_PLACE).with(Description.class).with(Media.class).with(Tag.class);
 		// For a place overview we would like to know people who currently are
 		// in that place
 		if (Place.CAL_TYPE.equals(itemKey.getType())) {
-			final Collection<FacetCategory> userFacetCategories = SearchHelper
-					.buildUserFacetCategories();
+			final Collection<FacetCategory> userFacetCategories = SearchHelper.buildUserFacetCategories();
 			objCriterion.addCriterion((ApisCriterion) SearchRestriction
-					.withContained(User.class, SearchScope.NEARBY_BLOCK,
-							maxRelatedElements, 0)
-					.facettedBy(userFacetCategories)
-					.aliasedBy(APIS_ALIAS_USER_NEAR)
+					.withContained(User.class, SearchScope.NEARBY_BLOCK, maxRelatedElements, 0)
+					.facettedBy(userFacetCategories).aliasedBy(APIS_ALIAS_USER_NEAR)
 					.with(Media.class, MediaRequestTypes.THUMB));
 			objCriterion.addCriterion((ApisCriterion) SearchRestriction
-					.withContained(User.class, SearchScope.CHILDREN,
-							maxRelatedElements, 0)
-					.facettedBy(userFacetCategories)
-					.aliasedBy(APIS_ALIAS_USER_LIKERS)
+					.withContained(User.class, SearchScope.CHILDREN, maxRelatedElements, 0)
+					.facettedBy(userFacetCategories).aliasedBy(APIS_ALIAS_USER_LIKERS)
 					.with(Media.class, MediaRequestTypes.THUMB));
-			objCriterion
-					.addCriterion((WithCriterion) SearchRestriction
-							.with(Event.class)
-							.with(Media.class)
-							.with(Description.class)
-							.addCriterion(
-									(ApisCriterion) SearchRestriction
-											.adaptKey(eventLocationAdapter)
-											.aliasedBy(
-													Constants.APIS_ALIAS_EVENT_PLACE)
-											.with(Media.class,
-													MediaRequestTypes.THUMB)));
-			objCriterion.addCriterion((WithCriterion) SearchRestriction
-					.with(EventSeries.class).with(Media.class)
+			objCriterion.addCriterion(
+					(WithCriterion) SearchRestriction.with(Event.class).with(Media.class).with(Description.class)
+							.addCriterion((ApisCriterion) SearchRestriction.adaptKey(eventLocationAdapter)
+									.aliasedBy(Constants.APIS_ALIAS_EVENT_PLACE)
+									.with(Media.class, MediaRequestTypes.THUMB)));
+			objCriterion.addCriterion((WithCriterion) SearchRestriction.with(EventSeries.class).with(Media.class)
 					.with(Description.class));
 			// Getting comments count
-			objCriterion.addCriterion(SearchRestriction.with(Comment.class, 1,
-					0).aliasedBy(APIS_ALIAS_COMMENTS));
+			objCriterion.addCriterion(SearchRestriction.with(Comment.class, 1, 0).aliasedBy(APIS_ALIAS_COMMENTS));
 
 		} else if (User.CAL_TYPE.equals(itemKey.getType())) {
-			objCriterion
-					.with(SearchRestriction.with(GeographicItem.class))
-					.addCriterion(
-							(ApisCriterion) SearchRestriction
-									.adaptKey(userLocationAdapter)
-									.aliasedBy(
-											Constants.APIS_ALIAS_USER_LOCATION)
-									.with(Media.class, MediaRequestTypes.THUMB))
-					.addCriterion(
-							(ApisCriterion) SearchRestriction
-									.with(User.class, maxRelatedElements, 0)
-									.aliasedBy(APIS_ALIAS_USER_LIKED)
-									.with(Media.class, MediaRequestTypes.THUMB))
-					.with(SearchRestriction.withContained(User.class,
-							SearchScope.CHILDREN, 1, 0).aliasedBy(
-							APIS_ALIAS_USER_LIKERS))
-					.addCriterion(
-							(ApisCriterion) SearchRestriction
-									.with(Place.class, maxRelatedElements, 0)
-									.aliasedBy(APIS_ALIAS_PLACE_LIKE)
-									.with(Media.class, MediaRequestTypes.THUMB))
-					.addCriterion(
-							(ApisCriterion) SearchRestriction
-									.with(Event.class)
-									.with(Media.class)
-									.addCriterion(
-											(ApisCriterion) SearchRestriction
-													.adaptKey(
-															eventLocationAdapter)
-													.aliasedBy(
-															Constants.APIS_ALIAS_EVENT_PLACE)
-													.with(Media.class,
-															MediaRequestTypes.THUMB)))
-					.addCriterion(
-							(ApisCriterion) SearchRestriction
-									.with(EventSeries.class)
-									.aliasedBy(
-											Constants.APIS_ALIAS_EVENT_SERIES)
-									.with(Media.class)
-									.addCriterion(
-											(ApisCriterion) SearchRestriction
-													.adaptKey(
-															eventLocationAdapter)
-													.aliasedBy(
-															Constants.APIS_ALIAS_EVENT_PLACE)
-													.with(Media.class,
-															MediaRequestTypes.THUMB)));
+			objCriterion.with(SearchRestriction.with(GeographicItem.class))
+					.addCriterion((ApisCriterion) SearchRestriction.adaptKey(userLocationAdapter)
+							.aliasedBy(Constants.APIS_ALIAS_USER_LOCATION).with(Media.class, MediaRequestTypes.THUMB))
+					.addCriterion((ApisCriterion) SearchRestriction.with(User.class, maxRelatedElements, 0)
+							.aliasedBy(APIS_ALIAS_USER_LIKED).with(Media.class, MediaRequestTypes.THUMB))
+					.with(SearchRestriction.withContained(User.class, SearchScope.CHILDREN, 1, 0)
+							.aliasedBy(APIS_ALIAS_USER_LIKERS))
+					.addCriterion((ApisCriterion) SearchRestriction.with(Place.class, maxRelatedElements, 0)
+							.aliasedBy(APIS_ALIAS_PLACE_LIKE).with(Media.class, MediaRequestTypes.THUMB))
+					.addCriterion((ApisCriterion) SearchRestriction.with(Event.class).with(Media.class)
+							.addCriterion((ApisCriterion) SearchRestriction.adaptKey(eventLocationAdapter)
+									.aliasedBy(Constants.APIS_ALIAS_EVENT_PLACE)
+									.with(Media.class, MediaRequestTypes.THUMB)))
+					.addCriterion((ApisCriterion) SearchRestriction.with(EventSeries.class)
+							.aliasedBy(Constants.APIS_ALIAS_EVENT_SERIES).with(Media.class)
+							.addCriterion((ApisCriterion) SearchRestriction.adaptKey(eventLocationAdapter)
+									.aliasedBy(Constants.APIS_ALIAS_EVENT_PLACE)
+									.with(Media.class, MediaRequestTypes.THUMB)));
 			// .with(ApisActivitiesHelper.withUserActivities(
 			// MAX_LOCALIZATION_ACTIVITY, 0, ActivityType.CHECKIN,
 			// ActivityType.CHECKOUT).aliasedBy(
@@ -221,76 +175,55 @@ public class MobileOverviewAction extends AbstractAction implements
 			// MessageRequestTypeListConversation(
 			// fromKey, user.getKey());
 			;
-		} else if (Event.CAL_ID.equals(itemKey.getType())
-				|| EventSeries.SERIES_CAL_ID.equals(itemKey.getType())) {
+		} else if (Event.CAL_ID.equals(itemKey.getType()) || EventSeries.SERIES_CAL_ID.equals(itemKey.getType())) {
 
-			final ApisCustomAdapter customLikeAdapter = new ApisExpirableLikesCustomAdapter(
-					eventManagementService, APIS_ALIAS_USER_LIKERS,
-					maxRelatedElements, 0);
+			final ApisCustomAdapter customLikeAdapter = new ApisExpirableLikesCustomAdapter(eventManagementService,
+					APIS_ALIAS_USER_LIKERS, maxRelatedElements, 0);
 
 			if (itemKey.getType().equals(EventSeries.SERIES_CAL_ID)) {
-				objCriterion.addCriterion(SearchRestriction.customAdapt(
-						customLikeAdapter, APIS_ALIAS_USER_LIKERS));
+				objCriterion.addCriterion(SearchRestriction.customAdapt(customLikeAdapter, APIS_ALIAS_USER_LIKERS));
 			} else {
 				objCriterion.addCriterion((WithCriterion) SearchRestriction
-						.withContained(User.class, SearchScope.CHILDREN,
-								maxRelatedElements, 0)
+						.withContained(User.class, SearchScope.CHILDREN, maxRelatedElements, 0)
 						.aliasedBy(APIS_ALIAS_USER_LIKERS).with(Media.class));
 			}
-			objCriterion.addCriterion((ApisCriterion) SearchRestriction
-					.adaptKey(eventLocationAdapter)
-					.aliasedBy(Constants.APIS_ALIAS_EVENT_PLACE)
-					.with(Media.class, MediaRequestTypes.THUMB));
+			objCriterion.addCriterion((ApisCriterion) SearchRestriction.adaptKey(eventLocationAdapter)
+					.aliasedBy(Constants.APIS_ALIAS_EVENT_PLACE).with(Media.class, MediaRequestTypes.THUMB));
 			// Getting comments count
-			objCriterion.addCriterion(SearchRestriction.with(Comment.class, 1,
-					0).aliasedBy(APIS_ALIAS_COMMENTS));
+			objCriterion.addCriterion(SearchRestriction.with(Comment.class, 1, 0).aliasedBy(APIS_ALIAS_COMMENTS));
 		}
-		final ApisRequest request = (ApisRequest) ApisFactory
-				.createCompositeRequest()
-				.addCriterion(objCriterion)
-				.addCriterion(
-						SearchRestriction.searchForAllFacets(User.class,
-								SearchScope.EVENTS).facettedBy(
-								Arrays.asList(
-										SearchHelper.getUserPlacesCategory(),
-										SearchHelper.getUserEventsCategory())));
+		final ApisRequest request = (ApisRequest) ApisFactory.createCompositeRequest().addCriterion(objCriterion)
+				.addCriterion(SearchRestriction.searchForAllFacets(User.class, SearchScope.EVENTS).facettedBy(
+						Arrays.asList(SearchHelper.getUserPlacesCategory(), SearchHelper.getUserEventsCategory())));
 		if (getNxtpUserToken() != null) {
 			// Fetching user if defined with liked elements
 			final ApisCriterion userCriterion = (ApisCriterion) currentUserSupport
-					.createApisCriterionFor(getNxtpUserToken(), false).with(
-							SearchRestriction.with(
-									ApisRegistry.getModelFromType(itemKey
-											.getType())).aliasedBy(
-									Constants.APIS_ALIAS_FAVORITE));
+					.createApisCriterionFor(getNxtpUserToken(), false)
+					.with(SearchRestriction.with(ApisRegistry.getModelFromType(itemKey.getType()))
+							.aliasedBy(Constants.APIS_ALIAS_FAVORITE));
 
 			// If localization is provided, we fetch the nearest place
 			if (lat != null && lng != null) {
-				userCriterion.addCriterion(SearchRestriction.searchNear(
-						Place.class, SearchScope.NEARBY_BLOCK, lat, lng,
-						radius, 5, 0).aliasedBy(APIS_ALIAS_NEARBY_PLACES));
+				userCriterion.addCriterion(
+						SearchRestriction.searchNear(Place.class, SearchScope.NEARBY_BLOCK, lat, lng, radius, 5, 0)
+								.aliasedBy(APIS_ALIAS_NEARBY_PLACES));
 			}
 			// Appending the user criterion
 			request.addCriterion(userCriterion);
 		}
-		response = (ApiCompositeResponse) getApiService().execute(request,
-				ContextFactory.createContext(getLocale()));
+		response = (ApiCompositeResponse) getApiService().execute(request, ContextFactory.createContext(getLocale()));
 
 		// Initializing current user
-		currentUser = response.getUniqueElement(User.class,
-				CurrentUserSupport.APIS_ALIAS_CURRENT_USER);
+		currentUser = response.getUniqueElement(User.class, CurrentUserSupport.APIS_ALIAS_CURRENT_USER);
 
 		// Extracting overviewed element
-		final CalmObject o = response.getUniqueElement(CalmObject.class,
-				APIS_ALIAS_PLACE);
-		final PaginationInfo likePagination = response
-				.getPaginationInfo(APIS_ALIAS_USER_LIKERS);
+		final CalmObject o = response.getUniqueElement(CalmObject.class, APIS_ALIAS_PLACE);
+		final PaginationInfo likePagination = response.getPaginationInfo(APIS_ALIAS_USER_LIKERS);
 		overviewSupport.initialize(getUrlService(), getLocale(), o,
-				likePagination == null ? 0 : likePagination.getItemCount(), 0,
-				currentUser);
+				likePagination == null ? 0 : likePagination.getItemCount(), 0, currentUser);
 		mediaProvider.initialize(o.getKey(), o.get(Media.class));
 		tagSupport.initialize(getLocale(), Collections.EMPTY_LIST);
-		descriptionSupport.initialize(getUrlService(), getLocale(), o,
-				o.get(Description.class));
+		descriptionSupport.initialize(getUrlService(), getLocale(), o, o.get(Description.class));
 
 		// Checking user validity and performs any timeout update
 		checkCurrentUser(currentUser);
@@ -302,12 +235,10 @@ public class MobileOverviewAction extends AbstractAction implements
 		if (lat != null && lng != null) {
 
 			// Getting the nearest places from lat / lng
-			final List<? extends Place> places = currentUser.get(Place.class,
-					APIS_ALIAS_NEARBY_PLACES);
+			final List<? extends Place> places = currentUser.get(Place.class, APIS_ALIAS_NEARBY_PLACES);
 
 			// Localizing user
-			localizationService.localize(currentUser, places, response, lat,
-					lng);
+			localizationService.localize(currentUser, places, response, lat, lng);
 		}
 
 		// Saving overview object for JSON exposure
@@ -364,35 +295,28 @@ public class MobileOverviewAction extends AbstractAction implements
 		JsonLiker json = null;
 		final long oldestCheckinTime = System.currentTimeMillis() - checkinTime;
 		if (Place.CAL_TYPE.equals(overviewObject.getKey().getType())) {
-			JsonPlaceOverview jsonElement = jsonBuilder.buildJsonPlaceOverview(
-					getLocale(), (Place) overviewObject, highRes);
+			JsonPlaceOverview jsonElement = jsonBuilder.buildJsonPlaceOverview(getLocale(), (Place) overviewObject,
+					highRes);
 			json = jsonElement;
 			// Filling like and nearby facetting
-			final FacetInformation likesFacetInfo = response
-					.getFacetInformation(SearchScope.CHILDREN);
-			jsonBuilder.fillJsonLikeFacets(getLocale(), jsonElement,
-					likesFacetInfo);
-			final FacetInformation nearbyFacetInfo = response
-					.getFacetInformation(SearchScope.NEARBY_BLOCK);
-			jsonBuilder.fillJsonUserFacets(getLocale(), jsonElement,
-					nearbyFacetInfo);
+			final FacetInformation likesFacetInfo = response.getFacetInformation(SearchScope.CHILDREN);
+			jsonBuilder.fillJsonLikeFacets(getLocale(), jsonElement, likesFacetInfo);
+			final FacetInformation nearbyFacetInfo = response.getFacetInformation(SearchScope.NEARBY_BLOCK);
+			jsonBuilder.fillJsonUserFacets(getLocale(), jsonElement, nearbyFacetInfo);
 
 			// Filling counts of likes and users near
-			final PaginationInfo nearPagination = response
-					.getPaginationInfo(APIS_ALIAS_USER_NEAR);
+			final PaginationInfo nearPagination = response.getPaginationInfo(APIS_ALIAS_USER_NEAR);
 			jsonElement.setUsers(nearPagination.getItemCount());
 
 			// Adding all users who are in or were in a place
 			final Set<String> addedUserKeys = new HashSet<String>();
 
 			// Users lastly localized in that place
-			final List<? extends User> inUsers = overviewObject.get(User.class,
-					APIS_ALIAS_USER_NEAR);
+			final List<? extends User> inUsers = overviewObject.get(User.class, APIS_ALIAS_USER_NEAR);
 			for (User user : inUsers) {
 				if (!addedUserKeys.contains(user.getKey().toString())) {
 					// Building JSON representation
-					final JsonLightUser jsonUser = jsonBuilder
-							.buildJsonLightUser(user, highRes, getLocale());
+					final JsonLightUser jsonUser = jsonBuilder.buildJsonLightUser(user, highRes, getLocale());
 					jsonElement.addInUser(jsonUser);
 					// Adding key
 					addedUserKeys.add(user.getKey().toString());
@@ -406,92 +330,74 @@ public class MobileOverviewAction extends AbstractAction implements
 				jsonElement.setLng(localized.getLongitude());
 			}
 			// Filling upcoming events
-			final List<? extends Event> events = overviewObject
-					.get(Event.class);
+			final List<? extends Event> events = overviewObject.get(Event.class);
 			for (Event event : events) {
 				if (!(event instanceof EventSeries)) {
 					final JsonLightEvent jsonEvent = new JsonLightEvent();
-					jsonBuilder.fillJsonEvent(jsonEvent, event, highRes,
-							getLocale(), response);
+					jsonBuilder.fillJsonEvent(jsonEvent, event, highRes, getLocale(), response);
 					jsonElement.addEvent(jsonEvent);
 				}
 			}
 
 			// Filling number of comments
-			PaginationInfo pagination = response
-					.getPaginationInfo(APIS_ALIAS_COMMENTS);
+			PaginationInfo pagination = response.getPaginationInfo(APIS_ALIAS_COMMENTS);
 			jsonElement.setCommentsCount(pagination.getItemCount());
 
 			// Image & thumb (TODO: need to factorize this with events and
 			// users)
 			final Media m = MediaHelper.getSingleMedia(overviewObject);
 			if (m != null) {
-				final JsonMedia jsonMedia = jsonBuilder.buildJsonMedia(m,
-						highRes);
+				final JsonMedia jsonMedia = jsonBuilder.buildJsonMedia(m, highRes);
 				if (jsonMedia != null) {
 					jsonElement.setThumb(jsonMedia);
 				}
 			}
 			for (Media media : overviewObject.get(Media.class)) {
 				if (media != m) {
-					final JsonMedia jsonMedia = jsonBuilder.buildJsonMedia(
-							media, highRes);
+					final JsonMedia jsonMedia = jsonBuilder.buildJsonMedia(media, highRes);
 					jsonElement.addOtherImage(jsonMedia);
 				}
 			}
 		} else if (User.CAL_TYPE.equals(overviewObject.getKey().getType())) {
 			final User user = (User) overviewObject;
-			final JsonUser jsonUser = jsonBuilder.buildJsonUser(user, highRes,
-					getLocale(), response);
+			final JsonUser jsonUser = jsonBuilder.buildJsonUser(user, highRes, getLocale(), response);
 			json = jsonUser;
 
 			// Setting liked places count
-			final PaginationInfo likePagination = response
-					.getPaginationInfo(APIS_ALIAS_PLACE_LIKE);
+			final PaginationInfo likePagination = response.getPaginationInfo(APIS_ALIAS_PLACE_LIKE);
 			jsonUser.setLikedPlacesCount(likePagination.getItemCount());
 
-			final List<? extends Place> likesPlaces = overviewObject.get(
-					Place.class, APIS_ALIAS_PLACE_LIKE);
+			final List<? extends Place> likesPlaces = overviewObject.get(Place.class, APIS_ALIAS_PLACE_LIKE);
 			for (Place place : likesPlaces) {
-				final JsonLightPlace jsonPlace = jsonBuilder
-						.buildJsonLightPlace(place, highRes, getLocale());
+				final JsonLightPlace jsonPlace = jsonBuilder.buildJsonLightPlace(place, highRes, getLocale());
 				jsonUser.addLikedPlace(jsonPlace);
 			}
 
 			// Extracting activities for checkin information
 			boolean checkedIn = false;
 			try {
-				final Place userLocation = user.getUnique(Place.class,
-						Constants.APIS_ALIAS_USER_LOCATION);
-				if (userLocation != null
-						&& user.getLastLocationTime().getTime() > oldestCheckinTime) {
+				final Place userLocation = user.getUnique(Place.class, Constants.APIS_ALIAS_USER_LOCATION);
+				if (userLocation != null && user.getLastLocationTime().getTime() > oldestCheckinTime) {
 					// We build JSON representation of it
-					final JsonLightPlace jsonPlace = jsonBuilder
-							.buildJsonLightPlace(userLocation, highRes,
-									getLocale());
+					final JsonLightPlace jsonPlace = jsonBuilder.buildJsonLightPlace(userLocation, highRes,
+							getLocale());
 					// And add it
 					jsonUser.addCheckedInPlace(jsonPlace);
 				}
 			} catch (CalException e) {
-				LOGGER.error(
-						"Unable to get user last checked in location for user '"
-								+ user.getKey() + "' / locationKey = '"
-								+ user.getLastLocationKey() + "': "
-								+ e.getMessage(), e);
+				LOGGER.error("Unable to get user last checked in location for user '" + user.getKey()
+						+ "' / locationKey = '" + user.getLastLocationKey() + "': " + e.getMessage(), e);
 			}
 
 			// Generating checkins count
 			jsonUser.setCheckedInPlacesCount(checkedIn ? 1 : 0);
 
 		} else if (Event.CAL_ID.equals(overviewObject.getKey().getType())
-				|| EventSeries.SERIES_CAL_ID.equals(overviewObject.getKey()
-						.getType())) {
+				|| EventSeries.SERIES_CAL_ID.equals(overviewObject.getKey().getType())) {
 			final JsonEvent jsonEvent = new JsonEvent();
-			jsonBuilder.fillJsonEvent(jsonEvent, (Event) overviewObject,
-					highRes, getLocale(), response);
+			jsonBuilder.fillJsonEvent(jsonEvent, (Event) overviewObject, highRes, getLocale(), response);
 			// Filling number of comments
-			PaginationInfo pagination = response
-					.getPaginationInfo(APIS_ALIAS_COMMENTS);
+			PaginationInfo pagination = response.getPaginationInfo(APIS_ALIAS_COMMENTS);
 			jsonEvent.setCommentsCount(pagination.getItemCount());
 
 			json = jsonEvent;
@@ -501,52 +407,40 @@ public class MobileOverviewAction extends AbstractAction implements
 
 			List<? extends User> likesUsers = Collections.emptyList();
 			if (User.CAL_TYPE.equals(overviewObject.getKey().getType())) {
-				likesUsers = overviewObject.get(User.class,
-						APIS_ALIAS_USER_LIKED);
-				final PaginationInfo likePagination = response
-						.getPaginationInfo(APIS_ALIAS_USER_LIKERS);
+				likesUsers = overviewObject.get(User.class, APIS_ALIAS_USER_LIKED);
+				final PaginationInfo likePagination = response.getPaginationInfo(APIS_ALIAS_USER_LIKERS);
 				json.setLikes(likePagination.getItemCount());
 			} else {
 				// Setting likes
-				final PaginationInfo likePagination = response
-						.getPaginationInfo(APIS_ALIAS_USER_LIKERS);
+				final PaginationInfo likePagination = response.getPaginationInfo(APIS_ALIAS_USER_LIKERS);
 				json.setLikes(likePagination.getItemCount());
 
-				if (EventSeries.SERIES_CAL_ID.equals(overviewObject.getKey()
-						.getType())) {
+				if (EventSeries.SERIES_CAL_ID.equals(overviewObject.getKey().getType())) {
 					try {
-						likesUsers = response.getElements(User.class,
-								APIS_ALIAS_USER_LIKERS);
+						likesUsers = response.getElements(User.class, APIS_ALIAS_USER_LIKERS);
 					} catch (ApisException e) {
 						likesUsers = Collections.emptyList();
-						LOGGER.error(
-								"Unable to get LIKERS of EventSeries '"
-										+ overviewObject.getKey() + "': "
-										+ e.getMessage(), e);
+						LOGGER.error("Unable to get LIKERS of EventSeries '" + overviewObject.getKey() + "': "
+								+ e.getMessage(), e);
 					}
-					((JsonEvent) json).setParticipants(likePagination
-							.getItemCount());
+					((JsonEvent) json).setParticipants(likePagination.getItemCount());
 				} else {
-					likesUsers = overviewObject.get(User.class,
-							APIS_ALIAS_USER_LIKERS);
+					likesUsers = overviewObject.get(User.class, APIS_ALIAS_USER_LIKERS);
 				}
 
 			}
 			for (User user : likesUsers) {
-				final JsonLightUser jsonUser = jsonBuilder.buildJsonLightUser(
-						user, highRes, getLocale());
+				final JsonLightUser jsonUser = jsonBuilder.buildJsonLightUser(user, highRes, getLocale());
 				json.addLikeUser(jsonUser);
 			}
 
 			// Filling messages count
-			int unreadMessagesCount = currentUser.get(Message.class).size();
-			json.setUnreadMsgCount(unreadMessagesCount);
+			jsonBuilder.fillMessagingUnreadCount(json, currentUser);
 
 			// Filling the "liked" flag
 			if (getNxtpUserToken() != null) {
-				final List<? extends CalmObject> likedObjects = currentUserSupport
-						.getCurrentUser().get(CalmObject.class,
-								Constants.APIS_ALIAS_FAVORITE);
+				final List<? extends CalmObject> likedObjects = currentUserSupport.getCurrentUser()
+						.get(CalmObject.class, Constants.APIS_ALIAS_FAVORITE);
 				for (CalmObject likedObject : likedObjects) {
 					if (likedObject.getKey().equals(overviewObject.getKey())) {
 						json.setLiked(true);
@@ -610,8 +504,7 @@ public class MobileOverviewAction extends AbstractAction implements
 		this.radius = radius;
 	}
 
-	public void setViewManagementService(
-			ViewManagementService viewManagementService) {
+	public void setViewManagementService(ViewManagementService viewManagementService) {
 		this.viewManagementService = viewManagementService;
 	}
 }

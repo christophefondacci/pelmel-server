@@ -107,6 +107,6 @@ public interface Constants {
 
 	// APIS query aliases for private network
 	String APIS_ALIAS_NETWORK_MEMBER = "connected";
-	String APIS_ALIAS_NETWORK_TOAPPROVE = "request";
-	String APIS_ALIAS_NETWORK_PENDING = "pending";
+	String APIS_ALIAS_NETWORK_REQUEST = "request";
+	String APIS_ALIAS_NETWORK_PENDING_APPROVAL = "pending";
 }

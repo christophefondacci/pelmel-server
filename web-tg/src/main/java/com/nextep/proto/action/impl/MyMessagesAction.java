@@ -217,9 +217,7 @@ public class MyMessagesAction extends AbstractAction implements MessagingAware, 
 		// Building the JSON wrapper
 		final JsonManyToOneMessageList messagesList = jsonBuilder.buildJsonManyToOneMessages(messages, highRes,
 				getLocale(), currentUserSupport.getCurrentUser());
-		int unreadCount = instantMessagingSupport.getMessages() == null ? 0
-				: instantMessagingSupport.getMessages().size();
-		messagesList.setUnreadMsgCount(unreadCount);
+		jsonBuilder.fillMessagingUnreadCount(messagesList, currentUserSupport.getCurrentUser());
 		messagesList.setPage(page);
 		messagesList.setPageSize(messagesPerPage);
 		messagesList.setTotalMsgCount(msgPagination.getItemCount());

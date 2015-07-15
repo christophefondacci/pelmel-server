@@ -7,8 +7,6 @@ import java.util.List;
 
 import javax.annotation.Resource;
 
-import net.sf.json.JSONObject;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +23,6 @@ import com.nextep.json.model.impl.JsonLightUser;
 import com.nextep.json.model.impl.JsonPlaceOverview;
 import com.nextep.media.model.Media;
 import com.nextep.media.model.MediaRequestTypes;
-import com.nextep.messages.model.Message;
 import com.nextep.properties.model.Property;
 import com.nextep.proto.action.base.AbstractAction;
 import com.nextep.proto.action.mobile.model.MobileOverviewService;
@@ -58,11 +55,11 @@ import com.videopolis.cals.model.PaginationInfo;
 import com.videopolis.smaug.common.model.FacetCategory;
 import com.videopolis.smaug.common.model.SearchScope;
 
-public class MobileOverviewPlaceAction extends AbstractAction implements
-		JsonProvider, MobileOverviewService {
+import net.sf.json.JSONObject;
 
-	private static final Log LOGGER = LogFactory
-			.getLog(MobileOverviewPlaceAction.class);
+public class MobileOverviewPlaceAction extends AbstractAction implements JsonProvider, MobileOverviewService {
+
+	private static final Log LOGGER = LogFactory.getLog(MobileOverviewPlaceAction.class);
 
 	// Constants declaration
 	private static final long serialVersionUID = 154177235838836337L;
@@ -99,94 +96,70 @@ public class MobileOverviewPlaceAction extends AbstractAction implements
 	@Override
 	protected String doExecute() throws Exception {
 		final ItemKey itemKey = CalmFactory.parseKey(id);
-		final ApisCriterion objCriterion = (ApisCriterion) SearchRestriction
-				.uniqueKeys(Arrays.asList(itemKey)).aliasedBy(APIS_ALIAS_PLACE)
-				.with(Description.class).with(Media.class).with(Tag.class)
+		final ApisCriterion objCriterion = (ApisCriterion) SearchRestriction.uniqueKeys(Arrays.asList(itemKey))
+				.aliasedBy(APIS_ALIAS_PLACE).with(Description.class).with(Media.class).with(Tag.class)
 				.with(Property.class);
 		// For a place overview we would like to know people who currently are
 		// in that place
-		final Collection<FacetCategory> userFacetCategories = Arrays
-				.asList(SearchHelper.getTagFacetCategory());
+		final Collection<FacetCategory> userFacetCategories = Arrays.asList(SearchHelper.getTagFacetCategory());
 
 		// Checked in users
 		objCriterion.addCriterion((ApisCriterion) SearchRestriction
-				.withContained(User.class, SearchScope.NEARBY_BLOCK,
-						maxRelatedElements, 0).facettedBy(userFacetCategories)
-				.aliasedBy(APIS_ALIAS_USER_CHECKEDIN)
+				.withContained(User.class, SearchScope.NEARBY_BLOCK, maxRelatedElements, 0)
+				.facettedBy(userFacetCategories).aliasedBy(APIS_ALIAS_USER_CHECKEDIN)
 				.with(Media.class, MediaRequestTypes.THUMB));
 		// Auto-localization
-		objCriterion.addCriterion(SearchRestriction.withContained(User.class,
-				SearchScope.USER_LOCALIZATION, 1, 0).aliasedBy(
-				APIS_ALIAS_USER_AUTO_LOCALIZATION));
+		objCriterion.addCriterion(SearchRestriction.withContained(User.class, SearchScope.USER_LOCALIZATION, 1, 0)
+				.aliasedBy(APIS_ALIAS_USER_AUTO_LOCALIZATION));
 
 		// Likers
 		objCriterion.addCriterion((ApisCriterion) SearchRestriction
-				.withContained(User.class, SearchScope.CHILDREN,
-						maxRelatedElements, 0).facettedBy(userFacetCategories)
-				.aliasedBy(APIS_ALIAS_USER_LIKERS)
-				.with(Media.class, MediaRequestTypes.THUMB));
+				.withContained(User.class, SearchScope.CHILDREN, maxRelatedElements, 0).facettedBy(userFacetCategories)
+				.aliasedBy(APIS_ALIAS_USER_LIKERS).with(Media.class, MediaRequestTypes.THUMB));
 
 		// Events and recurring events
-		objCriterion.addCriterion((WithCriterion) SearchRestriction
-				.with(Event.class).with(Media.class).with(Description.class));
-		objCriterion.addCriterion((WithCriterion) SearchRestriction
-				.with(EventSeries.class).with(Media.class)
-				.with(Description.class));
+		objCriterion.addCriterion(
+				(WithCriterion) SearchRestriction.with(Event.class).with(Media.class).with(Description.class));
+		objCriterion.addCriterion(
+				(WithCriterion) SearchRestriction.with(EventSeries.class).with(Media.class).with(Description.class));
 
 		// Getting comments count
-		objCriterion.addCriterion(SearchRestriction.with(Comment.class, 1, 0)
-				.aliasedBy(APIS_ALIAS_COMMENTS));
+		objCriterion.addCriterion(SearchRestriction.with(Comment.class, 1, 0).aliasedBy(APIS_ALIAS_COMMENTS));
 
 		// We need last nearby activity ID to display the "NEW" app activity
 		// badge
-		final List<Sorter> activitiesDateSorter = SearchHelper
-				.getActivitiesDateSorter(false);
+		final List<Sorter> activitiesDateSorter = SearchHelper.getActivitiesDateSorter(false);
 
 		// Querying along with some global user facetting
-		final ApisRequest request = (ApisRequest) ApisFactory
-				.createCompositeRequest()
-				.addCriterion(objCriterion)
-				.addCriterion(
-						SearchRestriction
-								.searchNear(Activity.class,
-										SearchScope.NEARBY_ACTIVITIES, lat,
-										lng, radius, 1, 0)
-								.sortBy(activitiesDateSorter)
-								.aliasedBy(APIS_ALIAS_NEARBY_ACTIVITIES))
-				.addCriterion(
-						SearchRestriction.searchForAllFacets(User.class,
-								SearchScope.EVENTS).facettedBy(
-								Arrays.asList(
-										SearchHelper.getUserPlacesCategory(),
-										SearchHelper.getUserEventsCategory())));
+		final ApisRequest request = (ApisRequest) ApisFactory.createCompositeRequest().addCriterion(objCriterion)
+				.addCriterion(SearchRestriction
+						.searchNear(Activity.class, SearchScope.NEARBY_ACTIVITIES, lat, lng, radius, 1, 0)
+						.sortBy(activitiesDateSorter).aliasedBy(APIS_ALIAS_NEARBY_ACTIVITIES))
+				.addCriterion(SearchRestriction.searchForAllFacets(User.class, SearchScope.EVENTS).facettedBy(
+						Arrays.asList(SearchHelper.getUserPlacesCategory(), SearchHelper.getUserEventsCategory())));
 
 		// Fetching user if defined with liked elements
 		final ApisCriterion userCriterion = (ApisCriterion) currentUserSupport
-				.createApisCriterionFor(getNxtpUserToken(), false).with(
-						SearchRestriction
-								.with(ApisRegistry.getModelFromType(itemKey
-										.getType())).aliasedBy(
-										Constants.APIS_ALIAS_FAVORITE));
+				.createApisCriterionFor(getNxtpUserToken(), false)
+				.with(SearchRestriction.with(ApisRegistry.getModelFromType(itemKey.getType()))
+						.aliasedBy(Constants.APIS_ALIAS_FAVORITE));
 
 		// If localization is provided, we fetch the nearest place
 		if (lat != null && lng != null) {
-			userCriterion.addCriterion(SearchRestriction.searchNear(
-					Place.class, SearchScope.NEARBY_BLOCK, lat, lng, radius, 5,
-					0).aliasedBy(Constants.APIS_ALIAS_NEARBY_PLACES));
+			userCriterion.addCriterion(
+					SearchRestriction.searchNear(Place.class, SearchScope.NEARBY_BLOCK, lat, lng, radius, 5, 0)
+							.aliasedBy(Constants.APIS_ALIAS_NEARBY_PLACES));
 		}
 		// Appending the user criterion
 		request.addCriterion(userCriterion);
 
-		response = (ApiCompositeResponse) getApiService().execute(request,
-				ContextFactory.createContext(getLocale()));
+		response = (ApiCompositeResponse) getApiService().execute(request, ContextFactory.createContext(getLocale()));
 
 		// Initializing current user
-		currentUser = response.getUniqueElement(User.class,
-				CurrentUserSupport.APIS_ALIAS_CURRENT_USER);
+		currentUser = response.getUniqueElement(User.class, CurrentUserSupport.APIS_ALIAS_CURRENT_USER);
 
 		// Extracting overviewed element
-		overviewObject = response.getUniqueElement(Place.class,
-				APIS_ALIAS_PLACE);
+		overviewObject = response.getUniqueElement(Place.class, APIS_ALIAS_PLACE);
 
 		// Checking user validity and performs any timeout update
 		checkCurrentUser(currentUser);
@@ -198,19 +171,16 @@ public class MobileOverviewPlaceAction extends AbstractAction implements
 		if (lat != null && lng != null) {
 
 			// Getting the nearest places from lat / lng
-			final List<? extends Place> places = currentUser.get(Place.class,
-					Constants.APIS_ALIAS_NEARBY_PLACES);
+			final List<? extends Place> places = currentUser.get(Place.class, Constants.APIS_ALIAS_NEARBY_PLACES);
 
 			// Localizing user
-			localizationService.localize(currentUser, places, response, lat,
-					lng);
+			localizationService.localize(currentUser, places, response, lat, lng);
 		}
 
 		// Filling the place of the events (we did not fetch it again) to
 		// current place
 		for (Event e : overviewObject.get(Event.class)) {
-			e.addAll(Constants.APIS_ALIAS_EVENT_PLACE,
-					Arrays.asList(overviewObject));
+			e.addAll(Constants.APIS_ALIAS_EVENT_PLACE, Arrays.asList(overviewObject));
 		}
 		// Saving the viewed item
 		viewManagementService.logViewedOverview(overviewObject, currentUser);
@@ -220,31 +190,23 @@ public class MobileOverviewPlaceAction extends AbstractAction implements
 
 	@Override
 	public String getJson() {
-		JsonPlaceOverview json = jsonBuilder.buildJsonPlaceOverview(
-				getLocale(), overviewObject, highRes);
+		JsonPlaceOverview json = jsonBuilder.buildJsonPlaceOverview(getLocale(), overviewObject, highRes);
 		// Filling like and nearby facetting
-		final FacetInformation likesFacetInfo = response
-				.getFacetInformation(SearchScope.CHILDREN);
+		final FacetInformation likesFacetInfo = response.getFacetInformation(SearchScope.CHILDREN);
 		jsonBuilder.fillJsonLikeFacets(getLocale(), json, likesFacetInfo);
-		final FacetInformation nearbyFacetInfo = response
-				.getFacetInformation(SearchScope.NEARBY_BLOCK);
+		final FacetInformation nearbyFacetInfo = response.getFacetInformation(SearchScope.NEARBY_BLOCK);
 		jsonBuilder.fillJsonUserFacets(getLocale(), json, nearbyFacetInfo);
 
 		// Filling counts of likes and users near
-		final PaginationInfo nearPagination = response
-				.getPaginationInfo(APIS_ALIAS_USER_CHECKEDIN);
-		final PaginationInfo autoLocPagination = response
-				.getPaginationInfo(APIS_ALIAS_USER_AUTO_LOCALIZATION);
-		json.setUsers(nearPagination.getItemCount()
-				+ autoLocPagination.getItemCount());
+		final PaginationInfo nearPagination = response.getPaginationInfo(APIS_ALIAS_USER_CHECKEDIN);
+		final PaginationInfo autoLocPagination = response.getPaginationInfo(APIS_ALIAS_USER_AUTO_LOCALIZATION);
+		json.setUsers(nearPagination.getItemCount() + autoLocPagination.getItemCount());
 
 		// Users lastly localized in that place
-		final List<? extends User> inUsers = overviewObject.get(User.class,
-				APIS_ALIAS_USER_CHECKEDIN);
+		final List<? extends User> inUsers = overviewObject.get(User.class, APIS_ALIAS_USER_CHECKEDIN);
 		for (User user : inUsers) {
 			// Building JSON representation
-			final JsonLightUser jsonUser = jsonBuilder.buildJsonLightUser(user,
-					highRes, getLocale());
+			final JsonLightUser jsonUser = jsonBuilder.buildJsonLightUser(user, highRes, getLocale());
 			json.addInUser(jsonUser);
 		}
 
@@ -259,59 +221,51 @@ public class MobileOverviewPlaceAction extends AbstractAction implements
 		for (Event event : events) {
 			if (!(event instanceof EventSeries)) {
 				final JsonLightEvent jsonEvent = new JsonLightEvent();
-				jsonBuilder.fillJsonEvent(jsonEvent, event, highRes,
-						getLocale(), response);
+				jsonBuilder.fillJsonEvent(jsonEvent, event, highRes, getLocale(), response);
 				json.addEvent(jsonEvent);
 			}
 		}
 
 		// Filling hours
-		final List<? extends EventSeries> series = overviewObject
-				.get(EventSeries.class);
+		final List<? extends EventSeries> series = overviewObject.get(EventSeries.class);
 		if (series != null) {
-			final Collection<JsonHour> hours = jsonBuilder.buildJsonHours(
-					series, overviewObject.getCity(), getLocale(), response);
+			final Collection<JsonHour> hours = jsonBuilder.buildJsonHours(series, overviewObject.getCity(), getLocale(),
+					response);
 			json.setHours(hours);
 		}
 		// Filling number of comments
-		PaginationInfo pagination = response
-				.getPaginationInfo(APIS_ALIAS_COMMENTS);
+		PaginationInfo pagination = response.getPaginationInfo(APIS_ALIAS_COMMENTS);
 		json.setCommentsCount(pagination.getItemCount());
 
 		// Generating like
 		List<? extends User> likesUsers = Collections.emptyList();
 
 		// Setting likes
-		final PaginationInfo likePagination = response
-				.getPaginationInfo(APIS_ALIAS_USER_LIKERS);
+		final PaginationInfo likePagination = response.getPaginationInfo(APIS_ALIAS_USER_LIKERS);
 		json.setLikes(likePagination.getItemCount());
 
 		likesUsers = overviewObject.get(User.class, APIS_ALIAS_USER_LIKERS);
 		for (User user : likesUsers) {
-			final JsonLightUser jsonUser = jsonBuilder.buildJsonLightUser(user,
-					highRes, getLocale());
+			final JsonLightUser jsonUser = jsonBuilder.buildJsonLightUser(user, highRes, getLocale());
 			json.addLikeUser(jsonUser);
 		}
 
 		// Filling messages count
-		int unreadMessagesCount = currentUser.get(Message.class).size();
-		json.setUnreadMsgCount(unreadMessagesCount);
+		jsonBuilder.fillMessagingUnreadCount(json, currentUser);
 
 		// Filling last activity ID
 		try {
-			final List<? extends Activity> activities = response.getElements(
-					Activity.class, APIS_ALIAS_NEARBY_ACTIVITIES);
+			final List<? extends Activity> activities = response.getElements(Activity.class,
+					APIS_ALIAS_NEARBY_ACTIVITIES);
 			if (!activities.isEmpty()) {
-				json.setMaxActivityId(activities.iterator().next().getKey()
-						.getNumericId());
+				json.setMaxActivityId(activities.iterator().next().getKey().getNumericId());
 			}
 		} catch (ApisException e) {
 			LOGGER.error("Unable to get last activity ID: " + e.getMessage(), e);
 		}
 		// Filling the "liked" flag
-		final List<? extends CalmObject> likedObjects = currentUserSupport
-				.getCurrentUser().get(CalmObject.class,
-						Constants.APIS_ALIAS_FAVORITE);
+		final List<? extends CalmObject> likedObjects = currentUserSupport.getCurrentUser().get(CalmObject.class,
+				Constants.APIS_ALIAS_FAVORITE);
 		for (CalmObject likedObject : likedObjects) {
 			if (likedObject.getKey().equals(overviewObject.getKey())) {
 				json.setLiked(true);
@@ -381,8 +335,7 @@ public class MobileOverviewPlaceAction extends AbstractAction implements
 		this.radius = radius;
 	}
 
-	public void setViewManagementService(
-			ViewManagementService viewManagementService) {
+	public void setViewManagementService(ViewManagementService viewManagementService) {
 		this.viewManagementService = viewManagementService;
 	}
 }

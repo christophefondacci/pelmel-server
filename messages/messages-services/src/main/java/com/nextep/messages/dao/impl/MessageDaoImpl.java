@@ -52,7 +52,7 @@ public class MessageDaoImpl extends AbstractCalDao<Message>implements MessageDao
 	public List<Message> getItemsFor(ItemKey key, int resultsPerPage, int pageOffset) {
 		return entityManager
 				.createQuery(
-						"from MessageImpl where toKey=:toKey and (fromKey!=toKey or recipientsGroupKey is not null) order by messageDate desc ")
+						"from MessageImpl where toKey=:toKey and (fromKey!=toKey or recipientsGroupKey is not null) and messageType='MESSAGE' order by messageDate desc ")
 				.setMaxResults(resultsPerPage).setFirstResult(pageOffset * resultsPerPage)
 				.setParameter("toKey", key.toString()).getResultList();
 	}
@@ -62,7 +62,7 @@ public class MessageDaoImpl extends AbstractCalDao<Message>implements MessageDao
 	public List<Message> getMessagesForAfterId(ItemKey userKey, int page, int pageSize, ItemKey afterId) {
 		return entityManager
 				.createQuery(
-						"from MessageImpl where (toKey=:toKey or fromKey=:toKey) and id>:minId and (fromKey!=toKey or recipientsGroupKey is not null) order by messageDate asc ")
+						"from MessageImpl where (toKey=:toKey or fromKey=:toKey) and id>:minId and (fromKey!=toKey or recipientsGroupKey is not null) and messageType='MESSAGE' order by messageDate asc ")
 				.setMaxResults(pageSize).setFirstResult(page * pageSize).setParameter("toKey", userKey.toString())
 				.setParameter("minId", afterId.getNumericId()).getResultList();
 	}
@@ -96,7 +96,7 @@ public class MessageDaoImpl extends AbstractCalDao<Message>implements MessageDao
 		} else {
 			final BigInteger count = (BigInteger) entityManager
 					.createNativeQuery(
-							"select count(1) from MESSAGES where to_item_key=:toItemKey and (from_item_key!=to_item_key or RECIPIENTS_ITEM_KEY is not null)")
+							"select count(1) from MESSAGES where to_item_key=:toItemKey and (from_item_key!=to_item_key or RECIPIENTS_ITEM_KEY is not null) and MSG_TYPE='MESSAGE'")
 					.setParameter("toItemKey", userKey.toString()).getSingleResult();
 			return count.intValue();
 		}
@@ -106,7 +106,7 @@ public class MessageDaoImpl extends AbstractCalDao<Message>implements MessageDao
 	public int getMessageCountAfterId(ItemKey userKey, ItemKey minItemKey) {
 		final BigInteger count = (BigInteger) entityManager
 				.createNativeQuery(
-						"select count(1) from MESSAGES where to_item_key=:toItemKey and MSG_ID>:minId and (from_item_key!=to_item_key or RECIPIENTS_ITEM_KEY is not null) ")
+						"select count(1) from MESSAGES where to_item_key=:toItemKey and MSG_ID>:minId and (from_item_key!=to_item_key or RECIPIENTS_ITEM_KEY is not null) and MSG_TYPE='MESSAGE'")
 				.setParameter("toItemKey", userKey.toString()).setParameter("minId", minItemKey.getNumericId())
 				.getSingleResult();
 		return count.intValue();
@@ -139,12 +139,12 @@ public class MessageDaoImpl extends AbstractCalDao<Message>implements MessageDao
 		if (MessageRecipientsGroup.CAL_TYPE.equals(from.getType())) {
 			messages = entityManager
 					.createQuery(
-							"from MessageImpl where recipientsGroupKey=:groupKey and toKey=:to order by messageDate desc")
+							"from MessageImpl where recipientsGroupKey=:groupKey and toKey=:to and messageType='MESSAGE' order by messageDate desc")
 					.setParameter("groupKey", from.toString()).setParameter("to", to.toString()).getResultList();
 		} else {
 			messages = entityManager
 					.createQuery(
-							"from MessageImpl where (fromKey=:from and toKey=:to) or (fromKey=:to and toKey=:from) order by messageDate desc")
+							"from MessageImpl where ((fromKey=:from and toKey=:to) or (fromKey=:to and toKey=:from)) and messageType='MESSAGE' order by messageDate desc")
 					.setParameter("from", from.toString()).setParameter("to", to.toString()).setFirstResult(offset)
 					.setMaxResults(count).getResultList();
 		}
@@ -157,12 +157,12 @@ public class MessageDaoImpl extends AbstractCalDao<Message>implements MessageDao
 		if (MessageRecipientsGroup.CAL_TYPE.equals(from.getType())) {
 			count = (BigInteger) entityManager
 					.createNativeQuery(
-							"select count(1) from MESSAGES where RECIPIENTS_ITEM_KEY=:groupKey and TO_ITEM_KEY=:to")
+							"select count(1) from MESSAGES where RECIPIENTS_ITEM_KEY=:groupKey and TO_ITEM_KEY=:to and MSG_TYPE='MESSAGE'")
 					.setParameter("groupKey", from.toString()).setParameter("to", to.toString()).getSingleResult();
 		} else {
 			count = (BigInteger) entityManager
 					.createNativeQuery(
-							"select count(1) from MESSAGES where (FROM_ITEM_KEY=:from and TO_ITEM_KEY=:to) or (FROM_ITEM_KEY=:to and TO_ITEM_KEY=:from)")
+							"select count(1) from MESSAGES where ((FROM_ITEM_KEY=:from and TO_ITEM_KEY=:to) or (FROM_ITEM_KEY=:to and TO_ITEM_KEY=:from)) and MSG_TYPE='MESSAGE'")
 					.setParameter("from", from.toString()).setParameter("to", to.toString()).getSingleResult();
 		}
 		return count.intValue();

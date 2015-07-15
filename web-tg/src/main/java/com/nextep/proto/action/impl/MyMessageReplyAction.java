@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import net.sf.json.JSONObject;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -42,11 +40,11 @@ import com.videopolis.cals.model.CalContext;
 import com.videopolis.cals.model.PaginationInfo;
 import com.videopolis.smaug.common.model.SearchScope;
 
-public class MyMessageReplyAction extends AbstractAction implements
-		CurrentUserAware, MessagingAware, JsonProvider {
+import net.sf.json.JSONObject;
 
-	private static final Log LOGGER = LogFactory
-			.getLog(MyMessageReplyAction.class);
+public class MyMessageReplyAction extends AbstractAction implements CurrentUserAware, MessagingAware, JsonProvider {
+
+	private static final Log LOGGER = LogFactory.getLog(MyMessageReplyAction.class);
 	private static final long serialVersionUID = 7255915412851663750L;
 	private static final String PAGE_STYLE_MSG = "my-messages";
 	private static final int MESSAGES_PER_PAGE = 15;
@@ -83,89 +81,70 @@ public class MyMessageReplyAction extends AbstractAction implements
 		final ItemKey fromKey = CalmFactory.parseKey(from);
 		// We need the user key
 		ApisRequest request = ApisFactory.createCompositeRequest();
-		request.addCriterion(currentUserSupport.createApisCriterionFor(
-				getNxtpUserToken(), true));
+		request.addCriterion(currentUserSupport.createApisCriterionFor(getNxtpUserToken(), true));
 		final CalContext context = ContextFactory.createContext(getLocale());
-		ApiCompositeResponse response = (ApiCompositeResponse) getApiService()
-				.execute(request, context);
+		ApiCompositeResponse response = (ApiCompositeResponse) getApiService().execute(request, context);
 
 		// Extracting user
-		User user = response.getUniqueElement(User.class,
-				CurrentUserSupport.APIS_ALIAS_CURRENT_USER);
+		User user = response.getUniqueElement(User.class, CurrentUserSupport.APIS_ALIAS_CURRENT_USER);
 		checkCurrentUser(user);
-		final RequestType msgRequestType = new MessageRequestTypeListConversation(
-				fromKey, user.getKey());
+		final RequestType msgRequestType = new MessageRequestTypeListConversation(fromKey, user.getKey());
 
 		// Querying user
 		request = ApisFactory.createCompositeRequest();
-		final ApisCriterion userCriterion = currentUserSupport
-				.createApisCriterionFor(getNxtpUserToken(), false);
+		final ApisCriterion userCriterion = currentUserSupport.createApisCriterionFor(getNxtpUserToken(), false);
 		// If localization is provided, we fetch the nearest place
 		if (lat != null && lng != null) {
-			userCriterion.addCriterion(SearchRestriction.searchNear(
-					Place.class, SearchScope.NEARBY_BLOCK, lat, lng, radius, 5,
-					0).aliasedBy(APIS_ALIAS_NEARBY_PLACES));
+			userCriterion.addCriterion(
+					SearchRestriction.searchNear(Place.class, SearchScope.NEARBY_BLOCK, lat, lng, radius, 5, 0)
+							.aliasedBy(APIS_ALIAS_NEARBY_PLACES));
 		}
 
 		// Adding the user criterion
 		request.addCriterion(userCriterion);
 
 		// Now querying from User
-		request.addCriterion((ApisCriterion) SearchRestriction
-				.uniqueKeys(Arrays.asList(fromKey))
-				.aliasedBy(APIS_ALIAS_FROM_USER)
-				.with(Media.class, MediaRequestTypes.THUMB));
+		request.addCriterion((ApisCriterion) SearchRestriction.uniqueKeys(Arrays.asList(fromKey))
+				.aliasedBy(APIS_ALIAS_FROM_USER).with(Media.class, MediaRequestTypes.THUMB));
 
 		// Querying messages
-		request.addCriterion((ApisCriterion) SearchRestriction
-				.list(Message.class, msgRequestType)
-				.paginatedBy(MESSAGES_PER_PAGE, page)
-				.aliasedBy(APIS_ALIAS_PAGE_MESSAGES)
-				.with(Media.class)
-				.addCriterion(
-						(ApisCriterion) SearchRestriction.adaptKey(
-								MSG_FROM_USER_ADAPTER).with(Media.class,
-								MediaRequestTypes.THUMB)));
-		response = (ApiCompositeResponse) getApiService().execute(request,
-				context);
+		request.addCriterion((ApisCriterion) SearchRestriction.list(Message.class, msgRequestType)
+				.paginatedBy(MESSAGES_PER_PAGE, page).aliasedBy(APIS_ALIAS_PAGE_MESSAGES).with(Media.class)
+				.addCriterion((ApisCriterion) SearchRestriction.adaptKey(MSG_FROM_USER_ADAPTER).with(Media.class,
+						MediaRequestTypes.THUMB)));
+		response = (ApiCompositeResponse) getApiService().execute(request, context);
 
 		// Extracting user
-		currentUser = response.getUniqueElement(User.class,
-				CurrentUserSupport.APIS_ALIAS_CURRENT_USER);
+		currentUser = response.getUniqueElement(User.class, CurrentUserSupport.APIS_ALIAS_CURRENT_USER);
 		currentUserSupport.initialize(getUrlService(), currentUser);
 		// Localizing user if information is provided
 		if (lat != null && lng != null) {
 			// Getting the nearest places from lat / lng
-			final List<? extends Place> places = currentUser.get(Place.class,
-					APIS_ALIAS_NEARBY_PLACES);
+			final List<? extends Place> places = currentUser.get(Place.class, APIS_ALIAS_NEARBY_PLACES);
 
 			// Localizing user
-			localizationService.localize(currentUser, places, response, lat,
-					lng);
+			localizationService.localize(currentUser, places, response, lat, lng);
 		}
 
 		fromUser = response.getUniqueElement(User.class, APIS_ALIAS_FROM_USER);
 
 		// Initializing instant messaging
-		final PaginationInfo paginationInfo = response
-				.getPaginationInfo(Message.class);
+		final PaginationInfo paginationInfo = response.getPaginationInfo(Message.class);
 		final List<? extends Message> messages = currentUser.get(Message.class);
-		messagingSupport.initialize(getUrlService(), getLocale(), messages,
-				paginationInfo, user.getKey(), PAGE_STYLE_MSG);
+		messagingSupport.initialize(getUrlService(), getLocale(), messages, paginationInfo, user.getKey(),
+				PAGE_STYLE_MSG);
 
 		// Initializing page messages
-		final List<? extends Message> myMessages = response.getElements(
-				Message.class, APIS_ALIAS_PAGE_MESSAGES);
+		final List<? extends Message> myMessages = response.getElements(Message.class, APIS_ALIAS_PAGE_MESSAGES);
 		myPaginationInfo = response.getPaginationInfo(APIS_ALIAS_PAGE_MESSAGES);
-		myMessagingSupport.initialize(getUrlService(), getLocale(), myMessages,
-				myPaginationInfo, currentUser.getKey(), PAGE_STYLE_MSG);
+		myMessagingSupport.initialize(getUrlService(), getLocale(), myMessages, myPaginationInfo, currentUser.getKey(),
+				PAGE_STYLE_MSG);
 
 		// Marking messages as read
 		final List<ItemKey> keysToMark = new ArrayList<ItemKey>();
 		for (Message message : myMessagingSupport.getMessages()) {
 			if (message.isUnread()
-					&& (unreadMaxId == null || message.getKey().getNumericId() <= unreadMaxId
-							.longValue())
+					&& (unreadMaxId == null || message.getKey().getNumericId() <= unreadMaxId.longValue())
 					&& !message.getFromKey().equals(user.getKey())) {
 				keysToMark.add(message.getKey());
 			}
@@ -182,22 +161,22 @@ public class MyMessageReplyAction extends AbstractAction implements
 
 	@Override
 	public String getJson() {
-		int unreadMsg = messagingSupport.getMessages().size();
-		unreadMsg -= readMsgCount;
+		// int unreadMsg = messagingSupport.getMessages().size();
+		// unreadMsg -= readMsgCount;
 		if (!markUnreadOnly) {
-			final List<? extends Message> messages = myMessagingSupport
-					.getMessages();
-			final JsonOneToOneMessageList messageList = jsonBuilder
-					.buildJsonOneToOneMessages(messages, highRes, getLocale(),
-							currentUser, fromUser);
-			messageList.setUnreadMsgCount(unreadMsg);
+			final List<? extends Message> messages = myMessagingSupport.getMessages();
+			final JsonOneToOneMessageList messageList = jsonBuilder.buildJsonOneToOneMessages(messages, highRes,
+					getLocale(), currentUser, fromUser);
+			jsonBuilder.fillMessagingUnreadCount(messageList, currentUser);
+			messageList.setUnreadMsgCount(messageList.getUnreadMsgCount() - readMsgCount);
 			messageList.setTotalMsgCount(myPaginationInfo.getItemCount());
 			messageList.setPage(page);
 			messageList.setPageSize(MESSAGES_PER_PAGE);
 			return JSONObject.fromObject(messageList).toString();
 		} else {
 			JsonMessagingStatistic stat = new JsonMessagingStatistic();
-			stat.setUnreadMsgCount(unreadMsg);
+			jsonBuilder.fillMessagingUnreadCount(stat, currentUser);
+			stat.setUnreadMsgCount(stat.getUnreadMsgCount() - readMsgCount);
 			stat.setTotalMsgCount(myPaginationInfo.getItemCount());
 			return JSONObject.fromObject(stat).toString();
 		}

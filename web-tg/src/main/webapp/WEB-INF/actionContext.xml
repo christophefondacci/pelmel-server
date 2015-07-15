@@ -523,7 +523,6 @@
 		<property name="overviewSupport" ref="routingOverviewSupport"/>
 		<property name="urlService" ref="urlService"/>
 		<property name="headerSupport" ref="overviewHeaderSupport"/> 
-		<property name="messageService" ref="messagesService"/> 
 	</bean>
 	<bean id="lostPasswordAction" class="com.nextep.proto.action.impl.tools.LostPasswordAction" parent="abstractAction" scope="request">
 		<property name="urlService" ref="urlService"/>

@@ -9,6 +9,7 @@ package com.nextep.json.model.impl;
 public class JsonMessagingStatistic {
 
 	private int unreadMsgCount = 0;
+	private int unreadNetworkNotificationsCount = 0;
 	private long maxActivityId = 0;
 	private int page = 0;
 	private int pageSize = 0;
@@ -20,6 +21,14 @@ public class JsonMessagingStatistic {
 
 	public int getUnreadMsgCount() {
 		return unreadMsgCount;
+	}
+
+	public void setUnreadNetworkNotificationsCount(int unreadNetworkNotificationsCount) {
+		this.unreadNetworkNotificationsCount = unreadNetworkNotificationsCount;
+	}
+
+	public int getUnreadNetworkNotificationsCount() {
+		return unreadNetworkNotificationsCount;
 	}
 
 	public void setTotalMsgCount(int totalMsgCount) {

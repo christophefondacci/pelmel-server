@@ -23,6 +23,7 @@ import com.nextep.json.model.impl.JsonLightUser;
 import com.nextep.json.model.impl.JsonManyToOneMessageList;
 import com.nextep.json.model.impl.JsonMedia;
 import com.nextep.json.model.impl.JsonMessage;
+import com.nextep.json.model.impl.JsonMessagingStatistic;
 import com.nextep.json.model.impl.JsonOneToOneMessageList;
 import com.nextep.json.model.impl.JsonPlace;
 import com.nextep.json.model.impl.JsonPlaceOverview;
@@ -74,8 +75,7 @@ public interface JsonBuilder {
 	 * @param f
 	 *            the {@link FacetInformation} from which we can extract facets
 	 */
-	void fillJsonLikeFacets(Locale locale, JsonPlaceOverview elt,
-			FacetInformation f);
+	void fillJsonLikeFacets(Locale locale, JsonPlaceOverview elt, FacetInformation f);
 
 	/**
 	 * Fills the JSON facets for users from facet information
@@ -85,8 +85,7 @@ public interface JsonBuilder {
 	 * @param f
 	 *            the {@link FacetInformation} from which we can extract facets
 	 */
-	void fillJsonUserFacets(Locale locale, JsonPlaceOverview elt,
-			FacetInformation f);
+	void fillJsonUserFacets(Locale locale, JsonPlaceOverview elt, FacetInformation f);
 
 	/**
 	 * Builds a JSON user bean from a {@link User} bean
@@ -102,8 +101,7 @@ public interface JsonBuilder {
 	 */
 	JsonUser buildJsonUser(User user, boolean highRes, Locale l);
 
-	JsonUser buildJsonUser(User user, boolean highRes, Locale l,
-			ApiResponse response);
+	JsonUser buildJsonUser(User user, boolean highRes, Locale l, ApiResponse response);
 
 	JsonActivity buildJsonActivity(Activity activity, boolean highRes, Locale l);
 
@@ -118,8 +116,7 @@ public interface JsonBuilder {
 	 *            the current {@link Locale}
 	 * @return the serializable {@link JsonBanner} JSON bean
 	 */
-	JsonBanner buildJsonBanner(AdvertisingBanner banner, boolean highRes,
-			Locale l);
+	JsonBanner buildJsonBanner(AdvertisingBanner banner, boolean highRes, Locale l);
 
 	/**
 	 * Builds a JSON place bean from a {@link Place} bean
@@ -134,13 +131,10 @@ public interface JsonBuilder {
 	 */
 	JsonPlace buildJsonPlace(Place place, boolean highRes, Locale l);
 
-	JsonPlace buildJsonPlace(Place place, boolean highRes, Locale l,
-			Map<String, Integer> likedPlaceMap,
-			Map<String, Integer> currentPlacesMap,
-			Map<String, Integer> eventUsersMap);
+	JsonPlace buildJsonPlace(Place place, boolean highRes, Locale l, Map<String, Integer> likedPlaceMap,
+			Map<String, Integer> currentPlacesMap, Map<String, Integer> eventUsersMap);
 
-	void fillJsonEvent(IJsonLightEvent e, Event event, boolean highRes,
-			Locale l, ApiResponse response);
+	void fillJsonEvent(IJsonLightEvent e, Event event, boolean highRes, Locale l, ApiResponse response);
 
 	/**
 	 * Builds a JSON message bean from a message bean
@@ -153,8 +147,7 @@ public interface JsonBuilder {
 	 *            the {@link Locale} information
 	 * @return the {@link JsonOneToOneMessageList} bean
 	 */
-	JsonOneToOneMessageList buildJsonOneToOneMessages(
-			List<? extends Message> messages, boolean highRes, Locale l,
+	JsonOneToOneMessageList buildJsonOneToOneMessages(List<? extends Message> messages, boolean highRes, Locale l,
 			User currentUser, User otherUser);
 
 	/**
@@ -172,12 +165,10 @@ public interface JsonBuilder {
 	 *            current user
 	 * @return the {@link JsonManyToOneMessageList} bean
 	 */
-	JsonManyToOneMessageList buildJsonManyToOneMessages(
-			List<? extends Message> messages, boolean highRes, Locale l,
+	JsonManyToOneMessageList buildJsonManyToOneMessages(List<? extends Message> messages, boolean highRes, Locale l,
 			User currentUser);
 
-	JsonManyToOneMessageList buildJsonMessagesFromComments(
-			List<? extends Comment> comments, boolean highRes, Locale l);
+	JsonManyToOneMessageList buildJsonMessagesFromComments(List<? extends Comment> comments, boolean highRes, Locale l);
 
 	/**
 	 * Converts a {@link Message} CAL object to its JSON representation
@@ -201,8 +192,7 @@ public interface JsonBuilder {
 	 *            the Locale to use for textual contents
 	 * @return the Json light bean
 	 */
-	JsonLightPlace buildJsonLightPlace(GeographicItem place, boolean highRes,
-			Locale l);
+	JsonLightPlace buildJsonLightPlace(GeographicItem place, boolean highRes, Locale l);
 
 	/**
 	 * Builds a JSON light city from a city bean
@@ -228,9 +218,8 @@ public interface JsonBuilder {
 	 *            {@link Locale} to use for descriptions
 	 * @return a corresponding collection of {@link JsonHour} beans
 	 */
-	Collection<JsonHour> buildJsonHours(
-			Collection<? extends EventSeries> eventSeries, City eventCity,
-			Locale l, ApiResponse response);
+	Collection<JsonHour> buildJsonHours(Collection<? extends EventSeries> eventSeries, City eventCity, Locale l,
+			ApiResponse response);
 
 	/**
 	 * Builds the JSON representation of the given recipients group, expecting
@@ -245,6 +234,13 @@ public interface JsonBuilder {
 	 *            the current locale
 	 * @return the {@link JsonRecipientsGroup} JSON bean
 	 */
-	JsonRecipientsGroup buildJsonRecipientsGroup(MessageRecipientsGroup group,
-			boolean highRes, Locale l);
+	JsonRecipientsGroup buildJsonRecipientsGroup(MessageRecipientsGroup group, boolean highRes, Locale l);
+
+	/**
+	 * Fills unread counts
+	 * 
+	 * @param json
+	 * @param currentUser
+	 */
+	void fillMessagingUnreadCount(JsonMessagingStatistic json, User currentUser);
 }

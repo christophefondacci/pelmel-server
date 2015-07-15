@@ -70,11 +70,11 @@ public final class UserHelper {
 				.with((WithCriterion) SearchRestriction
 						.with(User.class,
 								new UserPrivateListRequestType(UserPrivateListRequestType.LIST_PENDING_APPROVAL))
-						.aliasedBy(Constants.APIS_ALIAS_NETWORK_PENDING)
+						.aliasedBy(Constants.APIS_ALIAS_NETWORK_PENDING_APPROVAL)
 						.with(Media.class, MediaRequestTypes.THUMB))
 				.with((WithCriterion) SearchRestriction
 						.with(User.class, new UserPrivateListRequestType(UserPrivateListRequestType.LIST_REQUESTED))
-						.aliasedBy(Constants.APIS_ALIAS_NETWORK_TOAPPROVE)
+						.aliasedBy(Constants.APIS_ALIAS_NETWORK_REQUEST)
 						.with(Media.class, MediaRequestTypes.THUMB))
 				.with((WithCriterion) SearchRestriction
 						.with(User.class,

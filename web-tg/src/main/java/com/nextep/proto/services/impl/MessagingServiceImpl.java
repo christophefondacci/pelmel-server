@@ -23,8 +23,10 @@ import org.springframework.stereotype.Service;
 import com.nextep.cal.util.services.CalPersistenceService;
 import com.nextep.media.model.Media;
 import com.nextep.messages.model.Message;
+import com.nextep.messages.model.MessageType;
 import com.nextep.messages.model.MutableMessage;
 import com.nextep.proto.blocks.MediaPersistenceSupport;
+import com.nextep.proto.model.Constants;
 import com.nextep.proto.services.MessagingService;
 import com.nextep.proto.services.NotificationService;
 import com.nextep.proto.spring.ContextHolder;
@@ -80,7 +82,8 @@ public class MessagingServiceImpl implements MessagingService {
 	public Message sendMessageWithMedia(User from, User to, ItemKey recipientsGroupKey, String message, File mediaFile,
 			String mediaContentType, String mediaFilename) {
 		final Message msg = createMessage(from.getKey(), to.getKey(), recipientsGroupKey,
-				message == null ? messageSource.getMessage("message.photoUpgrade", null, Locale.ENGLISH) : message);
+				message == null ? messageSource.getMessage("message.photoUpgrade", null, Locale.ENGLISH) : message,
+				MessageType.MESSAGE);
 		ContextHolder.toggleWrite();
 		if (mediaFile != null) {
 			try {
@@ -91,56 +94,75 @@ public class MessagingServiceImpl implements MessagingService {
 				LOGGER.error("Unable to create media for message " + msg.getKey() + ": " + e.getMessage(), e);
 			}
 		}
-		sendPushNotification(from, to, msg, mediaFile != null);
+		sendPushNotification(from, to, msg, mediaFile != null, MessageType.MESSAGE);
 		return msg;
 	}
 
 	@Override
 	public Message sendMessage(User from, User to, ItemKey recipientsGroupKey, String message) {
-		final Message msg = createMessage(from.getKey(), to.getKey(), recipientsGroupKey, message);
-		sendPushNotification(from, to, msg, false);
+		return sendMessage(from, to, recipientsGroupKey, message, MessageType.MESSAGE);
+	}
+
+	@Override
+	public Message sendMessage(User from, User to, ItemKey recipientsGroupKey, String message, MessageType type) {
+		final Message msg = createMessage(from.getKey(), to.getKey(), recipientsGroupKey, message, type);
+		sendPushNotification(from, to, msg, false, type);
 		return msg;
 	}
 
-	private Message createMessage(ItemKey fromKey, ItemKey toKey, ItemKey recipientsGroupKey, String message) {
+	private Message createMessage(ItemKey fromKey, ItemKey toKey, ItemKey recipientsGroupKey, String message,
+			MessageType messageType) {
 		ContextHolder.toggleWrite();
 
 		final MutableMessage msg = (MutableMessage) messageService.createTransientObject();
 		msg.setFromKey(fromKey);
 		msg.setToKey(toKey);
+		msg.setMessageType(messageType);
 		if (recipientsGroupKey != null) {
 			msg.setRecipientsGroupKey(recipientsGroupKey);
 		}
 		msg.setMessage(message);
 		msg.setMessageDate(new Date());
 		// Our returning message is the message to self
-		if (toKey.equals(fromKey)) {
+		if (toKey.equals(fromKey) || messageType == MessageType.PRIVATE_NETWORK) {
 			msg.setUnread(false);
 		}
 		messageService.saveItem(msg);
 		return msg;
 	}
 
-	private void sendPushNotification(User sourceUser, User targetUser, Message msg, boolean isMediaMessage) {
+	private void sendPushNotification(User sourceUser, User targetUser, Message msg, boolean isMediaMessage,
+			MessageType messageType) {
 
 		// Notifying recipient if deviceId and push enabled (and not our own
 		// message)
-		if (targetUser.getPushDeviceId() != null && msg.isUnread()) {
+		if (targetUser.getPushDeviceId() != null && !targetUser.getKey().equals(sourceUser.getKey())) {
 			String pushMsg;
 			// Building push message
 			if (!isMediaMessage) {
-				pushMsg = MessageFormat.format(messageSource.getMessage("message.push.template", null, Locale.ENGLISH),
-						sourceUser.getPseudo(), msg.getMessage());
+				if (messageType == MessageType.MESSAGE) {
+					pushMsg = MessageFormat.format(
+							messageSource.getMessage("message.push.template", null, Locale.ENGLISH),
+							sourceUser.getPseudo(), msg.getMessage());
+				} else {
+					pushMsg = MessageFormat.format(
+							messageSource.getMessage("message.push.networkRequest", null, Locale.ENGLISH),
+							sourceUser.getPseudo());
+				}
 			} else {
 				pushMsg = MessageFormat.format(
 						messageSource.getMessage("message.push.photo.template", null, Locale.ENGLISH),
 						sourceUser.getPseudo());
 			}
 			// Sending message
+			final List<? extends User> toApprove = targetUser.get(User.class, Constants.APIS_ALIAS_NETWORK_PENDING_APPROVAL);
 			final List<? extends Message> unreadMessages = targetUser.get(Message.class);
-
+			int unreadCount = unreadMessages.size();
+			if (msg.isUnread()) {
+				unreadCount++;
+			}
 			// Adding +1 because we just added a new unread message
-			notificationService.sendNotification(targetUser, pushMsg, unreadMessages.size() + 1, null);
+			notificationService.sendNotification(targetUser, pushMsg, unreadCount, toApprove.size(), null);
 		}
 	}
 

@@ -44,6 +44,7 @@ import com.nextep.json.model.impl.JsonLightUser;
 import com.nextep.json.model.impl.JsonManyToOneMessageList;
 import com.nextep.json.model.impl.JsonMedia;
 import com.nextep.json.model.impl.JsonMessage;
+import com.nextep.json.model.impl.JsonMessagingStatistic;
 import com.nextep.json.model.impl.JsonOneToOneMessageList;
 import com.nextep.json.model.impl.JsonPlace;
 import com.nextep.json.model.impl.JsonPlaceOverview;
@@ -95,10 +96,8 @@ public class JsonBuilderImpl implements JsonBuilder {
 	}
 
 	@Override
-	public JsonPlaceOverview buildJsonPlaceOverview(Locale l, Place place,
-			boolean highRes) {
-		final JsonPlaceOverview json = new JsonPlaceOverview(place.getKey()
-				.toString());
+	public JsonPlaceOverview buildJsonPlaceOverview(Locale l, Place place, boolean highRes) {
+		final JsonPlaceOverview json = new JsonPlaceOverview(place.getKey().toString());
 		json.setName(DisplayHelper.getName(place));
 
 		// Place specific information
@@ -152,14 +151,11 @@ public class JsonBuilderImpl implements JsonBuilder {
 		return json;
 	}
 
-	private void fillDescription(CalmObject object, IJsonDescripted json,
-			Locale l) {
+	private void fillDescription(CalmObject object, IJsonDescripted json, Locale l) {
 		// Iterating over descriptions to generate JSON description bean
-		final List<? extends Description> descriptions = object
-				.get(Description.class);
+		final List<? extends Description> descriptions = object.get(Description.class);
 		Description desc = getDescriptionForLanguage(descriptions, l);
-		if (desc == null || desc.getDescription() == null
-				|| desc.getDescription().trim().isEmpty()) {
+		if (desc == null || desc.getDescription() == null || desc.getDescription().trim().isEmpty()) {
 			desc = getDescriptionForLanguage(descriptions, null);
 		}
 		if (desc != null) {
@@ -171,12 +167,10 @@ public class JsonBuilderImpl implements JsonBuilder {
 		}
 	}
 
-	private Description getDescriptionForLanguage(
-			List<? extends Description> descriptions, Locale l) {
+	private Description getDescriptionForLanguage(List<? extends Description> descriptions, Locale l) {
 		Description selectedDesc = null;
 		for (Description d : descriptions) {
-			if (l == null
-					|| d.getLocale().getLanguage().equals(l.getLanguage())) {
+			if (l == null || d.getLocale().getLanguage().equals(l.getLanguage())) {
 				selectedDesc = d;
 			}
 		}
@@ -204,16 +198,14 @@ public class JsonBuilderImpl implements JsonBuilder {
 	}
 
 	@Override
-	public void fillJsonLikeFacets(Locale locale, JsonPlaceOverview elt,
-			FacetInformation f) {
+	public void fillJsonLikeFacets(Locale locale, JsonPlaceOverview elt, FacetInformation f) {
 		final List<JsonFacet> jsonFacets = buildJsonFacets(locale, f);
 		// Filling our overview bean
 		elt.setLikesFacets(jsonFacets);
 	}
 
 	@Override
-	public void fillJsonUserFacets(Locale locale, JsonPlaceOverview elt,
-			FacetInformation f) {
+	public void fillJsonUserFacets(Locale locale, JsonPlaceOverview elt, FacetInformation f) {
 		final List<JsonFacet> jsonFacets = buildJsonFacets(locale, f);
 		// Filling our overview bean
 		elt.setUsersFacets(jsonFacets);
@@ -230,8 +222,7 @@ public class JsonBuilderImpl implements JsonBuilder {
 		for (FacetCount tagFacet : tagsFacets) {
 			final String facetCode = tagFacet.getFacet().getFacetCode();
 			// Building our JSON bean
-			final JsonFacet jsonFacet = new JsonFacet(facetCode,
-					tagFacet.getCount());
+			final JsonFacet jsonFacet = new JsonFacet(facetCode, tagFacet.getCount());
 			jsonFacets.add(jsonFacet);
 		}
 		return jsonFacets;
@@ -243,8 +234,7 @@ public class JsonBuilderImpl implements JsonBuilder {
 	}
 
 	@Override
-	public JsonUser buildJsonUser(User user, boolean highRes, Locale l,
-			ApiResponse response) {
+	public JsonUser buildJsonUser(User user, boolean highRes, Locale l, ApiResponse response) {
 		final JsonUser json = new JsonUser();
 		json.setKey(user.getKey().toString());
 		json.setPseudo(user.getPseudo());
@@ -252,10 +242,9 @@ public class JsonBuilderImpl implements JsonBuilder {
 		json.setHeightInCm(user.getHeightInCm());
 		json.setNxtpUserToken(user.getToken());
 		json.setWeightInKg(user.getWeightInKg());
-		final List<? extends Message> unreadMessages = user.get(Message.class);
-		json.setUnreadMsgCount(unreadMessages.size());
-		json.setOnline(user.getOnlineTimeout().getTime() > System
-				.currentTimeMillis() || user.getPushDeviceId() != null);
+		fillMessagingUnreadCount(json, user);
+		json.setOnline(
+				user.getOnlineTimeout().getTime() > System.currentTimeMillis() || user.getPushDeviceId() != null);
 
 		// Filling city
 		try {
@@ -264,18 +253,14 @@ public class JsonBuilderImpl implements JsonBuilder {
 				json.setCity(city.getName());
 			}
 		} catch (CalException e) {
-			LOGGER.error("Unable to extract city from user '" + user.getKey()
-					+ "'");
+			LOGGER.error("Unable to extract city from user '" + user.getKey() + "'");
 		}
 		// Filling descriptions
-		final List<? extends Description> descriptions = user
-				.get(Description.class);
+		final List<? extends Description> descriptions = user.get(Description.class);
 		for (Description description : descriptions) {
 			// If no locale provided we fill all descriptions, otherwise
 			// we filter the ones with the requested language
-			if (l == null
-					|| l.getLanguage().equals(
-							description.getLocale().getLanguage())) {
+			if (l == null || l.getLanguage().equals(description.getLocale().getLanguage())) {
 				// Initializing JSON bean
 				final JsonDescription jsonDesc = new JsonDescription();
 				jsonDesc.setKey(description.getKey().toString());
@@ -300,18 +285,15 @@ public class JsonBuilderImpl implements JsonBuilder {
 		if (user.getLastLocationKey() != null) {
 			try {
 				// Extracting last location
-				final Place lastLocation = user.getUnique(Place.class,
-						Constants.APIS_ALIAS_USER_LOCATION);
+				final Place lastLocation = user.getUnique(Place.class, Constants.APIS_ALIAS_USER_LOCATION);
 				if (lastLocation != null) {
 					final Date lastLocationTime = user.getLastLocationTime();
 
 					// Only filling this information if checkin time is not
 					// expired
-					if ((System.currentTimeMillis() - lastLocationTime
-							.getTime()) < checkinTime) {
+					if ((System.currentTimeMillis() - lastLocationTime.getTime()) < checkinTime) {
 						// Converting to JSON place
-						final IJsonLightPlace jsonUserPlace = buildJsonLightPlace(
-								lastLocation, highRes, l);
+						final IJsonLightPlace jsonUserPlace = buildJsonLightPlace(lastLocation, highRes, l);
 
 						// Injecting into JSON user bean
 						json.setLastLocation(jsonUserPlace);
@@ -319,9 +301,7 @@ public class JsonBuilderImpl implements JsonBuilder {
 					}
 				}
 			} catch (CalException e) {
-				LOGGER.error(
-						"Unable to extract user's last location : "
-								+ e.getMessage(), e);
+				LOGGER.error("Unable to extract user's last location : " + e.getMessage(), e);
 			}
 		}
 
@@ -331,34 +311,26 @@ public class JsonBuilderImpl implements JsonBuilder {
 			fillJsonEvent(jsonEvent, event, highRes, l, response);
 			json.addEvent(jsonEvent);
 		}
-		for (Event event : user.get(EventSeries.class,
-				Constants.APIS_ALIAS_EVENT_SERIES)) {
+		for (Event event : user.get(EventSeries.class, Constants.APIS_ALIAS_EVENT_SERIES)) {
 			JsonLightEvent jsonEvent = new JsonLightEvent();
 			fillJsonEvent(jsonEvent, event, highRes, l, response);
 			json.addEvent(jsonEvent);
 		}
 
 		// Getting lists
-		final List<? extends User> pendingApprovals = user.get(User.class,
-				Constants.APIS_ALIAS_NETWORK_PENDING);
-		final List<? extends User> pendingRequests = user.get(User.class,
-				Constants.APIS_ALIAS_NETWORK_TOAPPROVE);
-		final List<? extends User> networkUsers = user.get(User.class,
-				Constants.APIS_ALIAS_NETWORK_MEMBER);
-		final List<IJsonLightUser> jsonPendingApprovals = convertUserListToJsonUserList(
-				pendingApprovals, highRes, l);
-		final List<IJsonLightUser> jsonPendingRequests = convertUserListToJsonUserList(
-				pendingRequests, highRes, l);
-		final List<IJsonLightUser> jsonNetworkUsers = convertUserListToJsonUserList(
-				networkUsers, highRes, l);
+		final List<? extends User> pendingApprovals = user.get(User.class, Constants.APIS_ALIAS_NETWORK_PENDING_APPROVAL);
+		final List<? extends User> pendingRequests = user.get(User.class, Constants.APIS_ALIAS_NETWORK_REQUEST);
+		final List<? extends User> networkUsers = user.get(User.class, Constants.APIS_ALIAS_NETWORK_MEMBER);
+		final List<IJsonLightUser> jsonPendingApprovals = convertUserListToJsonUserList(pendingApprovals, highRes, l);
+		final List<IJsonLightUser> jsonPendingRequests = convertUserListToJsonUserList(pendingRequests, highRes, l);
+		final List<IJsonLightUser> jsonNetworkUsers = convertUserListToJsonUserList(networkUsers, highRes, l);
 		json.setPendingApprovals(jsonPendingApprovals);
 		json.setPendingRequests(jsonPendingRequests);
 		json.setNetworkUsers(jsonNetworkUsers);
 		return json;
 	}
 
-	private List<IJsonLightUser> convertUserListToJsonUserList(
-			List<? extends User> users, boolean highRes, Locale l) {
+	private List<IJsonLightUser> convertUserListToJsonUserList(List<? extends User> users, boolean highRes, Locale l) {
 		final List<IJsonLightUser> jsonUsers = new ArrayList<IJsonLightUser>();
 		for (User user : users) {
 			final IJsonLightUser jsonUser = buildJsonLightUser(user, highRes, l);
@@ -375,8 +347,7 @@ public class JsonBuilderImpl implements JsonBuilder {
 	 * @return the JSON bean
 	 */
 	@Override
-	public JsonLightUser buildJsonLightUser(User user, boolean highRes,
-			Locale locale) {
+	public JsonLightUser buildJsonLightUser(User user, boolean highRes, Locale locale) {
 		JsonLightUser jsonUser = new JsonLightUser();
 		jsonUser.setKey(user.getKey().toString());
 		jsonUser.setPseudo(user.getPseudo());
@@ -387,15 +358,14 @@ public class JsonBuilderImpl implements JsonBuilder {
 				jsonUser.setThumb(jsonMedia);
 			}
 		}
-		jsonUser.setOnline(user.getOnlineTimeout().getTime() > System
-				.currentTimeMillis() || user.getPushDeviceId() != null);
+		jsonUser.setOnline(
+				user.getOnlineTimeout().getTime() > System.currentTimeMillis() || user.getPushDeviceId() != null);
 		return jsonUser;
 	}
 
 	@Override
-	public JsonOneToOneMessageList buildJsonOneToOneMessages(
-			List<? extends Message> messages, boolean highRes, Locale l,
-			User fromUser, User toUser) {
+	public JsonOneToOneMessageList buildJsonOneToOneMessages(List<? extends Message> messages, boolean highRes,
+			Locale l, User fromUser, User toUser) {
 
 		// Building from and to users
 		final IJsonLightUser jsonFrom = buildJsonLightUser(fromUser, highRes, l);
@@ -425,8 +395,7 @@ public class JsonBuilderImpl implements JsonBuilder {
 		json.setMessage(message.getMessage());
 		json.setUnread(message.isUnread());
 		if (message.getRecipientsGroupKey() != null) {
-			json.setRecipientsGroupKey(message.getRecipientsGroupKey()
-					.toString());
+			json.setRecipientsGroupKey(message.getRecipientsGroupKey().toString());
 		}
 		try {
 			final Media media = message.getUnique(Media.class);
@@ -435,17 +404,14 @@ public class JsonBuilderImpl implements JsonBuilder {
 				json.setMedia(jsonMedia);
 			}
 		} catch (CalException e) {
-			LOGGER.error(
-					"Unable to get media from message, probably too many media associated: "
-							+ e.getMessage(), e);
+			LOGGER.error("Unable to get media from message, probably too many media associated: " + e.getMessage(), e);
 		}
 		return json;
 	}
 
 	@Override
-	public JsonManyToOneMessageList buildJsonManyToOneMessages(
-			List<? extends Message> messages, boolean highRes, Locale l,
-			User currentUser) {
+	public JsonManyToOneMessageList buildJsonManyToOneMessages(List<? extends Message> messages, boolean highRes,
+			Locale l, User currentUser) {
 
 		final Map<ItemKey, JsonLightUser> msgUsersMap = new HashMap<ItemKey, JsonLightUser>();
 		final JsonManyToOneMessageList messagesList = new JsonManyToOneMessageList();
@@ -459,15 +425,13 @@ public class JsonBuilderImpl implements JsonBuilder {
 
 			// Building the map of referenced users
 			try {
-				final User fromUser = message.getUnique(User.class,
-						Constants.ALIAS_FROM);
+				final User fromUser = message.getUnique(User.class, Constants.ALIAS_FROM);
 				fillUserMap(fromUser, msgUsersMap, highRes, l);
-				final User toUser = message.getUnique(User.class,
-						Constants.ALIAS_TO);
+				final User toUser = message.getUnique(User.class, Constants.ALIAS_TO);
 				fillUserMap(toUser, msgUsersMap, highRes, l);
 			} catch (CalException e) {
-				LOGGER.error("Unable to retrieve from/to user of message "
-						+ message.getKey() + ": " + e.getMessage(), e);
+				LOGGER.error("Unable to retrieve from/to user of message " + message.getKey() + ": " + e.getMessage(),
+						e);
 			}
 		}
 
@@ -478,8 +442,7 @@ public class JsonBuilderImpl implements JsonBuilder {
 		return messagesList;
 	}
 
-	private void fillUserMap(User user,
-			Map<ItemKey, JsonLightUser> msgUsersMap, boolean highRes, Locale l) {
+	private void fillUserMap(User user, Map<ItemKey, JsonLightUser> msgUsersMap, boolean highRes, Locale l) {
 		if (user != null) {
 			// Have we already built this user ?
 			JsonLightUser jsonUser = msgUsersMap.get(user.getKey());
@@ -492,8 +455,8 @@ public class JsonBuilderImpl implements JsonBuilder {
 	}
 
 	@Override
-	public JsonManyToOneMessageList buildJsonMessagesFromComments(
-			List<? extends Comment> comments, boolean highRes, Locale l) {
+	public JsonManyToOneMessageList buildJsonMessagesFromComments(List<? extends Comment> comments, boolean highRes,
+			Locale l) {
 
 		final Map<ItemKey, JsonLightUser> msgUsersMap = new HashMap<ItemKey, JsonLightUser>();
 		final JsonManyToOneMessageList messagesList = new JsonManyToOneMessageList();
@@ -513,8 +476,8 @@ public class JsonBuilderImpl implements JsonBuilder {
 					msg.setMedia(jsonMedia);
 				}
 			} catch (CalException e) {
-				LOGGER.error("Unable to get media associated with comment '"
-						+ comment.getKey() + "': " + e.getMessage(), e);
+				LOGGER.error(
+						"Unable to get media associated with comment '" + comment.getKey() + "': " + e.getMessage(), e);
 			}
 
 			// Adding to our message list
@@ -533,8 +496,8 @@ public class JsonBuilderImpl implements JsonBuilder {
 					}
 				}
 			} catch (CalException e) {
-				LOGGER.error("Unable to retrieve from/to user of comment "
-						+ comment.getKey() + ": " + e.getMessage(), e);
+				LOGGER.error("Unable to retrieve from/to user of comment " + comment.getKey() + ": " + e.getMessage(),
+						e);
 			}
 
 		}
@@ -547,8 +510,7 @@ public class JsonBuilderImpl implements JsonBuilder {
 	}
 
 	@Override
-	public JsonLightPlace buildJsonLightPlace(GeographicItem place,
-			boolean highRes, Locale l) {
+	public JsonLightPlace buildJsonLightPlace(GeographicItem place, boolean highRes, Locale l) {
 		final JsonLightPlace jsonPlace = new JsonLightPlace();
 		jsonPlace.setKey(place.getKey().toString());
 		jsonPlace.setName(place.getName());
@@ -568,8 +530,7 @@ public class JsonBuilderImpl implements JsonBuilder {
 	}
 
 	@Override
-	public void fillJsonEvent(IJsonLightEvent e, Event event, boolean highRes,
-			Locale l, ApiResponse response) {
+	public void fillJsonEvent(IJsonLightEvent e, Event event, boolean highRes, Locale l, ApiResponse response) {
 
 		e.setName(event.getName());
 		e.setKey(event.getKey().toString());
@@ -580,11 +541,9 @@ public class JsonBuilderImpl implements JsonBuilder {
 
 		// Extract the place
 		try {
-			final GeographicItem place = event.getUnique(GeographicItem.class,
-					Constants.APIS_ALIAS_EVENT_PLACE);
+			final GeographicItem place = event.getUnique(GeographicItem.class, Constants.APIS_ALIAS_EVENT_PLACE);
 			if (place != null) {
-				IJsonLightPlace jsonPlace = buildJsonLightPlace(place, highRes,
-						l);
+				IJsonLightPlace jsonPlace = buildJsonLightPlace(place, highRes, l);
 				e.setPlace(jsonPlace);
 
 				// We compute series date here because we need timezone from
@@ -597,28 +556,23 @@ public class JsonBuilderImpl implements JsonBuilder {
 					} else if (place instanceof Place) {
 						timezoneId = ((Place) place).getCity().getTimezoneId();
 					}
-					final Date nextStart = eventManagementService.computeNext(
-							series, timezoneId, true);
-					final Date nextEnd = eventManagementService.computeNext(
-							series, timezoneId, false);
+					final Date nextStart = eventManagementService.computeNext(series, timezoneId, true);
+					final Date nextEnd = eventManagementService.computeNext(series, timezoneId, false);
 					e.setStartTime(nextStart);
 					e.setEndTime(nextEnd);
 					e.setCalendarType(series.getCalendarType().name());
 				}
 			}
 		} catch (CalException ex) {
-			LOGGER.error("Unable to get Place for event " + event.getKey()
-					+ ": " + ex.getMessage(), ex);
+			LOGGER.error("Unable to get Place for event " + event.getKey() + ": " + ex.getMessage(), ex);
 		}
 
 		// Distance
 		if (response != null) {
 			final ItemKey eventKey = event.getKey();
-			final String distanceString = distanceDisplayService
-					.getDistanceFromItem(eventKey, response, l);
+			final String distanceString = distanceDisplayService.getDistanceFromItem(eventKey, response, l);
 			e.setDistance(distanceString);
-			final SearchStatistic distanceStat = response.getStatistic(
-					eventKey, SearchStatistic.DISTANCE);
+			final SearchStatistic distanceStat = response.getStatistic(eventKey, SearchStatistic.DISTANCE);
 			if (distanceStat != null) {
 				e.setRawDistance(distanceStat.getNumericValue().doubleValue());
 			}
@@ -634,11 +588,9 @@ public class JsonBuilderImpl implements JsonBuilder {
 		// Descriptions
 		if (e instanceof JsonEvent) {
 			// Iterating over descriptions to generate JSON description bean
-			final List<? extends Description> descriptions = event
-					.get(Description.class);
+			final List<? extends Description> descriptions = event.get(Description.class);
 			Description desc = getDescriptionForLanguage(descriptions, l);
-			if (desc == null || desc.getDescription() == null
-					|| desc.getDescription().trim().isEmpty()) {
+			if (desc == null || desc.getDescription() == null || desc.getDescription().trim().isEmpty()) {
 				desc = getDescriptionForLanguage(descriptions, null);
 			}
 			if (desc != null) {
@@ -651,15 +603,13 @@ public class JsonBuilderImpl implements JsonBuilder {
 
 	}
 
-	private void fillJsonEventParticipants(Event event, ApiResponse response,
-			IJsonWithParticipants e) {
+	private void fillJsonEventParticipants(Event event, ApiResponse response, IJsonWithParticipants e) {
 		// Participants
 		if (response != null) {
-			final FacetInformation facetInfo = response
-					.getFacetInformation(SearchScope.EVENTS);
+			final FacetInformation facetInfo = response.getFacetInformation(SearchScope.EVENTS);
 
-			Map<String, Integer> likedEventsMap = SearchHelper.unwrapFacets(
-					facetInfo, SearchHelper.getUserEventsCategory());
+			Map<String, Integer> likedEventsMap = SearchHelper.unwrapFacets(facetInfo,
+					SearchHelper.getUserEventsCategory());
 
 			final ItemKey likedKey = buildEventLikedKey(event);
 			final Integer likes = likedEventsMap.get(likedKey.toString());
@@ -679,24 +629,20 @@ public class JsonBuilderImpl implements JsonBuilder {
 			}
 
 			// Computing next date RELATIVE TO EVENT TIMEZONE
-			final Date nextEnd = eventManagementService.computeNext(
-					(EventSeries) event, timezoneId, false);
+			final Date nextEnd = eventManagementService.computeNext((EventSeries) event, timezoneId, false);
 			if (nextEnd != null) {
-				return new ExpirableItemKeyImpl(event.getKey(),
-						nextEnd.getTime());
+				return new ExpirableItemKeyImpl(event.getKey(), nextEnd.getTime());
 			}
 		}
 		return event.getKey();
 
 	}
 
-	public void setDistanceDisplayService(
-			DistanceDisplayService distanceDisplayService) {
+	public void setDistanceDisplayService(DistanceDisplayService distanceDisplayService) {
 		this.distanceDisplayService = distanceDisplayService;
 	}
 
-	public void setEventManagementService(
-			EventManagementService eventManagementService) {
+	public void setEventManagementService(EventManagementService eventManagementService) {
 		this.eventManagementService = eventManagementService;
 	}
 
@@ -707,10 +653,8 @@ public class JsonBuilderImpl implements JsonBuilder {
 	}
 
 	@Override
-	public JsonPlace buildJsonPlace(Place place, boolean highRes, Locale l,
-			Map<String, Integer> likedPlacesMap,
-			Map<String, Integer> currentPlacesMap,
-			Map<String, Integer> eventUsersMap) {
+	public JsonPlace buildJsonPlace(Place place, boolean highRes, Locale l, Map<String, Integer> likedPlacesMap,
+			Map<String, Integer> currentPlacesMap, Map<String, Integer> eventUsersMap) {
 		final JsonPlace p = new JsonPlace(DisplayHelper.getName(place));
 
 		p.setAddress(place.getAddress1());
@@ -764,8 +708,7 @@ public class JsonBuilderImpl implements JsonBuilder {
 		}
 
 		// Injecting advertising sponsors
-		final List<? extends AdvertisingBooster> adBoosters = place
-				.get(AdvertisingBooster.class);
+		final List<? extends AdvertisingBooster> adBoosters = place.get(AdvertisingBooster.class);
 		if (adBoosters != null && !adBoosters.isEmpty()) {
 			// If we have several boosters, we take the highest booster
 			int maxBoostValue = 0;
@@ -789,16 +732,13 @@ public class JsonBuilderImpl implements JsonBuilder {
 		Map<CalendarType, JsonSpecialEvent> eventsTypeMap = new HashMap<CalendarType, JsonSpecialEvent>();
 		final String timezoneId = place.getCity().getTimezoneId();
 		for (EventSeries series : events) {
-			final Date nextStart = eventManagementService.computeNext(series,
-					timezoneId, true);
+			final Date nextStart = eventManagementService.computeNext(series, timezoneId, true);
 			if (nextStart != null) {
-				final Date nextEnd = eventManagementService.computeNext(series,
-						timezoneId, false);
+				final Date nextEnd = eventManagementService.computeNext(series, timezoneId, false);
 
 				// Getting any other event registered under same calendar
 				// type
-				JsonSpecialEvent otherEvent = eventsTypeMap.get(series
-						.getCalendarType());
+				JsonSpecialEvent otherEvent = eventsTypeMap.get(series.getCalendarType());
 				// Creating if not already existing
 				JsonSpecialEvent event = new JsonSpecialEvent();
 				event.setType(series.getCalendarType().name());
@@ -808,24 +748,20 @@ public class JsonBuilderImpl implements JsonBuilder {
 				final long nextEndTime = nextEnd.getTime() / 1000;
 
 				// Soonest event to end will define the name
-				if (otherEvent == null || otherEvent.getNextEnd() == null
-						|| otherEvent.getNextEnd() > nextEndTime) {
+				if (otherEvent == null || otherEvent.getNextEnd() == null || otherEvent.getNextEnd() > nextEndTime) {
 					event.setNextEnd(nextEndTime);
 					event.setName(series.getName());
 					event.setKey(series.getKey().toString());
 					// Computing opening hours string
-					final String hours = eventManagementService
-							.buildReadableTimeframe(series, l);
-					String description = event.getDescription() == null ? ""
-							: event.getDescription() + " / ";
+					final String hours = eventManagementService.buildReadableTimeframe(series, l);
+					String description = event.getDescription() == null ? "" : event.getDescription() + " / ";
 					event.setDescription(description + hours);
 
 					// Processing series own media
 					final List<? extends Media> media = series.get(Media.class);
 					if (!media.isEmpty()) {
 						Media specialMedia = media.iterator().next();
-						final JsonMedia jsonMedia = buildJsonMedia(
-								specialMedia, highRes);
+						final JsonMedia jsonMedia = buildJsonMedia(specialMedia, highRes);
 						event.setThumb(jsonMedia);
 					}
 					event.setNextStart(nextStartTime);
@@ -835,8 +771,7 @@ public class JsonBuilderImpl implements JsonBuilder {
 					// Registering event place as child
 					series.add(place);
 					final ItemKey likedKey = buildEventLikedKey(series);
-					final Integer participants = eventUsersMap.get(likedKey
-							.toString());
+					final Integer participants = eventUsersMap.get(likedKey.toString());
 					if (participants != null) {
 						event.setParticipants(participants);
 					}
@@ -856,39 +791,30 @@ public class JsonBuilderImpl implements JsonBuilder {
 	}
 
 	@Override
-	public JsonActivity buildJsonActivity(Activity activity, boolean highRes,
-			Locale l) {
+	public JsonActivity buildJsonActivity(Activity activity, boolean highRes, Locale l) {
 		final JsonActivity json = new JsonActivity();
 		User user = null;
 		Place activityPlace = null;
 		User activityUser = null;
 		Event activityEvent = null;
 		try {
-			user = activity
-					.getUnique(User.class, Constants.ALIAS_ACTIVITY_USER);
-			activityPlace = activity.getUnique(Place.class,
-					Constants.ALIAS_ACTIVITY_TARGET);
-			activityUser = activity.getUnique(User.class,
-					Constants.ALIAS_ACTIVITY_TARGET);
-			activityEvent = activity.getUnique(Event.class,
-					Constants.ALIAS_ACTIVITY_TARGET);
+			user = activity.getUnique(User.class, Constants.ALIAS_ACTIVITY_USER);
+			activityPlace = activity.getUnique(Place.class, Constants.ALIAS_ACTIVITY_TARGET);
+			activityUser = activity.getUnique(User.class, Constants.ALIAS_ACTIVITY_TARGET);
+			activityEvent = activity.getUnique(Event.class, Constants.ALIAS_ACTIVITY_TARGET);
 		} catch (CalException e) {
-			LOGGER.error(
-					"Unable to extract info from activity " + activity.getKey()
-							+ " : " + e.getMessage(), e);
+			LOGGER.error("Unable to extract info from activity " + activity.getKey() + " : " + e.getMessage(), e);
 		}
 		if (user != null) {
 			final IJsonLightUser jsonUser = buildJsonLightUser(user, highRes, l);
 			json.setUser(jsonUser);
 		}
 		if (activityPlace != null) {
-			final IJsonLightPlace jsonPlace = buildJsonLightPlace(
-					activityPlace, highRes, l);
+			final IJsonLightPlace jsonPlace = buildJsonLightPlace(activityPlace, highRes, l);
 			json.setActivityPlace(jsonPlace);
 		}
 		if (activityUser != null) {
-			final IJsonLightUser jsonUser = buildJsonLightUser(activityUser,
-					highRes, l);
+			final IJsonLightUser jsonUser = buildJsonLightUser(activityUser, highRes, l);
 			json.setActivityUser(jsonUser);
 		}
 		if (activityEvent != null) {
@@ -920,15 +846,13 @@ public class JsonBuilderImpl implements JsonBuilder {
 	}
 
 	@Override
-	public Collection<JsonHour> buildJsonHours(
-			Collection<? extends EventSeries> eventSeries, City eventCity,
-			Locale l, ApiResponse response) {
+	public Collection<JsonHour> buildJsonHours(Collection<? extends EventSeries> eventSeries, City eventCity, Locale l,
+			ApiResponse response) {
 		final List<JsonHour> jsonHours = new ArrayList<JsonHour>();
 		final String timezoneId = eventCity.getTimezoneId();
 		for (EventSeries event : eventSeries) {
 			final JsonHour hour = new JsonHour();
-			hour.setKey(event.getKey() != null ? event.getKey().toString()
-					: null);
+			hour.setKey(event.getKey() != null ? event.getKey().toString() : null);
 			hour.setName(event.getName());
 			hour.setStartHour(event.getStartHour());
 			hour.setStartMinute(event.getStartMinute());
@@ -949,11 +873,9 @@ public class JsonBuilderImpl implements JsonBuilder {
 			fillDescription(event, hour, l);
 
 			// Computing next start / end time
-			final Date nextStart = eventManagementService.computeNext(event,
-					timezoneId, true);
+			final Date nextStart = eventManagementService.computeNext(event, timezoneId, true);
 			if (nextStart != null) {
-				final Date nextEnd = eventManagementService.computeNext(event,
-						timezoneId, false);
+				final Date nextEnd = eventManagementService.computeNext(event, timezoneId, false);
 
 				// Filling with info on the soonest events to come
 				final long nextStartTime = nextStart.getTime() / 1000;
@@ -975,8 +897,7 @@ public class JsonBuilderImpl implements JsonBuilder {
 	}
 
 	@Override
-	public JsonBanner buildJsonBanner(AdvertisingBanner banner,
-			boolean highRes, Locale l) {
+	public JsonBanner buildJsonBanner(AdvertisingBanner banner, boolean highRes, Locale l) {
 		final JsonBanner json = new JsonBanner();
 		json.setKey(banner.getKey().toString());
 		json.setClickCount(banner.getClickCount());
@@ -991,30 +912,23 @@ public class JsonBuilderImpl implements JsonBuilder {
 		json.setStatus(banner.getStatus().name());
 		if (banner.getTargetItemKey() != null) {
 			try {
-				Place p = banner.getUnique(Place.class,
-						Constants.APIS_ALIAS_BANNER_TARGET);
+				Place p = banner.getUnique(Place.class, Constants.APIS_ALIAS_BANNER_TARGET);
 				if (p != null) {
-					final JsonLightPlace jsonPlace = buildJsonLightPlace(p,
-							highRes, l);
+					final JsonLightPlace jsonPlace = buildJsonLightPlace(p, highRes, l);
 					json.setTargetPlace(jsonPlace);
 				}
 			} catch (CalException e1) {
-				LOGGER.error(
-						"Unable to extract place for banner '"
-								+ banner.getKey() + "': " + e1.getMessage(), e1);
+				LOGGER.error("Unable to extract place for banner '" + banner.getKey() + "': " + e1.getMessage(), e1);
 			}
 			try {
-				final Event e = banner.getUnique(Event.class,
-						Constants.APIS_ALIAS_BANNER_TARGET);
+				final Event e = banner.getUnique(Event.class, Constants.APIS_ALIAS_BANNER_TARGET);
 				if (e != null) {
 					final JsonLightEvent jsonEvent = new JsonLightEvent();
 					fillJsonEvent(jsonEvent, e, highRes, l, null);
 					json.setTargetEvent(jsonEvent);
 				}
 			} catch (CalException e1) {
-				LOGGER.error(
-						"Unable to extract event for banner '"
-								+ banner.getKey() + "': " + e1.getMessage(), e1);
+				LOGGER.error("Unable to extract event for banner '" + banner.getKey() + "': " + e1.getMessage(), e1);
 			}
 		}
 		json.setTargetUrl(banner.getTargetUrl());
@@ -1026,8 +940,8 @@ public class JsonBuilderImpl implements JsonBuilder {
 		return json;
 	}
 
-	public JsonRecipientsGroup buildJsonRecipientsGroup(
-			MessageRecipientsGroup group, boolean highRes, Locale l) {
+	@Override
+	public JsonRecipientsGroup buildJsonRecipientsGroup(MessageRecipientsGroup group, boolean highRes, Locale l) {
 		// Building JSON object
 		final JsonRecipientsGroup json = new JsonRecipientsGroup();
 		json.setKey(group.getKey().toString());
@@ -1035,10 +949,31 @@ public class JsonBuilderImpl implements JsonBuilder {
 		// Extracting users, converting to JSON and filling parent JSON
 		final List<? extends User> groupUsers = group.get(User.class);
 		for (User groupUser : groupUsers) {
-			final IJsonLightUser jsonUser = buildJsonLightUser(groupUser,
-					highRes, l);
+			final IJsonLightUser jsonUser = buildJsonLightUser(groupUser, highRes, l);
 			json.addUser(jsonUser);
 		}
 		return json;
+	}
+
+	public void fillMessagingUnreadCount(JsonMessagingStatistic json, User currentUser) {
+		final List<? extends Message> messages = currentUser.get(Message.class);
+		int unreadCount = 0;
+		int unreadNotifications = 0;
+
+		// Counting based on message type
+		for (Message m : messages) {
+			switch (m.getMessageType()) {
+			case MESSAGE:
+				unreadCount++;
+				break;
+			case PRIVATE_NETWORK:
+				unreadNotifications++;
+				break;
+			}
+		}
+
+		// Injecting counts in JSON
+		json.setUnreadMsgCount(unreadCount);
+		json.setUnreadNetworkNotificationsCount(unreadNotifications);
 	}
 }

@@ -34,8 +34,7 @@ public interface NotificationService {
 	 * @param sound
 	 *            the sound to use when notifying (not used yet)
 	 */
-	Future<Boolean> sendNotification(User user, String message, int badgeCount,
-			String sound);
+	Future<Boolean> sendNotification(User user, String message, int badgeCount, int notificationsCount, String sound);
 
 	/**
 	 * Queries the various push providers feedback services to check for any app
@@ -65,8 +64,8 @@ public interface NotificationService {
 	 * @param bccAddress
 	 *            optional list of BCC address
 	 */
-	void notifyByEmail(String title, String html, Collection<String> toAddress,
-			String templateId, String... bccAddress);
+	void notifyByEmail(String title, String html, Collection<String> toAddress, String templateId,
+			String... bccAddress);
 
 	/**
 	 * Notifies administrators about place update
@@ -96,12 +95,9 @@ public interface NotificationService {
 	 * @param descriptionKey
 	 *            new description keys
 	 */
-	Future<Boolean> sendPlaceUpdateEmailNotification(Place place, User user,
-			String oldName, String oldAddress, String oldPlaceType,
-			String oldCity, String oldLat, String oldLng,
-			List<ItemKey> oldTagKeys,
-			List<? extends Description> oldDescriptions,
-			String[] newDescriptions, String[] descriptionKey);
+	Future<Boolean> sendPlaceUpdateEmailNotification(Place place, User user, String oldName, String oldAddress,
+			String oldPlaceType, String oldCity, String oldLat, String oldLng, List<ItemKey> oldTagKeys,
+			List<? extends Description> oldDescriptions, String[] newDescriptions, String[] descriptionKey);
 
 	/**
 	 * Notifies adminitrator about event update
@@ -119,12 +115,9 @@ public interface NotificationService {
 	 * @param newEventPlace
 	 * @return
 	 */
-	Future<Boolean> sendEventUpdateEmailNotification(Event event, User user,
-			String oldKey, String oldName, GeographicItem oldPlace,
-			String oldStart, String oldEnd,
-			List<? extends Description> oldDescriptions,
-			String[] newDescriptions, String[] descriptionKey,
-			GeographicItem newEventPlace);
+	Future<Boolean> sendEventUpdateEmailNotification(Event event, User user, String oldKey, String oldName,
+			GeographicItem oldPlace, String oldStart, String oldEnd, List<? extends Description> oldDescriptions,
+			String[] newDescriptions, String[] descriptionKey, GeographicItem newEventPlace);
 
 	/**
 	 * Notifies administrator about event update
@@ -154,19 +147,14 @@ public interface NotificationService {
 	 * @param newEventPlace
 	 * @return
 	 */
-	Future<Boolean> sendEventSeriesUpdateEmailNotification(Event event,
-			User user, String oldKey, String oldName, GeographicItem oldPlace,
-			String oldStart, String oldEnd, Integer oldStartHour,
-			Integer oldStartMinute, Integer oldEndHour, Integer oldEndMinute,
-			boolean oldMonday, boolean oldTuesday, boolean oldWednesday,
-			boolean oldThursday, boolean oldFriday, boolean oldSaturday,
-			boolean oldSunday, Integer oldWeekOfMonthOffset,
-			List<? extends Description> oldDescriptions,
-			String[] newDescriptions, String[] descriptionKey,
-			GeographicItem newEventPlace);
+	Future<Boolean> sendEventSeriesUpdateEmailNotification(Event event, User user, String oldKey, String oldName,
+			GeographicItem oldPlace, String oldStart, String oldEnd, Integer oldStartHour, Integer oldStartMinute,
+			Integer oldEndHour, Integer oldEndMinute, boolean oldMonday, boolean oldTuesday, boolean oldWednesday,
+			boolean oldThursday, boolean oldFriday, boolean oldSaturday, boolean oldSunday,
+			Integer oldWeekOfMonthOffset, List<? extends Description> oldDescriptions, String[] newDescriptions,
+			String[] descriptionKey, GeographicItem newEventPlace);
 
-	Future<Boolean> sendEventDeletedNotification(Event event, Place eventPlace,
-			User user);
+	Future<Boolean> sendEventDeletedNotification(Event event, Place eventPlace, User user);
 
 	/**
 	 * Notifies administrator about a reported information
@@ -178,11 +166,9 @@ public interface NotificationService {
 	 * @param reportType
 	 *            type of report (from Constants.REPORT_TYPE)
 	 */
-	Future<Boolean> sendReportEmailNotification(CalmObject obj, User user,
-			int reportType);
+	Future<Boolean> sendReportEmailNotification(CalmObject obj, User user, int reportType);
 
-	Future<Boolean> sendMediaAddedEmailNotification(CalmObject obj, User user,
-			Media media);
+	Future<Boolean> sendMediaAddedEmailNotification(CalmObject obj, User user, Media media);
 
 	/**
 	 * Notifies administrtor about a comment on a place
@@ -194,8 +180,7 @@ public interface NotificationService {
 	 * @param comment
 	 *            the comment added
 	 */
-	Future<Boolean> sendCommentAddedEmailNotification(CalmObject obj,
-			User user, Comment comment);
+	Future<Boolean> sendCommentAddedEmailNotification(CalmObject obj, User user, Comment comment);
 
 	/**
 	 * Sends an email to the user that offers him to change his password

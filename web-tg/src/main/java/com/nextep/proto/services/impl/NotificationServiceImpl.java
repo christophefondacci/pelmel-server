@@ -70,6 +70,7 @@ public class NotificationServiceImpl implements NotificationService {
 
 	private static final Log LOGGER = LogFactory.getLog("notifications");
 	private static final String APIS_ALIAS_USER = "user";
+	private static final String APNS_FIELD_UNREAD_NETWORK = "unreadNetwork";
 
 	@Resource(mappedName = "smtpHostName")
 	private String smtpHostName;
@@ -110,8 +111,7 @@ public class NotificationServiceImpl implements NotificationService {
 
 	public void init() throws Exception {
 		if (pushEnabled) {
-			final ApnsServiceBuilder builder = APNS.newService().withCert(
-					pushKeyPath, pushKeyPassword);
+			final ApnsServiceBuilder builder = APNS.newService().withCert(pushKeyPath, pushKeyPassword);
 			if (production) {
 				apnsService = builder.withProductionDestination().build();
 			} else {
@@ -130,58 +130,49 @@ public class NotificationServiceImpl implements NotificationService {
 	@Override
 	public void checkExpiredPushDevices() {
 		// pushManager.requestExpiredTokens();
-		final Map<String, Date> expiredTokens = apnsService
-				.getInactiveDevices();
+		final Map<String, Date> expiredTokens = apnsService.getInactiveDevices();
 		if (expiredTokens == null) {
 			return;
 		}
-		LOGGER.info("PUSH: Processing " + expiredTokens.size()
-				+ " expired tokens");
+		LOGGER.info("PUSH: Processing " + expiredTokens.size() + " expired tokens");
 		for (final String token : expiredTokens.keySet()) {
 			final Date expirationDate = expiredTokens.get(token);
-			LOGGER.info("PUSH: Processing expired token '" + token
-					+ "' expired on '" + expirationDate + "'");
+			LOGGER.info("PUSH: Processing expired token '" + token + "' expired on '" + expirationDate + "'");
 			// Stop sending push notifications to each expired token if the
 			// expiration
 			// time is after the last time the app registered that token.
 			try {
 				ApisRequest request = ApisFactory.createCompositeRequest();
-				request.addCriterion(SearchRestriction.alternateKey(User.class,
-						CalmFactory.createKey(User.PUSH_TOKEN_TYPE, token))
-						.aliasedBy(APIS_ALIAS_USER));
-				final ApiCompositeResponse response = (ApiCompositeResponse) apiService
-						.execute(request, ContextFactory.createContext(Locale
-								.getDefault()));
-				final User user = response.getUniqueElement(User.class,
-						APIS_ALIAS_USER);
+				request.addCriterion(
+						SearchRestriction.alternateKey(User.class, CalmFactory.createKey(User.PUSH_TOKEN_TYPE, token))
+								.aliasedBy(APIS_ALIAS_USER));
+				final ApiCompositeResponse response = (ApiCompositeResponse) apiService.execute(request,
+						ContextFactory.createContext(Locale.getDefault()));
+				final User user = response.getUniqueElement(User.class, APIS_ALIAS_USER);
 				if (user != null) {
 					if (user.getOnlineTimeout().compareTo(expirationDate) < 0) {
 						ContextHolder.toggleWrite();
 						((MutableUser) user).setPushDeviceId(null);
 						usersService.saveItem(user);
-						LOGGER.info("PUSH: unregistering device ID for user "
-								+ user.getKey() + " - " + token);
+						LOGGER.info("PUSH: unregistering device ID for user " + user.getKey() + " - " + token);
 					}
 				}
 			} catch (CalException | ApisException e) {
-				LOGGER.error(
-						"PUSH: unable to create APIS criterion to fetch token ["
-								+ token + "]", e);
+				LOGGER.error("PUSH: unable to create APIS criterion to fetch token [" + token + "]", e);
 			}
 		}
 	}
 
 	@Override
 	@Async
-	public Future<Boolean> sendNotification(User user, String message,
-			int badgeCount, String sound) {
+	public Future<Boolean> sendNotification(User user, String message, int badgeCount, int unreadNetwork,
+			String sound) {
 		if (user.getPushDeviceId() != null && pushEnabled) {
 
-			LOGGER.info("Sending push notification to user [" + user.getKey()
-					+ "]");
+			LOGGER.info("Sending push notification to user [" + user.getKey() + "]");
 
-			String payload = APNS.newPayload().badge(badgeCount)
-					.alertBody(message).build();
+			String payload = APNS.newPayload().badge(badgeCount).alertBody(message)
+					.customField(APNS_FIELD_UNREAD_NETWORK, unreadNetwork).build();
 			apnsService.push(user.getPushDeviceId(), payload);
 		}
 		return new AsyncResult<Boolean>(true);
@@ -189,24 +180,20 @@ public class NotificationServiceImpl implements NotificationService {
 
 	@Override
 	public void notifyAdminByEmail(String title, String html) {
-		notifyByEmail(title, html, "christophe@pelmelguide.com",
-				adminEmailAlias);
+		notifyByEmail(title, html, "christophe@pelmelguide.com", adminEmailAlias);
 	}
 
-	private void notifyByEmail(String title, String html, String toAddress,
-			String bccAddress) {
-		notifyByEmail(title, html, Arrays.asList(toAddress.split(" ")),
-				"43c9d208-8167-48f8-bc90-0edc03575c5f", bccAddress.split(" "));
+	private void notifyByEmail(String title, String html, String toAddress, String bccAddress) {
+		notifyByEmail(title, html, Arrays.asList(toAddress.split(" ")), "43c9d208-8167-48f8-bc90-0edc03575c5f",
+				bccAddress.split(" "));
 	}
 
 	@Override
-	public void notifyByEmail(String title, String html,
-			Collection<String> toAddress, String templateId,
+	public void notifyByEmail(String title, String html, Collection<String> toAddress, String templateId,
 			String... bccAddress) {
 		LOGGER.info("<br>=================<br>" + title + "<br>" + html);
 
-		if (adminEmailAlias == null || adminEmailAlias.trim().isEmpty()
-				|| !emailEnabled) {
+		if (adminEmailAlias == null || adminEmailAlias.trim().isEmpty() || !emailEnabled) {
 			return;
 		}
 		Email sendgridEmail = new Email();
@@ -231,125 +218,87 @@ public class NotificationServiceImpl implements NotificationService {
 			if (response.getStatus()) {
 				LOGGER.info("SUCCESS: Sent email notification");
 			} else {
-				LOGGER.error("ERROR: Unable to send email - error #"
-						+ response.getCode() + " '" + response.getMessage()
+				LOGGER.error("ERROR: Unable to send email - error #" + response.getCode() + " '" + response.getMessage()
 						+ "'");
 			}
 		} catch (SendGridException e) {
-			LOGGER.error(
-					"Unable to send email notification: " + e.getMessage(), e);
+			LOGGER.error("Unable to send email notification: " + e.getMessage(), e);
 		}
 
 	}
 
 	@Override
 	@Async
-	public Future<Boolean> sendEventUpdateEmailNotification(Event event,
-			User user, String oldKey, String oldName, GeographicItem oldPlace,
-			String oldStart, String oldEnd,
-			List<? extends Description> oldDescriptions,
-			String[] newDescriptions, String[] descriptionKey,
-			GeographicItem newEventPlace) {
-		return sendEventSeriesUpdateEmailNotification(event, user, oldKey,
-				oldName, oldPlace, oldStart, oldEnd, null, null, null, null,
-				false, false, false, false, false, false, false, null,
-				oldDescriptions, newDescriptions, descriptionKey, newEventPlace);
+	public Future<Boolean> sendEventUpdateEmailNotification(Event event, User user, String oldKey, String oldName,
+			GeographicItem oldPlace, String oldStart, String oldEnd, List<? extends Description> oldDescriptions,
+			String[] newDescriptions, String[] descriptionKey, GeographicItem newEventPlace) {
+		return sendEventSeriesUpdateEmailNotification(event, user, oldKey, oldName, oldPlace, oldStart, oldEnd, null,
+				null, null, null, false, false, false, false, false, false, false, null, oldDescriptions,
+				newDescriptions, descriptionKey, newEventPlace);
 	}
 
 	@Override
 	@Async
-	public Future<Boolean> sendEventSeriesUpdateEmailNotification(Event event,
-			User user, String oldKey, String oldName, GeographicItem oldPlace,
-			String oldStart, String oldEnd, Integer oldStartHour,
-			Integer oldStartMinute, Integer oldEndHour, Integer oldEndMinute,
-			boolean oldMonday, boolean oldTuesday, boolean oldWednesday,
-			boolean oldThursday, boolean oldFriday, boolean oldSaturday,
-			boolean oldSunday, Integer oldWeekOfMonthOffset,
-			List<? extends Description> oldDescriptions,
-			String[] newDescriptions, String[] descriptionKey,
-			GeographicItem newEventPlace) {
+	public Future<Boolean> sendEventSeriesUpdateEmailNotification(Event event, User user, String oldKey, String oldName,
+			GeographicItem oldPlace, String oldStart, String oldEnd, Integer oldStartHour, Integer oldStartMinute,
+			Integer oldEndHour, Integer oldEndMinute, boolean oldMonday, boolean oldTuesday, boolean oldWednesday,
+			boolean oldThursday, boolean oldFriday, boolean oldSaturday, boolean oldSunday,
+			Integer oldWeekOfMonthOffset, List<? extends Description> oldDescriptions, String[] newDescriptions,
+			String[] descriptionKey, GeographicItem newEventPlace) {
 		try {
 			final StringBuilder buf = new StringBuilder();
 
 			// Generic email header
-			final String updated = oldKey == null ? "added" : "####"
-					.equals(oldKey) ? "deleted" : "updated";
+			final String updated = oldKey == null ? "added" : "####".equals(oldKey) ? "deleted" : "updated";
 			fillEmailHeaderFor(buf, event, user, updated);
 
 			// Reporting changed information
-			buf.append("<table cellpadding=\"5\" style=\"border: 1px solid #ccc;\"><thead><tr><th>Field</th><th>Old Value</th><th>NEW value</th></thead><tbody>");
+			buf.append(
+					"<table cellpadding=\"5\" style=\"border: 1px solid #ccc;\"><thead><tr><th>Field</th><th>Old Value</th><th>NEW value</th></thead><tbody>");
 			appendField(buf, "Name", oldName, event.getName());
 
 			String oldUrl = null;
 			if (oldPlace != null) {
-				oldUrl = urlService.getOverviewUrl(
-						DisplayHelper.getDefaultAjaxContainer(), oldPlace);
+				oldUrl = urlService.getOverviewUrl(DisplayHelper.getDefaultAjaxContainer(), oldPlace);
 			}
-			appendFieldWithUrl(buf, "Place", DisplayHelper.getName(oldPlace),
-					DisplayHelper.getName(newEventPlace), oldUrl,
-					urlService.getOverviewUrl(
-							DisplayHelper.getDefaultAjaxContainer(),
-							newEventPlace));
+			appendFieldWithUrl(buf, "Place", DisplayHelper.getName(oldPlace), DisplayHelper.getName(newEventPlace),
+					oldUrl, urlService.getOverviewUrl(DisplayHelper.getDefaultAjaxContainer(), newEventPlace));
 
 			if (event instanceof EventSeries) {
 				final EventSeries series = (EventSeries) event;
-				appendField(buf, "Event Type", series.getCalendarType().name(),
-						series.getCalendarType().name());
-				appendField(buf, "Start time", pad(oldStartHour) + ":"
-						+ pad(oldStartMinute), pad(series.getStartHour()) + ":"
-						+ pad(series.getStartMinute()));
-				appendField(buf, "End time", pad(oldEndHour) + ":"
-						+ pad(oldEndMinute), pad(series.getEndHour()) + ":"
-						+ pad(series.getEndMinute()));
-				appendField(buf, "Monday", String.valueOf(oldMonday),
-						String.valueOf(series.isMonday()));
-				appendField(buf, "Tuesday", String.valueOf(oldTuesday),
-						String.valueOf(series.isTuesday()));
-				appendField(buf, "Wednesday", String.valueOf(oldWednesday),
-						String.valueOf(series.isWednesday()));
-				appendField(buf, "Thursday", String.valueOf(oldThursday),
-						String.valueOf(series.isThursday()));
-				appendField(buf, "Friday", String.valueOf(oldFriday),
-						String.valueOf(series.isFriday()));
-				appendField(buf, "Saturday", String.valueOf(oldSaturday),
-						String.valueOf(series.isSaturday()));
-				appendField(buf, "Sunday", String.valueOf(oldSunday),
-						String.valueOf(series.isSunday()));
-				appendField(
-						buf,
-						"Week of month",
-						oldWeekOfMonthOffset == null ? null : String
-								.valueOf(oldWeekOfMonthOffset),
+				appendField(buf, "Event Type", series.getCalendarType().name(), series.getCalendarType().name());
+				appendField(buf, "Start time", pad(oldStartHour) + ":" + pad(oldStartMinute),
+						pad(series.getStartHour()) + ":" + pad(series.getStartMinute()));
+				appendField(buf, "End time", pad(oldEndHour) + ":" + pad(oldEndMinute),
+						pad(series.getEndHour()) + ":" + pad(series.getEndMinute()));
+				appendField(buf, "Monday", String.valueOf(oldMonday), String.valueOf(series.isMonday()));
+				appendField(buf, "Tuesday", String.valueOf(oldTuesday), String.valueOf(series.isTuesday()));
+				appendField(buf, "Wednesday", String.valueOf(oldWednesday), String.valueOf(series.isWednesday()));
+				appendField(buf, "Thursday", String.valueOf(oldThursday), String.valueOf(series.isThursday()));
+				appendField(buf, "Friday", String.valueOf(oldFriday), String.valueOf(series.isFriday()));
+				appendField(buf, "Saturday", String.valueOf(oldSaturday), String.valueOf(series.isSaturday()));
+				appendField(buf, "Sunday", String.valueOf(oldSunday), String.valueOf(series.isSunday()));
+				appendField(buf, "Week of month",
+						oldWeekOfMonthOffset == null ? null : String.valueOf(oldWeekOfMonthOffset),
 						String.valueOf(series.getWeekOfMonthOffset()));
 			} else {
 				// Getting event timezone
-				final String eventTimezone = eventManagementService
-						.getEventTimezoneId(event);
-				final Date localizedStart = eventManagementService.convertDate(
-						event.getStartDate(), TimeZone.getDefault().getID(),
-						eventTimezone);
-				final Date localizedEnd = eventManagementService.convertDate(
-						event.getEndDate(), TimeZone.getDefault().getID(),
-						eventTimezone);
+				final String eventTimezone = eventManagementService.getEventTimezoneId(event);
+				final Date localizedStart = eventManagementService.convertDate(event.getStartDate(),
+						TimeZone.getDefault().getID(), eventTimezone);
+				final Date localizedEnd = eventManagementService.convertDate(event.getEndDate(),
+						TimeZone.getDefault().getID(), eventTimezone);
 
-				appendField(buf, "Start date", oldStart,
-						dateFormatter.format(localizedStart));
-				appendField(buf, "End date", oldEnd,
-						dateFormatter.format(localizedEnd));
+				appendField(buf, "Start date", oldStart, dateFormatter.format(localizedStart));
+				appendField(buf, "End date", oldEnd, dateFormatter.format(localizedEnd));
 			}
-			appendDescriptions(buf, oldDescriptions, newDescriptions,
-					descriptionKey);
+			appendDescriptions(buf, oldDescriptions, newDescriptions, descriptionKey);
 			buf.append("</tbody></table>");
 			fillEmailFooterFor(buf, event, user);
-			notifyAdminByEmail(
-					"Event "
-							+ (event.getName() == null ? "" : event.getName()
-									+ " ") + updated + " by "
-							+ user.getPseudo(), buf.toString());
+			notifyAdminByEmail("Event " + (event.getName() == null ? "" : event.getName() + " ") + updated + " by "
+					+ user.getPseudo(), buf.toString());
 		} catch (Exception e) {
-			LOGGER.error(
-					"Exception while generating EVENT email notification: "
-							+ e.getMessage(), e);
+			LOGGER.error("Exception while generating EVENT email notification: " + e.getMessage(), e);
 		}
 		return new AsyncResult<Boolean>(true);
 	}
@@ -357,12 +306,10 @@ public class NotificationServiceImpl implements NotificationService {
 	@SuppressWarnings("unchecked")
 	@Async
 	@Override
-	public Future<Boolean> sendEventDeletedNotification(Event event,
-			Place eventPlace, User user) {
-		return sendEventSeriesUpdateEmailNotification(event, user, "####",
-				null, null, null, null, null, null, null, null, false, false,
-				false, false, false, false, false, null,
-				Collections.EMPTY_LIST, null, null, eventPlace);
+	public Future<Boolean> sendEventDeletedNotification(Event event, Place eventPlace, User user) {
+		return sendEventSeriesUpdateEmailNotification(event, user, "####", null, null, null, null, null, null, null,
+				null, false, false, false, false, false, false, false, null, Collections.EMPTY_LIST, null, null,
+				eventPlace);
 	}
 
 	private String pad(Integer hour) {
@@ -379,12 +326,9 @@ public class NotificationServiceImpl implements NotificationService {
 
 	@Override
 	@Async
-	public Future<Boolean> sendPlaceUpdateEmailNotification(Place place,
-			User user, String oldName, String oldAddress, String oldPlaceType,
-			String oldCity, String oldLat, String oldLng,
-			List<ItemKey> oldTagKeys,
-			List<? extends Description> oldDescriptions,
-			String[] newDescriptions, String[] descriptionKey) {
+	public Future<Boolean> sendPlaceUpdateEmailNotification(Place place, User user, String oldName, String oldAddress,
+			String oldPlaceType, String oldCity, String oldLat, String oldLng, List<ItemKey> oldTagKeys,
+			List<? extends Description> oldDescriptions, String[] newDescriptions, String[] descriptionKey) {
 		final StringBuilder buf = new StringBuilder();
 
 		// Generic email header
@@ -392,27 +336,23 @@ public class NotificationServiceImpl implements NotificationService {
 		fillEmailHeaderFor(buf, place, user, updated);
 
 		// Reporting changed information
-		buf.append("<table cellpadding=\"5\" style=\"border: 1px solid #ccc;\"><thead><tr><th>Field</th><th>Old Value</th><th>NEW value</th></thead><tbody>");
+		buf.append(
+				"<table cellpadding=\"5\" style=\"border: 1px solid #ccc;\"><thead><tr><th>Field</th><th>Old Value</th><th>NEW value</th></thead><tbody>");
 		appendField(buf, "Name", oldName, place.getName());
 		appendField(buf, "Address", oldAddress, place.getAddress1());
 		appendField(buf, "Place type", oldPlaceType, place.getPlaceType());
 		appendField(buf, "City", oldCity, place.getCity().getName());
-		appendField(buf, "Latitude", oldLat,
-				String.valueOf(place.getLatitude()));
-		appendField(buf, "Longitude", oldLng,
-				String.valueOf(place.getLongitude()));
-		appendDescriptions(buf, oldDescriptions, newDescriptions,
-				descriptionKey);
+		appendField(buf, "Latitude", oldLat, String.valueOf(place.getLatitude()));
+		appendField(buf, "Longitude", oldLng, String.valueOf(place.getLongitude()));
+		appendDescriptions(buf, oldDescriptions, newDescriptions, descriptionKey);
 		buf.append("</tbody></table>");
 		fillEmailFooterFor(buf, place, user);
 		final String objType = getObjectTypeName(place);
-		notifyAdminByEmail(objType + " " + place.getName() + " " + updated
-				+ " by " + user.getPseudo(), buf.toString());
+		notifyAdminByEmail(objType + " " + place.getName() + " " + updated + " by " + user.getPseudo(), buf.toString());
 		return new AsyncResult<Boolean>(true);
 	}
 
-	private void appendDescriptions(StringBuilder buf,
-			List<? extends Description> oldDescriptions,
+	private void appendDescriptions(StringBuilder buf, List<? extends Description> oldDescriptions,
 			String[] newDescriptions, String[] descriptionKey) {
 		// Descriptions
 		final Map<String, Description> oldDescMap = new HashMap<String, Description>();
@@ -424,9 +364,7 @@ public class NotificationServiceImpl implements NotificationService {
 				final String key = descriptionKey[i];
 				final String newDesc = newDescriptions[i];
 				final Description oldDesc = oldDescMap.get(key);
-				appendField(buf, "Description",
-						oldDesc != null ? oldDesc.getDescription() : "",
-						newDesc);
+				appendField(buf, "Description", oldDesc != null ? oldDesc.getDescription() : "", newDesc);
 			}
 		}
 	}
@@ -457,55 +395,41 @@ public class NotificationServiceImpl implements NotificationService {
 	 * @param actionType
 	 *            the type of action
 	 */
-	private void fillEmailHeaderFor(StringBuilder buf, CalmObject object,
-			User user, String actionType) {
-		final String url = baseUrl
-				+ urlService.getOverviewUrl(
-						DisplayHelper.getDefaultAjaxContainer(), object);
-		final String userUrl = baseUrl
-				+ urlService.getOverviewUrl(
-						DisplayHelper.getDefaultAjaxContainer(), user);
+	private void fillEmailHeaderFor(StringBuilder buf, CalmObject object, User user, String actionType) {
+		final String url = baseUrl + urlService.getOverviewUrl(DisplayHelper.getDefaultAjaxContainer(), object);
+		final String userUrl = baseUrl + urlService.getOverviewUrl(DisplayHelper.getDefaultAjaxContainer(), user);
 
 		final String objectType = getObjectTypeName(object);
-		buf.append("Hello administrators,<br><br>A "
-				+ objectType.toLowerCase()
-				+ " has been "
-				+ actionType
+		buf.append("Hello administrators,<br><br>A " + objectType.toLowerCase() + " has been " + actionType
 				+ " on <a href=\"http://www.pelmelguide.com\">PELMEL Guide</a>:<br><br>");
-		// buf.append("Hello administrators,<br><br>A place has been updated on PELMEL Guide:<br>");
+		// buf.append("Hello administrators,<br><br>A place has been updated on
+		// PELMEL Guide:<br>");
 		final String name = DisplayHelper.getName(object);
 		buf.append(objectType + " " + actionType + ": <a href=\"" + url + "\">"
-				+ (name == null || name.trim().isEmpty() ? "[No name]" : name)
-				+ "</a><br>");
-		buf.append(objectType + " " + actionType + " by: <a href=\"" + userUrl
-				+ "\">" + user.getPseudo() + "</a><br><br>");
+				+ (name == null || name.trim().isEmpty() ? "[No name]" : name) + "</a><br>");
+		buf.append(objectType + " " + actionType + " by: <a href=\"" + userUrl + "\">" + user.getPseudo()
+				+ "</a><br><br>");
 	}
 
-	private void appendField(StringBuilder buf, String fieldName,
-			String oldVal, String newVal) {
+	private void appendField(StringBuilder buf, String fieldName, String oldVal, String newVal) {
 		boolean isBold = newVal != null && !newVal.equals(oldVal);
-		buf.append("<tr><td style=\"text-align:right;\"><i>" + fieldName
-				+ "</i></td><td>" + HtmlUtils.htmlEscape(oldVal) + "</td><td>"
-				+ (isBold ? "<b>" : "") + HtmlUtils.htmlEscape(newVal)
+		buf.append("<tr><td style=\"text-align:right;\"><i>" + fieldName + "</i></td><td>"
+				+ HtmlUtils.htmlEscape(oldVal) + "</td><td>" + (isBold ? "<b>" : "") + HtmlUtils.htmlEscape(newVal)
 				+ (isBold ? "</b>" : "") + "</td></tr>");
 	}
 
-	private void appendFieldWithUrl(StringBuilder buf, String fieldName,
-			String oldVal, String newVal, String oldUrl, String newUrl) {
+	private void appendFieldWithUrl(StringBuilder buf, String fieldName, String oldVal, String newVal, String oldUrl,
+			String newUrl) {
 		boolean isBold = newVal != null && !newVal.equals(oldVal);
 
-		buf.append("<tr><td style=\"text-align:right;\"><i>" + fieldName
-				+ "</i></td><td><a href=\"" + baseUrl + oldUrl + "\">"
-				+ HtmlUtils.htmlEscape(oldVal) + "</a></td><td><a href=\""
-				+ baseUrl + newUrl + "\">" + (isBold ? "<b>" : "")
-				+ HtmlUtils.htmlEscape(newVal) + (isBold ? "</b>" : "")
-				+ "</a></td></tr>");
+		buf.append("<tr><td style=\"text-align:right;\"><i>" + fieldName + "</i></td><td><a href=\"" + baseUrl + oldUrl
+				+ "\">" + HtmlUtils.htmlEscape(oldVal) + "</a></td><td><a href=\"" + baseUrl + newUrl + "\">"
+				+ (isBold ? "<b>" : "") + HtmlUtils.htmlEscape(newVal) + (isBold ? "</b>" : "") + "</a></td></tr>");
 	}
 
 	@Override
 	@Async
-	public Future<Boolean> sendReportEmailNotification(CalmObject obj,
-			User user, int reportType) {
+	public Future<Boolean> sendReportEmailNotification(CalmObject obj, User user, int reportType) {
 		final StringBuilder buf = new StringBuilder();
 		fillEmailHeaderFor(buf, obj, user, "reported");
 
@@ -532,63 +456,53 @@ public class NotificationServiceImpl implements NotificationService {
 		buf.append("</b>");
 		fillEmailFooterFor(buf, obj, user);
 		final String objectType = getObjectTypeName(obj);
-		notifyAdminByEmail(
-				objectType + " " + DisplayHelper.getName(obj) + " reported as "
-						+ reportTypeLabel + " by " + user.getPseudo(),
+		notifyAdminByEmail(objectType + " " + DisplayHelper.getName(obj) + " reported as " + reportTypeLabel + " by "
+				+ user.getPseudo(), buf.toString());
+		return new AsyncResult<Boolean>(true);
+	}
+
+	private void fillEmailFooterFor(StringBuilder buf, CalmObject object, User user) {
+		buf.append("<br>");
+		// buf.append("<span
+		// style=\"float:right;padding-top:10px;padding-bottom:10px;\">The
+		// PELMEL server ;)</span>");
+	}
+
+	@Override
+	@Async
+	public Future<Boolean> sendMediaAddedEmailNotification(CalmObject obj, User user, Media media) {
+		StringBuilder buf = new StringBuilder();
+		fillEmailHeaderFor(buf, obj, user, "modified with a new photo");
+
+		buf.append("Photo added: <a href=\"" + MediaHelper.getImageUrl(media.getUrl()) + "\">New photo</a><br>");
+		buf.append("<img src=\"" + MediaHelper.getImageUrl(media.getUrl()) + "\">");
+		fillEmailFooterFor(buf, obj, user);
+		final String objType = getObjectTypeName(obj);
+		notifyAdminByEmail("Photo added to " + objType + " " + DisplayHelper.getName(obj) + " by " + user.getPseudo(),
 				buf.toString());
 		return new AsyncResult<Boolean>(true);
 	}
 
-	private void fillEmailFooterFor(StringBuilder buf, CalmObject object,
-			User user) {
-		buf.append("<br>");
-		// buf.append("<span style=\"float:right;padding-top:10px;padding-bottom:10px;\">The PELMEL server ;)</span>");
-	}
-
 	@Override
 	@Async
-	public Future<Boolean> sendMediaAddedEmailNotification(CalmObject obj,
-			User user, Media media) {
-		StringBuilder buf = new StringBuilder();
-		fillEmailHeaderFor(buf, obj, user, "modified with a new photo");
-
-		buf.append("Photo added: <a href=\""
-				+ MediaHelper.getImageUrl(media.getUrl())
-				+ "\">New photo</a><br>");
-		buf.append("<img src=\"" + MediaHelper.getImageUrl(media.getUrl())
-				+ "\">");
-		fillEmailFooterFor(buf, obj, user);
-		final String objType = getObjectTypeName(obj);
-		notifyAdminByEmail(
-				"Photo added to " + objType + " " + DisplayHelper.getName(obj)
-						+ " by " + user.getPseudo(), buf.toString());
-		return new AsyncResult<Boolean>(true);
-	}
-
-	@Override
-	@Async
-	public Future<Boolean> sendCommentAddedEmailNotification(CalmObject obj,
-			User user, Comment comment) {
+	public Future<Boolean> sendCommentAddedEmailNotification(CalmObject obj, User user, Comment comment) {
 		StringBuilder buf = new StringBuilder();
 		fillEmailHeaderFor(buf, obj, user, "commented");
 		buf.append("Comment added: <br><p>" + comment.getMessage() + "</p>");
 		try {
 			final Media m = comment.getUnique(Media.class);
 			if (m != null) {
-				buf.append("Comment Photo: <a href=\""
-						+ MediaHelper.getImageUrl(m.getUrl())
-						+ "\">Comment image</a><br>");
+				buf.append(
+						"Comment Photo: <a href=\"" + MediaHelper.getImageUrl(m.getUrl()) + "\">Comment image</a><br>");
 			}
 		} catch (CalException e) {
-			LOGGER.error("Unable to extract comment image for comment '"
-					+ comment.getKey() + "': " + e.getMessage(), e);
+			LOGGER.error("Unable to extract comment image for comment '" + comment.getKey() + "': " + e.getMessage(),
+					e);
 		}
 		fillEmailFooterFor(buf, obj, user);
 		final String objType = getObjectTypeName(obj);
-		notifyAdminByEmail(
-				"Comment added to " + objType + " "
-						+ DisplayHelper.getName(obj) + " by "
-						+ user.getPseudo(), buf.toString());
+		notifyAdminByEmail("Comment added to " + objType + " " + DisplayHelper.getName(obj) + " by " + user.getPseudo(),
+				buf.toString());
 		return new AsyncResult<Boolean>(true);
 	}
 
@@ -599,8 +513,7 @@ public class NotificationServiceImpl implements NotificationService {
 		fillEmailHeaderFor(buf, user, user, "signed up");
 		fillEmailFooterFor(buf, user, user);
 
-		notifyAdminByEmail("User " + user.getPseudo() + " registered",
-				buf.toString());
+		notifyAdminByEmail("User " + user.getPseudo() + " registered", buf.toString());
 		return new AsyncResult<Boolean>(true);
 	}
 
@@ -615,8 +528,7 @@ public class NotificationServiceImpl implements NotificationService {
 		buf.append("If the link does not work try to copy / paste it in a new web browser window.");
 		fillEmailFooterFor(buf, user, user);
 
-		notifyByEmail("[PELMEL Guide] Lost password link", buf.toString(),
-				user.getEmail(), "cfondacci@gmail.com");
+		notifyByEmail("[PELMEL Guide] Lost password link", buf.toString(), user.getEmail(), "cfondacci@gmail.com");
 
 	}
 
