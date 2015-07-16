@@ -94,7 +94,7 @@ public class MessagingServiceImpl implements MessagingService {
 				LOGGER.error("Unable to create media for message " + msg.getKey() + ": " + e.getMessage(), e);
 			}
 		}
-		sendPushNotification(from, to, msg, mediaFile != null, MessageType.MESSAGE);
+		sendPushNotification(from, to, message, mediaFile != null, MessageType.MESSAGE, msg.isUnread());
 		return msg;
 	}
 
@@ -106,7 +106,7 @@ public class MessagingServiceImpl implements MessagingService {
 	@Override
 	public Message sendMessage(User from, User to, ItemKey recipientsGroupKey, String message, MessageType type) {
 		final Message msg = createMessage(from.getKey(), to.getKey(), recipientsGroupKey, message, type);
-		sendPushNotification(from, to, msg, false, type);
+		sendPushNotification(from, to, message, false, type, msg.isUnread());
 		return msg;
 	}
 
@@ -121,7 +121,11 @@ public class MessagingServiceImpl implements MessagingService {
 		if (recipientsGroupKey != null) {
 			msg.setRecipientsGroupKey(recipientsGroupKey);
 		}
-		msg.setMessage(message);
+		if (messageType != MessageType.PRIVATE_NETWORK) {
+			msg.setMessage(message);
+		} else {
+			msg.setMessage(messageSource.getMessage("message.networkUpgrade", null, Locale.ENGLISH));
+		}
 		msg.setMessageDate(new Date());
 		// Our returning message is the message to self
 		if (toKey.equals(fromKey) || messageType == MessageType.PRIVATE_NETWORK) {
@@ -131,8 +135,8 @@ public class MessagingServiceImpl implements MessagingService {
 		return msg;
 	}
 
-	private void sendPushNotification(User sourceUser, User targetUser, Message msg, boolean isMediaMessage,
-			MessageType messageType) {
+	private void sendPushNotification(User sourceUser, User targetUser, String message, boolean isMediaMessage,
+			MessageType messageType, boolean unread) {
 
 		// Notifying recipient if deviceId and push enabled (and not our own
 		// message)
@@ -143,11 +147,9 @@ public class MessagingServiceImpl implements MessagingService {
 				if (messageType == MessageType.MESSAGE) {
 					pushMsg = MessageFormat.format(
 							messageSource.getMessage("message.push.template", null, Locale.ENGLISH),
-							sourceUser.getPseudo(), msg.getMessage());
+							sourceUser.getPseudo(), message);
 				} else {
-					pushMsg = MessageFormat.format(
-							messageSource.getMessage("message.push.networkRequest", null, Locale.ENGLISH),
-							sourceUser.getPseudo());
+					pushMsg = message;
 				}
 			} else {
 				pushMsg = MessageFormat.format(
@@ -155,10 +157,11 @@ public class MessagingServiceImpl implements MessagingService {
 						sourceUser.getPseudo());
 			}
 			// Sending message
-			final List<? extends User> toApprove = targetUser.get(User.class, Constants.APIS_ALIAS_NETWORK_PENDING_APPROVAL);
+			final List<? extends User> toApprove = targetUser.get(User.class,
+					Constants.APIS_ALIAS_NETWORK_PENDING_APPROVAL);
 			final List<? extends Message> unreadMessages = targetUser.get(Message.class);
 			int unreadCount = unreadMessages.size();
-			if (msg.isUnread()) {
+			if (unread) {
 				unreadCount++;
 			}
 			// Adding +1 because we just added a new unread message

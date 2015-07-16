@@ -2,6 +2,7 @@ package com.nextep.json.model.impl;
 
 import java.util.Date;
 
+import com.nextep.json.model.IJsonLightPlace;
 import com.nextep.json.model.IJsonLightUser;
 
 public class JsonLightUser implements IJsonLightUser {
@@ -11,12 +12,14 @@ public class JsonLightUser implements IJsonLightUser {
 	private Long lastLocationTime;
 	private boolean online;
 	private double rawDistance;
+	private IJsonLightPlace lastLocation;
 
 	@Override
 	public String getKey() {
 		return key;
 	}
 
+	@Override
 	public void setKey(String key) {
 		this.key = key;
 	}
@@ -34,7 +37,7 @@ public class JsonLightUser implements IJsonLightUser {
 	public JsonMedia getThumb() {
 		return thumb;
 	}
-
+ 
 	public void setThumb(JsonMedia thumb) {
 		this.thumb = thumb;
 	}
@@ -51,8 +54,7 @@ public class JsonLightUser implements IJsonLightUser {
 
 	@Override
 	public void setLastLocationTimeValue(Date lastLocationDate) {
-		this.lastLocationTime = lastLocationDate == null ? null
-				: lastLocationDate.getTime() / 1000;
+		this.lastLocationTime = lastLocationDate == null ? null : lastLocationDate.getTime() / 1000;
 	}
 
 	@Override
@@ -73,5 +75,15 @@ public class JsonLightUser implements IJsonLightUser {
 	@Override
 	public double getRawDistanceMeters() {
 		return rawDistance;
+	}
+
+	@Override
+	public void setLastLocation(IJsonLightPlace lastLocation) {
+		this.lastLocation = lastLocation;
+	}
+
+	@Override
+	public IJsonLightPlace getLastLocation() {
+		return lastLocation;
 	}
 }

@@ -10,8 +10,7 @@ import com.nextep.json.model.IJsonLightPlace;
 import com.nextep.json.model.IJsonLightUser;
 import com.nextep.json.model.IPrivateListContainer;
 
-public class JsonUser extends JsonLiker implements IJsonLightUser,
-		IPrivateListContainer {
+public class JsonUser extends JsonLiker implements IJsonLightUser, IPrivateListContainer {
 
 	private String key;
 	private String nxtpUserToken;
@@ -160,10 +159,12 @@ public class JsonUser extends JsonLiker implements IJsonLightUser,
 		return likedPlacesCount;
 	}
 
+	@Override
 	public void setLastLocation(IJsonLightPlace lastLocation) {
 		this.lastLocation = lastLocation;
 	}
 
+	@Override
 	public IJsonLightPlace getLastLocation() {
 		return lastLocation;
 	}

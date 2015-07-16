@@ -4,6 +4,7 @@ import java.util.Date;
 
 import com.nextep.media.model.Media;
 import com.nextep.media.model.MediaRequestTypes;
+import com.nextep.proto.apis.adapters.ApisUserLocationItemKeyAdapter;
 import com.nextep.proto.model.Constants;
 import com.nextep.users.model.User;
 import com.nextep.users.model.UserPrivateListRequestType;
@@ -74,12 +75,14 @@ public final class UserHelper {
 						.with(Media.class, MediaRequestTypes.THUMB))
 				.with((WithCriterion) SearchRestriction
 						.with(User.class, new UserPrivateListRequestType(UserPrivateListRequestType.LIST_REQUESTED))
-						.aliasedBy(Constants.APIS_ALIAS_NETWORK_REQUEST)
-						.with(Media.class, MediaRequestTypes.THUMB))
+						.aliasedBy(Constants.APIS_ALIAS_NETWORK_REQUEST).with(Media.class,
+								MediaRequestTypes.THUMB))
 				.with((WithCriterion) SearchRestriction
 						.with(User.class,
 								new UserPrivateListRequestType(UserPrivateListRequestType.LIST_PRIVATE_NETWORK))
-						.aliasedBy(Constants.APIS_ALIAS_NETWORK_MEMBER).with(Media.class, MediaRequestTypes.THUMB));
+						.aliasedBy(Constants.APIS_ALIAS_NETWORK_MEMBER).with(Media.class, MediaRequestTypes.THUMB)
+						.addCriterion(SearchRestriction.adaptKey(new ApisUserLocationItemKeyAdapter())
+								.aliasedBy(Constants.APIS_ALIAS_USER_LOCATION)));
 		return userCriterion;
 	}
 }

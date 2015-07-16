@@ -1,5 +1,6 @@
 package com.nextep.proto.action.mobile.impl;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -8,6 +9,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.nextep.cal.util.helpers.CalHelper;
+import com.nextep.geo.model.Place;
 import com.nextep.json.model.IJsonLightUser;
 import com.nextep.json.model.IPrivateListContainer;
 import com.nextep.json.model.impl.JsonPrivateListResponse;
@@ -48,6 +50,7 @@ public class MobilePrivateListAction extends AbstractAction implements JsonProvi
 	private static final String ACTION_REQUEST = "REQUEST";
 	private static final String ACTION_CONFIRM = "CONFIRM";
 	private static final String ACTION_CANCEL = "CANCEL";
+	private static final String ACTION_INVITE = "INVITE";
 
 	@Autowired
 	private CurrentUserSupport currentUserSupport;
@@ -80,7 +83,8 @@ public class MobilePrivateListAction extends AbstractAction implements JsonProvi
 		final User otherUser = response.getUniqueElement(User.class, APIS_ALIAS_USER);
 
 		// Getting lists
-		final List<? extends User> pendingApprovals = user.get(User.class, Constants.APIS_ALIAS_NETWORK_PENDING_APPROVAL);
+		final List<? extends User> pendingApprovals = user.get(User.class,
+				Constants.APIS_ALIAS_NETWORK_PENDING_APPROVAL);
 		final List<? extends User> pendingRequests = user.get(User.class, Constants.APIS_ALIAS_NETWORK_REQUEST);
 		final List<? extends User> networkUsers = user.get(User.class, Constants.APIS_ALIAS_NETWORK_MEMBER);
 
@@ -111,9 +115,10 @@ public class MobilePrivateListAction extends AbstractAction implements JsonProvi
 							user.getKey());
 
 					// Notification
-					final String msg = getText("message.networkUpgrade");
+					final String pushMsg = MessageFormat.format(getText("message.push.networkRequest"),
+							user.getPseudo());
 					otherUser.addAll(Constants.APIS_ALIAS_NETWORK_PENDING_APPROVAL, Arrays.asList(user));
-					messagingService.sendMessage(user, otherUser, null, msg, MessageType.PRIVATE_NETWORK);
+					messagingService.sendMessage(user, otherUser, null, pushMsg, MessageType.PRIVATE_NETWORK);
 				} else {
 					setErrorMessage(
 							"A request or connection already exists between " + userItemKey + " and " + user.getKey());
@@ -158,6 +163,14 @@ public class MobilePrivateListAction extends AbstractAction implements JsonProvi
 				getUsersService().deleteItemFor(user.getKey(), UserPrivateListRequestType.LIST_REQUESTED, userItemKey);
 				getUsersService().deleteItemFor(user.getKey(), UserPrivateListRequestType.LIST_PRIVATE_NETWORK,
 						userItemKey);
+				break;
+			case ACTION_INVITE:
+				final Place place = response.getUniqueElement(Place.class, APIS_ALIAS_USER);
+				final String msg = MessageFormat.format(getText("message.push.inviteCheckin"), user.getPseudo(),
+						place.getName());
+				for (User networkUser : networkUsers) {
+					messagingService.sendMessage(user, networkUser, null, msg, MessageType.PRIVATE_NETWORK);
+				}
 				break;
 			}
 

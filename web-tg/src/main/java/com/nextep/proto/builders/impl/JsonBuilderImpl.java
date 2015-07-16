@@ -236,15 +236,12 @@ public class JsonBuilderImpl implements JsonBuilder {
 	@Override
 	public JsonUser buildJsonUser(User user, boolean highRes, Locale l, ApiResponse response) {
 		final JsonUser json = new JsonUser();
-		json.setKey(user.getKey().toString());
-		json.setPseudo(user.getPseudo());
+		fillJsonLightUser(json, user, highRes, l);
 		json.setBirthDateValue(user.getBirthday());
 		json.setHeightInCm(user.getHeightInCm());
 		json.setNxtpUserToken(user.getToken());
 		json.setWeightInKg(user.getWeightInKg());
 		fillMessagingUnreadCount(json, user);
-		json.setOnline(
-				user.getOnlineTimeout().getTime() > System.currentTimeMillis() || user.getPushDeviceId() != null);
 
 		// Filling city
 		try {
@@ -281,30 +278,6 @@ public class JsonBuilderImpl implements JsonBuilder {
 			json.addTag(tag.getCode());
 		}
 
-		// Setting last location
-		if (user.getLastLocationKey() != null) {
-			try {
-				// Extracting last location
-				final Place lastLocation = user.getUnique(Place.class, Constants.APIS_ALIAS_USER_LOCATION);
-				if (lastLocation != null) {
-					final Date lastLocationTime = user.getLastLocationTime();
-
-					// Only filling this information if checkin time is not
-					// expired
-					if ((System.currentTimeMillis() - lastLocationTime.getTime()) < checkinTime) {
-						// Converting to JSON place
-						final IJsonLightPlace jsonUserPlace = buildJsonLightPlace(lastLocation, highRes, l);
-
-						// Injecting into JSON user bean
-						json.setLastLocation(jsonUserPlace);
-						json.setLastLocationTimeValue(lastLocationTime);
-					}
-				}
-			} catch (CalException e) {
-				LOGGER.error("Unable to extract user's last location : " + e.getMessage(), e);
-			}
-		}
-
 		// Setting events
 		for (Event event : user.get(Event.class)) {
 			JsonLightEvent jsonEvent = new JsonLightEvent();
@@ -318,7 +291,8 @@ public class JsonBuilderImpl implements JsonBuilder {
 		}
 
 		// Getting lists
-		final List<? extends User> pendingApprovals = user.get(User.class, Constants.APIS_ALIAS_NETWORK_PENDING_APPROVAL);
+		final List<? extends User> pendingApprovals = user.get(User.class,
+				Constants.APIS_ALIAS_NETWORK_PENDING_APPROVAL);
 		final List<? extends User> pendingRequests = user.get(User.class, Constants.APIS_ALIAS_NETWORK_REQUEST);
 		final List<? extends User> networkUsers = user.get(User.class, Constants.APIS_ALIAS_NETWORK_MEMBER);
 		final List<IJsonLightUser> jsonPendingApprovals = convertUserListToJsonUserList(pendingApprovals, highRes, l);
@@ -349,8 +323,7 @@ public class JsonBuilderImpl implements JsonBuilder {
 	@Override
 	public JsonLightUser buildJsonLightUser(User user, boolean highRes, Locale locale) {
 		JsonLightUser jsonUser = new JsonLightUser();
-		jsonUser.setKey(user.getKey().toString());
-		jsonUser.setPseudo(user.getPseudo());
+		fillJsonLightUser(jsonUser, user, highRes, locale);
 		final Media userMedia = MediaHelper.getSingleMedia(user);
 		if (userMedia != null) {
 			final JsonMedia jsonMedia = buildJsonMedia(userMedia, highRes);
@@ -358,9 +331,38 @@ public class JsonBuilderImpl implements JsonBuilder {
 				jsonUser.setThumb(jsonMedia);
 			}
 		}
+		return jsonUser;
+	}
+
+	private void fillJsonLightUser(IJsonLightUser jsonUser, User user, boolean highRes, Locale locale) {
+		jsonUser.setKey(user.getKey().toString());
+		jsonUser.setPseudo(user.getPseudo());
+
 		jsonUser.setOnline(
 				user.getOnlineTimeout().getTime() > System.currentTimeMillis() || user.getPushDeviceId() != null);
-		return jsonUser;
+		// Setting last location
+		if (user.getLastLocationKey() != null) {
+			try {
+				// Extracting last location
+				final Place lastLocation = user.getUnique(Place.class, Constants.APIS_ALIAS_USER_LOCATION);
+				if (lastLocation != null) {
+					final Date lastLocationTime = user.getLastLocationTime();
+
+					// Only filling this information if checkin time is not
+					// expired
+					if ((System.currentTimeMillis() - lastLocationTime.getTime()) < checkinTime) {
+						// Converting to JSON place
+						final IJsonLightPlace jsonUserPlace = buildJsonLightPlace(lastLocation, highRes, locale);
+
+						// Injecting into JSON user bean
+						jsonUser.setLastLocation(jsonUserPlace);
+						jsonUser.setLastLocationTimeValue(lastLocationTime);
+					}
+				}
+			} catch (CalException e) {
+				LOGGER.error("Unable to extract user's last location : " + e.getMessage(), e);
+			}
+		}
 	}
 
 	@Override
@@ -955,6 +957,7 @@ public class JsonBuilderImpl implements JsonBuilder {
 		return json;
 	}
 
+	@Override
 	public void fillMessagingUnreadCount(JsonMessagingStatistic json, User currentUser) {
 		final List<? extends Message> messages = currentUser.get(Message.class);
 		int unreadCount = 0;

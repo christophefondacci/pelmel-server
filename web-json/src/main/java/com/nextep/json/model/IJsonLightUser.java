@@ -6,6 +6,8 @@ public interface IJsonLightUser {
 
 	String getKey();
 
+	void setKey(String key);
+
 	String getPseudo();
 
 	void setPseudo(String pseudo);
@@ -23,5 +25,9 @@ public interface IJsonLightUser {
 	double getRawDistanceMeters();
 
 	void setRawDistanceMeters(double rawDistance);
+
+	IJsonLightPlace getLastLocation();
+
+	void setLastLocation(IJsonLightPlace place);
 
 }
