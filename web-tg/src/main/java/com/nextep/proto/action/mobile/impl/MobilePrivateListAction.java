@@ -145,6 +145,9 @@ public class MobilePrivateListAction extends AbstractAction implements JsonProvi
 								user.getKey());
 						getUsersService().setItemFor(user.getKey(), UserPrivateListRequestType.LIST_PRIVATE_NETWORK,
 								userItemKey);
+						final String pushMsg = MessageFormat.format(getText("message.push.networkRequestAccepted"),
+								user.getPseudo());
+						messagingService.sendMessage(user, otherUser, null, pushMsg, MessageType.PRIVATE_NETWORK);
 					}
 				} else {
 					setErrorMessage(
