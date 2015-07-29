@@ -518,6 +518,7 @@ public class JsonBuilderImpl implements JsonBuilder {
 		jsonPlace.setName(place.getName());
 		if (place instanceof Place) {
 			jsonPlace.setTimezoneId(((Place) place).getCity().getTimezoneId());
+			jsonPlace.setType(((Place) place).getPlaceType());
 		} else if (place instanceof City) {
 			jsonPlace.setTimezoneId(((City) place).getTimezoneId());
 		}
