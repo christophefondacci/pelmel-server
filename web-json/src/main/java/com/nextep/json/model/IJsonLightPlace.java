@@ -20,4 +20,8 @@ public interface IJsonLightPlace {
 
 	String getTimezoneId();
 
+	void setType(String type);
+
+	String getType();
+
 }

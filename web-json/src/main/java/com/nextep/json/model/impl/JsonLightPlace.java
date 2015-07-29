@@ -5,6 +5,7 @@ import com.nextep.json.model.IJsonLightPlace;
 public class JsonLightPlace implements IJsonLightPlace {
 	private String key;
 	private String name;
+	private String type;
 	private JsonMedia thumb;
 	private String timezoneId;
 
@@ -46,5 +47,15 @@ public class JsonLightPlace implements IJsonLightPlace {
 	@Override
 	public String getTimezoneId() {
 		return timezoneId;
+	}
+
+	@Override
+	public String getType() {
+		return type;
+	}
+
+	@Override
+	public void setType(String type) {
+		this.type = type;
 	}
 }

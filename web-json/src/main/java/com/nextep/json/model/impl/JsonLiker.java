@@ -5,15 +5,15 @@ import java.util.List;
 
 public class JsonLiker extends JsonMessagingStatistic {
 	private int likes;
-	private boolean isLiked = false;
+	private boolean liked;
 	private List<JsonLightUser> likeUsers = new ArrayList<JsonLightUser>();
 
 	public void setLiked(boolean isLiked) {
-		this.isLiked = isLiked;
+		this.liked = isLiked;
 	}
 
 	public boolean isLiked() {
-		return isLiked;
+		return liked;
 	}
 
 	public void addLikeUser(JsonLightUser user) {

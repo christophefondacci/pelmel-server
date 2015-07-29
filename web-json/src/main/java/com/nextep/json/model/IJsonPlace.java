@@ -25,10 +25,6 @@ public interface IJsonPlace extends IJsonLightPlace {
 
 	void setLng(double lng);
 
-	void setType(String type);
-
-	String getType();
-
 	List<String> getTags();
 
 	void addTag(String tagId);

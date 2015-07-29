@@ -33,7 +33,7 @@ public class JsonUser extends JsonLiker implements IJsonLightUser, IPrivateListC
 	private IJsonLightPlace lastLocation;
 	private Long lastLocationTime;
 	private boolean newUser;
-	private double rawDistance;
+	private double rawDistanceMeters;
 	private List<IJsonLightUser> pendingApprovals = new ArrayList<IJsonLightUser>();
 	private List<IJsonLightUser> pendingRequests = new ArrayList<IJsonLightUser>();
 	private List<IJsonLightUser> networkUsers = new ArrayList<IJsonLightUser>();
@@ -238,12 +238,12 @@ public class JsonUser extends JsonLiker implements IJsonLightUser, IPrivateListC
 
 	@Override
 	public void setRawDistanceMeters(double rawDistance) {
-		this.rawDistance = rawDistance;
+		this.rawDistanceMeters = rawDistance;
 	}
 
 	@Override
 	public double getRawDistanceMeters() {
-		return rawDistance;
+		return rawDistanceMeters;
 	}
 
 	@Override
