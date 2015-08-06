@@ -6,8 +6,6 @@ import java.util.List;
 
 import javax.annotation.Resource;
 
-import net.sf.json.JSONObject;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,11 +51,11 @@ import com.videopolis.cals.factory.ContextFactory;
 import com.videopolis.cals.model.PaginationInfo;
 import com.videopolis.smaug.common.model.SearchScope;
 
-public class MobileOverviewEventAction extends AbstractAction implements
-		JsonProvider, MobileOverviewService {
+import net.sf.json.JSONObject;
 
-	private static final Log LOGGER = LogFactory
-			.getLog(MobileOverviewEventAction.class);
+public class MobileOverviewEventAction extends AbstractAction implements JsonProvider, MobileOverviewService {
+
+	private static final Log LOGGER = LogFactory.getLog(MobileOverviewEventAction.class);
 
 	// Constants declaration
 	private static final long serialVersionUID = 154177235838836337L;
@@ -95,9 +93,8 @@ public class MobileOverviewEventAction extends AbstractAction implements
 		final ItemKey itemKey = CalmFactory.parseKey(id);
 
 		// Getting the overview event
-		final ApisCriterion objCriterion = (ApisCriterion) SearchRestriction
-				.uniqueKeys(Arrays.asList(itemKey)).aliasedBy(APIS_ALIAS_EVENT)
-				.with(Description.class).with(Media.class).with(Tag.class);
+		final ApisCriterion objCriterion = (ApisCriterion) SearchRestriction.uniqueKeys(Arrays.asList(itemKey))
+				.aliasedBy(APIS_ALIAS_EVENT).with(Description.class).with(Media.class).with(Tag.class);
 
 		// For recurring events, we need to do a specific search that looks for
 		// "likers" (attendees)
@@ -110,75 +107,60 @@ public class MobileOverviewEventAction extends AbstractAction implements
 			// to perform the search for likers (attendees in this case) with
 			// the expiration date
 			// so that expired "likes" will not be counted or returned
-			final ApisCustomAdapter customLikeAdapter = new ApisExpirableLikesCustomAdapter(
-					eventManagementService, APIS_ALIAS_USER_LIKERS,
-					maxRelatedElements, 0);
+			final ApisCustomAdapter customLikeAdapter = new ApisExpirableLikesCustomAdapter(eventManagementService,
+					APIS_ALIAS_USER_LIKERS, maxRelatedElements, 0);
 
 			// This specific adaptation needs to be plugged to the root of the
 			// response
 			// because of the custom adapter
-			objCriterion.addCriterion(SearchRestriction.customAdapt(
-					customLikeAdapter, APIS_ALIAS_USER_LIKERS));
+			objCriterion.addCriterion((ApisCriterion) SearchRestriction
+					.customAdapt(customLikeAdapter, APIS_ALIAS_USER_LIKERS).with(Media.class, MediaRequestTypes.THUMB));
 		} else {
 
 			// Classic "likes" (attendees) retrieval, we search for users
 			// flagged with this
 			// event key
 			objCriterion.addCriterion((WithCriterion) SearchRestriction
-					.withContained(User.class, SearchScope.CHILDREN,
-							maxRelatedElements, 0)
+					.withContained(User.class, SearchScope.CHILDREN, maxRelatedElements, 0)
 					.aliasedBy(APIS_ALIAS_USER_LIKERS).with(Media.class));
 		}
 
 		// Getting event location with thumb
-		objCriterion.addCriterion((ApisCriterion) SearchRestriction
-				.adaptKey(eventLocationAdapter)
-				.aliasedBy(Constants.APIS_ALIAS_EVENT_PLACE)
-				.with(Media.class, MediaRequestTypes.THUMB));
+		objCriterion.addCriterion((ApisCriterion) SearchRestriction.adaptKey(eventLocationAdapter)
+				.aliasedBy(Constants.APIS_ALIAS_EVENT_PLACE).with(Media.class, MediaRequestTypes.THUMB));
 
 		// Getting comments count
-		objCriterion.addCriterion(SearchRestriction.with(Comment.class, 1, 0)
-				.aliasedBy(APIS_ALIAS_COMMENTS));
+		objCriterion.addCriterion(SearchRestriction.with(Comment.class, 1, 0).aliasedBy(APIS_ALIAS_COMMENTS));
 
 		// Building the request
-		final ApisRequest request = (ApisRequest) ApisFactory
-				.createCompositeRequest().addCriterion(objCriterion)
+		final ApisRequest request = (ApisRequest) ApisFactory.createCompositeRequest().addCriterion(objCriterion)
 				// Adding global events facetting for knowing how many people
 				// will be attending
-				.addCriterion(
-						SearchRestriction.searchForAllFacets(User.class,
-								SearchScope.EVENTS).facettedBy(
-								Arrays.asList(
-										SearchHelper.getUserPlacesCategory(),
-										SearchHelper.getUserEventsCategory())));
+				.addCriterion(SearchRestriction.searchForAllFacets(User.class, SearchScope.EVENTS).facettedBy(
+						Arrays.asList(SearchHelper.getUserPlacesCategory(), SearchHelper.getUserEventsCategory())));
 
 		// Fetching user with liked elements matching the type of the requested
 		// overview object
 		final ApisCriterion userCriterion = (ApisCriterion) currentUserSupport
-				.createApisCriterionFor(getNxtpUserToken(), false).with(
-						SearchRestriction
-								.with(ApisRegistry.getModelFromType(itemKey
-										.getType())).aliasedBy(
-										Constants.APIS_ALIAS_FAVORITE));
+				.createApisCriterionFor(getNxtpUserToken(), false)
+				.with(SearchRestriction.with(ApisRegistry.getModelFromType(itemKey.getType()))
+						.aliasedBy(Constants.APIS_ALIAS_FAVORITE));
 
 		// If localization is provided, we fetch the nearest place
 		if (lat != null && lng != null) {
-			userCriterion.addCriterion(SearchRestriction.searchNear(
-					Place.class, SearchScope.NEARBY_BLOCK, lat, lng, radius, 5,
-					0).aliasedBy(APIS_ALIAS_NEARBY_PLACES));
+			userCriterion.addCriterion(
+					SearchRestriction.searchNear(Place.class, SearchScope.NEARBY_BLOCK, lat, lng, radius, 5, 0)
+							.aliasedBy(APIS_ALIAS_NEARBY_PLACES));
 		}
 		// Appending the user criterion
 		request.addCriterion(userCriterion);
-		response = (ApiCompositeResponse) getApiService().execute(request,
-				ContextFactory.createContext(getLocale()));
+		response = (ApiCompositeResponse) getApiService().execute(request, ContextFactory.createContext(getLocale()));
 
 		// Initializing current user
-		currentUser = response.getUniqueElement(User.class,
-				CurrentUserSupport.APIS_ALIAS_CURRENT_USER);
+		currentUser = response.getUniqueElement(User.class, CurrentUserSupport.APIS_ALIAS_CURRENT_USER);
 
 		// Extracting overviewed element
-		overviewObject = response.getUniqueElement(CalmObject.class,
-				APIS_ALIAS_EVENT);
+		overviewObject = response.getUniqueElement(CalmObject.class, APIS_ALIAS_EVENT);
 
 		// Checking user validity and performs any timeout update
 		checkCurrentUser(currentUser);
@@ -190,12 +172,10 @@ public class MobileOverviewEventAction extends AbstractAction implements
 		if (lat != null && lng != null) {
 
 			// Getting the nearest places from lat / lng
-			final List<? extends Place> places = currentUser.get(Place.class,
-					APIS_ALIAS_NEARBY_PLACES);
+			final List<? extends Place> places = currentUser.get(Place.class, APIS_ALIAS_NEARBY_PLACES);
 
 			// Localizing user
-			localizationService.localize(currentUser, places, response, lat,
-					lng);
+			localizationService.localize(currentUser, places, response, lat, lng);
 		}
 
 		// Saving the viewed item
@@ -207,11 +187,9 @@ public class MobileOverviewEventAction extends AbstractAction implements
 	@Override
 	public String getJson() {
 		final JsonEvent jsonEvent = new JsonEvent();
-		jsonBuilder.fillJsonEvent(jsonEvent, (Event) overviewObject, highRes,
-				getLocale(), response);
+		jsonBuilder.fillJsonEvent(jsonEvent, (Event) overviewObject, highRes, getLocale(), response);
 		// Filling number of comments
-		PaginationInfo pagination = response
-				.getPaginationInfo(APIS_ALIAS_COMMENTS);
+		PaginationInfo pagination = response.getPaginationInfo(APIS_ALIAS_COMMENTS);
 		jsonEvent.setCommentsCount(pagination.getItemCount());
 
 		// Generating like
@@ -220,25 +198,22 @@ public class MobileOverviewEventAction extends AbstractAction implements
 		// Setting likes as both likes and participants (like might be later
 		// used
 		// for real "likes" if needed)
-		final PaginationInfo likePagination = response
-				.getPaginationInfo(APIS_ALIAS_USER_LIKERS);
+		final PaginationInfo likePagination = response.getPaginationInfo(APIS_ALIAS_USER_LIKERS);
 		jsonEvent.setLikes(likePagination.getItemCount());
 		jsonEvent.setParticipants(likePagination.getItemCount());
 		if (EventSeries.SERIES_CAL_ID.equals(overviewObject.getKey().getType())) {
 			try {
-				likesUsers = response.getElements(User.class,
-						APIS_ALIAS_USER_LIKERS);
+				likesUsers = response.getElements(User.class, APIS_ALIAS_USER_LIKERS);
 			} catch (ApisException e) {
 				likesUsers = Collections.emptyList();
-				LOGGER.error("Unable to get LIKERS of EventSeries '"
-						+ overviewObject.getKey() + "': " + e.getMessage(), e);
+				LOGGER.error("Unable to get LIKERS of EventSeries '" + overviewObject.getKey() + "': " + e.getMessage(),
+						e);
 			}
 		} else {
 			likesUsers = overviewObject.get(User.class, APIS_ALIAS_USER_LIKERS);
 		}
 		for (User user : likesUsers) {
-			final JsonLightUser jsonUser = jsonBuilder.buildJsonLightUser(user,
-					highRes, getLocale());
+			final JsonLightUser jsonUser = jsonBuilder.buildJsonLightUser(user, highRes, getLocale());
 			jsonEvent.addLikeUser(jsonUser);
 		}
 
@@ -247,9 +222,8 @@ public class MobileOverviewEventAction extends AbstractAction implements
 		jsonEvent.setUnreadMsgCount(unreadMessagesCount);
 
 		// Filling the "liked" flag
-		final List<? extends CalmObject> likedObjects = currentUserSupport
-				.getCurrentUser().get(CalmObject.class,
-						Constants.APIS_ALIAS_FAVORITE);
+		final List<? extends CalmObject> likedObjects = currentUserSupport.getCurrentUser().get(CalmObject.class,
+				Constants.APIS_ALIAS_FAVORITE);
 		for (CalmObject likedObject : likedObjects) {
 			if (likedObject.getKey().equals(overviewObject.getKey())) {
 				jsonEvent.setLiked(true);
@@ -319,8 +293,7 @@ public class MobileOverviewEventAction extends AbstractAction implements
 		this.radius = radius;
 	}
 
-	public void setViewManagementService(
-			ViewManagementService viewManagementService) {
+	public void setViewManagementService(ViewManagementService viewManagementService) {
 		this.viewManagementService = viewManagementService;
 	}
 }
