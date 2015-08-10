@@ -46,7 +46,7 @@ public interface Constants {
 	int MAX_USER_POPULAR_CITIES = 15;
 	int MAX_TOP_EVENTS_OVERVIEW = 3;
 	int MAX_TOP_PLACES_OVERVIEW = 10;
-	int MAX_COMMENTS = 10;
+	int MAX_COMMENTS = 20;
 	int MAX_FAVORITE_MEN = 15;
 	int MAX_ACTIVITIES = 10;
 	int MAX_EVENT_USERS = 30;

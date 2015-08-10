@@ -24,6 +24,8 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.web.util.HtmlUtils;
 
+import com.google.android.gcm.server.MulticastResult;
+import com.google.android.gcm.server.Sender;
 import com.nextep.cal.util.services.CalPersistenceService;
 import com.nextep.comments.model.Comment;
 import com.nextep.descriptions.model.Description;
@@ -40,6 +42,7 @@ import com.nextep.proto.services.NotificationService;
 import com.nextep.proto.services.UrlService;
 import com.nextep.proto.spring.ContextHolder;
 import com.nextep.users.model.MutableUser;
+import com.nextep.users.model.PushProvider;
 import com.nextep.users.model.User;
 import com.notnoop.apns.APNS;
 import com.notnoop.apns.ApnsService;
@@ -82,6 +85,9 @@ public class NotificationServiceImpl implements NotificationService {
 	private Integer smtpPort;
 	@Resource(mappedName = "notification.enabled")
 	private Boolean emailEnabled;
+
+	@Resource(mappedName = "push.android.senderId")
+	private String pushAndroidSenderId;
 
 	// Injected services
 	private UrlService urlService;
@@ -170,10 +176,30 @@ public class NotificationServiceImpl implements NotificationService {
 		if (user.getPushDeviceId() != null && pushEnabled) {
 
 			LOGGER.info("Sending push notification to user [" + user.getKey() + "]");
+			if (user.getPushProvider() == PushProvider.APPLE) {
+				String payload = APNS.newPayload().badge(badgeCount).alertBody(message)
+						.customField(APNS_FIELD_UNREAD_NETWORK, unreadNetwork).build();
+				apnsService.push(user.getPushDeviceId(), payload);
+			} else {
+				final Sender sender = new Sender(pushAndroidSenderId);
+				final com.google.android.gcm.server.Message gcmMsg = new com.google.android.gcm.server.Message.Builder()
+						.collapseKey(user.getPushDeviceId()).timeToLive(30).delayWhileIdle(true)
+						.addData("message", message).addData("unreadCount", String.valueOf(badgeCount)).build();
+				try {
+					MulticastResult result = sender.send(gcmMsg, Arrays.asList(user.getPushDeviceId()), 1);
+					if (result.getResults() != null) {
+						int canonicalRegId = result.getCanonicalIds();
+						if (canonicalRegId != 0) {
 
-			String payload = APNS.newPayload().badge(badgeCount).alertBody(message)
-					.customField(APNS_FIELD_UNREAD_NETWORK, unreadNetwork).build();
-			apnsService.push(user.getPushDeviceId(), payload);
+						}
+					} else {
+						int error = result.getFailure();
+						LOGGER.error("Broadcast failure while sending msg to " + user.getKey() + ": " + error);
+					}
+				} catch (Exception e) {
+					LOGGER.error("Broadcast failure while sending msg to " + user.getKey() + ": " + e.getMessage(), e);
+				}
+			}
 		}
 		return new AsyncResult<Boolean>(true);
 	}
