@@ -7,9 +7,9 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
-import com.nextep.advertising.model.AdvertisingBooster;
-import com.nextep.advertising.model.BoosterType;
-import com.nextep.advertising.model.MutableAdvertisingBooster;
+import com.nextep.advertising.model.Subscription;
+import com.nextep.advertising.model.SubscriptionType;
+import com.nextep.advertising.model.MutableSubscription;
 import com.nextep.cal.util.model.impl.PriceImpl;
 import com.nextep.cal.util.services.CalPersistenceService;
 import com.nextep.proto.action.base.AbstractAction;
@@ -67,7 +67,7 @@ public class SponsorshipActivationAction extends AbstractAction implements
 						(ApisCriterion) SearchRestriction
 								.uniqueKeys(Arrays.asList(sponsoredKey))
 								.aliasedBy(APIS_ALIAS_SPONSORED_ITEM)
-								.with(AdvertisingBooster.class));
+								.with(Subscription.class));
 		// .addCriterion(SearchRestriction.forKey(Payment.CAL_TRANSACTION_ID,
 		// transactionId, 1, 0).aliasedBy(alias));
 
@@ -85,8 +85,8 @@ public class SponsorshipActivationAction extends AbstractAction implements
 				CalmObject.class, APIS_ALIAS_SPONSORED_ITEM);
 
 		// Checking whether we have pre-existing booster for this period
-		final List<? extends AdvertisingBooster> existingBoosters = sponsoredObject
-				.get(AdvertisingBooster.class);
+		final List<? extends Subscription> existingBoosters = sponsoredObject
+				.get(Subscription.class);
 
 		// Computing start and end date from provided duration
 		final Calendar cal = Calendar.getInstance();
@@ -96,16 +96,16 @@ public class SponsorshipActivationAction extends AbstractAction implements
 
 		// Sorting boosters by date
 		Collections.sort(existingBoosters,
-				new Comparator<AdvertisingBooster>() {
+				new Comparator<Subscription>() {
 					@Override
-					public int compare(AdvertisingBooster o1,
-							AdvertisingBooster o2) {
+					public int compare(Subscription o1,
+							Subscription o2) {
 						return o1.getStartDate().compareTo(o2.getStartDate());
 					}
 				});
 
 		// Checking if there is any existing booster which may conflict
-		for (AdvertisingBooster booster : existingBoosters) {
+		for (Subscription booster : existingBoosters) {
 			final long boostStart = booster.getStartDate().getTime();
 			final long boostEnd = booster.getEndDate().getTime();
 			if ((boostStart >= myStart.getTime() && boostStart < myEnd
@@ -132,10 +132,10 @@ public class SponsorshipActivationAction extends AbstractAction implements
 			return error(412);
 		} else {
 			// Preparing to add booster
-			MutableAdvertisingBooster booster = (MutableAdvertisingBooster) advertisingService
+			MutableSubscription booster = (MutableSubscription) advertisingService
 					.createTransientObject();
 			booster.setRelatedItemKey(sponsoredKey);
-			booster.setBoosterType(BoosterType.DEFAULT);
+			booster.setSubscriptionType(SubscriptionType.DEFAULT);
 			booster.setBoostValue(monthCredits);
 			booster.setStartDate(myStart);
 			booster.setEndDate(myEnd);

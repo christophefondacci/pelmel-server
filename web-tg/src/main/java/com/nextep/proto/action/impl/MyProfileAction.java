@@ -4,7 +4,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-import com.nextep.advertising.model.AdvertisingBooster;
+import com.nextep.advertising.model.Subscription;
 import com.nextep.advertising.model.impl.AdvertisingRequestTypes;
 import com.nextep.descriptions.model.Description;
 import com.nextep.geo.model.City;
@@ -79,8 +79,8 @@ public class MyProfileAction extends AbstractAction implements TagAware,
 		final ApisCriterion userCriterion = (ApisCriterion) currentUserSupport
 				.createApisCriterionFor(getNxtpUserToken(), false)
 				.with((WithCriterion) SearchRestriction.with(
-						AdvertisingBooster.class,
-						AdvertisingRequestTypes.USER_BOOSTERS).addCriterion(
+						Subscription.class,
+						AdvertisingRequestTypes.USER_SUBSCRIPTIONS).addCriterion(
 						(ApisCriterion) SearchRestriction
 								.adaptKey(advertisingRelatedItemKeyAdapter)
 								.aliasedBy(

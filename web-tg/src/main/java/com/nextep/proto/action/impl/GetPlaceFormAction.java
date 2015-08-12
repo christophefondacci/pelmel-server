@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import com.nextep.advertising.model.AdvertisingBooster;
+import com.nextep.advertising.model.Subscription;
 import com.nextep.descriptions.model.Description;
 import com.nextep.geo.model.City;
 import com.nextep.geo.model.GeographicItem;
@@ -71,7 +71,7 @@ public class GetPlaceFormAction extends AbstractAction implements
 		final ApisRequest request = ApisFactory.createCompositeRequest();
 		final ApisCriterion placeCriterion = (ApisCriterion) SearchRestriction
 				.uniqueKeys(Arrays.asList(placeKey))
-				.aliasedBy(APIS_ALIAS_PLACE).with(AdvertisingBooster.class);
+				.aliasedBy(APIS_ALIAS_PLACE).with(Subscription.class);
 		if (Place.CAL_TYPE.equals(placeKey.getType())) {
 			placeCriterion.with(Description.class).with(Property.class)
 					.with(Tag.class);

@@ -7,12 +7,12 @@ import com.videopolis.calm.model.ItemKey;
 
 /**
  * This interface exposes setters methods that can update an
- * {@link AdvertisingBooster} bean
+ * {@link Subscription} bean
  * 
  * @author cfondacci
  * 
  */
-public interface MutableAdvertisingBooster extends AdvertisingBooster {
+public interface MutableSubscription extends Subscription {
 
 	/**
 	 * Updates the item key of the element being boosted
@@ -65,7 +65,23 @@ public interface MutableAdvertisingBooster extends AdvertisingBooster {
 	 * Defines the type of booster
 	 * 
 	 * @param boosterType
-	 *            the new {@link BoosterType}
+	 *            the new {@link SubscriptionType}
 	 */
-	void setBoosterType(BoosterType boosterType);
+	void setSubscriptionType(SubscriptionType boosterType);
+
+	/**
+	 * Defines the transaction ID of the first transaction of the subscription.
+	 * 
+	 * @param originalTransactionId
+	 *            the transaction ID of the first payment for the subscription
+	 */
+	void setOriginalTransactionId(String originalTransactionId);
+
+	/**
+	 * Defines the transaction ID of the payment of this period. Globally unique
+	 * 
+	 * @param transactionId
+	 *            the transaction ID.
+	 */
+	void setTransactionId(String transactionId);
 }

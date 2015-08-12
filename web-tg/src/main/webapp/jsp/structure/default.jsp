@@ -26,6 +26,14 @@
 	  <script src="http://static.pelmelguide.com/js/html5shiv.js"></script>
 	  <script src="http://static.pelmelguide.com/js/respond.min.js"></script>
 	<![endif]-->
+	<!-- Begin Cookie Consent plugin by Silktide - http://silktide.com/cookieconsent -->
+	<script type="text/javascript">
+	    window.cookieconsent_options = {"message":"<s:text name='cookie.bannerMessage'/>","dismiss":"<s:text name='cookie.bannerOk'/>","learnMore":"More info","link":null,"theme":"light-bottom"};
+	</script>
+	
+	<script type="text/javascript" src="//s3.amazonaws.com/cc.silktide.com/cookieconsent.latest.min.js"></script>
+	<!-- End Cookie Consent plugin -->
+		
 </head>
 <body id="page-home" class="<tiles:insertAttribute name="background"/>">
 <s:set value="headerSupport" var="headerSupport"/>

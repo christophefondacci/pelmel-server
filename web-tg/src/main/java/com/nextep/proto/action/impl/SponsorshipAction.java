@@ -2,7 +2,7 @@ package com.nextep.proto.action.impl;
 
 import java.util.Arrays;
 
-import com.nextep.advertising.model.AdvertisingBooster;
+import com.nextep.advertising.model.Subscription;
 import com.nextep.proto.action.base.AbstractAction;
 import com.nextep.proto.action.model.CurrentUserAware;
 import com.nextep.proto.action.model.SponsorshipAware;
@@ -46,7 +46,7 @@ public class SponsorshipAction extends AbstractAction implements
 						(ApisCriterion) SearchRestriction
 								.uniqueKeys(Arrays.asList(itemKey))
 								.aliasedBy(APIS_ALIAS_OBJECT)
-								.with(AdvertisingBooster.class));
+								.with(Subscription.class));
 
 		// Executing
 		final ApiCompositeResponse response = (ApiCompositeResponse) getApiService()

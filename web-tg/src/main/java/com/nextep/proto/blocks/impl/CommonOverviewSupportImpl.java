@@ -8,7 +8,7 @@ import java.util.Locale;
 
 import org.springframework.context.MessageSource;
 
-import com.nextep.advertising.model.AdvertisingBooster;
+import com.nextep.advertising.model.Subscription;
 import com.nextep.proto.blocks.OverviewSupport;
 import com.nextep.proto.helpers.DisplayHelper;
 import com.nextep.proto.model.Constants;
@@ -125,11 +125,11 @@ public class CommonOverviewSupportImpl implements OverviewSupport {
 		return dislikeCount;
 	}
 
-	private AdvertisingBooster getActiveBooster() {
-		final List<? extends AdvertisingBooster> boosters = calmObject
-				.get(AdvertisingBooster.class);
+	private Subscription getActiveBooster() {
+		final List<? extends Subscription> boosters = calmObject
+				.get(Subscription.class);
 		final long currentTime = System.currentTimeMillis();
-		for (AdvertisingBooster booster : boosters) {
+		for (Subscription booster : boosters) {
 			final long boostStart = booster.getStartDate().getTime();
 			final long boostEnd = booster.getEndDate().getTime();
 			// Is it an active booster period ?
@@ -143,7 +143,7 @@ public class CommonOverviewSupportImpl implements OverviewSupport {
 	@Override
 	public boolean isCurrentOwner(User user) {
 		// Getting any active booster
-		final AdvertisingBooster activeBooster = getActiveBooster();
+		final Subscription activeBooster = getActiveBooster();
 		// We check if this is the current user
 		return (activeBooster != null && activeBooster.getPurchaserItemKey()
 				.equals(user.getKey()));
@@ -152,7 +152,7 @@ public class CommonOverviewSupportImpl implements OverviewSupport {
 	@Override
 	public boolean isUpdatable() {
 		// Getting any active booster
-		final AdvertisingBooster activeBooster = getActiveBooster();
+		final Subscription activeBooster = getActiveBooster();
 		// We can modify this element if nobody owns it OR if we are the owner
 		return activeBooster == null
 				|| activeBooster.getPurchaserItemKey().equals(
@@ -161,7 +161,7 @@ public class CommonOverviewSupportImpl implements OverviewSupport {
 
 	@Override
 	public String getOwnershipInfoLabel(User user) {
-		final AdvertisingBooster booster = getActiveBooster();
+		final Subscription booster = getActiveBooster();
 		if (booster != null) {
 			final String endDate = DATE_FORMATTER.format(booster.getEndDate());
 			return messageSource.getMessage(TRANSLATION_KEY_OWNER_INFO,

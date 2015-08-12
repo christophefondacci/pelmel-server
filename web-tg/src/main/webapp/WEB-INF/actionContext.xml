@@ -216,6 +216,9 @@
 	<bean id="mobileBannerUpdatePaymentAction" class="com.nextep.proto.action.mobile.impl.MobileBannerUpdatePaymentAction" parent="abstractAction" scope="request">
 		<property name="urlService" ref="urlService"/>
 	</bean>
+	<bean id="mobileSubscribeAction" class="com.nextep.proto.action.mobile.impl.MobileSubscribeAction" parent="abstractAction" scope="request">
+		<property name="urlService" ref="urlService"/>
+	</bean>
 	<bean id="mobileBannerListAction" class="com.nextep.proto.action.mobile.impl.MobileBannerListAction" parent="abstractAction" scope="request">
 		<property name="urlService" ref="urlService"/>
 	</bean>

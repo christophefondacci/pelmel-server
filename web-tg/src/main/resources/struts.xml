@@ -456,6 +456,11 @@
 			<result name="input">/jsp/pages/json.jsp</result>
 			<result name="error">/jsp/pages/json.jsp</result>
 		</action>
+		<action name="mobileSubscribe" class="mobileSubscribeAction">
+			<result>/jsp/pages/json.jsp</result>
+			<result name="input">/jsp/pages/json-error.jsp</result>
+			<result name="error">/jsp/pages/json-error.jsp</result>
+		</action>
 		<action name="userLogin" class="userLoginAction">
 			<result name="input" type="tiles">login-error</result>
 			<result name="redirect" type="redirect">

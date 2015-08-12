@@ -24,7 +24,7 @@ import org.apache.solr.client.solrj.response.QueryResponse;
 import com.nextep.activities.model.Activity;
 import com.nextep.activities.model.ActivityType;
 import com.nextep.advertising.model.AdvertisingBanner;
-import com.nextep.advertising.model.AdvertisingBooster;
+import com.nextep.advertising.model.Subscription;
 import com.nextep.advertising.model.BannerStatus;
 import com.nextep.cal.util.helpers.CalHelper;
 import com.nextep.events.model.Event;
@@ -424,13 +424,13 @@ public class SolrSearchPersistenceServiceImpl implements
 				}
 			}
 			// Adding ad boosts
-			final List<? extends AdvertisingBooster> adBoosters = place
-					.get(AdvertisingBooster.class);
+			final List<? extends Subscription> adBoosters = place
+					.get(Subscription.class);
 			// TODO: ADBOOST adjust this computation
 			// Computing upper date bound and higher price
 			Date maxDate = null;
 			double maxPrice = 0;
-			for (AdvertisingBooster adBooster : adBoosters) {
+			for (Subscription adBooster : adBoosters) {
 				// Adjusting max date
 				if (maxDate == null || adBooster.getEndDate().after(maxDate)) {
 					maxDate = adBooster.getEndDate();

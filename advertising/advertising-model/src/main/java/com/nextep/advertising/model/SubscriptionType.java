@@ -1,6 +1,6 @@
 package com.nextep.advertising.model;
 
-public enum BoosterType {
+public enum SubscriptionType {
 
 	DEFAULT, STICKY
 }

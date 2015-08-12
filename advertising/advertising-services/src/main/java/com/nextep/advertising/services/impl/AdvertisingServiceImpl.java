@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.Map;
 
 import com.nextep.advertising.dao.AdvertisingDao;
-import com.nextep.advertising.model.AdvertisingBooster;
-import com.nextep.advertising.model.impl.AdvertisingBoosterImpl;
+import com.nextep.advertising.model.Subscription;
+import com.nextep.advertising.model.impl.SubscriptionImpl;
 import com.nextep.advertising.model.impl.AdvertisingRequestTypes;
 import com.nextep.cal.util.services.CalPersistenceService;
 import com.nextep.cal.util.services.base.AbstractDaoBasedCalServiceImpl;
@@ -26,12 +26,12 @@ public class AdvertisingServiceImpl extends AbstractDaoBasedCalServiceImpl
 
 	@Override
 	public Class<? extends CalmObject> getProvidedClass() {
-		return AdvertisingBooster.class;
+		return Subscription.class;
 	}
 
 	@Override
 	public String getProvidedType() {
-		return AdvertisingBooster.CAL_ID;
+		return Subscription.CAL_ID;
 	}
 
 	@Override
@@ -48,7 +48,7 @@ public class AdvertisingServiceImpl extends AbstractDaoBasedCalServiceImpl
 
 	@Override
 	public CalmObject createTransientObject() {
-		return new AdvertisingBoosterImpl();
+		return new SubscriptionImpl();
 	}
 
 	@Override
@@ -60,10 +60,10 @@ public class AdvertisingServiceImpl extends AbstractDaoBasedCalServiceImpl
 	@Override
 	public MultiKeyItemsResponse getItemsFor(List<ItemKey> itemKeys,
 			CalContext context, RequestType requestType) throws CalException {
-		Map<ItemKey, List<AdvertisingBooster>> adMap = Collections.emptyMap();
+		Map<ItemKey, List<Subscription>> adMap = Collections.emptyMap();
 		if (requestType == null) {
 			adMap = ((AdvertisingDao) getCalDao()).getBoostersFor(itemKeys);
-		} else if (AdvertisingRequestTypes.USER_BOOSTERS.equals(requestType)) {
+		} else if (AdvertisingRequestTypes.USER_SUBSCRIPTIONS.equals(requestType)) {
 			adMap = ((AdvertisingDao) getCalDao())
 					.getBoostersForUsers(itemKeys);
 		}

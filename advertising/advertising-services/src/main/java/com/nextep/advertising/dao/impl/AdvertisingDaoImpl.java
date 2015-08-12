@@ -20,8 +20,8 @@ import org.apache.commons.logging.LogFactory;
 
 import com.nextep.advertising.dao.AdvertisingDao;
 import com.nextep.advertising.model.AdvertisingBanner;
-import com.nextep.advertising.model.AdvertisingBooster;
 import com.nextep.advertising.model.Payment;
+import com.nextep.advertising.model.Subscription;
 import com.nextep.cal.util.helpers.CalHelper;
 import com.nextep.cal.util.model.CalDaoExt;
 import com.nextep.cal.util.model.base.AbstractCalDao;
@@ -29,11 +29,9 @@ import com.videopolis.calm.model.CalmObject;
 import com.videopolis.calm.model.ItemKey;
 import com.videopolis.calm.model.RequestType;
 
-public class AdvertisingDaoImpl extends AbstractCalDao<CalmObject> implements
-		AdvertisingDao, CalDaoExt<CalmObject> {
+public class AdvertisingDaoImpl extends AbstractCalDao<CalmObject>implements AdvertisingDao, CalDaoExt<CalmObject> {
 
-	private static final Log LOGGER = LogFactory
-			.getLog(AdvertisingDaoImpl.class);
+	private static final Log LOGGER = LogFactory.getLog(AdvertisingDaoImpl.class);
 
 	@PersistenceContext(unitName = "nextep-advertising")
 	private EntityManager entityManager;
@@ -41,9 +39,8 @@ public class AdvertisingDaoImpl extends AbstractCalDao<CalmObject> implements
 	@Override
 	public CalmObject getById(long id) {
 		try {
-			return (CalmObject) entityManager
-					.createQuery("from AdvertisingBoosterImpl where id=:id")
-					.setParameter("id", id).getSingleResult();
+			return (CalmObject) entityManager.createQuery("from SubscriptionImpl where id=:id").setParameter("id", id)
+					.getSingleResult();
 		} catch (NonUniqueResultException e) {
 			LOGGER.error("Non unique result: " + e.getMessage(), e);
 			return null;
@@ -58,33 +55,29 @@ public class AdvertisingDaoImpl extends AbstractCalDao<CalmObject> implements
 	public List<CalmObject> getItemsFor(ItemKey key) {
 		return entityManager
 				.createQuery(
-						"from AdvertisingBoosterImpl where relatedItemKey=:itemKey and fromDate>=:currentDate and toDate<:currentDate")
-				.setParameter("itemKey", key.toString())
-				.setParameter("currentDate", new Date()).getResultList();
+						"from SubscriptionImpl where relatedItemKey=:itemKey and fromDate>=:currentDate and toDate<:currentDate")
+				.setParameter("itemKey", key.toString()).setParameter("currentDate", new Date()).getResultList();
 	}
 
 	@Override
-	public Map<ItemKey, List<AdvertisingBooster>> getBoostersFor(
-			List<ItemKey> itemKeys) {
+	public Map<ItemKey, List<Subscription>> getBoostersFor(List<ItemKey> itemKeys) {
 		final List<String> itemKeysStr = new ArrayList<String>();
 		for (ItemKey itemKey : itemKeys) {
 			itemKeysStr.add(itemKey.toString());
 		}
 
-		final List<AdvertisingBooster> adBoosters = entityManager
+		final List<Subscription> adBoosters = entityManager
 				.createQuery(
-						"from AdvertisingBoosterImpl where relatedItemKey in (:itemKeys) and fromDate<=:currentDate and toDate>:currentDate")
-				.setParameter("itemKeys", itemKeysStr)
-				.setParameter("currentDate", new Date()).getResultList();
+						"from SubscriptionImpl where relatedItemKey in (:itemKeys) and fromDate<=:currentDate and toDate>:currentDate")
+				.setParameter("itemKeys", itemKeysStr).setParameter("currentDate", new Date()).getResultList();
 
-		final Map<ItemKey, List<AdvertisingBooster>> adBoostersKeyMap = new HashMap<ItemKey, List<AdvertisingBooster>>();
-		for (AdvertisingBooster adBooster : adBoosters) {
+		final Map<ItemKey, List<Subscription>> adBoostersKeyMap = new HashMap<ItemKey, List<Subscription>>();
+		for (Subscription adBooster : adBoosters) {
 			final ItemKey itemKey = adBooster.getRelatedItemKey();
-			List<AdvertisingBooster> adBoostersForKey = adBoostersKeyMap
-					.get(itemKey);
+			List<Subscription> adBoostersForKey = adBoostersKeyMap.get(itemKey);
 			// Initializing list
 			if (adBoostersForKey == null) {
-				adBoostersForKey = new ArrayList<AdvertisingBooster>();
+				adBoostersForKey = new ArrayList<Subscription>();
 				adBoostersKeyMap.put(itemKey, adBoostersForKey);
 			}
 			adBoostersForKey.add(adBooster);
@@ -93,24 +86,21 @@ public class AdvertisingDaoImpl extends AbstractCalDao<CalmObject> implements
 	}
 
 	@Override
-	public Map<ItemKey, List<AdvertisingBooster>> getBoostersForUsers(
-			List<ItemKey> itemKeys) {
+	public Map<ItemKey, List<Subscription>> getBoostersForUsers(List<ItemKey> itemKeys) {
 		final List<String> itemKeysStr = new ArrayList<String>();
 		for (ItemKey itemKey : itemKeys) {
 			itemKeysStr.add(itemKey.toString());
 		}
-		final List<AdvertisingBooster> adBoosters = entityManager
-				.createQuery(
-						"from AdvertisingBoosterImpl where purchaserItemKey in (:itemKeys)")
+		final List<Subscription> adBoosters = entityManager
+				.createQuery("from SubscriptionImpl where purchaserItemKey in (:itemKeys)")
 				.setParameter("itemKeys", itemKeysStr).getResultList();
-		final Map<ItemKey, List<AdvertisingBooster>> adBoostersKeyMap = new HashMap<ItemKey, List<AdvertisingBooster>>();
-		for (AdvertisingBooster adBooster : adBoosters) {
+		final Map<ItemKey, List<Subscription>> adBoostersKeyMap = new HashMap<ItemKey, List<Subscription>>();
+		for (Subscription adBooster : adBoosters) {
 			final ItemKey itemKey = adBooster.getPurchaserItemKey();
-			List<AdvertisingBooster> adBoostersForUserKey = adBoostersKeyMap
-					.get(itemKey);
+			List<Subscription> adBoostersForUserKey = adBoostersKeyMap.get(itemKey);
 			// Initializing list
 			if (adBoostersForUserKey == null) {
-				adBoostersForUserKey = new ArrayList<AdvertisingBooster>();
+				adBoostersForUserKey = new ArrayList<Subscription>();
 				adBoostersKeyMap.put(itemKey, adBoostersForUserKey);
 			}
 			adBoostersForUserKey.add(adBooster);
@@ -121,8 +111,7 @@ public class AdvertisingDaoImpl extends AbstractCalDao<CalmObject> implements
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<Payment> getPaymentsFor(ItemKey itemKey) {
-		return entityManager
-				.createQuery("from PaymentImpl where userKey=:userKey")
+		return entityManager.createQuery("from PaymentImpl where userKey=:userKey")
 				.setParameter("userKey", itemKey.toString()).getResultList();
 	}
 
@@ -137,16 +126,15 @@ public class AdvertisingDaoImpl extends AbstractCalDao<CalmObject> implements
 	}
 
 	@Override
-	public Map<ItemKey, List<AdvertisingBanner>> getBannersFor(
-			Collection<ItemKey> geoItemKeys, String searchType, Locale locale) {
+	public Map<ItemKey, List<AdvertisingBanner>> getBannersFor(Collection<ItemKey> geoItemKeys, String searchType,
+			Locale locale) {
 		final Collection<String> keys = CalHelper.unwrapItemKeys(geoItemKeys);
 
 		@SuppressWarnings("unchecked")
 		final List<AdvertisingBanner> banners = entityManager
 				.createQuery(
 						"from AdvertisingBannerImpl where topGeographicItemKey in (:geoItemKey) and (searchType is null or searchType=:searchType) and (locale is null or locale=:locale) and status!='DELETED' order by display_count asc")
-				.setParameter("geoItemKey", keys)
-				.setParameter("searchType", searchType)
+				.setParameter("geoItemKey", keys).setParameter("searchType", searchType)
 				.setParameter("locale", locale.getLanguage()).getResultList();
 
 		final Map<ItemKey, List<AdvertisingBanner>> bannersMap = new HashMap<ItemKey, List<AdvertisingBanner>>();
@@ -183,9 +171,8 @@ public class AdvertisingDaoImpl extends AbstractCalDao<CalmObject> implements
 
 			@SuppressWarnings("unchecked")
 			final List<AdvertisingBanner> banners = entityManager
-					.createQuery(
-							"from AdvertisingBannerImpl where id in (:itemKeys)")
-					.setParameter("itemKeys", keys).getResultList();
+					.createQuery("from AdvertisingBannerImpl where id in (:itemKeys)").setParameter("itemKeys", keys)
+					.getResultList();
 
 			return banners;
 		} else {
@@ -195,21 +182,18 @@ public class AdvertisingDaoImpl extends AbstractCalDao<CalmObject> implements
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<CalmObject> listItems(RequestType requestType,
-			Integer pageSize, Integer pageOffset) {
+	public List<CalmObject> listItems(RequestType requestType, Integer pageSize, Integer pageOffset) {
 
-		List<CalmObject> banners = entityManager
-				.createQuery("from AdvertisingBannerImpl")
-				.setMaxResults(pageSize).setFirstResult(pageOffset * pageSize)
-				.getResultList();
+		List<CalmObject> banners = entityManager.createQuery("from AdvertisingBannerImpl").setMaxResults(pageSize)
+				.setFirstResult(pageOffset * pageSize).getResultList();
 
 		return banners;
 	}
 
 	@Override
 	public int getCount() {
-		final BigInteger count = (BigInteger) entityManager.createNativeQuery(
-				"select count(1) from ADS_BANNERS").getSingleResult();
+		final BigInteger count = (BigInteger) entityManager.createNativeQuery("select count(1) from ADS_BANNERS")
+				.getSingleResult();
 		return count.intValue();
 	}
 

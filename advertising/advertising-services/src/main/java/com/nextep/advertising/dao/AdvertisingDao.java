@@ -6,7 +6,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import com.nextep.advertising.model.AdvertisingBanner;
-import com.nextep.advertising.model.AdvertisingBooster;
+import com.nextep.advertising.model.Subscription;
 import com.nextep.advertising.model.Payment;
 import com.nextep.cal.util.model.CalDao;
 import com.videopolis.calm.model.CalmObject;
@@ -20,9 +20,9 @@ import com.videopolis.calm.model.ItemKey;
  */
 public interface AdvertisingDao extends CalDao<CalmObject> {
 
-	Map<ItemKey, List<AdvertisingBooster>> getBoostersFor(List<ItemKey> keys);
+	Map<ItemKey, List<Subscription>> getBoostersFor(List<ItemKey> keys);
 
-	Map<ItemKey, List<AdvertisingBooster>> getBoostersForUsers(
+	Map<ItemKey, List<Subscription>> getBoostersForUsers(
 			List<ItemKey> keys);
 
 	/**

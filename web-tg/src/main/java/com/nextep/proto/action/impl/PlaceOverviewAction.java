@@ -10,7 +10,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.nextep.activities.model.Activity;
 import com.nextep.advertising.model.AdvertisingBanner;
-import com.nextep.advertising.model.AdvertisingBooster;
+import com.nextep.advertising.model.Subscription;
 import com.nextep.comments.model.Comment;
 import com.nextep.descriptions.model.Description;
 import com.nextep.events.model.Event;
@@ -182,7 +182,7 @@ public class PlaceOverviewAction extends AbstractAction implements
 				.with(Tag.class)
 				.with(Media.class)
 				.with(Description.class)
-				.with(AdvertisingBooster.class)
+				.with(Subscription.class)
 				.with(Property.class)
 				.with((WithCriterion) SearchRestriction.with(Event.class)
 						.with(Media.class).with(Description.class))

@@ -6,7 +6,7 @@ import java.util.List;
 
 import com.nextep.activities.model.Activity;
 import com.nextep.advertising.model.AdvertisingBanner;
-import com.nextep.advertising.model.AdvertisingBooster;
+import com.nextep.advertising.model.Subscription;
 import com.nextep.events.model.Event;
 import com.nextep.geo.model.GeographicItem;
 import com.nextep.geo.model.Place;
@@ -63,12 +63,12 @@ public class RightsManagementServiceImpl implements RightsManagementService {
 			return ((AdvertisingBanner) object).getOwnerItemKey();
 		} else {
 			// Retrieving existing boosters
-			final List<? extends AdvertisingBooster> boosters = object
-					.get(AdvertisingBooster.class);
+			final List<? extends Subscription> boosters = object
+					.get(Subscription.class);
 			// Getting current time
 			final long currentTime = System.currentTimeMillis();
 			// For all defined boosters
-			for (AdvertisingBooster booster : boosters) {
+			for (Subscription booster : boosters) {
 				// If the booster is active (=current time is inside the booster
 				// period)
 				if (booster.getStartDate().getTime() <= currentTime

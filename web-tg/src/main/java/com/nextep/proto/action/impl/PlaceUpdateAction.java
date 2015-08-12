@@ -13,7 +13,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.nextep.activities.model.ActivityType;
 import com.nextep.activities.model.MutableActivity;
-import com.nextep.advertising.model.AdvertisingBooster;
+import com.nextep.advertising.model.Subscription;
 import com.nextep.cal.util.services.CalPersistenceService;
 import com.nextep.descriptions.model.Description;
 import com.nextep.descriptions.model.DescriptionRequestType;
@@ -149,7 +149,7 @@ public class PlaceUpdateAction extends AbstractAction implements
 					.uniqueKeys(Arrays.asList(placeKey))
 					.aliasedBy(APIS_ALIAS_PLACE).with(Property.class)
 					.with(Description.class).with(Tag.class)
-					.with(AdvertisingBooster.class));
+					.with(Subscription.class));
 			response = (ApiCompositeResponse) getApiService().execute(request,
 					ContextFactory.createContext(getLocale()));
 			place = response.getUniqueElement(MutablePlace.class,
@@ -260,7 +260,7 @@ public class PlaceUpdateAction extends AbstractAction implements
 		// Fetching the updated place for search storage
 		final ApisRequest fetchRequest = (ApisRequest) ApisFactory
 				.createRequest(Place.class).uniqueKey(place.getKey().getId())
-				.with(Tag.class).with(AdvertisingBooster.class)
+				.with(Tag.class).with(Subscription.class)
 				.with(Statistic.class);
 		final ApiResponse fetchResponse = getApiService().execute(fetchRequest,
 				ContextFactory.createContext(getLocale()));

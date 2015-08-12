@@ -128,6 +128,7 @@
 	<Environment name="push.production" type="java.lang.Boolean" value="false"/>
 	<Environment name="push.enabled" type="java.lang.Boolean" value="true"/>
 	<Environment name="payment.production" type="java.lang.Boolean" value="false"/>
+	<Environment name="payment.sharedSecret" type="java.lang.String" value="30ee24a8e8a24c9ea78d4c7299790ff1"/>
 	
 	<Environment name="gcloud.appName" type="java.lang.String" value="PelMel"/>
 	<Environment name="gcloud.bucketName" type="java.lang.String" value="media.pelmelguide.com"/>

@@ -7,13 +7,12 @@ import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
 
 import javax.annotation.Resource;
-
-import net.sf.json.JSONObject;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -41,11 +40,12 @@ import com.videopolis.apis.service.ApiCompositeResponse;
 import com.videopolis.calm.model.ItemKey;
 import com.videopolis.smaug.common.model.SearchScope;
 
+import net.sf.json.JSONObject;
+
 @Service("bannerDisplayService")
 public class BannerDisplayServiceImpl implements BannerDisplayService {
 
-	private static final Log LOGGER = LogFactory
-			.getLog(BannerDisplayServiceImpl.class);
+	private static final Log LOGGER = LogFactory.getLog(BannerDisplayServiceImpl.class);
 	private static final String APIS_ALIAS_BANNER = "banners";
 	private static final int MAX_BANNERS = 10;
 	private static final double BANNER_RADIUS = 10.0f;
@@ -61,17 +61,17 @@ public class BannerDisplayServiceImpl implements BannerDisplayService {
 
 	@Resource(mappedName = "payment.production")
 	private Boolean production;
+	@Resource(mappedName = "payment.sharedSecret")
+	private String sharedSecret;
 
 	@Override
-	public void addBannersRequest(ApisRequest request, double latitude,
-			double longitude) throws ApisException {
+	public void addBannersRequest(ApisRequest request, double latitude, double longitude) throws ApisException {
 		request.addCriterion((ApisCriterion) SearchRestriction
-				.searchNear(AdvertisingBanner.class, SearchScope.NEARBY_BLOCK,
-						latitude, longitude, BANNER_RADIUS, MAX_BANNERS, 0)
+				.searchNear(AdvertisingBanner.class, SearchScope.NEARBY_BLOCK, latitude, longitude, BANNER_RADIUS,
+						MAX_BANNERS, 0)
 				.aliasedBy(APIS_ALIAS_BANNER)
 				.addCriterion(
-						SearchRestriction.adaptKey(bannerTargetAdapter)
-								.aliasedBy(Constants.APIS_ALIAS_BANNER_TARGET))
+						SearchRestriction.adaptKey(bannerTargetAdapter).aliasedBy(Constants.APIS_ALIAS_BANNER_TARGET))
 				.with(Media.class));
 	}
 
@@ -81,12 +81,11 @@ public class BannerDisplayServiceImpl implements BannerDisplayService {
 	}
 
 	@Override
-	public AdvertisingBanner getBannerSelection(ApiCompositeResponse response,
-			ItemKey currentBannerKey) {
+	public AdvertisingBanner getBannerSelection(ApiCompositeResponse response, ItemKey currentBannerKey) {
 
 		try {
-			final List<? extends AdvertisingBanner> banners = response
-					.getElements(AdvertisingBanner.class, APIS_ALIAS_BANNER);
+			final List<? extends AdvertisingBanner> banners = response.getElements(AdvertisingBanner.class,
+					APIS_ALIAS_BANNER);
 
 			// Filtering non ready banners
 			final List<AdvertisingBanner> availableBanners = new ArrayList<AdvertisingBanner>();
@@ -97,8 +96,7 @@ public class BannerDisplayServiceImpl implements BannerDisplayService {
 					// current banner
 					// To sum-up, it will avoid to select the specified current
 					// banner if we have at least another choice
-					if (currentBannerKey == null || banners.size() == 1
-							|| !banner.getKey().equals(currentBannerKey)) {
+					if (currentBannerKey == null || banners.size() == 1 || !banner.getKey().equals(currentBannerKey)) {
 						availableBanners.add(banner);
 					}
 				}
@@ -140,30 +138,28 @@ public class BannerDisplayServiceImpl implements BannerDisplayService {
 	}
 
 	@SuppressWarnings("unchecked")
-	private Map<String, Object> validateAppleReceipt(String receipt,
-			boolean production) {
-		final String json = "{\"receipt-data\":\"" + receipt + "\"}";
-		final String url = production ? URL_PAYMENT_PRODUCTION
-				: URL_PAYMENT_SANDBOX;
+	private Map<String, Object> validateAppleReceipt(String receipt, boolean production) {
+		Map<String, String> jsonReceipt = new HashMap<>();
+		jsonReceipt.put("receipt-data", receipt);
+		jsonReceipt.put("password", sharedSecret);
+		final String json = JSONObject.fromObject(jsonReceipt).toString();
+		final String url = production ? URL_PAYMENT_PRODUCTION : URL_PAYMENT_SANDBOX;
 
 		try {
 			final URL validationUrl = new URL(url);
-			final HttpURLConnection connection = (HttpURLConnection) validationUrl
-					.openConnection();
+			final HttpURLConnection connection = (HttpURLConnection) validationUrl.openConnection();
 			connection.setRequestMethod("POST");
 			connection.setDoOutput(true);
 			connection.setRequestProperty("Content-Type", "application/json");
 			connection.setRequestProperty("Accept", "application/json");
 
 			// Posting JSON body
-			final OutputStreamWriter wr = new OutputStreamWriter(
-					connection.getOutputStream());
+			final OutputStreamWriter wr = new OutputStreamWriter(connection.getOutputStream());
 			wr.write(json);
 			wr.flush();
 
 			// Get the response
-			final BufferedReader rd = new BufferedReader(new InputStreamReader(
-					connection.getInputStream()));
+			final BufferedReader rd = new BufferedReader(new InputStreamReader(connection.getInputStream()));
 			String line;
 			StringBuilder buf = new StringBuilder();
 			while ((line = rd.readLine()) != null) {
@@ -182,9 +178,7 @@ public class BannerDisplayServiceImpl implements BannerDisplayService {
 			}
 			return (Map<String, Object>) obj.get("receipt");
 		} catch (IOException e) {
-			LOGGER.error(
-					"Unable to contact Apple to validate payment receipt: "
-							+ e.getMessage(), e);
+			LOGGER.error("Unable to contact Apple to validate payment receipt: " + e.getMessage(), e);
 		}
 		return null;
 	}

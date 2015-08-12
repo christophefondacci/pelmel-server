@@ -17,7 +17,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.nextep.activities.model.Activity;
 import com.nextep.advertising.model.AdvertisingBanner;
-import com.nextep.advertising.model.AdvertisingBooster;
+import com.nextep.advertising.model.Subscription;
 import com.nextep.comments.model.Comment;
 import com.nextep.descriptions.model.Description;
 import com.nextep.events.model.CalendarType;
@@ -711,11 +711,11 @@ public class JsonBuilderImpl implements JsonBuilder {
 		}
 
 		// Injecting advertising sponsors
-		final List<? extends AdvertisingBooster> adBoosters = place.get(AdvertisingBooster.class);
+		final List<? extends Subscription> adBoosters = place.get(Subscription.class);
 		if (adBoosters != null && !adBoosters.isEmpty()) {
 			// If we have several boosters, we take the highest booster
 			int maxBoostValue = 0;
-			for (AdvertisingBooster adBooster : adBoosters) {
+			for (Subscription adBooster : adBoosters) {
 				if (adBooster.getBoostValue() > maxBoostValue) {
 					maxBoostValue = adBooster.getBoostValue();
 				}

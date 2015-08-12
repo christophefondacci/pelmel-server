@@ -8,7 +8,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.context.MessageSource;
 
-import com.nextep.advertising.model.AdvertisingBooster;
+import com.nextep.advertising.model.Subscription;
 import com.nextep.geo.model.GeographicItem;
 import com.nextep.media.model.Media;
 import com.nextep.proto.blocks.SponsorshipSupport;
@@ -147,11 +147,11 @@ public class SponsorshipSupportImpl implements SponsorshipSupport {
 
 	@Override
 	public List<CalmObject> getSponsoredElements() {
-		final List<? extends AdvertisingBooster> boosters = currentUser
-				.get(AdvertisingBooster.class);
+		final List<? extends Subscription> boosters = currentUser
+				.get(Subscription.class);
 		final List<CalmObject> sponsoredElements = new ArrayList<CalmObject>();
 		final long currentTime = System.currentTimeMillis();
-		for (AdvertisingBooster booster : boosters) {
+		for (Subscription booster : boosters) {
 			if (booster.getStartDate().getTime() <= currentTime
 					&& booster.getEndDate().getTime() > currentTime) {
 				try {

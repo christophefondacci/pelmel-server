@@ -1,5 +1,7 @@
 package com.nextep.json.model.impl;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -12,6 +14,8 @@ import com.nextep.json.model.IPrivateListContainer;
 
 public class JsonUser extends JsonLiker implements IJsonLightUser, IPrivateListContainer {
 
+	private static final DateFormat birthDateFormat = new SimpleDateFormat("yyyy/MM/dd");
+
 	private String key;
 	private String nxtpUserToken;
 	private String pseudo;
@@ -19,6 +23,7 @@ public class JsonUser extends JsonLiker implements IJsonLightUser, IPrivateListC
 	private Integer heightInCm;
 	private Integer weightInKg;
 	private Long birthDate;
+	private String invariableBirthDate;
 	private boolean online;
 	private Collection<JsonDescription> descriptions = new ArrayList<JsonDescription>();
 	// private String description;
@@ -43,6 +48,7 @@ public class JsonUser extends JsonLiker implements IJsonLightUser, IPrivateListC
 		return key;
 	}
 
+	@Override
 	public void setKey(String key) {
 		this.key = key;
 	}
@@ -91,6 +97,7 @@ public class JsonUser extends JsonLiker implements IJsonLightUser, IPrivateListC
 
 	public void setBirthDateValue(Date birthDate) {
 		this.birthDate = birthDate.getTime() / 1000;
+		this.invariableBirthDate = birthDateFormat.format(birthDate);
 	}
 
 	public Collection<JsonDescription> getDescriptions() {
@@ -276,4 +283,11 @@ public class JsonUser extends JsonLiker implements IJsonLightUser, IPrivateListC
 		this.networkUsers = networkUsers;
 	}
 
+	public void setInvariableBirthDate(String invariableBirthDate) {
+		this.invariableBirthDate = invariableBirthDate;
+	}
+
+	public String getInvariableBirthDate() {
+		return invariableBirthDate;
+	}
 }

@@ -6,7 +6,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.nextep.advertising.model.AdvertisingBooster;
+import com.nextep.advertising.model.Subscription;
 import com.nextep.cal.util.services.CalPersistenceService;
 import com.nextep.media.model.Media;
 import com.nextep.media.model.MutableMedia;
@@ -56,7 +56,7 @@ public class MoveMediaAction extends AbstractAction implements
 		request.addCriterion((ApisCriterion) SearchRestriction
 				.uniqueKeys(Arrays.asList(parentKey))
 				.aliasedBy(APIS_ALIAS_MEDIA).with(Media.class)
-				.with(AdvertisingBooster.class));
+				.with(Subscription.class));
 
 		final ApiCompositeResponse response = (ApiCompositeResponse) getApiService()
 				.execute(request, ContextFactory.createContext(getLocale()));

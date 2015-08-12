@@ -11,8 +11,8 @@ import javax.persistence.Table;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.nextep.advertising.model.BoosterType;
-import com.nextep.advertising.model.MutableAdvertisingBooster;
+import com.nextep.advertising.model.SubscriptionType;
+import com.nextep.advertising.model.MutableSubscription;
 import com.nextep.cal.util.helpers.CalHelper;
 import com.nextep.cal.util.model.Price;
 import com.nextep.cal.util.model.impl.PriceImpl;
@@ -23,13 +23,11 @@ import com.videopolis.calm.model.ItemKey;
 
 @Entity
 @Table(name = "ADS_BOOSTERS")
-public class AdvertisingBoosterImpl extends AbstractCalmObject implements
-		MutableAdvertisingBooster {
+public class SubscriptionImpl extends AbstractCalmObject implements MutableSubscription {
 
 	private static final long serialVersionUID = 4554744743456518505L;
 
-	private static final Log LOGGER = LogFactory
-			.getLog(AdvertisingBoosterImpl.class);
+	private static final Log LOGGER = LogFactory.getLog(SubscriptionImpl.class);
 
 	@GeneratedValue
 	@Id
@@ -60,7 +58,13 @@ public class AdvertisingBoosterImpl extends AbstractCalmObject implements
 	@Column(name = "BOOSTER_TYPE")
 	private String boosterType;
 
-	public AdvertisingBoosterImpl() {
+	@Column(name = "ORIGINAL_TRANSACTION_ID")
+	private String originalTransactionId;
+
+	@Column(name = "TRANSACTION_ID")
+	private String transactionId;
+
+	public SubscriptionImpl() {
 		super(null);
 	}
 
@@ -74,8 +78,7 @@ public class AdvertisingBoosterImpl extends AbstractCalmObject implements
 		try {
 			return CalmFactory.parseKey(relatedItemKey);
 		} catch (CalException e) {
-			LOGGER.error("Unable to parse related item key " + relatedItemKey
-					+ " : " + e.getMessage(), e);
+			LOGGER.error("Unable to parse related item key " + relatedItemKey + " : " + e.getMessage(), e);
 		}
 		return null;
 	}
@@ -105,27 +108,25 @@ public class AdvertisingBoosterImpl extends AbstractCalmObject implements
 		try {
 			return CalmFactory.parseKey(purchaserItemKey);
 		} catch (CalException e) {
-			LOGGER.error("Unable to parse purchaser item key "
-					+ purchaserItemKey + " : " + e.getMessage(), e);
+			LOGGER.error("Unable to parse purchaser item key " + purchaserItemKey + " : " + e.getMessage(), e);
 		}
 		return null;
 	}
 
 	@Override
-	public BoosterType getBoosterType() {
+	public SubscriptionType getSubscriptionType() {
 		try {
-			return BoosterType.valueOf(boosterType);
+			return SubscriptionType.valueOf(boosterType);
 		} catch (IllegalArgumentException e) {
-			LOGGER.error("Invalid booster type retrieved from database '"
-					+ boosterType + "', fallbacking to DEFAULT");
-			return BoosterType.DEFAULT;
+			LOGGER.error("Invalid booster type retrieved from database '" + boosterType + "', fallbacking to DEFAULT");
+			return SubscriptionType.DEFAULT;
 		} catch (NullPointerException e) {
-			return BoosterType.DEFAULT;
+			return SubscriptionType.DEFAULT;
 		}
 	}
 
 	@Override
-	public void setBoosterType(BoosterType boosterType) {
+	public void setSubscriptionType(SubscriptionType boosterType) {
 		this.boosterType = boosterType == null ? null : boosterType.name();
 	}
 
@@ -158,5 +159,25 @@ public class AdvertisingBoosterImpl extends AbstractCalmObject implements
 	@Override
 	public void setStartDate(Date startDate) {
 		this.fromDate = startDate;
+	}
+
+	@Override
+	public void setOriginalTransactionId(String originalTransactionId) {
+		this.originalTransactionId = originalTransactionId;
+	}
+
+	@Override
+	public String getOriginalTransactionId() {
+		return originalTransactionId;
+	}
+
+	@Override
+	public void setTransactionId(String transactionId) {
+		this.transactionId = transactionId;
+	}
+
+	@Override
+	public String getTransactionId() {
+		return transactionId;
 	}
 }

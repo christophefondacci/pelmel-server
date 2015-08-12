@@ -18,7 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.nextep.activities.model.Activity;
 import com.nextep.advertising.model.AdvertisingBanner;
-import com.nextep.advertising.model.AdvertisingBooster;
+import com.nextep.advertising.model.Subscription;
 import com.nextep.cal.util.services.CalPersistenceService;
 import com.nextep.descriptions.model.Description;
 import com.nextep.events.model.Event;
@@ -290,7 +290,7 @@ public class NearbyPlacesListAction extends AbstractAction implements
 				.with(Description.class)
 				.with(Media.class)
 				.with(Tag.class)
-				.with(AdvertisingBooster.class)
+				.with(Subscription.class)
 				.with((WithCriterion) SearchRestriction.with(EventSeries.class)
 						.with(Media.class));
 		// Integrating the criterion
