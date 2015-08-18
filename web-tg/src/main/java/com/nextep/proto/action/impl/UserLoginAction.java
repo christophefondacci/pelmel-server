@@ -10,12 +10,15 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.context.NoSuchMessageException;
 
+import com.nextep.advertising.model.Subscription;
+import com.nextep.advertising.model.impl.AdvertisingRequestTypes;
 import com.nextep.descriptions.model.Description;
-import com.nextep.json.model.impl.JsonUser;
+import com.nextep.json.model.impl.JsonLoggedInUser;
 import com.nextep.media.model.Media;
 import com.nextep.media.model.MediaRequestTypes;
 import com.nextep.proto.action.base.AbstractAction;
 import com.nextep.proto.action.model.JsonProvider;
+import com.nextep.proto.apis.adapters.ApisSubscriptionRelatedItemKeyAdapter;
 import com.nextep.proto.apis.adapters.ApisUserLocationItemKeyAdapter;
 import com.nextep.proto.blocks.CurrentUserSupport;
 import com.nextep.proto.builders.JsonBuilder;
@@ -104,6 +107,11 @@ public class UserLoginAction extends AbstractAction implements CookieProvider, J
 							final ApisCriterion userCriterion = (ApisCriterion) currentUserSupport
 									.createApisCriterionFor(user.getToken(), false).with(Description.class)
 									.with(Tag.class)
+									.addCriterion((ApisCriterion) SearchRestriction
+											.with(Subscription.class,
+													AdvertisingRequestTypes.USER_CURRENT_SUBSCRIPTIONS)
+											.addCriterion(SearchRestriction
+													.adaptKey(new ApisSubscriptionRelatedItemKeyAdapter())))
 									.addCriterion((ApisCriterion) SearchRestriction.adaptKey(userLocationAdapter)
 											.aliasedBy(Constants.APIS_ALIAS_USER_LOCATION)
 											.with(Media.class, MediaRequestTypes.THUMB));
@@ -150,7 +158,7 @@ public class UserLoginAction extends AbstractAction implements CookieProvider, J
 	@Override
 	public String getJson() {
 		if (user != null) {
-			final JsonUser json = jsonBuilder.buildJsonUser(user, highRes, null);
+			final JsonLoggedInUser json = jsonBuilder.buildJsonLoggedInUser(user, highRes, null);
 			return JSONObject.fromObject(json).toString();
 		} else {
 			return "";

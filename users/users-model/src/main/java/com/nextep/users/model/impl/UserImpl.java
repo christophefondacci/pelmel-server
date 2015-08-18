@@ -92,9 +92,13 @@ public class UserImpl extends AbstractCalmObject implements User, MutableUser {
 
 	@Column(name = "EMAIL_LAST_DATE")
 	private Date lastEmailDate;
-	/**
-	 * 
-	 */
+
+	@Column(name = "EMAIL_VALIDATION_TOKEN")
+	private String emailValidationToken;
+
+	@Column(name = "EMAIL_VALIDATED")
+	private boolean emailValidated;
+
 	private static final long serialVersionUID = 4236481091171015199L;
 
 	public UserImpl() {
@@ -264,8 +268,7 @@ public class UserImpl extends AbstractCalmObject implements User, MutableUser {
 			try {
 				return CalmFactory.parseKey(lastLocationKey);
 			} catch (CalException e) {
-				LOGGER.error("Unable to parse last location key : "
-						+ lastLocationKey);
+				LOGGER.error("Unable to parse last location key : " + lastLocationKey);
 			}
 		}
 		return null;
@@ -288,8 +291,7 @@ public class UserImpl extends AbstractCalmObject implements User, MutableUser {
 
 	@Override
 	public void setLastLocationKey(ItemKey lastLocationKey) {
-		this.lastLocationKey = lastLocationKey == null ? null : lastLocationKey
-				.toString();
+		this.lastLocationKey = lastLocationKey == null ? null : lastLocationKey.toString();
 	}
 
 	@Override
@@ -396,5 +398,25 @@ public class UserImpl extends AbstractCalmObject implements User, MutableUser {
 	@Override
 	public Date getLastEmailDate() {
 		return lastEmailDate;
+	}
+
+	@Override
+	public String getEmailValidationToken() {
+		return emailValidationToken;
+	}
+
+	@Override
+	public boolean isEmailValidated() {
+		return emailValidated;
+	}
+
+	@Override
+	public void setEmailValidationToken(String emailValidationToken) {
+		this.emailValidationToken = emailValidationToken;
+	}
+
+	@Override
+	public void setEmailValidated(boolean emailValidated) {
+		this.emailValidated = emailValidated;
 	}
 }

@@ -13,4 +13,6 @@ public interface MutableItemView extends ItemView {
 	void setViewerItemKey(ItemKey viewerItemKey);
 
 	void setViewType(String viewType);
+
+	void setCount(int count);
 }

@@ -205,6 +205,13 @@
 		</dependency>
 		<dependency>
 			<groupId>neXtep</groupId>
+			<artifactId>deals-services</artifactId>
+			<version>1.0-SNAPSHOT</version>
+			<type>jar</type>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>neXtep</groupId>
 			<artifactId>events-services</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 			<type>jar</type>

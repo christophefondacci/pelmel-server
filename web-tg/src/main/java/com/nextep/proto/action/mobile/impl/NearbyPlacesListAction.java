@@ -10,12 +10,11 @@ import java.util.Map;
 
 import javax.annotation.Resource;
 
-import net.sf.json.JSONObject;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.fgp.deals.model.Deal;
 import com.nextep.activities.model.Activity;
 import com.nextep.advertising.model.AdvertisingBanner;
 import com.nextep.advertising.model.Subscription;
@@ -83,12 +82,13 @@ import com.videopolis.smaug.common.model.SearchScope;
 import com.videopolis.smaug.common.model.SuggestScope;
 import com.videopolis.smaug.model.FacetCount;
 
-public class NearbyPlacesListAction extends AbstractAction implements
-		SearchAware, JsonProvider, TagAware, NearbySearchAware {
+import net.sf.json.JSONObject;
+
+public class NearbyPlacesListAction extends AbstractAction
+		implements SearchAware, JsonProvider, TagAware, NearbySearchAware {
 
 	private static final long serialVersionUID = 2386753201776395502L;
-	private static final Log LOGGER = LogFactory
-			.getLog(NearbyPlacesListAction.class);
+	private static final Log LOGGER = LogFactory.getLog(NearbyPlacesListAction.class);
 
 	private static String APIS_ALIAS_NEARBY_PLACES = "np";
 	private static String APIS_ALIAS_NEARBY_EVENTS = "ne";
@@ -155,10 +155,8 @@ public class NearbyPlacesListAction extends AbstractAction implements
 		// Creating the request
 		final ApisRequest request = ApisFactory.createCompositeRequest();
 		// Place rating sorter
-		List<Sorter> placeSorters = Arrays.asList(SearchHelper
-				.getPlaceRatingSorter());
-		if (searchLng != null && searchLat != null
-				&& lat == searchLat.doubleValue()
+		List<Sorter> placeSorters = Arrays.asList(SearchHelper.getPlaceRatingSorter());
+		if (searchLng != null && searchLat != null && lat == searchLat.doubleValue()
 				&& lng == searchLng.doubleValue()) {
 			placeSorters = Arrays.asList(SearchHelper.getDistanceSorter());
 		}
@@ -170,11 +168,8 @@ public class NearbyPlacesListAction extends AbstractAction implements
 				if (searchLat != null && searchLng != null) {
 
 					// Looking for nearby places
-					placesCriterion = SearchRestriction
-							.searchNear(Place.class, SearchScope.NEARBY_BLOCK,
-									searchLat, searchLng, radius, pageSize,
-									page).sortBy(placeSorters)
-							.aliasedBy(APIS_ALIAS_NEARBY_PLACES);
+					placesCriterion = SearchRestriction.searchNear(Place.class, SearchScope.NEARBY_BLOCK, searchLat,
+							searchLng, radius, pageSize, page).sortBy(placeSorters).aliasedBy(APIS_ALIAS_NEARBY_PLACES);
 
 					// Adding activities
 					// final List<Sorter> activitiesDateSorter = SearchHelper
@@ -193,56 +188,41 @@ public class NearbyPlacesListAction extends AbstractAction implements
 					// request.addCriterion(activitiesCrit);
 
 					// Adding users
-					final ApisCriterion usersOnlineCrit = buildUserCriterion(
-							SearchScope.USERS_ONLINE, APIS_ALIAS_NEARBY_USERS,
-							searchLat, searchLng);
+					final ApisCriterion usersOnlineCrit = buildUserCriterion(SearchScope.USERS_ONLINE,
+							APIS_ALIAS_NEARBY_USERS, searchLat, searchLng);
 					request.addCriterion(usersOnlineCrit);
-					final ApisCriterion usersOfflineCrit = buildUserCriterion(
-							SearchScope.USERS_OFFLINE,
-							APIS_ALIAS_NEARBY_USERS_OFFLINE, searchLat,
-							searchLng);
+					final ApisCriterion usersOfflineCrit = buildUserCriterion(SearchScope.USERS_OFFLINE,
+							APIS_ALIAS_NEARBY_USERS_OFFLINE, searchLat, searchLng);
 					request.addCriterion(usersOfflineCrit);
 
 					// Adding events
 					final ApisCriterion eventsCrit = (ApisCriterion) SearchRestriction
-							.searchNear(Event.class, SearchScope.EVENTS,
-									searchLat, searchLng, radius,
+							.searchNear(Event.class, SearchScope.EVENTS, searchLat, searchLng, radius,
 									NEARBY_EVENTS_COUNT, 0)
-							.aliasedBy(APIS_ALIAS_NEARBY_EVENTS)
-							.with(Media.class, MediaRequestTypes.THUMB)
-							.addCriterion(
-									(ApisCriterion) SearchRestriction
-											.adaptKey(eventLocationAdapter)
-											.aliasedBy(
-													Constants.APIS_ALIAS_EVENT_PLACE)
-											.with(Media.class,
-													MediaRequestTypes.THUMB));
+							.aliasedBy(APIS_ALIAS_NEARBY_EVENTS).with(Media.class, MediaRequestTypes.THUMB)
+							.addCriterion((ApisCriterion) SearchRestriction.adaptKey(eventLocationAdapter)
+									.aliasedBy(Constants.APIS_ALIAS_EVENT_PLACE)
+									.with(Media.class, MediaRequestTypes.THUMB));
 					request.addCriterion(eventsCrit);
 				} else {
 					// Building every city having places by using facets of a
 					// place search
-					final FacetCategory cityCategory = SearchHelper
-							.getCityFacetCategory();
-					final ApisFacetToItemKeyAdapter cityKeyAdapter = new ApisFacetToItemKeyAdapter(
-							SearchScope.CITY, cityCategory, -1);
-					placesCriterion = (ApisCriterion) SearchRestriction
-							.searchAll(Place.class, SearchScope.CITY, 10, 0)
+					final FacetCategory cityCategory = SearchHelper.getCityFacetCategory();
+					final ApisFacetToItemKeyAdapter cityKeyAdapter = new ApisFacetToItemKeyAdapter(SearchScope.CITY,
+							cityCategory, -1);
+					placesCriterion = (ApisCriterion) SearchRestriction.searchAll(Place.class, SearchScope.CITY, 10, 0)
 							.facettedBy(Arrays.asList(cityCategory))
-							.customAdapt(cityKeyAdapter,
-									APIS_ALIAS_NEARBY_PLACES);
+							.customAdapt(cityKeyAdapter, APIS_ALIAS_NEARBY_PLACES);
 				}
 			} else {
 				// If we got a parent, we search for places INSIDE the parent
 				// rather than nearby
-				placesCriterion = SearchRestriction.withContained(Place.class,
-						SearchScope.NEARBY_BLOCK, pageSize, page).aliasedBy(
-						APIS_ALIAS_NEARBY_PLACES);
+				placesCriterion = SearchRestriction.withContained(Place.class, SearchScope.NEARBY_BLOCK, pageSize, page)
+						.aliasedBy(APIS_ALIAS_NEARBY_PLACES);
 				// Adding users
 				final ApisCriterion usersCrit = (ApisCriterion) SearchRestriction
-						.withContained(User.class, SearchScope.USERS,
-								nearbyUsersCount, 0)
-						.aliasedBy(APIS_ALIAS_NEARBY_USERS)
-						.with(Media.class, MediaRequestTypes.THUMB);
+						.withContained(User.class, SearchScope.USERS, nearbyUsersCount, 0)
+						.aliasedBy(APIS_ALIAS_NEARBY_USERS).with(Media.class, MediaRequestTypes.THUMB);
 				request.addCriterion(usersCrit);
 			}
 		} else {
@@ -250,33 +230,23 @@ public class NearbyPlacesListAction extends AbstractAction implements
 			scopes.add(SuggestScope.DESTINATION);
 			scopes.add(SuggestScope.PLACE);
 			scopes.add(SuggestScope.GEO_FULLTEXT);
-			placesCriterion = SearchRestriction.searchFromText(
-					GeographicItem.class, scopes, searchText, pageSize)
+			placesCriterion = SearchRestriction.searchFromText(GeographicItem.class, scopes, searchText, pageSize)
 					.aliasedBy(APIS_ALIAS_NEARBY_PLACES);
 
 			// Building a user fulltext search from text
-			List<SuggestScope> userScopes = Arrays.asList(SuggestScope.USER,
-					SuggestScope.GEO_FULLTEXT);
+			List<SuggestScope> userScopes = Arrays.asList(SuggestScope.USER, SuggestScope.GEO_FULLTEXT);
 			ApisCriterion usersCrit = (ApisCriterion) SearchRestriction
-					.searchFromText(User.class, userScopes, searchText,
-							nearbyUsersCount)
-					.aliasedBy(APIS_ALIAS_NEARBY_USERS)
-					.with(Media.class, MediaRequestTypes.THUMB);
+					.searchFromText(User.class, userScopes, searchText, nearbyUsersCount)
+					.aliasedBy(APIS_ALIAS_NEARBY_USERS).with(Media.class, MediaRequestTypes.THUMB);
 			request.addCriterion(usersCrit);
 
 			// Building an event fulltext search
-			List<SuggestScope> eventScopes = Arrays.asList(SuggestScope.EVENT,
-					SuggestScope.GEO_FULLTEXT);
+			List<SuggestScope> eventScopes = Arrays.asList(SuggestScope.EVENT, SuggestScope.GEO_FULLTEXT);
 			ApisCriterion eventsCrit = (ApisCriterion) SearchRestriction
-					.searchFromText(Event.class, eventScopes, searchText,
-							NEARBY_EVENTS_COUNT)
-					.aliasedBy(APIS_ALIAS_NEARBY_EVENTS)
-					.with(Media.class, MediaRequestTypes.THUMB)
-					.addCriterion(
-							(ApisCriterion) SearchRestriction
-									.adaptKey(eventLocationAdapter)
-									.aliasedBy(Constants.APIS_ALIAS_EVENT_PLACE)
-									.with(Media.class, MediaRequestTypes.THUMB));
+					.searchFromText(Event.class, eventScopes, searchText, NEARBY_EVENTS_COUNT)
+					.aliasedBy(APIS_ALIAS_NEARBY_EVENTS).with(Media.class, MediaRequestTypes.THUMB)
+					.addCriterion((ApisCriterion) SearchRestriction.adaptKey(eventLocationAdapter)
+							.aliasedBy(Constants.APIS_ALIAS_EVENT_PLACE).with(Media.class, MediaRequestTypes.THUMB));
 			request.addCriterion(eventsCrit);
 			// FacetCategory cityCategory = SearchHelper.getCityFacetCategory();
 			// request.addCriterion(SearchRestriction
@@ -286,13 +256,8 @@ public class NearbyPlacesListAction extends AbstractAction implements
 		}
 
 		// Adding default places information
-		placesCriterion
-				.with(Description.class)
-				.with(Media.class)
-				.with(Tag.class)
-				.with(Subscription.class)
-				.with((WithCriterion) SearchRestriction.with(EventSeries.class)
-						.with(Media.class));
+		placesCriterion.with(Description.class).with(Media.class).with(Tag.class).with(Subscription.class)
+				.with(Deal.class).with((WithCriterion) SearchRestriction.with(EventSeries.class).with(Media.class));
 		// Integrating the criterion
 		if (parentKey == null) {
 			// At the root level by default
@@ -314,60 +279,39 @@ public class NearbyPlacesListAction extends AbstractAction implements
 
 			// Adding users
 			final ApisCriterion usersCrit = (ApisCriterion) SearchRestriction
-					.withContained(User.class, SearchScope.USERS,
-							nearbyUsersCount, 0)
-					.aliasedBy(APIS_ALIAS_NEARBY_USERS)
-					.with(Media.class, MediaRequestTypes.THUMB);
+					.withContained(User.class, SearchScope.USERS, nearbyUsersCount, 0)
+					.aliasedBy(APIS_ALIAS_NEARBY_USERS).with(Media.class, MediaRequestTypes.THUMB);
 
 			// Building parent getter, querying contained places
-			request.addCriterion((ApisCriterion) SearchRestriction
-					.uniqueKeys(Arrays.asList(parentItemKey))
+			request.addCriterion((ApisCriterion) SearchRestriction.uniqueKeys(Arrays.asList(parentItemKey))
 					.aliasedBy(APIS_ALIAS_CITY).addCriterion(placesCriterion)
 					// .addCriterion(activitiesCrit)
 					.addCriterion(usersCrit));
 		}
 		// We need last nearby activity ID to display the "NEW" app activity
 		// badge
-		final List<Sorter> activitiesDateSorter = SearchHelper
-				.getActivitiesDateSorter(false);
-		request.addCriterion(
-				SearchRestriction.searchForAllFacets(User.class,
-						SearchScope.USER_LOCALIZATION).facettedBy(
-						Arrays.asList(
-								SearchHelper.getUserCurrentPlaceCategory(),
-								SearchHelper.getUserAutoPlaceCategory())))
-				.addCriterion(
-						SearchRestriction.searchForAllFacets(User.class,
-								SearchScope.CHILDREN).facettedBy(
-								Arrays.asList(SearchHelper
-										.getUserPlacesCategory())))
-				.addCriterion(
-						SearchRestriction.searchForAllFacets(User.class,
-								SearchScope.EVENTS).facettedBy(
-								Arrays.asList(SearchHelper
-										.getUserEventsCategory())))
-				.addCriterion(
-						ApisLocalizationHelper.buildNearestCityCriterion(lat,
-								lng, cityRadius))
-				.addCriterion(
-						SearchRestriction
-								.searchNear(Activity.class,
-										SearchScope.NEARBY_ACTIVITIES, lat,
-										lng, radius, 1, 0)
-								.sortBy(activitiesDateSorter)
-								.aliasedBy(APIS_ALIAS_NEARBY_ACTIVITIES));
+		final List<Sorter> activitiesDateSorter = SearchHelper.getActivitiesDateSorter(false);
+		request.addCriterion(SearchRestriction.searchForAllFacets(User.class, SearchScope.USER_LOCALIZATION)
+				.facettedBy(Arrays.asList(SearchHelper.getUserCurrentPlaceCategory(),
+						SearchHelper.getUserAutoPlaceCategory())))
+				.addCriterion(SearchRestriction.searchForAllFacets(User.class, SearchScope.CHILDREN)
+						.facettedBy(Arrays.asList(SearchHelper.getUserPlacesCategory())))
+				.addCriterion(SearchRestriction.searchForAllFacets(User.class, SearchScope.EVENTS)
+						.facettedBy(Arrays.asList(SearchHelper.getUserEventsCategory())))
+				.addCriterion(ApisLocalizationHelper.buildNearestCityCriterion(lat, lng, cityRadius))
+				.addCriterion(SearchRestriction
+						.searchNear(Activity.class, SearchScope.NEARBY_ACTIVITIES, lat, lng, radius, 1, 0)
+						.sortBy(activitiesDateSorter).aliasedBy(APIS_ALIAS_NEARBY_ACTIVITIES));
 
 		if (getNxtpUserToken() != null) {
 			ApisCriterion userCriterion = (ApisCriterion) currentUserSupport
-					.createApisCriterionFor(getNxtpUserToken(), true).with(
-							GeographicItem.class);
+					.createApisCriterionFor(getNxtpUserToken(), true).with(GeographicItem.class);
 
 			// If localization is provided, we fetch the nearest place
 			if (lat != 0 || lng != 0) {
-				userCriterion.addCriterion(SearchRestriction.searchNear(
-						Place.class, SearchScope.NEARBY_BLOCK, lat, lng,
-						radius, 5, 0).aliasedBy(
-						Constants.APIS_ALIAS_NEARBY_PLACES));
+				userCriterion.addCriterion(
+						SearchRestriction.searchNear(Place.class, SearchScope.NEARBY_BLOCK, lat, lng, radius, 5, 0)
+								.aliasedBy(Constants.APIS_ALIAS_NEARBY_PLACES));
 			}
 
 			// Adding criterion
@@ -377,19 +321,17 @@ public class NearbyPlacesListAction extends AbstractAction implements
 		// Adding banner query
 		bannerDisplayService.addBannersRequest(request, lat, lng);
 
-		final ApiCompositeResponse response = (ApiCompositeResponse) getApiService()
-				.execute(request, ContextFactory.createContext(getLocale()));
+		final ApiCompositeResponse response = (ApiCompositeResponse) getApiService().execute(request,
+				ContextFactory.createContext(getLocale()));
 
 		// Extracting current user
-		final User user = response.getUniqueElement(User.class,
-				CurrentUserSupport.APIS_ALIAS_CURRENT_USER);
+		final User user = response.getUniqueElement(User.class, CurrentUserSupport.APIS_ALIAS_CURRENT_USER);
 
 		// Checking user status / update timeouts
 		checkCurrentUser(user);
 
 		// Extracting facets
-		final FacetInformation currentPlaceFacetInfo = response
-				.getFacetInformation(SearchScope.USER_LOCALIZATION);
+		final FacetInformation currentPlaceFacetInfo = response.getFacetInformation(SearchScope.USER_LOCALIZATION);
 		// Hashing current user places by place key
 		Map<String, Integer> currentPlacesMap = new HashMap<String, Integer>();
 		final List<FacetCount> currentPlaceCounts = currentPlaceFacetInfo
@@ -406,27 +348,23 @@ public class NearbyPlacesListAction extends AbstractAction implements
 		for (FacetCount c : currentAutoPlaceCounts) {
 			int count = c.getCount();
 			// Taking the previous count (current place)
-			Integer previousCount = currentPlacesMap.get(c.getFacet()
-					.getFacetCode());
+			Integer previousCount = currentPlacesMap.get(c.getFacet().getFacetCode());
 			if (previousCount == null) {
 				previousCount = 0;
 			}
 			// Adding auto count
-			currentPlacesMap.put(c.getFacet().getFacetCode(), previousCount
-					+ count);
+			currentPlacesMap.put(c.getFacet().getFacetCode(), previousCount + count);
 		}
 
 		// Hashing liked user places by place key
-		final FacetInformation facetInfo = response
-				.getFacetInformation(SearchScope.CHILDREN);
-		Map<String, Integer> likedPlacesMap = SearchHelper.unwrapFacets(
-				facetInfo, SearchHelper.getUserPlacesCategory());
+		final FacetInformation facetInfo = response.getFacetInformation(SearchScope.CHILDREN);
+		Map<String, Integer> likedPlacesMap = SearchHelper.unwrapFacets(facetInfo,
+				SearchHelper.getUserPlacesCategory());
 
 		// Hashing users attending events
-		final FacetInformation eventsFacetInfo = response
-				.getFacetInformation(SearchScope.EVENTS);
-		Map<String, Integer> eventsUsersMap = SearchHelper.unwrapFacets(
-				eventsFacetInfo, SearchHelper.getUserEventsCategory());
+		final FacetInformation eventsFacetInfo = response.getFacetInformation(SearchScope.EVENTS);
+		Map<String, Integer> eventsUsersMap = SearchHelper.unwrapFacets(eventsFacetInfo,
+				SearchHelper.getUserEventsCategory());
 
 		List<? extends Place> places;
 		List<? extends Event> events;
@@ -434,13 +372,11 @@ public class NearbyPlacesListAction extends AbstractAction implements
 		List<? extends User> users;
 
 		if (parentKey == null) {
-			places = response
-					.getElements(Place.class, APIS_ALIAS_NEARBY_PLACES);
+			places = response.getElements(Place.class, APIS_ALIAS_NEARBY_PLACES);
 			// activities = response.getElements(Activity.class,
 			// APIS_ALIAS_NEARBY_ACTIVITIES);
 			users = response.getElements(User.class, APIS_ALIAS_NEARBY_USERS);
-			List<? extends User> offlineUsers = response.getElements(
-					User.class, APIS_ALIAS_NEARBY_USERS_OFFLINE);
+			List<? extends User> offlineUsers = response.getElements(User.class, APIS_ALIAS_NEARBY_USERS_OFFLINE);
 			if (offlineUsers != null && !offlineUsers.isEmpty()) {
 				users.addAll((List) offlineUsers);
 			}
@@ -448,8 +384,7 @@ public class NearbyPlacesListAction extends AbstractAction implements
 		} else {
 			// If we had a parent key set we need to extract places from its
 			// parent geographic element
-			final GeographicItem city = response.getUniqueElement(
-					GeographicItem.class, APIS_ALIAS_CITY);
+			final GeographicItem city = response.getUniqueElement(GeographicItem.class, APIS_ALIAS_CITY);
 			places = city.get(Place.class, APIS_ALIAS_NEARBY_PLACES);
 			// activities = city.get(Activity.class,
 			// APIS_ALIAS_NEARBY_ACTIVITIES);
@@ -457,32 +392,25 @@ public class NearbyPlacesListAction extends AbstractAction implements
 		}
 
 		// Extracting items count
-		PaginationInfo usersPagination = response
-				.getPaginationInfo(APIS_ALIAS_NEARBY_USERS);
-		int usersCount = usersPagination == null ? users.size()
-				: usersPagination.getItemCount();
+		PaginationInfo usersPagination = response.getPaginationInfo(APIS_ALIAS_NEARBY_USERS);
+		int usersCount = usersPagination == null ? users.size() : usersPagination.getItemCount();
 
 		// Adding offline users count
-		PaginationInfo offlinePagination = response
-				.getPaginationInfo(APIS_ALIAS_NEARBY_USERS_OFFLINE);
+		PaginationInfo offlinePagination = response.getPaginationInfo(APIS_ALIAS_NEARBY_USERS_OFFLINE);
 		if (usersPagination != null && offlinePagination != null) {
 			usersCount += offlinePagination.getItemCount();
 		}
 
-		PaginationInfo placesPagination = response
-				.getPaginationInfo(APIS_ALIAS_NEARBY_PLACES);
-		int placesCount = placesPagination == null ? places.size()
-				: placesPagination.getItemCount();
+		PaginationInfo placesPagination = response.getPaginationInfo(APIS_ALIAS_NEARBY_PLACES);
+		int placesCount = placesPagination == null ? places.size() : placesPagination.getItemCount();
 
 		// Getting events from response root
 		events = response.getElements(Event.class, APIS_ALIAS_NEARBY_EVENTS);
 
 		// final FacetInformation facetInfo = response
 		// .getFacetInformation(SearchScope.NEARBY_BLOCK);
-		final PaginationInfo paginationInfo = response
-				.getPaginationInfo(Place.class);
-		searchSupport.initialize(null, getUrlService(), getLocale(), null,
-				null, null, paginationInfo, places);
+		final PaginationInfo paginationInfo = response.getPaginationInfo(Place.class);
+		searchSupport.initialize(null, getUrlService(), getLocale(), null, null, null, paginationInfo, places);
 		final List<Tag> tags = Collections.emptyList();
 		tagSupport.initialize(getLocale(), tags);
 		nearbySearchSupport.initialize(getLocale(), response);
@@ -493,17 +421,15 @@ public class NearbyPlacesListAction extends AbstractAction implements
 		for (CalmObject o : searchSupport.getSearchResults()) {
 			final Place place = (Place) o;
 
-			final JsonPlace p = jsonBuilder.buildJsonPlace(place, highRes,
-					getLocale(), likedPlacesMap, currentPlacesMap,
-					eventsUsersMap);
+			final JsonPlace p = jsonBuilder.buildJsonPlace(place, highRes, getLocale(), likedPlacesMap,
+					currentPlacesMap, eventsUsersMap);
 
 			// Distance management
-			final SearchStatistic distanceStat = response.getStatistic(
-					o.getKey(), SearchStatistic.DISTANCE);
+			final SearchStatistic distanceStat = response.getStatistic(o.getKey(), SearchStatistic.DISTANCE);
 			if (distanceStat != null) {
 				p.setRawDistance(distanceStat.getNumericValue().doubleValue());
-				final String distanceString = distanceDisplayService
-						.getDistanceFromItem(o.getKey(), response, getLocale());
+				final String distanceString = distanceDisplayService.getDistanceFromItem(o.getKey(), response,
+						getLocale());
 				p.setDistance(distanceString);
 			} else {
 				// Setting the city as the distance string if no nearby search
@@ -527,8 +453,7 @@ public class NearbyPlacesListAction extends AbstractAction implements
 		// searchLat/searchLng, the distances are incorrect)
 		final Map<String, Double> distanceMap = new HashMap<String, Double>();
 		for (JsonPlace p : jsonPlaces) {
-			double distance = GeoHelper.distanceBetween(lat, lng, p.getLat(),
-					p.getLng());
+			double distance = GeoHelper.distanceBetween(lat, lng, p.getLat(), p.getLng());
 			distanceMap.put(p.getItemKey(), distance);
 			p.setRawDistance(distance);
 		}
@@ -545,10 +470,8 @@ public class NearbyPlacesListAction extends AbstractAction implements
 
 					// Else we use the standard sort algorithm based on user
 					// inside a place and user liking a place
-					int val1 = o1.getUsersCount() * 5000 + o1.getLikesCount()
-							* 500;
-					int val2 = o2.getUsersCount() * 5000 + o2.getLikesCount()
-							* 500;
+					int val1 = o1.getUsersCount() * 5000 + o1.getLikesCount() * 500;
+					int val2 = o2.getUsersCount() * 5000 + o2.getLikesCount() * 500;
 
 					int penalty1 = getDistancePenalty(o1.getRawDistance());
 					int penalty2 = getDistancePenalty(o2.getRawDistance());
@@ -559,23 +482,19 @@ public class NearbyPlacesListAction extends AbstractAction implements
 			}
 		});
 
-		final List<? extends City> cities = response.getElements(City.class,
-				APIS_ALIAS_NEARBY_PLACES);
-		final FacetInformation citiesFacetInfo = response
-				.getFacetInformation(SearchScope.CITY);
-		final Map<String, Integer> citiesPlacesMap = SearchHelper.unwrapFacets(
-				citiesFacetInfo, SearchHelper.getCityFacetCategory());
+		final List<? extends City> cities = response.getElements(City.class, APIS_ALIAS_NEARBY_PLACES);
+		final FacetInformation citiesFacetInfo = response.getFacetInformation(SearchScope.CITY);
+		final Map<String, Integer> citiesPlacesMap = SearchHelper.unwrapFacets(citiesFacetInfo,
+				SearchHelper.getCityFacetCategory());
 		final List<JsonLightCity> jsonCities = new ArrayList<JsonLightCity>();
 		for (City city : cities) {
 			final JsonLightCity jsonCity = new JsonLightCity();
-			jsonCity.setKey(city.getKey() == null ? null : city.getKey()
-					.toString());
+			jsonCity.setKey(city.getKey() == null ? null : city.getKey().toString());
 			jsonCity.setName(city.getName());
 			jsonCity.setLatitude(city.getLatitude());
 			jsonCity.setLongitude(city.getLongitude());
 			// Getting the number of facets
-			final Integer cityPlacesCount = citiesPlacesMap.get(city.getKey()
-					.toString());
+			final Integer cityPlacesCount = citiesPlacesMap.get(city.getKey().toString());
 			if (cityPlacesCount != null) {
 				jsonCity.setPlacesCount(cityPlacesCount);
 			} else {
@@ -592,8 +511,7 @@ public class NearbyPlacesListAction extends AbstractAction implements
 			// Adding media
 			final Media m = MediaHelper.getSingleMedia(city);
 			if (m != null) {
-				final JsonMedia jsonMedia = jsonBuilder.buildJsonMedia(m,
-						highRes);
+				final JsonMedia jsonMedia = jsonBuilder.buildJsonMedia(m, highRes);
 				jsonCity.setMedia(jsonMedia);
 			}
 			// Adding JSON city to list
@@ -617,8 +535,7 @@ public class NearbyPlacesListAction extends AbstractAction implements
 		final List<JsonLightEvent> jsonEvents = new ArrayList<JsonLightEvent>();
 		for (Event event : events) {
 			final JsonLightEvent jsonEvent = new JsonLightEvent();
-			jsonBuilder.fillJsonEvent(jsonEvent, event, highRes, getLocale(),
-					response);
+			jsonBuilder.fillJsonEvent(jsonEvent, event, highRes, getLocale(), response);
 
 			jsonEvents.add(jsonEvent);
 		}
@@ -649,28 +566,24 @@ public class NearbyPlacesListAction extends AbstractAction implements
 			}
 		}
 
-		final MutableUser currentUser = response.getUniqueElement(
-				MutableUser.class, CurrentUserSupport.APIS_ALIAS_CURRENT_USER);
+		final MutableUser currentUser = response.getUniqueElement(MutableUser.class,
+				CurrentUserSupport.APIS_ALIAS_CURRENT_USER);
 
 		// Localizing user city
-		final City localizedCity = response.getUniqueElement(City.class,
-				ApisLocalizationHelper.APIS_ALIAS_CITY_NEARBY);
+		final City localizedCity = response.getUniqueElement(City.class, ApisLocalizationHelper.APIS_ALIAS_CITY_NEARBY);
 		ContextHolder.toggleWrite();
 		if (localizedCity != null) {
 			geoService.setItemFor(user.getKey(), localizedCity.getKey());
 			// currentUser.add(localizedCity);
 		}
 		if (currentUser != null && (lat != 0 || lng != 0)) {
-			List<? extends Place> nearbyPlaces = currentUser.get(Place.class,
-					Constants.APIS_ALIAS_NEARBY_PLACES);
-			localizationService.localize(currentUser, nearbyPlaces, response,
-					lat, lng);
+			List<? extends Place> nearbyPlaces = currentUser.get(Place.class, Constants.APIS_ALIAS_NEARBY_PLACES);
+			localizationService.localize(currentUser, nearbyPlaces, response, lat, lng);
 		}
 
 		// Counting views
 		if (localizedCity != null) {
-			viewManagementService.logViewCount(localizedCity, currentUser,
-					Constants.VIEW_TYPE_MOBILE);
+			viewManagementService.logViewCount(localizedCity, currentUser, Constants.VIEW_TYPE_MOBILE);
 		}
 
 		// Extracting activities
@@ -694,8 +607,7 @@ public class NearbyPlacesListAction extends AbstractAction implements
 		final List<JsonLightUser> jsonUsers = new ArrayList<JsonLightUser>();
 		final List<String> userKeysOrder = new ArrayList<String>();
 		for (User nearbyUser : users) {
-			final JsonLightUser jsonUser = jsonBuilder.buildJsonLightUser(
-					nearbyUser, highRes, getLocale());
+			final JsonLightUser jsonUser = jsonBuilder.buildJsonLightUser(nearbyUser, highRes, getLocale());
 			jsonUsers.add(jsonUser);
 			userKeysOrder.add(nearbyUser.getKey().toString());
 		}
@@ -725,11 +637,10 @@ public class NearbyPlacesListAction extends AbstractAction implements
 		// Setting nearby activities count
 		// Filling last activity ID
 		try {
-			final List<? extends Activity> activities = response.getElements(
-					Activity.class, APIS_ALIAS_NEARBY_ACTIVITIES);
+			final List<? extends Activity> activities = response.getElements(Activity.class,
+					APIS_ALIAS_NEARBY_ACTIVITIES);
 			if (!activities.isEmpty()) {
-				jsonResponse.setMaxActivityId(activities.iterator().next()
-						.getKey().getNumericId());
+				jsonResponse.setMaxActivityId(activities.iterator().next().getKey().getNumericId());
 			}
 		} catch (ApisException e) {
 			LOGGER.error("Unable to get last activity ID: " + e.getMessage(), e);
@@ -737,19 +648,16 @@ public class NearbyPlacesListAction extends AbstractAction implements
 
 		// Building city JSON
 		if (localizedCity != null) {
-			final JsonLightCity jsonCity = jsonBuilder.buildJsonLightCity(
-					localizedCity, highRes, getLocale());
+			final JsonLightCity jsonCity = jsonBuilder.buildJsonLightCity(localizedCity, highRes, getLocale());
 			jsonResponse.setLocalizedCity(jsonCity);
 		}
 
 		// Building banner
-		AdvertisingBanner banner = bannerDisplayService
-				.getBannerSelection(response);
+		AdvertisingBanner banner = bannerDisplayService.getBannerSelection(response);
 		if (banner != null) {
 
 			// Building JSON banner and filling JSON response
-			final JsonBanner jsonBanner = jsonBuilder.buildJsonBanner(banner,
-					highRes, getLocale());
+			final JsonBanner jsonBanner = jsonBuilder.buildJsonBanner(banner, highRes, getLocale());
 			jsonResponse.setBanner(jsonBanner);
 
 			// Considering 1 display
@@ -767,12 +675,11 @@ public class NearbyPlacesListAction extends AbstractAction implements
 	 * @return
 	 * @throws ApisException
 	 */
-	private ApisCriterion buildUserCriterion(SearchScope scope, String alias,
-			double searchLat, double searchLng) throws ApisException {
+	private ApisCriterion buildUserCriterion(SearchScope scope, String alias, double searchLat, double searchLng)
+			throws ApisException {
 		double searchRadius = Math.min(Math.max(radius * 1.5f, 50.0f), 1500.0f);
 		return (ApisCriterion) SearchRestriction
-				.searchNear(User.class, scope, searchLat, searchLng,
-						searchRadius, nearbyUsersCount, 0).aliasedBy(alias)
+				.searchNear(User.class, scope, searchLat, searchLng, searchRadius, nearbyUsersCount, 0).aliasedBy(alias)
 				.with(Media.class, MediaRequestTypes.THUMB);
 	}
 
@@ -873,8 +780,7 @@ public class NearbyPlacesListAction extends AbstractAction implements
 
 	}
 
-	public void setDistanceDisplayService(
-			DistanceDisplayService distanceDisplayService) {
+	public void setDistanceDisplayService(DistanceDisplayService distanceDisplayService) {
 		this.distanceDisplayService = distanceDisplayService;
 	}
 
@@ -914,8 +820,7 @@ public class NearbyPlacesListAction extends AbstractAction implements
 		this.geoService = geoService;
 	}
 
-	public void setViewManagementService(
-			ViewManagementService viewManagementService) {
+	public void setViewManagementService(ViewManagementService viewManagementService) {
 		this.viewManagementService = viewManagementService;
 	}
 

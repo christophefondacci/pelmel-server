@@ -212,6 +212,11 @@
 			<result type="tiles">simpleResult</result>
 			<interceptor-ref name="default" />
 		</action>
+		<action name="validateEmail" class="validateEmailAction">
+			<result>/jsp/pages/json.jsp</result>
+			<result type="tiles" name="redirect">simpleResult</result>
+			<interceptor-ref name="default" />
+		</action>
 		<action name="ajaxGeoList" class="ajaxGeoListAction">
 			<result>/jsp/pages/json.jsp</result>
 			<interceptor-ref name="default" />
@@ -717,6 +722,12 @@
 		</action>
 		<action name="eventseries" class="adminEventsSeriesAction">
 			<result type="tiles">adminEventsSeries</result>
+			<interceptor-ref name="default" />
+		</action>
+		<action name="ownerReport" class="adminOwnerReportAction">
+			<result>/jsp/pages/json.jsp</result>
+			<result name="input">/jsp/pages/json.jsp</result>
+			<result name="error">/jsp/pages/json-error.jsp</result>
 			<interceptor-ref name="default" />
 		</action>
 	</package>

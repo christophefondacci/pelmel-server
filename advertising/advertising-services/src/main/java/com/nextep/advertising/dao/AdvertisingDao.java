@@ -6,8 +6,8 @@ import java.util.Locale;
 import java.util.Map;
 
 import com.nextep.advertising.model.AdvertisingBanner;
-import com.nextep.advertising.model.Subscription;
 import com.nextep.advertising.model.Payment;
+import com.nextep.advertising.model.Subscription;
 import com.nextep.cal.util.model.CalDao;
 import com.videopolis.calm.model.CalmObject;
 import com.videopolis.calm.model.ItemKey;
@@ -22,8 +22,7 @@ public interface AdvertisingDao extends CalDao<CalmObject> {
 
 	Map<ItemKey, List<Subscription>> getBoostersFor(List<ItemKey> keys);
 
-	Map<ItemKey, List<Subscription>> getBoostersForUsers(
-			List<ItemKey> keys);
+	Map<ItemKey, List<Subscription>> getBoostersForUsers(List<ItemKey> keys, boolean validOnly);
 
 	/**
 	 * Retrieves all payments made by the user with the given key
@@ -44,8 +43,8 @@ public interface AdvertisingDao extends CalDao<CalmObject> {
 	 *            the current search type
 	 * @return
 	 */
-	Map<ItemKey, List<AdvertisingBanner>> getBannersFor(
-			Collection<ItemKey> geoItemKeys, String searchType, Locale locale);
+	Map<ItemKey, List<AdvertisingBanner>> getBannersFor(Collection<ItemKey> geoItemKeys, String searchType,
+			Locale locale);
 
 	/**
 	 * Provides the banner attached to any of the given item keys

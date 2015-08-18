@@ -13,8 +13,6 @@ import java.util.Locale;
 
 import javax.servlet.http.Cookie;
 
-import net.sf.json.JSONObject;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,6 +63,8 @@ import com.videopolis.calm.model.ItemKey;
 import com.videopolis.cals.factory.ContextFactory;
 import com.videopolis.smaug.common.model.SearchScope;
 
+import net.sf.json.JSONObject;
+
 /**
  * This action is called by the user registration form and handles the
  * persistence of user information in our data stores.
@@ -73,18 +73,15 @@ import com.videopolis.smaug.common.model.SearchScope;
  * 
  */
 @Conversion()
-public class UserRegistrationAction extends AbstractAction implements
-		CookieProvider, PropertiesUpdateAware, DescriptionsUpdateAware,
-		JsonProvider {
+public class UserRegistrationAction extends AbstractAction
+		implements CookieProvider, PropertiesUpdateAware, DescriptionsUpdateAware, JsonProvider {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 3108725625627129332L;
-	private static final Log log = LogFactory
-			.getLog(UserRegistrationAction.class);
-	private final static DateFormat DATE_FORMAT = new SimpleDateFormat(
-			"yyyyMMdd");
+	private static final Log log = LogFactory.getLog(UserRegistrationAction.class);
+	private final static DateFormat DATE_FORMAT = new SimpleDateFormat("yyyyMMdd");
 	private final static String APIS_ALIAS_USER = "user";
 	private final static String APIS_ALIAS_EMAIL_EXISTS = "email";
 	private final static String APIS_ALIAS_CITY_NEARBY_DEFAULT = "citydefault";
@@ -109,8 +106,7 @@ public class UserRegistrationAction extends AbstractAction implements
 
 	private File media;
 	// Dynamic arguments
-	private String name, email, password, contentType, fileName,
-			passwordConfirm;
+	private String name, email, password, contentType, fileName, passwordConfirm;
 	private String defaultCityKey;
 	private String userKey;
 	private String cityKey;
@@ -119,8 +115,8 @@ public class UserRegistrationAction extends AbstractAction implements
 	private String[] tagKeys = {};
 
 	private String[] propertyCode = {}, propertyKey = {}, propertyValue = {};
-	private String[] descriptionLanguageCodes = {}, descriptionItemKeys = {},
-			descriptions = {}, descriptionSourceId = {};
+	private String[] descriptionLanguageCodes = {}, descriptionItemKeys = {}, descriptions = {},
+			descriptionSourceId = {};
 	private double lat, lng;
 	private String redirectUrl;
 	private boolean highRes;
@@ -138,75 +134,61 @@ public class UserRegistrationAction extends AbstractAction implements
 		// Creating our new user
 		if (userKey != null && !"".equals(userKey)) {
 			final ItemKey userItemKey = CalmFactory.parseKey(userKey);
-			final ApisRequest request = (ApisRequest) ApisFactory
-					.createCompositeRequest().addCriterion(
-							(ApisCriterion) SearchRestriction
-									.uniqueKeys(Arrays.asList(userItemKey))
-									.aliasedBy(APIS_ALIAS_USER)
-									.with(Property.class)
-									.with(Description.class)
-									.with(Place.class,
-											Constants.APIS_ALIAS_FAVORITE)
-									.with(Event.class,
-											Constants.APIS_ALIAS_FAVORITE)
-									.with(User.class,
-											Constants.APIS_ALIAS_FAVORITE));
+			final ApisRequest request = (ApisRequest) ApisFactory.createCompositeRequest()
+					.addCriterion((ApisCriterion) SearchRestriction.uniqueKeys(Arrays.asList(userItemKey))
+							.aliasedBy(APIS_ALIAS_USER).with(Property.class).with(Description.class)
+							.with(Place.class, Constants.APIS_ALIAS_FAVORITE)
+							.with(Event.class, Constants.APIS_ALIAS_FAVORITE)
+							.with(User.class, Constants.APIS_ALIAS_FAVORITE));
 			if (lat != 0 && lng != 0) {
 				// Looking for the closest city (=most populated among the 5
 				// closest cities)
-				request.addCriterion(ApisLocalizationHelper
-						.buildNearestCityCriterion(lat, lng, cityRadius));
+				request.addCriterion(ApisLocalizationHelper.buildNearestCityCriterion(lat, lng, cityRadius));
 			}
-			final ApiCompositeResponse response = (ApiCompositeResponse) getApiService()
-					.execute(request, ContextFactory.createContext(getLocale()));
-			user = (MutableUser) response.getUniqueElement(User.class,
-					APIS_ALIAS_USER);
-			localizedCity = response.getUniqueElement(City.class,
-					ApisLocalizationHelper.APIS_ALIAS_CITY_NEARBY);
+			final ApiCompositeResponse response = (ApiCompositeResponse) getApiService().execute(request,
+					ContextFactory.createContext(getLocale()));
+			user = (MutableUser) response.getUniqueElement(User.class, APIS_ALIAS_USER);
+			localizedCity = response.getUniqueElement(City.class, ApisLocalizationHelper.APIS_ALIAS_CITY_NEARBY);
 			((UserImpl) user).setToken(getNxtpUserToken());
 		} else {
 			final ApisRequest request = ApisFactory.createCompositeRequest();
 			if (lat != 0 && lng != 0) {
-				request.addCriterion(ApisLocalizationHelper
-						.buildNearestCityCriterion(lat, lng, cityRadius));
+				request.addCriterion(ApisLocalizationHelper.buildNearestCityCriterion(lat, lng, cityRadius));
 			} else {
 				// That means use de-activated localization, so we assign it our
 				// default
 				// city for everything to work fine. He will be relocalized
 				// properly as soon
 				// as we got localization info
-				request.addCriterion(SearchRestriction.uniqueKeys(
-						Arrays.asList(CalmFactory.parseKey(defaultCityKey)))
+				request.addCriterion(SearchRestriction.uniqueKeys(Arrays.asList(CalmFactory.parseKey(defaultCityKey)))
 						.aliasedBy(APIS_ALIAS_CITY_NEARBY_DEFAULT));
 			}
 			// Building an email key
-			final ItemKey emailKey = CalmFactory.createKey(User.EMAIL_TYPE,
-					email);
+			final ItemKey emailKey = CalmFactory.createKey(User.EMAIL_TYPE, email);
 
 			// Querying user box to check whether this user already exist (so
 			// that we prevent recreation)
-			request.addCriterion(SearchRestriction.alternateKey(User.class,
-					emailKey).aliasedBy(APIS_ALIAS_EMAIL_EXISTS));
+			request.addCriterion(
+					SearchRestriction.alternateKey(User.class, emailKey).aliasedBy(APIS_ALIAS_EMAIL_EXISTS));
 
 			// Executing APIS request
-			ApiCompositeResponse response = (ApiCompositeResponse) getApiService()
-					.execute(request, ContextFactory.createContext(getLocale()));
-			localizedCity = response.getUniqueElement(City.class,
-					ApisLocalizationHelper.APIS_ALIAS_CITY_NEARBY);
+			ApiCompositeResponse response = (ApiCompositeResponse) getApiService().execute(request,
+					ContextFactory.createContext(getLocale()));
+			localizedCity = response.getUniqueElement(City.class, ApisLocalizationHelper.APIS_ALIAS_CITY_NEARBY);
 
 			// Fallback on default city when not found
 			if (localizedCity == null) {
-				localizedCity = response.getUniqueElement(City.class,
-						APIS_ALIAS_CITY_NEARBY_DEFAULT);
+				localizedCity = response.getUniqueElement(City.class, APIS_ALIAS_CITY_NEARBY_DEFAULT);
 			}
-			final User emailUser = response.getUniqueElement(User.class,
-					APIS_ALIAS_EMAIL_EXISTS);
+			final User emailUser = response.getUniqueElement(User.class, APIS_ALIAS_EMAIL_EXISTS);
 			// If we already have a user, we return an error
 			if (emailUser != null) {
 				setErrorMessage(getText("index.register.error.email"));
 				return unauthorized();
 			}
 			user = (MutableUser) usersService.createTransientObject();
+			final String emailToken = ((UsersService) getUsersService()).generateUniqueToken(user);
+			user.setEmailValidationToken(emailToken);
 		}
 		// Parsing birthday
 		if (birthDD != null && birthMM != null && birthYYYY != null) {
@@ -217,12 +199,10 @@ public class UserRegistrationAction extends AbstractAction implements
 				birthMM = '0' + birthMM;
 			}
 			try {
-				final Date birthday = DATE_FORMAT.parse(birthYYYY + birthMM
-						+ birthDD);
+				final Date birthday = DATE_FORMAT.parse(birthYYYY + birthMM + birthDD);
 				user.setBirthday(birthday);
 			} catch (ParseException e) {
-				log.error("Unable to parse user date : " + birthYYYY + birthMM
-						+ birthDD + " for user " + email);
+				log.error("Unable to parse user date : " + birthYYYY + birthMM + birthDD + " for user " + email);
 			}
 		}
 		user.setPseudo(name);
@@ -241,19 +221,17 @@ public class UserRegistrationAction extends AbstractAction implements
 		ContextHolder.toggleWrite();
 		usersService.saveItem(user);
 		if (password != null && newUser) {
-			((UsersService) usersService).savePassword(user.getKey(), null,
-					password);
+			((UsersService) usersService).savePassword(user.getKey(), null, password);
 		}
 
 		// Binding tags to this user
 		final List<ItemKey> keys = new ArrayList<ItemKey>();
 		if (tagKeys != null) {
 			for (String tagKey : tagKeys) {
-				keys.add(CalmFactory.parseKey(tagKey.startsWith(Tag.CAL_ID) ? tagKey
-						: Tag.CAL_ID + tagKey));
+				keys.add(CalmFactory.parseKey(tagKey.startsWith(Tag.CAL_ID) ? tagKey : Tag.CAL_ID + tagKey));
 			}
-			List<? extends CalmObject> tags = tagsService.setItemFor(
-					user.getKey(), keys.toArray(new ItemKey[keys.size()]));
+			List<? extends CalmObject> tags = tagsService.setItemFor(user.getKey(),
+					keys.toArray(new ItemKey[keys.size()]));
 			user.addAll(tags);
 		}
 
@@ -271,38 +249,33 @@ public class UserRegistrationAction extends AbstractAction implements
 		}
 		// Creates the new media
 		if (media != null && fileName != null) {
-			mediaPersistenceSupport.createMedia(user, user.getKey(), media,
-					fileName, contentType, "Profile", false, null);
+			mediaPersistenceSupport.createMedia(user, user.getKey(), media, fileName, contentType, "Profile", false,
+					null);
 		}
 		// Saving search item
 		searchPersistenceService.storeCalmObject(user, null);
 		// Updating properties
 		if (!newUser && propertyKey != null) {
-			propertiesManagementService.updateProperties(user, user,
-					getLocale(), propertyKey, propertyCode, propertyValue);
+			propertiesManagementService.updateProperties(user, user, getLocale(), propertyKey, propertyCode,
+					propertyValue);
 		}
 		if (!newUser) {
 			// For existing users we store every description submitted
-			if (descriptionLanguageCodes != null && descriptionItemKeys != null
-					&& descriptions != null) {
-				descriptionManagementService.updateDescriptions(user, user,
-						descriptionLanguageCodes, descriptionItemKeys,
-						descriptions, descriptionSourceId);
+			if (descriptionLanguageCodes != null && descriptionItemKeys != null && descriptions != null) {
+				descriptionManagementService.updateDescriptions(user, user, descriptionLanguageCodes,
+						descriptionItemKeys, descriptions, descriptionSourceId);
 			}
 		} else {
 			// Since registration form is shorter than profile form (i.e. not
 			// containing full description edition), we inject user's
 			// description has the headline he defined
 			final Locale l = getLocale();
-			descriptionManagementService.updateDescriptions(user, user,
-					new String[] { l.getLanguage() }, new String[] { "0" },
-					new String[] { user.getStatusMessage() },
-					new String[] { "1000" });
+			descriptionManagementService.updateDescriptions(user, user, new String[] { l.getLanguage() },
+					new String[] { "0" }, new String[] { user.getStatusMessage() }, new String[] { "1000" });
 		}
 		// Generating REGISTER activity for new users
 		if (newUser) {
-			final MutableActivity activity = (MutableActivity) activitiesService
-					.createTransientObject();
+			final MutableActivity activity = (MutableActivity) activitiesService.createTransientObject();
 			activity.setActivityType(ActivityType.REGISTER);
 			activity.setDate(new Date());
 			activity.setUserKey(user.getKey());
@@ -311,15 +284,13 @@ public class UserRegistrationAction extends AbstractAction implements
 			activitiesService.saveItem(activity);
 			// Localizing activity and storing in search
 			activity.addAll(user.get(City.class));
-			searchPersistenceService.storeCalmObject(activity,
-					SearchScope.CHILDREN);
+			searchPersistenceService.storeCalmObject(activity, SearchScope.CHILDREN);
 			// Sending the welcome message for new users
 			messagingService.sendWelcomeMessage(user.getKey(), getLocale());
 			notificationService.sendUserRegisteredEmailNotification(user);
 		}
 
-		redirectUrl = getUrlService().getUserOverviewUrl(
-				DisplayHelper.getDefaultAjaxContainer(), user);
+		redirectUrl = getUrlService().getUserOverviewUrl(DisplayHelper.getDefaultAjaxContainer(), user);
 		return SUCCESS;
 	}
 
@@ -400,8 +371,7 @@ public class UserRegistrationAction extends AbstractAction implements
 		this.tagsService = tagsService;
 	}
 
-	public void setSearchPersistenceService(
-			SearchPersistenceService searchPersistenceService) {
+	public void setSearchPersistenceService(SearchPersistenceService searchPersistenceService) {
 		this.searchPersistenceService = searchPersistenceService;
 	}
 
@@ -421,16 +391,12 @@ public class UserRegistrationAction extends AbstractAction implements
 			// for profile edition and we don't want to unlog the user each time
 			// he updates his profile
 			if (userKey == null || "".equals(userKey)) {
-				final List<String> domainExts = LocalizationHelper
-						.getSupportedDomains();
+				final List<String> domainExts = LocalizationHelper.getSupportedDomains();
 				for (String domainExt : domainExts) {
-					final Cookie c = new Cookie(Constants.USER_COOKIE_NAME,
-							user.getToken().toString());
-					final String subdomain = (String) ActionContext
-							.getContext().get(
-									Constants.ACTION_CONTEXT_SUBDOMAIN);
-					c.setDomain(subdomain + "." + getDomainName() + "."
-							+ domainExt);
+					final Cookie c = new Cookie(Constants.USER_COOKIE_NAME, user.getToken().toString());
+					final String subdomain = (String) ActionContext.getContext()
+							.get(Constants.ACTION_CONTEXT_SUBDOMAIN);
+					c.setDomain(subdomain + "." + getDomainName() + "." + domainExt);
 					cookies.add(c);
 				}
 			}
@@ -442,8 +408,7 @@ public class UserRegistrationAction extends AbstractAction implements
 		return Collections.emptyList();
 	}
 
-	public void setMediaPersistenceSupport(
-			MediaPersistenceSupport mediaPersistenceSupport) {
+	public void setMediaPersistenceSupport(MediaPersistenceSupport mediaPersistenceSupport) {
 		this.mediaPersistenceSupport = mediaPersistenceSupport;
 	}
 
@@ -534,8 +499,7 @@ public class UserRegistrationAction extends AbstractAction implements
 	}
 
 	@Override
-	public void setPropertiesManagementService(
-			PropertiesManagementService propertiesService) {
+	public void setPropertiesManagementService(PropertiesManagementService propertiesService) {
 		this.propertiesManagementService = propertiesService;
 	}
 
@@ -574,8 +538,7 @@ public class UserRegistrationAction extends AbstractAction implements
 	}
 
 	@Override
-	public void setDescriptionsManagementService(
-			DescriptionsManagementService descriptionManagementService) {
+	public void setDescriptionsManagementService(DescriptionsManagementService descriptionManagementService) {
 		this.descriptionManagementService = descriptionManagementService;
 	}
 
@@ -625,8 +588,7 @@ public class UserRegistrationAction extends AbstractAction implements
 		this.defaultCityKey = defaultCityKey;
 	}
 
-	public void setMessagePersistenceService(
-			CalPersistenceService messageService) {
+	public void setMessagePersistenceService(CalPersistenceService messageService) {
 		this.messagePersistenceService = messageService;
 	}
 

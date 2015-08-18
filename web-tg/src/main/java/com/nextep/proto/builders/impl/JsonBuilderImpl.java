@@ -14,7 +14,9 @@ import javax.annotation.Resource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
+import com.fgp.deals.model.Deal;
 import com.nextep.activities.model.Activity;
 import com.nextep.advertising.model.AdvertisingBanner;
 import com.nextep.advertising.model.Subscription;
@@ -30,9 +32,11 @@ import com.nextep.json.model.IJsonDescripted;
 import com.nextep.json.model.IJsonLightEvent;
 import com.nextep.json.model.IJsonLightPlace;
 import com.nextep.json.model.IJsonLightUser;
+import com.nextep.json.model.IJsonPlace;
 import com.nextep.json.model.IJsonWithParticipants;
 import com.nextep.json.model.impl.JsonActivity;
 import com.nextep.json.model.impl.JsonBanner;
+import com.nextep.json.model.impl.JsonDeal;
 import com.nextep.json.model.impl.JsonDescription;
 import com.nextep.json.model.impl.JsonEvent;
 import com.nextep.json.model.impl.JsonFacet;
@@ -41,6 +45,7 @@ import com.nextep.json.model.impl.JsonLightCity;
 import com.nextep.json.model.impl.JsonLightEvent;
 import com.nextep.json.model.impl.JsonLightPlace;
 import com.nextep.json.model.impl.JsonLightUser;
+import com.nextep.json.model.impl.JsonLoggedInUser;
 import com.nextep.json.model.impl.JsonManyToOneMessageList;
 import com.nextep.json.model.impl.JsonMedia;
 import com.nextep.json.model.impl.JsonMessage;
@@ -51,6 +56,7 @@ import com.nextep.json.model.impl.JsonPlaceOverview;
 import com.nextep.json.model.impl.JsonProperty;
 import com.nextep.json.model.impl.JsonRecipientsGroup;
 import com.nextep.json.model.impl.JsonSpecialEvent;
+import com.nextep.json.model.impl.JsonStatistic;
 import com.nextep.json.model.impl.JsonUser;
 import com.nextep.media.model.Media;
 import com.nextep.messages.model.Message;
@@ -63,6 +69,8 @@ import com.nextep.proto.helpers.SearchHelper;
 import com.nextep.proto.model.Constants;
 import com.nextep.proto.services.DistanceDisplayService;
 import com.nextep.proto.services.EventManagementService;
+import com.nextep.proto.services.RightsManagementService;
+import com.nextep.statistic.model.ItemView;
 import com.nextep.tags.model.Tag;
 import com.nextep.users.model.User;
 import com.videopolis.apis.model.FacetInformation;
@@ -87,6 +95,8 @@ public class JsonBuilderImpl implements JsonBuilder {
 	private static final Log LOGGER = LogFactory.getLog(JsonBuilderImpl.class);
 	private DistanceDisplayService distanceDisplayService;
 	private EventManagementService eventManagementService;
+	@Autowired
+	private RightsManagementService rightsManagementService;
 	// private String baseUrl;
 
 	@Resource(mappedName = "smaug/lastSeenMaxTime")
@@ -98,38 +108,12 @@ public class JsonBuilderImpl implements JsonBuilder {
 	@Override
 	public JsonPlaceOverview buildJsonPlaceOverview(Locale l, Place place, boolean highRes) {
 		final JsonPlaceOverview json = new JsonPlaceOverview(place.getKey().toString());
-		json.setName(DisplayHelper.getName(place));
 
-		// Place specific information
-		json.setAddress(place.getAddress1());
-		json.setType(place.getPlaceType());
-		json.setCity(place.getCity().getName());
-		json.setTimezoneId(place.getCity().getTimezoneId());
+		// Filling common characteristics
+		fillJsonPlace(json, place, highRes, l);
 
 		// Filling descriptions
 		fillDescription(place, json, l);
-
-		// Iterating over tags to generate JSON tag beans
-		final List<? extends Tag> tags = place.get(Tag.class);
-		for (Tag t : tags) {
-			json.addTag(t.getCode());
-		}
-
-		// Image & thumb (TODO: need to factorize this with events and
-		// users)
-		final Media m = MediaHelper.getSingleMedia(place);
-		if (m != null) {
-			final JsonMedia jsonMedia = buildJsonMedia(m, highRes);
-			if (jsonMedia != null) {
-				json.setThumb(jsonMedia);
-			}
-		}
-		for (Media media : place.get(Media.class)) {
-			if (media != m) {
-				final JsonMedia jsonMedia = buildJsonMedia(media, highRes);
-				json.addOtherImage(jsonMedia);
-			}
-		}
 
 		// Properties
 		final List<? extends Property> properties = place.get(Property.class);
@@ -137,6 +121,14 @@ public class JsonBuilderImpl implements JsonBuilder {
 			if (!Constants.PROPERTY_OPENING_HOUR.equals(property.getCode())) {
 				final JsonProperty jsonProp = buildJsonProperty(property);
 				json.addProperty(jsonProp);
+			}
+		}
+
+		final List<? extends Subscription> subscriptions = place.get(Subscription.class);
+		for (Subscription s : subscriptions) {
+			if (s.getStartDate().getTime() < System.currentTimeMillis()
+					&& s.getEndDate().getTime() > System.currentTimeMillis()) {
+				json.setOwnerKey(s.getPurchaserItemKey().toString());
 			}
 		}
 		return json;
@@ -236,6 +228,49 @@ public class JsonBuilderImpl implements JsonBuilder {
 	@Override
 	public JsonUser buildJsonUser(User user, boolean highRes, Locale l, ApiResponse response) {
 		final JsonUser json = new JsonUser();
+		fillJsonUser(json, user, highRes, l, response);
+		return json;
+	}
+
+	@Override
+	public JsonLoggedInUser buildJsonLoggedInUser(User user, boolean highRes, Locale l) {
+		final JsonLoggedInUser json = new JsonLoggedInUser();
+		fillJsonUser(json, user, highRes, l, null);
+		json.setEmailValidated(user.isEmailValidated());
+
+		// Getting lists
+		final List<? extends User> pendingApprovals = user.get(User.class,
+				Constants.APIS_ALIAS_NETWORK_PENDING_APPROVAL);
+		final List<? extends User> pendingRequests = user.get(User.class, Constants.APIS_ALIAS_NETWORK_REQUEST);
+		final List<? extends User> networkUsers = user.get(User.class, Constants.APIS_ALIAS_NETWORK_MEMBER);
+		final List<IJsonLightUser> jsonPendingApprovals = convertUserListToJsonUserList(pendingApprovals, highRes, l);
+		final List<IJsonLightUser> jsonPendingRequests = convertUserListToJsonUserList(pendingRequests, highRes, l);
+		final List<IJsonLightUser> jsonNetworkUsers = convertUserListToJsonUserList(networkUsers, highRes, l);
+		json.setPendingApprovals(jsonPendingApprovals);
+		json.setPendingRequests(jsonPendingRequests);
+		json.setNetworkUsers(jsonNetworkUsers);
+		json.setAdmin(rightsManagementService.isAdministrator(user));
+
+		// Iterating over subscriptions
+		final List<? extends Subscription> subscriptions = user.get(Subscription.class);
+		for (Subscription subscription : subscriptions) {
+			if (subscription.getStartDate().getTime() < System.currentTimeMillis()
+					&& subscription.getEndDate().getTime() > System.currentTimeMillis()) {
+				try {
+					final Place ownedPlace = subscription.getUnique(Place.class);
+					final JsonLightPlace jsonPlace = buildJsonLightPlace(ownedPlace, highRes, l);
+					json.addOwnedPlace(jsonPlace);
+				} catch (CalException e) {
+					LOGGER.error(
+							"Unable to get place from subscription '" + subscription.getKey() + "': " + e.getMessage(),
+							e);
+				}
+			}
+		}
+		return json;
+	}
+
+	private void fillJsonUser(JsonUser json, User user, boolean highRes, Locale l, ApiResponse response) {
 		fillJsonLightUser(json, user, highRes, l);
 		json.setBirthDateValue(user.getBirthday());
 		json.setHeightInCm(user.getHeightInCm());
@@ -289,19 +324,6 @@ public class JsonBuilderImpl implements JsonBuilder {
 			fillJsonEvent(jsonEvent, event, highRes, l, response);
 			json.addEvent(jsonEvent);
 		}
-
-		// Getting lists
-		final List<? extends User> pendingApprovals = user.get(User.class,
-				Constants.APIS_ALIAS_NETWORK_PENDING_APPROVAL);
-		final List<? extends User> pendingRequests = user.get(User.class, Constants.APIS_ALIAS_NETWORK_REQUEST);
-		final List<? extends User> networkUsers = user.get(User.class, Constants.APIS_ALIAS_NETWORK_MEMBER);
-		final List<IJsonLightUser> jsonPendingApprovals = convertUserListToJsonUserList(pendingApprovals, highRes, l);
-		final List<IJsonLightUser> jsonPendingRequests = convertUserListToJsonUserList(pendingRequests, highRes, l);
-		final List<IJsonLightUser> jsonNetworkUsers = convertUserListToJsonUserList(networkUsers, highRes, l);
-		json.setPendingApprovals(jsonPendingApprovals);
-		json.setPendingRequests(jsonPendingRequests);
-		json.setNetworkUsers(jsonNetworkUsers);
-		return json;
 	}
 
 	private List<IJsonLightUser> convertUserListToJsonUserList(List<? extends User> users, boolean highRes, Locale l) {
@@ -659,46 +681,8 @@ public class JsonBuilderImpl implements JsonBuilder {
 	public JsonPlace buildJsonPlace(Place place, boolean highRes, Locale l, Map<String, Integer> likedPlacesMap,
 			Map<String, Integer> currentPlacesMap, Map<String, Integer> eventUsersMap) {
 		final JsonPlace p = new JsonPlace(DisplayHelper.getName(place));
-
-		p.setAddress(place.getAddress1());
-		p.setCity(DisplayHelper.getName(place.getCity()));
-		// p.setDescription(searchSupport.getResultDescription(o));
+		fillJsonPlace(p, place, highRes, l);
 		p.setClosedReportsCount(place.getClosedCount());
-		p.setTimezoneId(place.getCity().getTimezoneId());
-		// Image & thumb
-		final Media m = MediaHelper.getSingleMedia(place);
-		if (m != null) {
-			final JsonMedia jsonMedia = buildJsonMedia(m, highRes);
-			if (jsonMedia != null) {
-				p.setThumb(jsonMedia);
-			}
-		}
-		for (Media media : place.get(Media.class)) {
-			if (media != m) {
-				final JsonMedia jsonMedia = buildJsonMedia(media, highRes);
-				p.addOtherImage(jsonMedia);
-				// We select as main image one with higher height for proper
-				// mobile display
-				// if (media.getWidth() < media.getHeight()
-				// && m.getWidth() > m.getHeight()) {
-				// final JsonMedia previousMainMedia = p.getThumb();
-				// p.setThumb(jsonMedia);
-				// p.addOtherImage(previousMainMedia);
-				// } else if (jsonMedia != null) {
-				// p.addOtherImage(jsonMedia);
-				// }
-			}
-		}
-		// Misc info
-		p.setKey(place.getKey().toString());
-		p.setLat(place.getLatitude());
-		p.setLng(place.getLongitude());
-		p.setType(place.getPlaceType());
-
-		// Injecting tags
-		for (Tag tag : place.get(Tag.class)) {
-			p.addTag(tag.getCode());
-		}
 
 		// Injecting counts
 		final Integer likes = likedPlacesMap.get(place.getKey().toString());
@@ -711,13 +695,14 @@ public class JsonBuilderImpl implements JsonBuilder {
 		}
 
 		// Injecting advertising sponsors
-		final List<? extends Subscription> adBoosters = place.get(Subscription.class);
-		if (adBoosters != null && !adBoosters.isEmpty()) {
+		final List<? extends Subscription> subscriptions = place.get(Subscription.class);
+		if (subscriptions != null && !subscriptions.isEmpty()) {
 			// If we have several boosters, we take the highest booster
-			int maxBoostValue = 0;
-			for (Subscription adBooster : adBoosters) {
-				if (adBooster.getBoostValue() > maxBoostValue) {
-					maxBoostValue = adBooster.getBoostValue();
+			int maxBoostValue = -1;
+			for (Subscription subscription : subscriptions) {
+				if (subscription.getBoostValue() > maxBoostValue) {
+					maxBoostValue = subscription.getBoostValue();
+					p.setOwnerKey(subscription.getPurchaserItemKey().toString());
 				}
 			}
 			// Assigning the highest boost value
@@ -791,6 +776,69 @@ public class JsonBuilderImpl implements JsonBuilder {
 		}
 		// We're done with JSON
 		return p;
+	}
+
+	/**
+	 * JSON builder for common information for place
+	 * 
+	 * @param json
+	 *            the json structure to fill
+	 * @param place
+	 *            the place to extract data
+	 * @param highRes
+	 *            HD flag
+	 * @param l
+	 *            current locale
+	 */
+	private void fillJsonPlace(IJsonPlace json, Place place, boolean highRes, Locale l) {
+		// Place specific information
+		json.setName(DisplayHelper.getName(place));
+		json.setAddress(place.getAddress1());
+		json.setCity(DisplayHelper.getName(place.getCity()));
+		json.setTimezoneId(place.getCity().getTimezoneId());
+		json.setKey(place.getKey().toString());
+		json.setLat(place.getLatitude());
+		json.setLng(place.getLongitude());
+		json.setType(place.getPlaceType());
+
+		// Image & thumb (TODO: need to factorize this with events and
+		// users)
+		final Media m = MediaHelper.getSingleMedia(place);
+		if (m != null) {
+			final JsonMedia jsonMedia = buildJsonMedia(m, highRes);
+			if (jsonMedia != null) {
+				json.setThumb(jsonMedia);
+			}
+		}
+		for (Media media : place.get(Media.class)) {
+			if (media != m) {
+				final JsonMedia jsonMedia = buildJsonMedia(media, highRes);
+				json.addOtherImage(jsonMedia);
+			}
+		}
+
+		// Injecting tags
+		for (Tag tag : place.get(Tag.class)) {
+			json.addTag(tag.getCode());
+		}
+
+		final List<? extends Deal> deals = place.get(Deal.class);
+		final List<JsonDeal> jsonDeals = new ArrayList<>();
+		for (Deal deal : deals) {
+			final JsonDeal jsonDeal = buildJsonDeal(deal);
+			jsonDeals.add(jsonDeal);
+		}
+		json.setDeals(jsonDeals);
+	}
+
+	public JsonDeal buildJsonDeal(Deal deal) {
+		final JsonDeal json = new JsonDeal();
+		json.setKey(deal.getKey().toString());
+		json.setRelatedItemKey(deal.getRelatedItemKey().toString());
+		json.setStartDateValue(deal.getStartDate());
+		json.setStatus(deal.getStatus().name());
+		json.setType(deal.getDealType().name());
+		return json;
 	}
 
 	@Override
@@ -979,5 +1027,15 @@ public class JsonBuilderImpl implements JsonBuilder {
 		// Injecting counts in JSON
 		json.setUnreadMsgCount(unreadCount);
 		json.setUnreadNetworkNotificationsCount(unreadNotifications);
+	}
+
+	@Override
+	public JsonStatistic buildJsonStatistic(ItemView itemView) {
+		final JsonStatistic stat = new JsonStatistic();
+		stat.setStatDateValue(itemView.getViewDate());
+		// stat.setItemKey(itemView.getViewedItemKey().toString());
+		stat.setStatType(itemView.getViewType());
+		stat.setCount(itemView.getCount());
+		return stat;
 	}
 }

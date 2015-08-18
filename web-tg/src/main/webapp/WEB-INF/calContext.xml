@@ -25,6 +25,7 @@
 	<bean id="eventSeriesService" parent="abstractEventSeriesService" />
 	<bean id="activitiesService" parent="abstractActivitiesService" />
 	<bean id="advertisingService" parent="abstractAdvertisingService" />
+	<bean id="dealService" parent="abstractDealService" />
 	<bean id="bannersService" parent="abstractBannersService" />
 	<bean id="propertiesService" parent="abstractPropertiesService" />
 	<bean id="descService" parent="abstractDescriptionsService" />
@@ -42,6 +43,15 @@
 		<property name="defaultTargetDataSource" value="java:comp/env/jdbc/togayther"/>
 	</bean>
 	<bean id="activitiesDataSource" class="com.nextep.proto.spring.ReadWriteDataSourceRouter">
+		<property name="targetDataSources">
+			<map key-type="java.lang.String">
+				<entry key="READ" value="java:comp/env/jdbc/togayther"/>
+				<entry key="WRITE" value="java:comp/env/jdbc/togayther_write"/>
+			</map>
+		</property>
+		<property name="defaultTargetDataSource" value="java:comp/env/jdbc/togayther"/>
+	</bean>
+	<bean id="dealsDataSource" class="com.nextep.proto.spring.ReadWriteDataSourceRouter">
 		<property name="targetDataSources">
 			<map key-type="java.lang.String">
 				<entry key="READ" value="java:comp/env/jdbc/togayther"/>

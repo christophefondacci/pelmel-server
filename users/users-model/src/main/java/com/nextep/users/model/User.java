@@ -166,4 +166,19 @@ public interface User extends CalmObject, Localized {
 	 * @return the last date when we sent an email to that user
 	 */
 	Date getLastEmailDate();
+
+	/**
+	 * Provides the token that can validates the email address
+	 * 
+	 * @return the EMAIL validation token
+	 */
+	String getEmailValidationToken();
+
+	/**
+	 * Whether or not the email address has been validated
+	 * 
+	 * @return <code>true</code> if email address is confirmed, else
+	 *         <code>false</code>
+	 */
+	boolean isEmailValidated();
 }

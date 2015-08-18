@@ -5,6 +5,14 @@ public class JsonStatus {
 	private boolean error;
 	private String message;
 
+	public JsonStatus() {
+	}
+
+	public JsonStatus(boolean error, String message) {
+		this.error = error;
+		this.message = message;
+	}
+
 	public boolean isError() {
 		return error;
 	}

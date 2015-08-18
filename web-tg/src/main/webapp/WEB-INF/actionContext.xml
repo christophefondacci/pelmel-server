@@ -534,6 +534,10 @@
 		<property name="urlService" ref="urlService"/>
 		<property name="headerSupport" ref="resetPasswordHeaderSupport"/>
 	</bean>
+	<bean id="validateEmailAction" class="com.nextep.proto.action.impl.tools.ValidateEmailAction" parent="abstractAction" scope="request">
+		<property name="urlService" ref="urlService"/>
+		<property name="headerSupport" ref="validateEmailHeaderSupport"/>
+	</bean>
 	<bean id="ajaxGetMediaFormAction" class="com.nextep.proto.action.impl.GetMediaFormAction" parent="abstractAction" scope="request">
 		<property name="urlService" ref="urlService"/>
 		<property name="currentUserSupport" ref="currentUserSupport"/>
@@ -762,6 +766,9 @@
 		<property name="headerSupport" ref="adminPlacesHeaderSupport"/>
 		<property name="urlService" ref="urlService"/>
 		<property name="currentUserSupport" ref="currentUserSupport"/>
+	</bean> 
+	<bean id="adminOwnerReportAction" class="com.nextep.proto.action.impl.admin.AdminOwnerReportAction" parent="abstractAction" scope="request">
+		<property name="urlService" ref="urlService"/>
 	</bean> 
 	<bean id="adminUsersAction" class="com.nextep.proto.action.impl.admin.AdminUsersAction" parent="abstractAction" scope="request">
 		<property name="headerSupport" ref="adminUsersHeaderSupport"/>

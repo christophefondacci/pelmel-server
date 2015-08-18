@@ -6,8 +6,8 @@ import java.util.Map;
 
 import com.nextep.advertising.dao.AdvertisingDao;
 import com.nextep.advertising.model.Subscription;
-import com.nextep.advertising.model.impl.SubscriptionImpl;
 import com.nextep.advertising.model.impl.AdvertisingRequestTypes;
+import com.nextep.advertising.model.impl.SubscriptionImpl;
 import com.nextep.cal.util.services.CalPersistenceService;
 import com.nextep.cal.util.services.base.AbstractDaoBasedCalServiceImpl;
 import com.videopolis.calm.exception.CalException;
@@ -21,8 +21,7 @@ import com.videopolis.cals.model.MultiKeyItemsResponse;
 import com.videopolis.cals.model.RequestSettings;
 import com.videopolis.cals.model.impl.MultiKeyItemsResponseImpl;
 
-public class AdvertisingServiceImpl extends AbstractDaoBasedCalServiceImpl
-		implements CalPersistenceService {
+public class AdvertisingServiceImpl extends AbstractDaoBasedCalServiceImpl implements CalPersistenceService {
 
 	@Override
 	public Class<? extends CalmObject> getProvidedClass() {
@@ -40,10 +39,9 @@ public class AdvertisingServiceImpl extends AbstractDaoBasedCalServiceImpl
 	}
 
 	@Override
-	public List<? extends CalmObject> setItemFor(ItemKey contributedItemKey,
-			ItemKey... internalItemKeys) throws CalException {
-		throw new UnsupportedCalServiceException(
-				"AdvertisingService.setItemFor not supported");
+	public List<? extends CalmObject> setItemFor(ItemKey contributedItemKey, ItemKey... internalItemKeys)
+			throws CalException {
+		throw new UnsupportedCalServiceException("AdvertisingService.setItemFor not supported");
 	}
 
 	@Override
@@ -52,20 +50,20 @@ public class AdvertisingServiceImpl extends AbstractDaoBasedCalServiceImpl
 	}
 
 	@Override
-	public MultiKeyItemsResponse getItemsFor(List<ItemKey> itemKeys,
-			CalContext context) throws CalException {
+	public MultiKeyItemsResponse getItemsFor(List<ItemKey> itemKeys, CalContext context) throws CalException {
 		return getItemsFor(itemKeys, context, null);
 	}
 
 	@Override
-	public MultiKeyItemsResponse getItemsFor(List<ItemKey> itemKeys,
-			CalContext context, RequestType requestType) throws CalException {
+	public MultiKeyItemsResponse getItemsFor(List<ItemKey> itemKeys, CalContext context, RequestType requestType)
+			throws CalException {
 		Map<ItemKey, List<Subscription>> adMap = Collections.emptyMap();
 		if (requestType == null) {
 			adMap = ((AdvertisingDao) getCalDao()).getBoostersFor(itemKeys);
 		} else if (AdvertisingRequestTypes.USER_SUBSCRIPTIONS.equals(requestType)) {
-			adMap = ((AdvertisingDao) getCalDao())
-					.getBoostersForUsers(itemKeys);
+			adMap = ((AdvertisingDao) getCalDao()).getBoostersForUsers(itemKeys, false);
+		} else if (AdvertisingRequestTypes.USER_CURRENT_SUBSCRIPTIONS.equals(requestType)) {
+			adMap = ((AdvertisingDao) getCalDao()).getBoostersForUsers(itemKeys, true);
 		}
 		final MultiKeyItemsResponseImpl response = new MultiKeyItemsResponseImpl();
 		for (ItemKey key : adMap.keySet()) {
@@ -75,9 +73,8 @@ public class AdvertisingServiceImpl extends AbstractDaoBasedCalServiceImpl
 	}
 
 	@Override
-	public ItemsResponse listItems(CalContext context, RequestType requestType,
-			RequestSettings requestSettings) throws CalException {
-		throw new UnsupportedCalServiceException(
-				"Unsupported AdvertisingService.list");
+	public ItemsResponse listItems(CalContext context, RequestType requestType, RequestSettings requestSettings)
+			throws CalException {
+		throw new UnsupportedCalServiceException("Unsupported AdvertisingService.list");
 	}
 }

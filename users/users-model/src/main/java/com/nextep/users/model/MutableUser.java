@@ -43,4 +43,8 @@ public interface MutableUser extends User {
 	void setDeviceInfo(String deviceInfo);
 
 	void setLastEmailDate(Date lastEmailDate);
+
+	void setEmailValidationToken(String token);
+
+	void setEmailValidated(boolean validated);
 }

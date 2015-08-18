@@ -24,17 +24,13 @@ public class MobileUrlServiceImpl implements UrlService {
 	}
 
 	@Override
-	public String getXMLSitemapIndexUrl(Locale locale, String pageType,
-			SearchType searchType) {
-		return baseUrlService.getXMLSitemapIndexUrl(locale, pageType,
-				searchType);
+	public String getXMLSitemapIndexUrl(Locale locale, String pageType, SearchType searchType) {
+		return baseUrlService.getXMLSitemapIndexUrl(locale, pageType, searchType);
 	}
 
 	@Override
-	public String getXMLSitemapUrl(Locale locale, String pageType,
-			SearchType searchType, int page) {
-		return baseUrlService.getXMLSitemapUrl(locale, pageType, searchType,
-				page);
+	public String getXMLSitemapUrl(Locale locale, String pageType, SearchType searchType, int page) {
+		return baseUrlService.getXMLSitemapUrl(locale, pageType, searchType, page);
 	}
 
 	public void setBaseUrlService(UrlService baseUrlService) {
@@ -42,18 +38,15 @@ public class MobileUrlServiceImpl implements UrlService {
 	}
 
 	@Override
-	public String buildSearchUrl(String targetHtmlElementId, CalmObject geoKey,
-			SearchType searchType, FacetInformation currentFacetting,
-			Facet newFacet, Facet removedFacet) {
-		return baseUrlService.buildSearchUrl(targetHtmlElementId, geoKey,
-				searchType, currentFacetting, newFacet, removedFacet);
+	public String buildSearchUrl(String targetHtmlElementId, CalmObject geoKey, SearchType searchType,
+			FacetInformation currentFacetting, Facet newFacet, Facet removedFacet) {
+		return baseUrlService.buildSearchUrl(targetHtmlElementId, geoKey, searchType, currentFacetting, newFacet,
+				removedFacet);
 	}
 
 	@Override
-	public String buildSearchUrl(String targetHtmlElementId,
-			GeographicItem geoKey, SearchType searchType) {
-		return baseUrlService.buildSearchUrl(targetHtmlElementId, geoKey,
-				searchType);
+	public String buildSearchUrl(String targetHtmlElementId, GeographicItem geoKey, SearchType searchType) {
+		return baseUrlService.buildSearchUrl(targetHtmlElementId, geoKey, searchType);
 	}
 
 	@Override
@@ -62,29 +55,24 @@ public class MobileUrlServiceImpl implements UrlService {
 	}
 
 	@Override
-	public String buildUserSearchUrl(String targetHtmlElementId,
-			CalmObject geoKey, FacetInformation currentFacetting,
+	public String buildUserSearchUrl(String targetHtmlElementId, CalmObject geoKey, FacetInformation currentFacetting,
 			FacetRange range) {
-		return baseUrlService.buildUserSearchUrl(targetHtmlElementId, geoKey,
-				currentFacetting, range);
+		return baseUrlService.buildUserSearchUrl(targetHtmlElementId, geoKey, currentFacetting, range);
 	}
 
 	@Override
-	public String buildSearchUrl(String targetHtmlElementId, CalmObject geoKey,
-			SearchType searchType, FacetInformation currentFacetting, int page) {
-		return baseUrlService.buildSearchUrl(targetHtmlElementId, geoKey,
-				searchType, currentFacetting, page);
+	public String buildSearchUrl(String targetHtmlElementId, CalmObject geoKey, SearchType searchType,
+			FacetInformation currentFacetting, int page) {
+		return baseUrlService.buildSearchUrl(targetHtmlElementId, geoKey, searchType, currentFacetting, page);
 	}
 
 	@Override
-	public String getPlaceOverviewUrl(String targetHtmlElementId,
-			CalmObject place) {
+	public String getPlaceOverviewUrl(String targetHtmlElementId, CalmObject place) {
 		return "overview.html?id=" + place.getKey().toString();
 	}
 
 	@Override
-	public String getEventOverviewUrl(String targetHtmlElementId,
-			CalmObject event) {
+	public String getEventOverviewUrl(String targetHtmlElementId, CalmObject event) {
 		return baseUrlService.getEventOverviewUrl(targetHtmlElementId, event);
 	}
 
@@ -99,38 +87,28 @@ public class MobileUrlServiceImpl implements UrlService {
 	}
 
 	@Override
-	public String getMediaAdditionFormUrl(String targetHtmlElementId,
-			ItemKey element) {
-		return baseUrlService.getMediaAdditionFormUrl(targetHtmlElementId,
-				element);
+	public String getMediaAdditionFormUrl(String targetHtmlElementId, ItemKey element) {
+		return baseUrlService.getMediaAdditionFormUrl(targetHtmlElementId, element);
 	}
 
 	@Override
-	public String getWriteMessageDialogUrl(String targetHtmlElementId,
-			ItemKey element) {
-		return baseUrlService.getWriteMessageDialogUrl(targetHtmlElementId,
-				element);
+	public String getWriteMessageDialogUrl(String targetHtmlElementId, ItemKey element) {
+		return baseUrlService.getWriteMessageDialogUrl(targetHtmlElementId, element);
 	}
 
 	@Override
-	public String getEventEditionFormUrl(String targetHtmlElementId,
-			ItemKey element) {
-		return baseUrlService.getEventEditionFormUrl(targetHtmlElementId,
-				element);
+	public String getEventEditionFormUrl(String targetHtmlElementId, ItemKey element) {
+		return baseUrlService.getEventEditionFormUrl(targetHtmlElementId, element);
 	}
 
 	@Override
-	public String getEventEditionFormUrl(String targetHtmlElementId,
-			ItemKey element, CalendarType calendarType) {
-		return baseUrlService.getEventEditionFormUrl(targetHtmlElementId,
-				element, calendarType);
+	public String getEventEditionFormUrl(String targetHtmlElementId, ItemKey element, CalendarType calendarType) {
+		return baseUrlService.getEventEditionFormUrl(targetHtmlElementId, element, calendarType);
 	}
 
 	@Override
-	public String getPlaceEditionFormUrl(String targetHtmlElementId,
-			ItemKey element, String placeType) {
-		return baseUrlService.getPlaceEditionFormUrl(targetHtmlElementId,
-				element, placeType);
+	public String getPlaceEditionFormUrl(String targetHtmlElementId, ItemKey element, String placeType) {
+		return baseUrlService.getPlaceEditionFormUrl(targetHtmlElementId, element, placeType);
 	}
 
 	@Override
@@ -139,81 +117,61 @@ public class MobileUrlServiceImpl implements UrlService {
 	}
 
 	@Override
-	public String getCommentUrl(String targetHtmlElementId, ItemKey parentKey,
-			int page) {
-		return baseUrlService.getCommentUrl(targetHtmlElementId, parentKey,
-				page);
+	public String getCommentUrl(String targetHtmlElementId, ItemKey parentKey, int page) {
+		return baseUrlService.getCommentUrl(targetHtmlElementId, parentKey, page);
 	}
 
 	@Override
-	public String getToggleUserTagUrl(String targetHtmlElementId,
-			ItemKey taggedItemKey, ItemKey tag) {
-		return baseUrlService.getToggleUserTagUrl(targetHtmlElementId,
-				taggedItemKey, tag);
+	public String getToggleUserTagUrl(String targetHtmlElementId, ItemKey taggedItemKey, ItemKey tag) {
+		return baseUrlService.getToggleUserTagUrl(targetHtmlElementId, taggedItemKey, tag);
 	}
 
 	@Override
-	public String getMyMessagesUrl(String targetHtmlElementId,
-			CalmObject parent, int page) {
-		return baseUrlService.getMyMessagesUrl(targetHtmlElementId, parent,
-				page);
+	public String getMyMessagesUrl(String targetHtmlElementId, CalmObject parent, int page) {
+		return baseUrlService.getMyMessagesUrl(targetHtmlElementId, parent, page);
 	}
 
 	@Override
-	public String buildSearchUrl(Locale language, String targetHtmlElementId,
-			CalmObject geoItem, SearchType searchType,
+	public String buildSearchUrl(Locale language, String targetHtmlElementId, CalmObject geoItem, SearchType searchType,
 			FacetInformation currentFacetting, int page) {
-		return baseUrlService.buildSearchUrl(language, targetHtmlElementId,
-				geoItem, searchType, currentFacetting, page);
+		return baseUrlService.buildSearchUrl(language, targetHtmlElementId, geoItem, searchType, currentFacetting,
+				page);
 	}
 
 	@Override
-	public String buildMapSearchUrl(Locale locale, String targetHtmlElementId,
-			GeographicItem geoItem) {
-		return baseUrlService.buildMapSearchUrl(locale, targetHtmlElementId,
-				geoItem);
+	public String buildMapSearchUrl(Locale locale, String targetHtmlElementId, GeographicItem geoItem) {
+		return baseUrlService.buildMapSearchUrl(locale, targetHtmlElementId, geoItem);
 	}
 
 	@Override
-	public String getPlaceOverviewUrl(Locale locale,
-			String targetHtmlElementId, CalmObject place) {
-		return baseUrlService.getPlaceOverviewUrl(locale, targetHtmlElementId,
-				place);
+	public String getPlaceOverviewUrl(Locale locale, String targetHtmlElementId, CalmObject place) {
+		return baseUrlService.getPlaceOverviewUrl(locale, targetHtmlElementId, place);
 	}
 
 	@Override
-	public String getEventOverviewUrl(Locale locale,
-			String targetHtmlElementId, CalmObject event) {
-		return baseUrlService.getEventOverviewUrl(locale, targetHtmlElementId,
-				event);
+	public String getEventOverviewUrl(Locale locale, String targetHtmlElementId, CalmObject event) {
+		return baseUrlService.getEventOverviewUrl(locale, targetHtmlElementId, event);
 	}
 
 	@Override
-	public String getUserOverviewUrl(Locale locale, String targetHtmlElementId,
-			CalmObject user) {
-		return baseUrlService.getUserOverviewUrl(locale, targetHtmlElementId,
-				user);
+	public String getUserOverviewUrl(Locale locale, String targetHtmlElementId, CalmObject user) {
+		return baseUrlService.getUserOverviewUrl(locale, targetHtmlElementId, user);
 	}
 
 	@Override
-	public String getOverviewUrl(Locale locale, String targetHtmlElementId,
-			CalmObject item) {
+	public String getOverviewUrl(Locale locale, String targetHtmlElementId, CalmObject item) {
 		return baseUrlService.getOverviewUrl(locale, targetHtmlElementId, item);
 	}
 
 	@Override
-	public String getActivitiesUrl(String targetHtmlElementId,
-			CalmObject target, CalmObject user, GeographicItem geoItem,
-			int page, String typeFilter) {
-		return baseUrlService.getActivitiesUrl(targetHtmlElementId, target,
-				user, geoItem, page, typeFilter);
+	public String getActivitiesUrl(String targetHtmlElementId, CalmObject target, CalmObject user,
+			GeographicItem geoItem, int page, String typeFilter) {
+		return baseUrlService.getActivitiesUrl(targetHtmlElementId, target, user, geoItem, page, typeFilter);
 	}
 
 	@Override
-	public String getMediaAdditionFormUrl(String targetHtmlElementId,
-			ItemKey element, String redirectUrl) {
-		return baseUrlService.getMediaAdditionFormUrl(targetHtmlElementId,
-				element, redirectUrl);
+	public String getMediaAdditionFormUrl(String targetHtmlElementId, ItemKey element, String redirectUrl) {
+		return baseUrlService.getMediaAdditionFormUrl(targetHtmlElementId, element, redirectUrl);
 	}
 
 	@Override
@@ -244,6 +202,11 @@ public class MobileUrlServiceImpl implements UrlService {
 	@Override
 	public String getResetPasswordUrl(User user) {
 		return baseUrlService.getResetPasswordUrl(user);
+	}
+
+	@Override
+	public String getEmailValidationUrl(User user) {
+		return baseUrlService.getEmailValidationUrl(user);
 	}
 
 	@Override

@@ -41,8 +41,7 @@ import com.videopolis.smaug.common.model.FacetRange;
 public class UrlServiceImpl implements UrlService {
 
 	private static final Log LOGGER = LogFactory.getLog(UrlServiceImpl.class);
-	private static final FacetCategory PLACE_TYPE_CATEGORY = SearchHelper
-			.getPlaceTypeCategory();
+	private static final FacetCategory PLACE_TYPE_CATEGORY = SearchHelper.getPlaceTypeCategory();
 
 	private MessageSource messageSource;
 	private String webappPrefix = "";
@@ -58,17 +57,14 @@ public class UrlServiceImpl implements UrlService {
 	private String baseUrl;
 
 	@Override
-	public String buildSearchUrl(String targetHtmlElementId,
-			GeographicItem geoItem, SearchType searchType) {
+	public String buildSearchUrl(String targetHtmlElementId, GeographicItem geoItem, SearchType searchType) {
 		return buildSearchUrl(targetHtmlElementId, geoItem, searchType, null, 0);
 	}
 
 	@Override
-	public String buildMapSearchUrl(Locale locale, String targetHtmlElementId,
-			GeographicItem geoItem) {
-		return internalBuildAjaxSearchUrl(locale, UrlConstants.SEARCH_TYPE_MAP,
-				targetHtmlElementId, geoItem, null, null, null, 0,
-				isAjaxSearch, isAjaxSearch);
+	public String buildMapSearchUrl(Locale locale, String targetHtmlElementId, GeographicItem geoItem) {
+		return internalBuildAjaxSearchUrl(locale, UrlConstants.SEARCH_TYPE_MAP, targetHtmlElementId, geoItem, null,
+				null, null, 0, isAjaxSearch, isAjaxSearch);
 	}
 
 	@Override
@@ -76,10 +72,9 @@ public class UrlServiceImpl implements UrlService {
 		return webappPrefix + "/mapInfo.action?geoKey=" + geoKey.toString();
 	}
 
-	private String internalBuildAjaxSearchUrl(Locale locale, String action,
-			String targetHtmlElementId, CalmObject geoItem,
-			FacetInformation currentFacetting, Facet newFacet,
-			Facet removedFacet, int page, boolean isAjaxUrl, boolean addJSCall) {
+	private String internalBuildAjaxSearchUrl(Locale locale, String action, String targetHtmlElementId,
+			CalmObject geoItem, FacetInformation currentFacetting, Facet newFacet, Facet removedFacet, int page,
+			boolean isAjaxUrl, boolean addJSCall) {
 		final Map<String, StringBuilder> buildersMap = new HashMap<String, StringBuilder>();
 		final StringBuilder buf = new StringBuilder();
 		if (addJSCall) {
@@ -92,16 +87,15 @@ public class UrlServiceImpl implements UrlService {
 		}
 		final String seoPage = encode(DisplayHelper.getName(geoItem, locale));
 		// Building URL
-		buf.append("/" + UrlConstants.SEARCH_PAGE + "-" + seoPage + "/"
-				+ action + "-");
+		buf.append("/" + UrlConstants.SEARCH_PAGE + "-" + seoPage + "/" + action + "-");
 		// Appending SEO representation
 		try {
-			final String msg = encode(messageSource.getMessage(
-					UrlConstants.KEY_SEO_ACTION_PREFIX + action, null, locale));
+			final String msg = encode(
+					messageSource.getMessage(UrlConstants.KEY_SEO_ACTION_PREFIX + action, null, locale));
 			buf.append(msg);
 		} catch (NoSuchMessageException e) {
-			LOGGER.error("Ungenerable SEO action because of missing translation: "
-					+ UrlConstants.KEY_SEO_ACTION_PREFIX + action);
+			LOGGER.error("Ungenerable SEO action because of missing translation: " + UrlConstants.KEY_SEO_ACTION_PREFIX
+					+ action);
 		}
 		// Appending geo name and ID
 		if (geoItem != null) {
@@ -119,18 +113,13 @@ public class UrlServiceImpl implements UrlService {
 				if (!PLACE_TYPE_CATEGORY.equals(f.getFacetCategory())) {
 					// Appending the facet code, only if not removed
 					if (f.getFacetCategory().isRange()) {
-						if (removedFacet == null
-								|| !removedFacet.getFacetCategory().equals(
-										f.getFacetCategory())) {
+						if (removedFacet == null || !removedFacet.getFacetCategory().equals(f.getFacetCategory())) {
 							urlFacets.add(f);
 						}
 					} else {
-						if (removedFacet == null
-								|| (!f.getFacetCode().equals(
-										removedFacet.getFacetCode()))) {
+						if (removedFacet == null || (!f.getFacetCode().equals(removedFacet.getFacetCode()))) {
 							// Handling amenities differently
-							if (SearchHelper.getAmenitiesFacetCategory()
-									.equals(f.getFacetCategory())) {
+							if (SearchHelper.getAmenitiesFacetCategory().equals(f.getFacetCategory())) {
 								urlAmenities.add(f);
 							} else {
 								urlFacets.add(f);
@@ -143,8 +132,7 @@ public class UrlServiceImpl implements UrlService {
 		// Adding new facet
 		if (newFacet != null) {
 			// Handling amenities differently
-			if (SearchHelper.getAmenitiesFacetCategory().equals(
-					newFacet.getFacetCategory())) {
+			if (SearchHelper.getAmenitiesFacetCategory().equals(newFacet.getFacetCategory())) {
 				urlAmenities.add(newFacet);
 			} else {
 				urlFacets.add(newFacet);
@@ -197,14 +185,12 @@ public class UrlServiceImpl implements UrlService {
 		try {
 			encodedFragment = URLEncoder.encode(urlFragment, "UTF-8");
 		} catch (UnsupportedEncodingException e) {
-			LOGGER.error("Error while encoding localization URL fragment for "
-					+ urlFragment + ": " + e.getMessage());
+			LOGGER.error("Error while encoding localization URL fragment for " + urlFragment + ": " + e.getMessage());
 		}
 		return encodedFragment;
 	}
 
-	private void addFacet(Facet f, String separator, StringBuilder buf,
-			Map<String, StringBuilder> buildersMap) {
+	private void addFacet(Facet f, String separator, StringBuilder buf, Map<String, StringBuilder> buildersMap) {
 		if (!(f instanceof FacetRange)) {
 			buf.append(separator);
 			buf.append(f.getFacetCode());
@@ -235,31 +221,24 @@ public class UrlServiceImpl implements UrlService {
 	}
 
 	@Override
-	public String buildSearchUrl(String targetHtmlElementId,
-			CalmObject geoItem, SearchType searchType,
+	public String buildSearchUrl(String targetHtmlElementId, CalmObject geoItem, SearchType searchType,
 			FacetInformation currentFacetting, int page) {
-		return internalBuildAjaxSearchUrl(null, getAction(searchType),
-				targetHtmlElementId, geoItem, currentFacetting, null, null,
-				page, isAjaxSearch, isAjaxSearch);
+		return internalBuildAjaxSearchUrl(null, getAction(searchType), targetHtmlElementId, geoItem, currentFacetting,
+				null, null, page, isAjaxSearch, isAjaxSearch);
 	}
 
 	@Override
-	public String buildSearchUrl(Locale language, String targetHtmlElementId,
-			CalmObject geoItem, SearchType searchType,
+	public String buildSearchUrl(Locale language, String targetHtmlElementId, CalmObject geoItem, SearchType searchType,
 			FacetInformation currentFacetting, int page) {
-		return internalBuildAjaxSearchUrl(language, getAction(searchType),
-				targetHtmlElementId, geoItem, currentFacetting, null, null,
-				page, isAjaxSearch, isAjaxSearch);
+		return internalBuildAjaxSearchUrl(language, getAction(searchType), targetHtmlElementId, geoItem,
+				currentFacetting, null, null, page, isAjaxSearch, isAjaxSearch);
 	}
 
 	@Override
-	public String buildSearchUrl(String targetHtmlElementId,
-			CalmObject geoItem, SearchType searchType,
-			FacetInformation currentFacetting, Facet newFacet,
-			Facet removedFacet) {
-		return internalBuildAjaxSearchUrl(null, getAction(searchType),
-				targetHtmlElementId, geoItem, currentFacetting, newFacet,
-				removedFacet, 0, isAjaxSearch, isAjaxSearch);
+	public String buildSearchUrl(String targetHtmlElementId, CalmObject geoItem, SearchType searchType,
+			FacetInformation currentFacetting, Facet newFacet, Facet removedFacet) {
+		return internalBuildAjaxSearchUrl(null, getAction(searchType), targetHtmlElementId, geoItem, currentFacetting,
+				newFacet, removedFacet, 0, isAjaxSearch, isAjaxSearch);
 	}
 
 	public void setWebappPrefix(String webappPrefix) {
@@ -267,19 +246,15 @@ public class UrlServiceImpl implements UrlService {
 	}
 
 	@Override
-	public String getPlaceOverviewUrl(String targetHtmlElementId,
-			CalmObject place) {
+	public String getPlaceOverviewUrl(String targetHtmlElementId, CalmObject place) {
 		return getPlaceOverviewUrl(null, targetHtmlElementId, place);
 	}
 
 	@Override
-	public String getPlaceOverviewUrl(Locale locale,
-			String targetHtmlElementId, CalmObject place) {
+	public String getPlaceOverviewUrl(Locale locale, String targetHtmlElementId, CalmObject place) {
 		final Place p = (Place) place;
-		final SearchType searchType = SearchType
-				.fromPlaceType(p.getPlaceType());
-		return buildOverviewUrl(locale, targetHtmlElementId, place,
-				getAction(searchType), isAjaxOverview, addJSCalls);
+		final SearchType searchType = SearchType.fromPlaceType(p.getPlaceType());
+		return buildOverviewUrl(locale, targetHtmlElementId, place, getAction(searchType), isAjaxOverview, addJSCalls);
 	}
 
 	@Override
@@ -288,15 +263,13 @@ public class UrlServiceImpl implements UrlService {
 	}
 
 	@Override
-	public String getUserOverviewUrl(Locale locale, String targetHtmlElementId,
-			CalmObject user) {
-		return buildOverviewUrl(locale, targetHtmlElementId, user,
-				UrlConstants.SEARCH_TYPE_USERS, isAjaxOverview, addJSCalls);
+	public String getUserOverviewUrl(Locale locale, String targetHtmlElementId, CalmObject user) {
+		return buildOverviewUrl(locale, targetHtmlElementId, user, UrlConstants.SEARCH_TYPE_USERS, isAjaxOverview,
+				addJSCalls);
 	}
 
-	private String buildOverviewUrl(Locale locale, String targetHtmlElementId,
-			CalmObject item, String actionName, boolean isAjax,
-			boolean addJSCall) {
+	private String buildOverviewUrl(Locale locale, String targetHtmlElementId, CalmObject item, String actionName,
+			boolean isAjax, boolean addJSCall) {
 		final StringBuilder buf = new StringBuilder();
 		// Appending javascript call if ajax
 		if (addJSCall) {
@@ -319,19 +292,16 @@ public class UrlServiceImpl implements UrlService {
 					locale = Locale.ENGLISH;
 				}
 			}
-			String seoPage = encode(messageSource.getMessage(
-					UrlConstants.KEY_OVERVIEW_PAGE, null, locale));
+			String seoPage = encode(messageSource.getMessage(UrlConstants.KEY_OVERVIEW_PAGE, null, locale));
 			String seoObjTypeKey = key.getType();
 			if (item instanceof Place) {
 				final Place place = (Place) item;
 				seoObjTypeKey = place.getPlaceType();
 				seoPage = encode(DisplayHelper.getName(place.getCity(), locale));
 			}
-			final String seoObjType = encode(messageSource.getMessage(
-					UrlConstants.KEY_SEO_TYPE_PREFIX + seoObjTypeKey, null,
-					locale));
-			buf.append(UrlConstants.OVERVIEW_PAGE + "-" + seoPage + "/"
-					+ actionName + "-" + seoObjType + "/");
+			final String seoObjType = encode(
+					messageSource.getMessage(UrlConstants.KEY_SEO_TYPE_PREFIX + seoObjTypeKey, null, locale));
+			buf.append(UrlConstants.OVERVIEW_PAGE + "-" + seoPage + "/" + actionName + "-" + seoObjType + "/");
 		}
 		buf.append(key.toString());
 
@@ -355,20 +325,17 @@ public class UrlServiceImpl implements UrlService {
 	}
 
 	@Override
-	public String buildUserSearchUrl(String targetHtmlElementId,
-			CalmObject geoItem, FacetInformation currentFacetting,
+	public String buildUserSearchUrl(String targetHtmlElementId, CalmObject geoItem, FacetInformation currentFacetting,
 			FacetRange range) {
 		FacetRange toRemoveRange = range;
 		// Special case for age we need to remove the birthyear facet because of
 		// age to year conversion
 		if ("age".equals(range.getFacetCategory().getCategoryCode())) {
-			toRemoveRange = FacetFactory.createFacetRange(
-					SearchHelper.getFacetCategory("birthyear"), "",
+			toRemoveRange = FacetFactory.createFacetRange(SearchHelper.getFacetCategory("birthyear"), "",
 					Long.MIN_VALUE, Long.MAX_VALUE);
 		}
-		return internalBuildAjaxSearchUrl(null, UrlConstants.SEARCH_TYPE_USERS,
-				targetHtmlElementId, geoItem, currentFacetting, range,
-				toRemoveRange, 0, isAjaxSearch, false);
+		return internalBuildAjaxSearchUrl(null, UrlConstants.SEARCH_TYPE_USERS, targetHtmlElementId, geoItem,
+				currentFacetting, range, toRemoveRange, 0, isAjaxSearch, false);
 	}
 
 	@Override
@@ -377,26 +344,22 @@ public class UrlServiceImpl implements UrlService {
 	}
 
 	@Override
-	public String getMediaAdditionFormUrl(String targetHtmlElementId,
-			ItemKey element) {
-		return webappPrefix + "/ajaxAddMediaDialog.action?id="
-				+ element.toString();
+	public String getMediaAdditionFormUrl(String targetHtmlElementId, ItemKey element) {
+		return webappPrefix + "/ajaxAddMediaDialog.action?id=" + element.toString();
 		// + "','" + targetHtmlElementId + "')";
 	}
 
 	@Override
-	public String getMediaAdditionFormUrl(String targetHtmlElementId,
-			ItemKey element, String redirectUrl) {
+	public String getMediaAdditionFormUrl(String targetHtmlElementId, ItemKey element, String redirectUrl) {
 		String encodedRedirect = null;
 		try {
 			encodedRedirect = URLEncoder.encode(redirectUrl, "UTF-8");
 		} catch (UnsupportedEncodingException e) {
-			LOGGER.error("Unsupported encoding thrown when encoding media addition redirect url : "
-					+ e.getMessage() + " [->ignoring redirect]");
+			LOGGER.error("Unsupported encoding thrown when encoding media addition redirect url : " + e.getMessage()
+					+ " [->ignoring redirect]");
 		}
 		StringBuilder buf = new StringBuilder();
-		buf.append(webappPrefix + "/ajaxAddMediaDialog.action?id="
-				+ element.toString());
+		buf.append(webappPrefix + "/ajaxAddMediaDialog.action?id=" + element.toString());
 		if (encodedRedirect != null) {
 			buf.append("&redirectUrl=" + encodedRedirect);
 		}
@@ -404,39 +367,32 @@ public class UrlServiceImpl implements UrlService {
 	}
 
 	@Override
-	public String getWriteMessageDialogUrl(String targetHtmlElementId,
-			ItemKey element) {
-		return webappPrefix + "/ajaxWriteMsgDialog.action?to="
-				+ element.toString();
+	public String getWriteMessageDialogUrl(String targetHtmlElementId, ItemKey element) {
+		return webappPrefix + "/ajaxWriteMsgDialog.action?to=" + element.toString();
 	}
 
 	@Override
-	public String getEventOverviewUrl(String targetHtmlElementId,
-			CalmObject event) {
+	public String getEventOverviewUrl(String targetHtmlElementId, CalmObject event) {
 		return getEventOverviewUrl(null, targetHtmlElementId, event);
 	}
 
 	@Override
-	public String getEventOverviewUrl(Locale locale,
-			String targetHtmlElementId, CalmObject event) {
-		return buildOverviewUrl(locale, targetHtmlElementId, event,
-				UrlConstants.SEARCH_TYPE_EVENTS, isAjaxOverview, addJSCalls);
+	public String getEventOverviewUrl(Locale locale, String targetHtmlElementId, CalmObject event) {
+		return buildOverviewUrl(locale, targetHtmlElementId, event, UrlConstants.SEARCH_TYPE_EVENTS, isAjaxOverview,
+				addJSCalls);
 
 	}
 
 	@Override
-	public String getEventEditionFormUrl(String targetHtmlElementId,
-			ItemKey element) {
+	public String getEventEditionFormUrl(String targetHtmlElementId, ItemKey element) {
 		return getEventEditionFormUrl(targetHtmlElementId, element, null);
 	}
 
 	@Override
-	public String getEventEditionFormUrl(String targetHtmlElementId,
-			ItemKey element, CalendarType calendarType) {
+	public String getEventEditionFormUrl(String targetHtmlElementId, ItemKey element, CalendarType calendarType) {
 		final StringBuilder buf = new StringBuilder();
 		if (element != null) {
-			buf.append(webappPrefix + "/ajaxGetEventForm?id="
-					+ element.toString());
+			buf.append(webappPrefix + "/ajaxGetEventForm?id=" + element.toString());
 		} else {
 			buf.append(webappPrefix + "/ajaxGetEventForm");
 		}
@@ -449,10 +405,8 @@ public class UrlServiceImpl implements UrlService {
 	}
 
 	@Override
-	public String getPlaceEditionFormUrl(String targetHtmlElementId,
-			ItemKey element, String placeType) {
-		return webappPrefix + "/ajaxGetPlaceForm.action?id="
-				+ element.toString() + "&placeType=" + placeType;
+	public String getPlaceEditionFormUrl(String targetHtmlElementId, ItemKey element, String placeType) {
+		return webappPrefix + "/ajaxGetPlaceForm.action?id=" + element.toString() + "&placeType=" + placeType;
 	}
 
 	@Override
@@ -461,15 +415,13 @@ public class UrlServiceImpl implements UrlService {
 	}
 
 	@Override
-	public String getOverviewUrl(Locale locale, String targetHtmlElementId,
-			CalmObject item) {
+	public String getOverviewUrl(Locale locale, String targetHtmlElementId, CalmObject item) {
 		final String type = item.getKey().getType();
 		if (Place.CAL_TYPE.equals(type)) {
 			return getPlaceOverviewUrl(locale, targetHtmlElementId, item);
 		} else if (item instanceof GeographicItem) {
 			// Default bar-search
-			return buildSearchUrl(DisplayHelper.getDefaultAjaxContainer(),
-					(GeographicItem) item, SearchType.BARS);
+			return buildSearchUrl(DisplayHelper.getDefaultAjaxContainer(), (GeographicItem) item, SearchType.BARS);
 		} else if (User.CAL_TYPE.equals(type)) {
 			return getUserOverviewUrl(locale, targetHtmlElementId, item);
 		} else if (Event.CAL_ID.equals(type)) {
@@ -483,16 +435,13 @@ public class UrlServiceImpl implements UrlService {
 	}
 
 	@Override
-	public String getCommentUrl(String targetHtmlElementId, ItemKey parentKey,
-			int page) {
-		return "/ajaxComments.action?id=" + parentKey.toString() + "&page="
-				+ page;
+	public String getCommentUrl(String targetHtmlElementId, ItemKey parentKey, int page) {
+		return "/ajaxComments.action?id=" + parentKey.toString() + "&page=" + page;
 	}
 
 	@Override
-	public String getActivitiesUrl(String targetHtmlElementId,
-			CalmObject target, CalmObject user, GeographicItem geoItem,
-			int page, String typeFilter) {
+	public String getActivitiesUrl(String targetHtmlElementId, CalmObject target, CalmObject user,
+			GeographicItem geoItem, int page, String typeFilter) {
 		final StringBuilder buf = new StringBuilder();
 		buf.append("/ajaxActivities.action?page=" + page);
 		if (target != null) {
@@ -514,17 +463,13 @@ public class UrlServiceImpl implements UrlService {
 	}
 
 	@Override
-	public String getToggleUserTagUrl(String targetHtmlElementId,
-			ItemKey taggedItemKey, ItemKey tag) {
-		return "/toggleUserTag.action?id=" + taggedItemKey.toString() + "&tag="
-				+ tag.toString();
+	public String getToggleUserTagUrl(String targetHtmlElementId, ItemKey taggedItemKey, ItemKey tag) {
+		return "/toggleUserTag.action?id=" + taggedItemKey.toString() + "&tag=" + tag.toString();
 	}
 
 	@Override
-	public String getMyMessagesUrl(String targetHtmlElementId,
-			CalmObject parent, int page) {
-		return buildOverviewUrl(null, targetHtmlElementId, parent,
-				"myMessages", true, true);
+	public String getMyMessagesUrl(String targetHtmlElementId, CalmObject parent, int page) {
+		return buildOverviewUrl(null, targetHtmlElementId, parent, "myMessages", true, true);
 	}
 
 	public void setMessageSource(MessageSource messageSource) {
@@ -537,25 +482,20 @@ public class UrlServiceImpl implements UrlService {
 	}
 
 	@Override
-	public String getXMLSitemapIndexUrl(Locale locale, String pageType,
-			SearchType searchType) {
-		String url = "/sitemapindex-" + pageType + "-" + searchType.name()
-				+ ".xml";
+	public String getXMLSitemapIndexUrl(Locale locale, String pageType, SearchType searchType) {
+		String url = "/sitemapindex-" + pageType + "-" + searchType.name() + ".xml";
 		return LocalizationHelper.buildUrl(locale, domainName, url);
 	}
 
 	@Override
-	public String getXMLSitemapUrl(Locale locale, String pageType,
-			SearchType searchType, int page) {
-		String url = "/sitemap-" + pageType + "-" + searchType.name() + "-p"
-				+ page + ".xml";
+	public String getXMLSitemapUrl(Locale locale, String pageType, SearchType searchType, int page) {
+		String url = "/sitemap-" + pageType + "-" + searchType.name() + "-p" + page + ".xml";
 		return LocalizationHelper.buildUrl(locale, domainName, url);
 	}
 
 	@Override
 	public String getPromoteUrl(Locale l) {
-		return LocalizationHelper.buildUrl(l.getLanguage(), domainName,
-				"/promote", true);
+		return LocalizationHelper.buildUrl(l.getLanguage(), domainName, "/promote", true);
 	}
 
 	@Override
@@ -604,8 +544,13 @@ public class UrlServiceImpl implements UrlService {
 	}
 
 	@Override
+	public String getEmailValidationUrl(User user) {
+		return baseUrl + "/validateEmail?userKey=" + user.getKey().toString() + "&emailToken="
+				+ user.getEmailValidationToken();
+	}
+
+	@Override
 	public String getEventDeletionUrl(Event event) {
-		return baseUrl + "/deleteItem?key=" + event.getKey()
-				+ "&confirmed=true";
+		return baseUrl + "/deleteItem?key=" + event.getKey() + "&confirmed=true";
 	}
 }

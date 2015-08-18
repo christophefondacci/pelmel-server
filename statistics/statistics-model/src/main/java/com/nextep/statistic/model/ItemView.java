@@ -42,4 +42,11 @@ public interface ItemView extends CalmObject {
 	 * @return the view type
 	 */
 	String getViewType();
+
+	/**
+	 * An optional transient count used for "fake" statistics (reports)
+	 * 
+	 * @return
+	 */
+	int getCount();
 }

@@ -19,7 +19,9 @@ public class JsonPlace implements IJsonPlace {
 	private int boostValue;
 	private int closedReportsCount;
 	private String timezoneId;
+	private String ownerKey;
 	private List<JsonSpecialEvent> specials = new ArrayList<JsonSpecialEvent>();
+	private List<JsonDeal> deals = new ArrayList<>();
 
 	public JsonPlace(String name) {
 		this.name = name;
@@ -218,5 +220,30 @@ public class JsonPlace implements IJsonPlace {
 	@Override
 	public void setKey(String key) {
 		this.itemKey = key;
+	}
+
+	@Override
+	public void setOwnerKey(String ownerKey) {
+		this.ownerKey = ownerKey;
+	}
+
+	@Override
+	public String getOwnerKey() {
+		return ownerKey;
+	}
+
+	@Override
+	public List<JsonDeal> getDeals() {
+		return deals;
+	}
+
+	@Override
+	public void setDeals(List<JsonDeal> deals) {
+		this.deals = deals;
+	}
+
+	@Override
+	public void addDeal(JsonDeal deal) {
+		this.deals.add(deal);
 	}
 }

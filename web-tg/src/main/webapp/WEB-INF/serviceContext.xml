@@ -88,6 +88,7 @@
 				<ref bean="eventSeriesService"/>
 				<ref bean="activitiesService"/>
 				<ref bean="advertisingService"/>
+				<ref bean="dealService"/>
 				<ref bean="bannersService"/>
 				<ref bean="propertiesService"/>
 				<ref bean="descService"/>

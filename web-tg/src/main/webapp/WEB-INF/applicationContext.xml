@@ -25,6 +25,7 @@
 	<import resource="classpath:META-INF/events-services/springContext.xml" />
 	<import resource="classpath:META-INF/activities-services/springContext.xml" />
 	<import resource="classpath:META-INF/advertising-services/springContext.xml" />
+	<import resource="classpath:META-INF/deals-services/springContext.xml" />
 	<import resource="classpath:META-INF/properties-services/springContext.xml" />
 	<import resource="classpath:META-INF/descriptions-services/springContext.xml" />
 	<import resource="classpath:META-INF/comments-services/springContext.xml" />

@@ -20,6 +20,7 @@ import com.nextep.json.model.impl.JsonHour;
 import com.nextep.json.model.impl.JsonLightCity;
 import com.nextep.json.model.impl.JsonLightPlace;
 import com.nextep.json.model.impl.JsonLightUser;
+import com.nextep.json.model.impl.JsonLoggedInUser;
 import com.nextep.json.model.impl.JsonManyToOneMessageList;
 import com.nextep.json.model.impl.JsonMedia;
 import com.nextep.json.model.impl.JsonMessage;
@@ -28,10 +29,12 @@ import com.nextep.json.model.impl.JsonOneToOneMessageList;
 import com.nextep.json.model.impl.JsonPlace;
 import com.nextep.json.model.impl.JsonPlaceOverview;
 import com.nextep.json.model.impl.JsonRecipientsGroup;
+import com.nextep.json.model.impl.JsonStatistic;
 import com.nextep.json.model.impl.JsonUser;
 import com.nextep.media.model.Media;
 import com.nextep.messages.model.Message;
 import com.nextep.messages.model.MessageRecipientsGroup;
+import com.nextep.statistic.model.ItemView;
 import com.nextep.users.model.User;
 import com.videopolis.apis.model.FacetInformation;
 import com.videopolis.apis.service.ApiResponse;
@@ -100,6 +103,8 @@ public interface JsonBuilder {
 	 * @return the {@link JsonUser} bean
 	 */
 	JsonUser buildJsonUser(User user, boolean highRes, Locale l);
+
+	JsonLoggedInUser buildJsonLoggedInUser(User user, boolean highRes, Locale l);
 
 	JsonUser buildJsonUser(User user, boolean highRes, Locale l, ApiResponse response);
 
@@ -243,4 +248,13 @@ public interface JsonBuilder {
 	 * @param currentUser
 	 */
 	void fillMessagingUnreadCount(JsonMessagingStatistic json, User currentUser);
+
+	/**
+	 * Builds the JSON statistic bean from an ItemView
+	 * 
+	 * @param itemView
+	 *            the {@link ItemView}
+	 * @return the {@link JsonStatistic} bean
+	 */
+	JsonStatistic buildJsonStatistic(ItemView itemView);
 }

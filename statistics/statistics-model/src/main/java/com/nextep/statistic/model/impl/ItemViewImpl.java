@@ -26,8 +26,7 @@ public class ItemViewImpl extends AbstractCalmObject implements MutableItemView 
 
 	private static final long serialVersionUID = 3232642302332321504L;
 	private static final Log LOGGER = LogFactory.getLog(ItemViewImpl.class);
-	private static final DateFormat ID_DATE_FORMAT = new SimpleDateFormat(
-			"yyyyMMddHHmmss");
+	private static final DateFormat ID_DATE_FORMAT = new SimpleDateFormat("yyyyMMddHHmmss");
 
 	@Id
 	@Column(name = "ITEM_KEY_VIEWED")
@@ -44,6 +43,8 @@ public class ItemViewImpl extends AbstractCalmObject implements MutableItemView 
 	@Column(name = "VIEW_TYPE")
 	private String viewType;
 
+	private transient int count;
+
 	public ItemViewImpl() {
 		super(null);
 	}
@@ -52,12 +53,10 @@ public class ItemViewImpl extends AbstractCalmObject implements MutableItemView 
 	public ItemKey getKey() {
 		if (viewedItemKey != null) {
 			try {
-				return CalmFactory.createKey(CAL_TYPE, viewedItemKey
-						+ viewerItemKey + ID_DATE_FORMAT.format(viewDate));
+				return CalmFactory.createKey(CAL_TYPE, viewedItemKey + viewerItemKey + ID_DATE_FORMAT.format(viewDate));
 			} catch (CalException e) {
-				LOGGER.error("Unable to build fake ItemView item key "
-						+ viewedItemKey + "/" + viewerItemKey + "/" + viewDate
-						+ " : " + e.getMessage());
+				LOGGER.error("Unable to build fake ItemView item key " + viewedItemKey + "/" + viewerItemKey + "/"
+						+ viewDate + " : " + e.getMessage());
 			}
 		}
 		return null;
@@ -69,8 +68,7 @@ public class ItemViewImpl extends AbstractCalmObject implements MutableItemView 
 			try {
 				return CalmFactory.parseKey(viewedItemKey);
 			} catch (CalException e) {
-				LOGGER.error("Unable to parse CAL key '" + viewedItemKey
-						+ "' : " + e.getMessage());
+				LOGGER.error("Unable to parse CAL key '" + viewedItemKey + "' : " + e.getMessage());
 			}
 		}
 		return null;
@@ -82,8 +80,7 @@ public class ItemViewImpl extends AbstractCalmObject implements MutableItemView 
 			try {
 				return CalmFactory.parseKey(viewerItemKey);
 			} catch (CalException e) {
-				LOGGER.error("Unable to parse CAL key '" + viewerItemKey
-						+ "' : " + e.getMessage());
+				LOGGER.error("Unable to parse CAL key '" + viewerItemKey + "' : " + e.getMessage());
 			}
 		}
 		return null;
@@ -101,14 +98,12 @@ public class ItemViewImpl extends AbstractCalmObject implements MutableItemView 
 
 	@Override
 	public void setViewedItemKey(ItemKey viewedItemKey) {
-		this.viewedItemKey = viewedItemKey == null ? null : viewedItemKey
-				.toString();
+		this.viewedItemKey = viewedItemKey == null ? null : viewedItemKey.toString();
 	}
 
 	@Override
 	public void setViewerItemKey(ItemKey viewerItemKey) {
-		this.viewerItemKey = viewerItemKey == null ? null : viewerItemKey
-				.toString();
+		this.viewerItemKey = viewerItemKey == null ? null : viewerItemKey.toString();
 	}
 
 	@Override
@@ -119,5 +114,15 @@ public class ItemViewImpl extends AbstractCalmObject implements MutableItemView 
 	@Override
 	public void setViewType(String viewType) {
 		this.viewType = viewType;
+	}
+
+	@Override
+	public void setCount(int count) {
+		this.count = count;
+	}
+
+	@Override
+	public int getCount() {
+		return count;
 	}
 }

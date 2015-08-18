@@ -12,6 +12,14 @@ public class AdvertisingRequestTypes {
 			return obj == USER_SUBSCRIPTIONS;
 		};
 	};
+	public static final RequestType USER_CURRENT_SUBSCRIPTIONS = new RequestType() {
+		private static final long serialVersionUID = -6872436155017531972L;
+
+		@Override
+		public boolean equals(Object obj) {
+			return obj == USER_CURRENT_SUBSCRIPTIONS;
+		};
+	};
 	public static final RequestType USER_BANNERS = new RequestType() {
 		private static final long serialVersionUID = 1L;
 

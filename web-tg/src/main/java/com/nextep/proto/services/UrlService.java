@@ -21,11 +21,9 @@ import com.videopolis.smaug.common.model.FacetRange;
  */
 public interface UrlService {
 
-	String buildSearchUrl(String targetHtmlElementId, GeographicItem geoItem,
-			SearchType searchType);
+	String buildSearchUrl(String targetHtmlElementId, GeographicItem geoItem, SearchType searchType);
 
-	String buildMapSearchUrl(Locale locale, String targetHtmlElementId,
-			GeographicItem geoItem);
+	String buildMapSearchUrl(Locale locale, String targetHtmlElementId, GeographicItem geoItem);
 
 	String getMapInfoWindowUrl(ItemKey geoKey);
 
@@ -38,8 +36,8 @@ public interface UrlService {
 	 * @param range
 	 * @return
 	 */
-	String buildUserSearchUrl(String targetHtmlElementId, CalmObject geoItem,
-			FacetInformation currentFacetting, FacetRange range);
+	String buildUserSearchUrl(String targetHtmlElementId, CalmObject geoItem, FacetInformation currentFacetting,
+			FacetRange range);
 
 	/**
 	 * Builds a URL pointing to the search results at the specified page from
@@ -61,11 +59,10 @@ public interface UrlService {
 	 *            the page that should be displayed
 	 * @return the corresponding URL pointing to the search result main page
 	 */
-	String buildSearchUrl(String targetHtmlElementId, CalmObject geoItem,
-			SearchType searchType, FacetInformation currentFacetting, int page);
+	String buildSearchUrl(String targetHtmlElementId, CalmObject geoItem, SearchType searchType,
+			FacetInformation currentFacetting, int page);
 
-	String buildSearchUrl(Locale language, String targetHtmlElementId,
-			CalmObject geoItem, SearchType searchType,
+	String buildSearchUrl(Locale language, String targetHtmlElementId, CalmObject geoItem, SearchType searchType,
 			FacetInformation currentFacetting, int page);
 
 	/**
@@ -91,9 +88,8 @@ public interface UrlService {
 	 *            <code>null</code> if none
 	 * @return the corresponding URL pointing to the search result main page
 	 */
-	String buildSearchUrl(String targetHtmlElementId, CalmObject geoItem,
-			SearchType searchType, FacetInformation currentFacetting,
-			Facet newFacet, Facet removedFacet);
+	String buildSearchUrl(String targetHtmlElementId, CalmObject geoItem, SearchType searchType,
+			FacetInformation currentFacetting, Facet newFacet, Facet removedFacet);
 
 	/**
 	 * Builds a URL pointing to the overview page of the place specified through
@@ -111,8 +107,7 @@ public interface UrlService {
 	 */
 	String getPlaceOverviewUrl(String targetHtmlElementId, CalmObject place);
 
-	String getPlaceOverviewUrl(Locale locale, String targetHtmlElementId,
-			CalmObject place);
+	String getPlaceOverviewUrl(Locale locale, String targetHtmlElementId, CalmObject place);
 
 	/**
 	 * Builds a URL pointing to the overview page of the event specified through
@@ -130,8 +125,7 @@ public interface UrlService {
 	 */
 	String getEventOverviewUrl(String targetHtmlElementId, CalmObject event);
 
-	String getEventOverviewUrl(Locale locale, String targetHtmlElementId,
-			CalmObject event);
+	String getEventOverviewUrl(Locale locale, String targetHtmlElementId, CalmObject event);
 
 	/**
 	 * Builds a URL pointing to the overview page of the user specified through
@@ -149,8 +143,7 @@ public interface UrlService {
 	 */
 	String getUserOverviewUrl(String targetHtmlElementId, CalmObject user);
 
-	String getUserOverviewUrl(Locale locale, String targetHtmlElementId,
-			CalmObject user);
+	String getUserOverviewUrl(Locale locale, String targetHtmlElementId, CalmObject user);
 
 	String getILikeUrl(String targetHtmlElementId, ItemKey element);
 
@@ -183,8 +176,7 @@ public interface UrlService {
 	 *            URL to redirect to after a media has been uploaded
 	 * @return the media addition URL
 	 */
-	String getMediaAdditionFormUrl(String targetHtmlElementId, ItemKey element,
-			String redirectUrl);
+	String getMediaAdditionFormUrl(String targetHtmlElementId, ItemKey element, String redirectUrl);
 
 	String getWriteMessageDialogUrl(String targetHtmlElementId, ItemKey element);
 
@@ -219,11 +211,9 @@ public interface UrlService {
 	 * this calendar type (typically use to spawn the opening hours creation
 	 * form)
 	 */
-	String getEventEditionFormUrl(String targetHtmlElementId, ItemKey element,
-			CalendarType calendarType);
+	String getEventEditionFormUrl(String targetHtmlElementId, ItemKey element, CalendarType calendarType);
 
-	String getPlaceEditionFormUrl(String targetHtmlElementId, ItemKey element,
-			String placeType);
+	String getPlaceEditionFormUrl(String targetHtmlElementId, ItemKey element, String placeType);
 
 	/**
 	 * Generic method retrieving the overview URL of an unknown element.
@@ -240,8 +230,7 @@ public interface UrlService {
 	 */
 	String getOverviewUrl(String targetHtmlElementId, CalmObject item);
 
-	String getOverviewUrl(Locale locale, String targetHtmlElementId,
-			CalmObject item);
+	String getOverviewUrl(Locale locale, String targetHtmlElementId, CalmObject item);
 
 	/**
 	 * Provides the URL that can update the comments of the specified target
@@ -273,22 +262,18 @@ public interface UrlService {
 	 *            the page offset to retrieve
 	 * @return the corresponding URL
 	 */
-	String getActivitiesUrl(String targetHtmlElementId, CalmObject target,
-			CalmObject user, GeographicItem geoItem, int page, String typeFilter);
+	String getActivitiesUrl(String targetHtmlElementId, CalmObject target, CalmObject user, GeographicItem geoItem,
+			int page, String typeFilter);
 
-	String getToggleUserTagUrl(String targetHtmlElementId,
-			ItemKey taggedItemKey, ItemKey tag);
+	String getToggleUserTagUrl(String targetHtmlElementId, ItemKey taggedItemKey, ItemKey tag);
 
-	String getMyMessagesUrl(String targetHtmlElementId, CalmObject parent,
-			int page);
+	String getMyMessagesUrl(String targetHtmlElementId, CalmObject parent, int page);
 
 	String getHomepageUrl(Locale locale);
 
-	String getXMLSitemapIndexUrl(Locale locale, String pageType,
-			SearchType searchType);
+	String getXMLSitemapIndexUrl(Locale locale, String pageType, SearchType searchType);
 
-	String getXMLSitemapUrl(Locale locale, String pageType,
-			SearchType searchType, int page);
+	String getXMLSitemapUrl(Locale locale, String pageType, SearchType searchType, int page);
 
 	/**
 	 * Provides the URL of the secured promotion page
@@ -340,4 +325,13 @@ public interface UrlService {
 	 * @return the absolute URL
 	 */
 	String getResetPasswordUrl(User user);
+
+	/**
+	 * Generates the URL pointing to the email validation service
+	 * 
+	 * @param user
+	 *            the {@link User} to validate email address for
+	 * @return the absolute URL
+	 */
+	String getEmailValidationUrl(User user);
 }

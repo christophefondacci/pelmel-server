@@ -190,5 +190,14 @@ public interface NotificationService {
 	 */
 	void sendChangePasswordEmail(User user);
 
+	/**
+	 * Sends an email to this user asking him to follow a link that will switch
+	 * his account to "Validated" regarding email address
+	 * 
+	 * @param user
+	 *            the {@link User} to validate the email address for
+	 */
+	void sendEmailValidationEmail(User user);
+
 	Future<Boolean> sendUserRegisteredEmailNotification(User user);
 }

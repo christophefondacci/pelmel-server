@@ -4,8 +4,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import net.sf.json.JSONObject;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,11 +32,11 @@ import com.videopolis.calm.model.ItemKey;
 import com.videopolis.cals.factory.ContextFactory;
 import com.videopolis.smaug.common.model.SearchScope;
 
-public class MobileBannerUpdatePaymentAction extends AbstractAction implements
-		JsonProviderWithError {
+import net.sf.json.JSONObject;
 
-	private static final Log LOGGER = LogFactory
-			.getLog(MobileBannerUpdatePaymentAction.class);
+public class MobileBannerUpdatePaymentAction extends AbstractAction implements JsonProviderWithError {
+
+	private static final Log LOGGER = LogFactory.getLog("PAYMENT");
 	private static final long serialVersionUID = 1L;
 	private static final String APIS_ALIAS_BANNER = "banner";
 	private static final String JSON_TRANSACTION_ID = "transaction_id";
@@ -72,28 +70,20 @@ public class MobileBannerUpdatePaymentAction extends AbstractAction implements
 		final ItemKey bannerItemKey = CalmFactory.parseKey(bannerKey);
 
 		// Building request
-		final ApisRequest request = (ApisRequest) ApisFactory
-				.createCompositeRequest()
-				.addCriterion(
-						currentUserSupport.createApisCriterionFor(
-								getNxtpUserToken(), true))
-				.addCriterion(
-						SearchRestriction.uniqueKeys(
-								Arrays.asList(bannerItemKey)).aliasedBy(
-								APIS_ALIAS_BANNER));
+		final ApisRequest request = (ApisRequest) ApisFactory.createCompositeRequest()
+				.addCriterion(currentUserSupport.createApisCriterionFor(getNxtpUserToken(), true))
+				.addCriterion(SearchRestriction.uniqueKeys(Arrays.asList(bannerItemKey)).aliasedBy(APIS_ALIAS_BANNER));
 
 		// Executing query
-		final ApiCompositeResponse response = (ApiCompositeResponse) getApiService()
-				.execute(request, ContextFactory.createContext(getLocale()));
+		final ApiCompositeResponse response = (ApiCompositeResponse) getApiService().execute(request,
+				ContextFactory.createContext(getLocale()));
 
 		// Checking valid user
-		final User user = response.getUniqueElement(User.class,
-				CurrentUserSupport.APIS_ALIAS_CURRENT_USER);
+		final User user = response.getUniqueElement(User.class, CurrentUserSupport.APIS_ALIAS_CURRENT_USER);
 		checkCurrentUser(user);
 
 		// Getting banner
-		banner = response.getUniqueElement(AdvertisingBanner.class,
-				APIS_ALIAS_BANNER);
+		banner = response.getUniqueElement(AdvertisingBanner.class, APIS_ALIAS_BANNER);
 		if (banner == null) {
 			setErrorMessage("Banner not found");
 			return ERROR;
@@ -102,14 +92,12 @@ public class MobileBannerUpdatePaymentAction extends AbstractAction implements
 		// Getting expected product ID
 
 		// Validating receipt with apple and getting JSON back
-		final Map<String, Object> receipt = bannerDisplayService
-				.validateAppleReceipt(appStoreReceipt);
+		final Map<String, Object> receipt = bannerDisplayService.validateAppleReceipt(appStoreReceipt);
 		if (receipt == null) {
 			setErrorMessage("Invalid payment receipt confirmation received from App Store");
 			return ERROR;
 		}
-		final List<Map<String, Object>> inAppPurchases = (List<Map<String, Object>>) receipt
-				.get("in_app");
+		final List<Map<String, Object>> inAppPurchases = (List<Map<String, Object>>) receipt.get("in_app");
 
 		// Preparing to update banner
 		ContextHolder.toggleWrite();
@@ -117,11 +105,9 @@ public class MobileBannerUpdatePaymentAction extends AbstractAction implements
 
 		// Iterating over in-app to look for a matching product
 		for (Map<String, Object> appPurchase : inAppPurchases) {
-			final String transactionId = (String) appPurchase
-					.get(JSON_TRANSACTION_ID);
+			final String transactionId = (String) appPurchase.get(JSON_TRANSACTION_ID);
 			final String productId = (String) appPurchase.get(JSON_PRODUCT_ID);
-			LOGGER.info("Iterating over purchase transaction '" + transactionId
-					+ "' of product '" + productId + "'");
+			LOGGER.info("Iterating over purchase transaction '" + transactionId + "' of product '" + productId + "'");
 
 			// Getting target display count which has been bought
 			final int targetDisplayCount = getBannerTargetDisplayCount(productId);
@@ -134,13 +120,10 @@ public class MobileBannerUpdatePaymentAction extends AbstractAction implements
 					mutableBanner.setTargetDisplayCount(targetDisplayCount);
 					mutableBanner.setStatus(BannerStatus.READY);
 				} else {
-					LOGGER.error("Banner " + mutableBanner.getKey()
-							+ " has transaction ID "
-							+ mutableBanner.getTransactionId()
-							+ " while trying to assign transaction ID "
+					LOGGER.error("Banner " + mutableBanner.getKey() + " has transaction ID "
+							+ mutableBanner.getTransactionId() + " while trying to assign transaction ID "
 							+ transactionId);
-					setErrorMessage("Banner '"
-							+ mutableBanner.getKey()
+					setErrorMessage("Banner '" + mutableBanner.getKey()
 							+ "' already has a transaction with a different identifier");
 					return ERROR;
 				}
@@ -149,8 +132,7 @@ public class MobileBannerUpdatePaymentAction extends AbstractAction implements
 
 		// Saving
 		bannersService.saveItem(mutableBanner);
-		searchPersistenceService.storeCalmObject(mutableBanner,
-				SearchScope.CHILDREN);
+		searchPersistenceService.storeCalmObject(mutableBanner, SearchScope.CHILDREN);
 		return SUCCESS;
 	}
 
@@ -168,8 +150,7 @@ public class MobileBannerUpdatePaymentAction extends AbstractAction implements
 
 	@Override
 	public String getJson() {
-		final JsonBanner jsonBanner = jsonBuilder.buildJsonBanner(banner, true,
-				getLocale());
+		final JsonBanner jsonBanner = jsonBuilder.buildJsonBanner(banner, true, getLocale());
 
 		return JSONObject.fromObject(jsonBanner).toString();
 	}

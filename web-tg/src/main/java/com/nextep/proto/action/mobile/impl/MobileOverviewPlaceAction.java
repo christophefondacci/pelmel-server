@@ -12,6 +12,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.nextep.activities.model.Activity;
+import com.nextep.advertising.model.Subscription;
 import com.nextep.comments.model.Comment;
 import com.nextep.descriptions.model.Description;
 import com.nextep.events.model.Event;
@@ -98,7 +99,7 @@ public class MobileOverviewPlaceAction extends AbstractAction implements JsonPro
 		final ItemKey itemKey = CalmFactory.parseKey(id);
 		final ApisCriterion objCriterion = (ApisCriterion) SearchRestriction.uniqueKeys(Arrays.asList(itemKey))
 				.aliasedBy(APIS_ALIAS_PLACE).with(Description.class).with(Media.class).with(Tag.class)
-				.with(Property.class);
+				.with(Property.class).with(Subscription.class);
 		// For a place overview we would like to know people who currently are
 		// in that place
 		final Collection<FacetCategory> userFacetCategories = Arrays.asList(SearchHelper.getTagFacetCategory());

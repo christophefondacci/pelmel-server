@@ -69,6 +69,12 @@
 		<property name="canonical" value="/resetPassword"/>
 		<property name="robotsTags" value="NOINDEX,NOFOLLOW"/>
 	</bean>
+	<bean id="validateEmailHeaderSupport" parent="titledHeaderSupport" scope="prototype">
+		<property name="titleMessageKey" value="header.title.validateEmail"/>
+		<property name="pageStyle" value="bar"/>
+		<property name="canonical" value="/validateEmail"/>
+		<property name="robotsTags" value="NOINDEX,NOFOLLOW"/>
+	</bean>
 	<bean id="partnersHeaderSupport" parent="titledHeaderSupport" scope="prototype">
 		<property name="titleMessageKey" value="partners.title"/>
 		<property name="pageStyle" value="profile"/>

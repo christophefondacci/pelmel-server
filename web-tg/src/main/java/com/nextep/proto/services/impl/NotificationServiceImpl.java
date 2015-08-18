@@ -554,7 +554,21 @@ public class NotificationServiceImpl implements NotificationService {
 		buf.append("If the link does not work try to copy / paste it in a new web browser window.");
 		fillEmailFooterFor(buf, user, user);
 
-		notifyByEmail("[PELMEL Guide] Lost password link", buf.toString(), user.getEmail(), "cfondacci@gmail.com");
+		notifyByEmail("[PELMEL] Lost password link", buf.toString(), user.getEmail(), "cfondacci@gmail.com");
+
+	}
+
+	public void sendEmailValidationEmail(User user) {
+
+		final StringBuilder buf = new StringBuilder();
+		buf.append("Hello " + user.getPseudo() + ",<br><br>");
+		buf.append("Please follow this link to validate your email address:<br>");
+		final String url = urlService.getEmailValidationUrl(user);
+		buf.append("<a href=\"" + url + "\">" + url + "</a><br><br>");
+		buf.append("If the link does not work try to copy / paste it in a new web browser window.");
+		fillEmailFooterFor(buf, user, user);
+
+		notifyByEmail("[PELMEL] Email validation", buf.toString(), user.getEmail(), "cfondacci@gmail.com");
 
 	}
 

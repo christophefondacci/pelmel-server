@@ -14,6 +14,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.NonUniqueResultException;
 import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -86,14 +87,20 @@ public class AdvertisingDaoImpl extends AbstractCalDao<CalmObject>implements Adv
 	}
 
 	@Override
-	public Map<ItemKey, List<Subscription>> getBoostersForUsers(List<ItemKey> itemKeys) {
+	public Map<ItemKey, List<Subscription>> getBoostersForUsers(List<ItemKey> itemKeys, boolean validOnly) {
 		final List<String> itemKeysStr = new ArrayList<String>();
 		for (ItemKey itemKey : itemKeys) {
 			itemKeysStr.add(itemKey.toString());
 		}
-		final List<Subscription> adBoosters = entityManager
-				.createQuery("from SubscriptionImpl where purchaserItemKey in (:itemKeys)")
-				.setParameter("itemKeys", itemKeysStr).getResultList();
+		String queryString = "from SubscriptionImpl where purchaserItemKey in (:itemKeys)";
+		if (validOnly) {
+			queryString = queryString + " and fromDate<=:currentDate and toDate>:currentDate";
+		}
+		final Query query = entityManager.createQuery(queryString).setParameter("itemKeys", itemKeysStr);
+		if (validOnly) {
+			query.setParameter("currentDate", new Date());
+		}
+		final List<Subscription> adBoosters = query.getResultList();
 		final Map<ItemKey, List<Subscription>> adBoostersKeyMap = new HashMap<ItemKey, List<Subscription>>();
 		for (Subscription adBooster : adBoosters) {
 			final ItemKey itemKey = adBooster.getPurchaserItemKey();

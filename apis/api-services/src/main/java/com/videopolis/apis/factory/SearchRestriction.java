@@ -62,10 +62,12 @@ public final class SearchRestriction {
 	private SearchRestriction() {
 	}
 
-	public static UniqueKeyCriterion uniqueKeys(List<ItemKey> keys)
-			throws ApisException {
-		return new UniqueKeyCriterionImpl(
-				keys.toArray(new ItemKey[keys.size()]));
+	public static UniqueKeyCriterion uniqueKey(ItemKey key) throws ApisException {
+		return uniqueKeys(Arrays.asList(key));
+	}
+
+	public static UniqueKeyCriterion uniqueKeys(List<ItemKey> keys) throws ApisException {
+		return new UniqueKeyCriterionImpl(keys.toArray(new ItemKey[keys.size()]));
 	}
 
 	/**
@@ -78,8 +80,7 @@ public final class SearchRestriction {
 	 *            the alternate key argument
 	 * @return an alternate key {@link ApisCriterion}
 	 */
-	public static AlternateKeyCriterion alternateKey(
-			Class<? extends CalmObject> itemType, ItemKey alternateKey) {
+	public static AlternateKeyCriterion alternateKey(Class<? extends CalmObject> itemType, ItemKey alternateKey) {
 		final String calType = ApisRegistry.getTypeFromModel(itemType);
 		return new AlternateKeyCriterionImpl(calType, alternateKey);
 	}
@@ -93,8 +94,7 @@ public final class SearchRestriction {
 	 *            type of items to retrieve <i>with</i> the primary item type
 	 * @return the corresponding {@link ApisCriterion}
 	 */
-	public static WithCriterion with(final Class<? extends CalmObject> itemType)
-			throws ApisException {
+	public static WithCriterion with(final Class<? extends CalmObject> itemType) throws ApisException {
 		final String type = ApisRegistry.getTypeFromModel(itemType);
 		return new WithCriterionImpl(type);
 	}
@@ -111,8 +111,7 @@ public final class SearchRestriction {
 	 *            to retrieve elements fetched by this criterion.
 	 * @return the corresponding {@link ApisCriterion}
 	 */
-	public static WithCriterion with(
-			final Class<? extends CalmObject> itemType, final String alias)
+	public static WithCriterion with(final Class<? extends CalmObject> itemType, final String alias)
 			throws ApisException {
 		final WithCriterion crit = with(itemType);
 		crit.aliasedBy(alias);
@@ -133,9 +132,8 @@ public final class SearchRestriction {
 	 *            {@link RequestType} to use to query the CalService
 	 * @return the corresponding {@link ApisCriterion}
 	 */
-	public static WithCriterion with(
-			final Class<? extends CalmObject> itemType,
-			final RequestType requestType) throws ApisException {
+	public static WithCriterion with(final Class<? extends CalmObject> itemType, final RequestType requestType)
+			throws ApisException {
 		final String type = ApisRegistry.getTypeFromModel(itemType);
 		final WithCriterionImpl withCriterion = new WithCriterionImpl(type);
 		withCriterion.setRequestType(requestType);
@@ -154,8 +152,7 @@ public final class SearchRestriction {
 	 *            page number (starts at 0)
 	 * @return the corresponding {@link ApisCriterion}
 	 */
-	public static WithCriterion with(
-			final Class<? extends CalmObject> itemType, final int itemsByPage,
+	public static WithCriterion with(final Class<? extends CalmObject> itemType, final int itemsByPage,
 			final int pageNumber) throws ApisException {
 		final String type = ApisRegistry.getTypeFromModel(itemType);
 		final WithCriterion withCrit = new WithCriterionImpl(type);
@@ -184,14 +181,12 @@ public final class SearchRestriction {
 	 * @return the corresponding {@link ApisCriterion}
 	 * @throws ApisException
 	 */
-	public static WithCriterion with(final Class<? extends CalmObject> type,
-			final Sorter.Order sortOrder, final String sortCriterion,
-			final int itemsPerPage, final int pageOffset) throws ApisException {
+	public static WithCriterion with(final Class<? extends CalmObject> type, final Sorter.Order sortOrder,
+			final String sortCriterion, final int itemsPerPage, final int pageOffset) throws ApisException {
 		final String itemType = ApisRegistry.getTypeFromModel(type);
 		final WithCriterion crit = new CustomizedWithCriterionImpl(itemType);
 		crit.paginatedBy(itemsPerPage, pageOffset);
-		final Sorter sorter = SorterFactory.createSorter(sortCriterion,
-				sortOrder);
+		final Sorter sorter = SorterFactory.createSorter(sortCriterion, sortOrder);
 		crit.sortBy(sorter);
 		return crit;
 	}
@@ -218,11 +213,9 @@ public final class SearchRestriction {
 	 * @deprecated use the overloaded method with the explicit search scope
 	 */
 	@Deprecated
-	public static SearchCriterion withNearest(
-			final Class<? extends CalmObject> itemType, final int pageSize,
+	public static SearchCriterion withNearest(final Class<? extends CalmObject> itemType, final int pageSize,
 			final int pageOffset, final double radius) throws ApisException {
-		return withNearest(itemType, SearchScope.NEARBY_BLOCK, pageSize,
-				pageOffset, radius);
+		return withNearest(itemType, SearchScope.NEARBY_BLOCK, pageSize, pageOffset, radius);
 	}
 
 	/**
@@ -248,13 +241,11 @@ public final class SearchRestriction {
 	 *            geographic search radius
 	 * @return a {@link ApisCriterion} containing this information
 	 */
-	public static SearchCriterion withNearest(
-			final Class<? extends CalmObject> itemType,
-			final SearchScope scope, final int pageSize, final int pageOffset,
-			final double radius) throws ApisException {
+	public static SearchCriterion withNearest(final Class<? extends CalmObject> itemType, final SearchScope scope,
+			final int pageSize, final int pageOffset, final double radius) throws ApisException {
 		final String type = ApisRegistry.getTypeFromModel(itemType);
-		final SearchCriterion searchCrit = new SearchCriterionImpl(type, scope,
-				SearchMethod.CITIES_WITHOUT_SHADOW, radius);
+		final SearchCriterion searchCrit = new SearchCriterionImpl(type, scope, SearchMethod.CITIES_WITHOUT_SHADOW,
+				radius);
 		searchCrit.paginatedBy(pageSize, pageOffset);
 
 		return searchCrit;
@@ -278,11 +269,11 @@ public final class SearchRestriction {
 	 * @throws ApisException
 	 *             whenever a problem prevents the criterion from being created
 	 */
-	public static ForCriterion forKey(final String type, final String id,
-			final int itemsByPage, final int pageNumber) throws ApisException {
+	public static ForCriterion forKey(final String type, final String id, final int itemsByPage, final int pageNumber)
+			throws ApisException {
 		try {
-			final ForCriterionImpl forCriterion = new ForCriterionImpl(
-					CalmFactory.createKey(type, id), itemsByPage, pageNumber);
+			final ForCriterionImpl forCriterion = new ForCriterionImpl(CalmFactory.createKey(type, id), itemsByPage,
+					pageNumber);
 			return forCriterion;
 		} catch (final CalException e) {
 			throw new ApisException("Invalid CAL key: " + e.getMessage(), e);
@@ -314,18 +305,15 @@ public final class SearchRestriction {
 	 * @throws ApisException
 	 *             whenever a problem prevents the criterion from being created
 	 */
-	public static ForCriterion forKey(
-			final Class<? extends CalmObject> calClass, final String type,
-			final String id, final int itemsByPage, final int pageNumber)
-			throws ApisException {
+	public static ForCriterion forKey(final Class<? extends CalmObject> calClass, final String type, final String id,
+			final int itemsByPage, final int pageNumber) throws ApisException {
 		try {
-			final ForCriterionImpl forCriterion = new ForCriterionImpl(
-					CalmFactory.createKey(type, id), itemsByPage, pageNumber);
+			final ForCriterionImpl forCriterion = new ForCriterionImpl(CalmFactory.createKey(type, id), itemsByPage,
+					pageNumber);
 			// Retrieving the CAL type associated with the CAL class
 			final String calType = ApisRegistry.getTypeFromModel(calClass);
 			// Safety check
-			Assert.notNull(calType, "Invalid or unmapped CAL class : "
-					+ calClass);
+			Assert.notNull(calType, "Invalid or unmapped CAL class : " + calClass);
 			// Assigning the type to the criterion
 			forCriterion.setType(ApisRegistry.getTypeFromModel(calClass));
 
@@ -350,8 +338,7 @@ public final class SearchRestriction {
 		return new AdapterCriterionImpl(adapter);
 	}
 
-	public static ItemKeyAdapterCriterion adaptKey(
-			final ApisItemKeyAdapter adapter) {
+	public static ItemKeyAdapterCriterion adaptKey(final ApisItemKeyAdapter adapter) {
 		return new ItemKeyAdapterCriterionImpl(adapter);
 	}
 
@@ -371,13 +358,10 @@ public final class SearchRestriction {
 	 * @return the {@link SearchCriterion}
 	 * @throws ApisException
 	 */
-	public static SearchCriterion withContained(
-			final Class<? extends CalmObject> itemType,
-			final SearchScope scope, final int pageSize, final int pageOffset)
-			throws ApisException {
+	public static SearchCriterion withContained(final Class<? extends CalmObject> itemType, final SearchScope scope,
+			final int pageSize, final int pageOffset) throws ApisException {
 		final String type = ApisRegistry.getTypeFromModel(itemType);
-		final SearchCriterion searchCrit = new SearchCriterionImpl(type, scope,
-				SearchMethod.CITIES_WITHOUT_SHADOW);
+		final SearchCriterion searchCrit = new SearchCriterionImpl(type, scope, SearchMethod.CITIES_WITHOUT_SHADOW);
 		searchCrit.paginatedBy(pageSize, pageOffset);
 		return searchCrit;
 	}
@@ -401,13 +385,10 @@ public final class SearchRestriction {
 	 * @return the {@link SearchCriterion}
 	 * @throws ApisException
 	 */
-	public static SearchCriterion withContained(
-			final Class<? extends CalmObject> itemType,
-			final SearchScope scope, final SearchMethod searchMethod,
-			final int pageSize, final int pageOffset) throws ApisException {
+	public static SearchCriterion withContained(final Class<? extends CalmObject> itemType, final SearchScope scope,
+			final SearchMethod searchMethod, final int pageSize, final int pageOffset) throws ApisException {
 		final String type = ApisRegistry.getTypeFromModel(itemType);
-		final SearchCriterion searchCrit = new SearchCriterionImpl(type, scope,
-				searchMethod);
+		final SearchCriterion searchCrit = new SearchCriterionImpl(type, scope, searchMethod);
 		searchCrit.paginatedBy(pageSize, pageOffset);
 		return searchCrit;
 	}
@@ -427,45 +408,37 @@ public final class SearchRestriction {
 	 *            number of items to search for
 	 * @return the corresponding {@link ApisCriterion}
 	 */
-	public static WithCriterion searchFromText(
-			final Class<? extends CalmObject> itemType,
-			final SuggestScope scopes, final String text, final int itemsCount) {
+	public static WithCriterion searchFromText(final Class<? extends CalmObject> itemType, final SuggestScope scopes,
+			final String text, final int itemsCount) {
 		return searchFromText(itemType, Arrays.asList(scopes), text, itemsCount);
 	}
 
-	public static WithCriterion searchFromText(
-			final Class<? extends CalmObject> itemType,
-			final List<SuggestScope> scopes, final String text,
-			final int itemsCount) {
+	public static WithCriterion searchFromText(final Class<? extends CalmObject> itemType,
+			final List<SuggestScope> scopes, final String text, final int itemsCount) {
 		final String type = ApisRegistry.getTypeFromModel(itemType);
 		return new SearchTextCriterionImpl(type, scopes, text, itemsCount);
 	}
 
-	public static SearchCriterion searchAll(
-			Class<? extends CalmObject> itemType, SearchScope scope,
-			int pageSize, int pageOffset) {
+	public static SearchCriterion searchAll(Class<? extends CalmObject> itemType, SearchScope scope, int pageSize,
+			int pageOffset) {
 		final String type = ApisRegistry.getTypeFromModel(itemType);
-		final SearchCriterion crit = new SearchAllCriterionImpl(type, scope,
-				SearchMethod.CITIES_WITH_SHADOW);
+		final SearchCriterion crit = new SearchAllCriterionImpl(type, scope, SearchMethod.CITIES_WITH_SHADOW);
 		crit.paginatedBy(pageSize, pageOffset);
 		return crit;
 	}
 
-	public static SearchCriterion searchForAllFacets(
-			Class<? extends CalmObject> itemType, SearchScope scope) {
+	public static SearchCriterion searchForAllFacets(Class<? extends CalmObject> itemType, SearchScope scope) {
 		final String type = ApisRegistry.getTypeFromModel(itemType);
-		final SearchCriterion crit = new SearchAllCriterionImpl(type, scope,
-				SearchMethod.NO_FACET_LIMIT);
+		final SearchCriterion crit = new SearchAllCriterionImpl(type, scope, SearchMethod.NO_FACET_LIMIT);
 		crit.paginatedBy(0, 0);
 		return crit;
 	}
 
-	public static SearchCriterion searchNear(
-			Class<? extends CalmObject> itemType, SearchScope scope,
-			double lat, double lng, double radius, int pageSize, int pageOffset) {
+	public static SearchCriterion searchNear(Class<? extends CalmObject> itemType, SearchScope scope, double lat,
+			double lng, double radius, int pageSize, int pageOffset) {
 		final String type = ApisRegistry.getTypeFromModel(itemType);
-		final SearchCriterion crit = new SearchNearCriterionImpl(type, scope,
-				SearchMethod.CITIES_WITHOUT_SHADOW, lat, lng, radius);
+		final SearchCriterion crit = new SearchNearCriterionImpl(type, scope, SearchMethod.CITIES_WITHOUT_SHADOW, lat,
+				lng, radius);
 		crit.paginatedBy(pageSize, pageOffset);
 		return crit;
 	}
@@ -482,9 +455,8 @@ public final class SearchRestriction {
 	 * @return the request
 	 * @throws ApisException
 	 */
-	public static ListCriterion list(
-			final Class<? extends CalmObject> itemType,
-			final RequestType requestType) throws ApisException {
+	public static ListCriterion list(final Class<? extends CalmObject> itemType, final RequestType requestType)
+			throws ApisException {
 		final String type = ApisRegistry.getTypeFromModel(itemType);
 		return new ListCriterionImpl(type, requestType);
 	}
@@ -500,8 +472,7 @@ public final class SearchRestriction {
 	 *            the alias under which elements are aggregated in the response
 	 * @return the criteria container properly configured
 	 */
-	public static ApisCriterion customAdapt(ApisCustomAdapter adapter,
-			String alias) {
+	public static ApisCriterion customAdapt(ApisCustomAdapter adapter, String alias) {
 		return new CustomAdaptCriterionImpl(adapter, alias);
 	}
 }

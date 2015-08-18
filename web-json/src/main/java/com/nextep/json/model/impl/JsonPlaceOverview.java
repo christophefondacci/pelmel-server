@@ -8,8 +8,7 @@ import java.util.List;
 import com.nextep.json.model.IJsonDescripted;
 import com.nextep.json.model.IJsonPlace;
 
-public class JsonPlaceOverview extends JsonLiker implements IJsonDescripted,
-		IJsonPlace {
+public class JsonPlaceOverview extends JsonLiker implements IJsonDescripted, IJsonPlace {
 	private String key;
 	private String city;
 	private String timezoneId;
@@ -20,6 +19,7 @@ public class JsonPlaceOverview extends JsonLiker implements IJsonDescripted,
 	private String descriptionKey;
 	private String descriptionLanguage;
 	private JsonMedia thumb;
+	private String ownerKey;
 	private List<JsonMedia> otherImages = new ArrayList<JsonMedia>();
 	private List<JsonFacet> likesFacets = Collections.emptyList();
 	private List<JsonFacet> usersFacets = Collections.emptyList();
@@ -30,6 +30,7 @@ public class JsonPlaceOverview extends JsonLiker implements IJsonDescripted,
 	private List<JsonLightEvent> events = new ArrayList<JsonLightEvent>();
 	private Collection<JsonHour> hours = new ArrayList<JsonHour>();
 	private Collection<JsonProperty> properties = new ArrayList<JsonProperty>();
+	private List<JsonDeal> deals = new ArrayList<>();
 
 	public JsonPlaceOverview(String key) {
 		this.key = key;
@@ -245,5 +246,30 @@ public class JsonPlaceOverview extends JsonLiker implements IJsonDescripted,
 
 	public void addProperty(JsonProperty property) {
 		properties.add(property);
+	}
+
+	@Override
+	public void setOwnerKey(String ownerKey) {
+		this.ownerKey = ownerKey;
+	}
+
+	@Override
+	public String getOwnerKey() {
+		return ownerKey;
+	}
+
+	@Override
+	public List<JsonDeal> getDeals() {
+		return deals;
+	}
+
+	@Override
+	public void setDeals(List<JsonDeal> deals) {
+		this.deals = deals;
+	}
+
+	@Override
+	public void addDeal(JsonDeal deal) {
+		this.deals.add(deal);
 	}
 }
