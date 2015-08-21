@@ -109,4 +109,7 @@ public interface Constants {
 	String APIS_ALIAS_NETWORK_MEMBER = "connected";
 	String APIS_ALIAS_NETWORK_REQUEST = "request";
 	String APIS_ALIAS_NETWORK_PENDING_APPROVAL = "pending";
+
+	// STATS
+	String VIEW_STAT_DEAL_USE = "DEAL_USED";
 }

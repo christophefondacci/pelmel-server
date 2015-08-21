@@ -24,4 +24,10 @@
 			<bean class="com.nextep.deals.dao.impl.DealDaoImpl" />
 		</property>
 	</bean>
+	<bean id="abstractDealUseService" class="com.nextep.deals.services.impl.DealUseServiceImpl"
+		abstract="true">
+		<property name="dealDao">
+			<bean class="com.nextep.deals.dao.impl.DealDaoImpl" />
+		</property>
+	</bean>
 </beans>

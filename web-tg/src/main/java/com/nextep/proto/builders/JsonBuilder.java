@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import com.fgp.deals.model.Deal;
 import com.nextep.activities.model.Activity;
 import com.nextep.advertising.model.AdvertisingBanner;
 import com.nextep.comments.model.Comment;
@@ -16,6 +17,7 @@ import com.nextep.geo.model.Place;
 import com.nextep.json.model.IJsonLightEvent;
 import com.nextep.json.model.impl.JsonActivity;
 import com.nextep.json.model.impl.JsonBanner;
+import com.nextep.json.model.impl.JsonDeal;
 import com.nextep.json.model.impl.JsonHour;
 import com.nextep.json.model.impl.JsonLightCity;
 import com.nextep.json.model.impl.JsonLightPlace;
@@ -257,4 +259,13 @@ public interface JsonBuilder {
 	 * @return the {@link JsonStatistic} bean
 	 */
 	JsonStatistic buildJsonStatistic(ItemView itemView);
+
+	/**
+	 * Builds the JSON deal bean from a {@link Deal} object
+	 * 
+	 * @param deal
+	 *            the {@link Deal} model object bean
+	 * @return the {@link JsonDeal} instance
+	 */
+	JsonDeal buildJsonDeal(Deal deal);
 }

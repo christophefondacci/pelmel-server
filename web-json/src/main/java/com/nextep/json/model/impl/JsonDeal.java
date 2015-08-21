@@ -9,6 +9,7 @@ public class JsonDeal {
 	private String type;
 	private Long startDate;
 	private String relatedItemKey;
+	private int usedToday;
 
 	public String getKey() {
 		return key;
@@ -54,4 +55,11 @@ public class JsonDeal {
 		this.relatedItemKey = relatedItemKey;
 	}
 
+	public void setUsedToday(int usedToday) {
+		this.usedToday = usedToday;
+	}
+
+	public int getUsedToday() {
+		return usedToday;
+	}
 }

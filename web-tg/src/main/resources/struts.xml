@@ -463,6 +463,13 @@
 		</action>
 		<action name="mobileSubscribe" class="mobileSubscribeAction">
 			<result>/jsp/pages/json.jsp</result>
+			<result name="success" type="redirectAction">
+				<param name="actionName">place</param>
+				<param name="namespace">/api</param>
+				<param name="prependServletContext">false</param>
+				<param name="parse">true</param>
+				<param name="id">${subscribedKey}</param>
+			</result>
 			<result name="input">/jsp/pages/json-error.jsp</result>
 			<result name="error">/jsp/pages/json-error.jsp</result>
 		</action>
@@ -566,6 +573,16 @@
 			<result name="error">/jsp/pages/json-error.jsp</result>
 		</action>
 		<action name="mobileComments" class="ajaxCommentsAction">
+			<result>/jsp/pages/json.jsp</result>
+			<result name="input">/jsp/pages/json-error.jsp</result>
+			<result name="error">/jsp/pages/json-error.jsp</result>
+		</action>
+		<action name="mobileActivateDeal" class="activateDealAction">
+			<result>/jsp/pages/json.jsp</result>
+			<result name="input">/jsp/pages/json-error.jsp</result>
+			<result name="error">/jsp/pages/json-error.jsp</result>
+		</action>
+		<action name="mobileUseDeal" class="useDealAction">
 			<result>/jsp/pages/json.jsp</result>
 			<result name="input">/jsp/pages/json-error.jsp</result>
 			<result name="error">/jsp/pages/json-error.jsp</result>

@@ -16,6 +16,12 @@
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
+			<groupId>neXtep</groupId>
+			<artifactId>cal-utils</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-annotations</artifactId>
 			<version>3.5.0-Final</version>

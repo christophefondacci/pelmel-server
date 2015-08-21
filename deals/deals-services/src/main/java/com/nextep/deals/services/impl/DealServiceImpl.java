@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Map;
 
 import com.fgp.deals.model.Deal;
+import com.fgp.deals.model.impl.DealImpl;
+import com.nextep.cal.util.services.CalPersistenceService;
 import com.nextep.cal.util.services.base.AbstractDaoBasedCalServiceImpl;
 import com.nextep.deals.dao.DealDao;
 import com.videopolis.calm.exception.CalException;
@@ -13,7 +15,7 @@ import com.videopolis.cals.model.CalContext;
 import com.videopolis.cals.model.MultiKeyItemsResponse;
 import com.videopolis.cals.model.impl.MultiKeyItemsResponseImpl;
 
-public class DealServiceImpl extends AbstractDaoBasedCalServiceImpl {
+public class DealServiceImpl extends AbstractDaoBasedCalServiceImpl implements CalPersistenceService {
 
 	@Override
 	public Class<? extends CalmObject> getProvidedClass() {
@@ -43,4 +45,22 @@ public class DealServiceImpl extends AbstractDaoBasedCalServiceImpl {
 		// Returning
 		return response;
 	}
+
+	@Override
+	public void saveItem(CalmObject object) {
+		getCalDao().save(object);
+	}
+
+	@Override
+	public List<? extends CalmObject> setItemFor(ItemKey contributedItemKey, ItemKey... internalItemKeys)
+			throws CalException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public CalmObject createTransientObject() {
+		return new DealImpl();
+	}
+
 }

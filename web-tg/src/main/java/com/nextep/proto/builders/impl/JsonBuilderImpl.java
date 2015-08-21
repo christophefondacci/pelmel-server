@@ -17,6 +17,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.fgp.deals.model.Deal;
+import com.fgp.deals.model.DealUse;
 import com.nextep.activities.model.Activity;
 import com.nextep.advertising.model.AdvertisingBanner;
 import com.nextep.advertising.model.Subscription;
@@ -831,6 +832,7 @@ public class JsonBuilderImpl implements JsonBuilder {
 		json.setDeals(jsonDeals);
 	}
 
+	@Override
 	public JsonDeal buildJsonDeal(Deal deal) {
 		final JsonDeal json = new JsonDeal();
 		json.setKey(deal.getKey().toString());
@@ -838,6 +840,11 @@ public class JsonBuilderImpl implements JsonBuilder {
 		json.setStartDateValue(deal.getStartDate());
 		json.setStatus(deal.getStatus().name());
 		json.setType(deal.getDealType().name());
+
+		final List<? extends DealUse> dealUses = deal.get(DealUse.class);
+		if (dealUses != null) {
+			json.setUsedToday(dealUses.size());
+		}
 		return json;
 	}
 

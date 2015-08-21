@@ -17,8 +17,11 @@
 	<aop:config>
 		<aop:pointcut id="dealsServicePointcut"
 			expression="execution(* com.nextep.deals.services.impl.DealServiceImpl.*(..))" />
+		<aop:pointcut id="dealUsesServicePointcut"
+			expression="execution(* com.nextep.deals.services.impl.DealUseServiceImpl.*(..))" />
 
 		<aop:advisor advice-ref="dealsTransactionAdvice" pointcut-ref="dealsServicePointcut" />
+		<aop:advisor advice-ref="dealsTransactionAdvice" pointcut-ref="dealUsesServicePointcut" />
 	</aop:config>
 
 	<bean id="dealsTransactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">

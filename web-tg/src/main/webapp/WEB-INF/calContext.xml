@@ -26,6 +26,7 @@
 	<bean id="activitiesService" parent="abstractActivitiesService" />
 	<bean id="advertisingService" parent="abstractAdvertisingService" />
 	<bean id="dealService" parent="abstractDealService" />
+	<bean id="dealUseService" parent="abstractDealUseService" />
 	<bean id="bannersService" parent="abstractBannersService" />
 	<bean id="propertiesService" parent="abstractPropertiesService" />
 	<bean id="descService" parent="abstractDescriptionsService" />

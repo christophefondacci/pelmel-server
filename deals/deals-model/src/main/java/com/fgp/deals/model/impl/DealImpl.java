@@ -14,6 +14,7 @@ import org.apache.commons.logging.LogFactory;
 import com.fgp.deals.model.DealStatus;
 import com.fgp.deals.model.DealType;
 import com.fgp.deals.model.MutableDeal;
+import com.nextep.cal.util.helpers.CalHelper;
 import com.videopolis.calm.base.AbstractCalmObject;
 import com.videopolis.calm.exception.CalException;
 import com.videopolis.calm.factory.CalmFactory;
@@ -47,6 +48,11 @@ public class DealImpl extends AbstractCalmObject implements MutableDeal {
 
 	public DealImpl() {
 		super(null);
+	}
+
+	@Override
+	public ItemKey getKey() {
+		return CalHelper.getItemKeyFromId(CAL_ID, id);
 	}
 
 	@Override

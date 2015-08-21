@@ -770,6 +770,12 @@
 	<bean id="adminOwnerReportAction" class="com.nextep.proto.action.impl.admin.AdminOwnerReportAction" parent="abstractAction" scope="request">
 		<property name="urlService" ref="urlService"/>
 	</bean> 
+	<bean id="activateDealAction" class="com.nextep.proto.action.mobile.impl.MobileActivateDealAction" parent="abstractAction" scope="request">
+		<property name="urlService" ref="urlService"/>
+	</bean> 
+	<bean id="useDealAction" class="com.nextep.proto.action.mobile.impl.MobileUseDealAction" parent="abstractAction" scope="request">
+		<property name="urlService" ref="urlService"/>
+	</bean> 
 	<bean id="adminUsersAction" class="com.nextep.proto.action.impl.admin.AdminUsersAction" parent="abstractAction" scope="request">
 		<property name="headerSupport" ref="adminUsersHeaderSupport"/>
 		<property name="urlService" ref="urlService"/>
