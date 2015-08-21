@@ -47,12 +47,21 @@ public class StatisticsDaoImpl extends AbstractCalDao<Statistic>implements Stati
 	@Override
 	public List<ItemView> getReportFor(ItemKey itemKey, StatisticPeriod period) {
 		Query query = null;
-		query = entityManager.createNativeQuery(
-				"select DAte(view_date) as view_day, view_type, count(distinct item_key_viewer) from STAT_VIEWS"
-						+ " where ITEM_KEY_VIEWED=:itemKey and view_date>date_add(now(),interval -"
-						+ period.getRangeDuration() + " day) and  ITEM_KEY_VIEWER is not null"
-						+ " group by view_day, view_type;")
-				.setParameter("itemKey", itemKey.toString());
+		if (period.getIncrementTime() >= 86400000) {
+			query = entityManager.createNativeQuery(
+					"select date(view_date) as view_day, view_type, count(distinct item_key_viewer) from STAT_VIEWS"
+							+ " where ITEM_KEY_VIEWED=:itemKey and view_date>date_add(now(),interval -"
+							+ period.getRangeDuration() + " day) and  ITEM_KEY_VIEWER is not null"
+							+ " group by view_day, view_type;")
+					.setParameter("itemKey", itemKey.toString());
+		} else {
+			query = entityManager.createNativeQuery(
+					"select str_to_date(date_format(view_date,'%Y-%m-%d %H:00:00'),'%Y-%m-%d %H:%i:%s') as view_day, view_type, count(distinct item_key_viewer) from STAT_VIEWS "
+							+ "where ITEM_KEY_VIEWED=:itemKey "
+							+ "and view_date>date_add(now(),interval -1 day) and  ITEM_KEY_VIEWER is not null "
+							+ "group by view_day, view_type")
+					.setParameter("itemKey", itemKey.toString());
+		}
 		final List<ItemView> items = new ArrayList<>();
 		if (query != null) {
 			List<Object[]> results = query.getResultList();
