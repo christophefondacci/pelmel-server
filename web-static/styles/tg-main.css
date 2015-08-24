@@ -17,6 +17,14 @@ body {
   /* Pad bottom by footer height */
   padding: 0 0 405px;
 }
+#wrap-hp {
+  min-height: 100%;
+  height: auto;
+  /* Negative indent footer by its height */
+  margin: 0 auto -225px;
+  /* Pad bottom by footer height */
+  padding: 0 0 225px;
+}
 
 h1,h2,h3 {
 /* 	font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif; */
@@ -180,9 +188,12 @@ button.close {
 	font-size: 30px;
 }
 a {
-	color: #3B5998;
+	color: #f48020;	
 	text-decoration: none;
 	border: none;
+}
+.pre-hp-footer a {
+	text-decoration: underline;
 }
 .container-content a {
 	display: block;
@@ -2889,13 +2900,16 @@ h1.home-slogan {
 .apple-badge {
 	margin-left: auto;
 	margin-right: auto;
-	width: 120px;
 	display: block;
+	height:50px;
+}
+.apple-badge.block-apps {
+	width:142px;
 }
 .android-badge {
 	margin-left: auto;
 	margin-right: auto;
-	width: 120px;
+	height:50px;
 	display: block;
 }
 .left-badge-text {
@@ -3380,4 +3394,28 @@ label.text-right {
 }
 .admin-icon {
 	width:20px;
+}
+.homepage-screenshot {
+	height:500px;
+	padding: 20px;
+}
+.screenshot-container {
+	text-align: center;
+}
+.hp.logo {
+	margin-top:25px;
+}
+.mini-hp-title {
+	padding-top:10px;
+	padding-left:5px;
+}
+.mini-hp-title > a  {
+	color:white;
+}
+.hp-apps {
+	margin-top:60px;
+}
+.pelmel-hp-text {
+	color: #d26002;
+	font-size:1.4em;
 }

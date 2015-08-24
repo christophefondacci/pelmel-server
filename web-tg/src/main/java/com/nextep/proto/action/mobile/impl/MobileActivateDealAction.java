@@ -20,6 +20,7 @@ import com.nextep.proto.action.model.JsonProvider;
 import com.nextep.proto.blocks.CurrentUserSupport;
 import com.nextep.proto.builders.JsonBuilder;
 import com.nextep.proto.services.RightsManagementService;
+import com.nextep.proto.spring.ContextHolder;
 import com.nextep.users.model.User;
 import com.videopolis.apis.factory.ApisFactory;
 import com.videopolis.apis.factory.SearchRestriction;
@@ -78,7 +79,7 @@ public class MobileActivateDealAction extends AbstractAction implements JsonProv
 		if (isOwner(user, place)) {
 
 			final List<? extends Deal> deals = place.get(Deal.class);
-
+			ContextHolder.toggleWrite();
 			// If no deal specified we create it
 			if (deals.isEmpty() && dealKey == null) {
 				final MutableDeal deal = (MutableDeal) dealsService.createTransientObject();

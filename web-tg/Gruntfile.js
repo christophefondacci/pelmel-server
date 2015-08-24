@@ -17,10 +17,10 @@ module.exports = function(grunt) {
 					src : [ 'dist/' ]
 				},
 				useminPrepare : {
-					html : 'target/web-proto/jsp/structure/default.jsp'
+					html : ['target/web-proto/jsp/structure/default.jsp','target/web-proto/jsp/structure/homepage.jsp']
 				},
 				usemin : {
-					html : 'target/web-proto/jsp/structure/default.jsp',
+					html : ['target/web-proto/jsp/structure/default.jsp','target/web-proto/jsp/structure/homepage.jsp'],
 					options : {
 						flow : {
 							html : {

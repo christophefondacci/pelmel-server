@@ -37,7 +37,7 @@
 			<interceptor-ref name="default" />
 		</action>
 		<action name="index" class="indexAction">
-			<result type="tiles">homepage</result>
+			<result type="tiles">homepageStatic</result>
 			<interceptor-ref name="default" />
 		</action>
 		<action name="disconnect" class="disconnectAction">
@@ -618,6 +618,10 @@
 		</action>
 		<action name="about" class="aboutAction">
 			<result type="tiles">about</result>
+			<interceptor-ref name="default" />
+		</action>
+		<action name="privacy" class="aboutAction">
+			<result type="tiles">privacy</result>
 			<interceptor-ref name="default" />
 		</action>
 		<action name="ajaxGetLoginForm" class="aboutAction">

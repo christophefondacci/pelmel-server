@@ -16,6 +16,6 @@
 <div class="prepend-top col-xs-24 col-sm-offset-1 col-sm-23">
 	<h2 class="section-title main-info-title"><s:text name="about.terms"/></h2>
 	<span class="prepend-top"><s:text name="about.terms.contents"/></span>
-	<span class="prepend-top"><s:property value="getText('about.terms.contents.desc')" escapeHtml="false"/></span>
+	<span class="prepend-top"><tiles:insertTemplate template="/jsp/top/terms.jsp"/></span>
 	
 </div>

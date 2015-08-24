@@ -41,8 +41,7 @@ public class GeoPlaceTypesSupportImpl implements GeoPlaceTypesSupport {
 	private List<String> otherPlaceTypes;
 
 	@Override
-	public void initialize(Locale l, UrlService urlService,
-			GeographicItem parentGeoItem, FacetInformation facetInfo,
+	public void initialize(Locale l, UrlService urlService, GeographicItem parentGeoItem, FacetInformation facetInfo,
 			String currentPlaceType, ApiResponse response) {
 		this.locale = l;
 		this.urlService = urlService;
@@ -52,8 +51,7 @@ public class GeoPlaceTypesSupportImpl implements GeoPlaceTypesSupport {
 
 		// Iterating over all facet counts to extract all place types but the
 		// current one
-		final List<FacetCount> facetCounts = facetInfo
-				.getFacetCounts(SearchHelper.getPlaceTypeCategory());
+		final List<FacetCount> facetCounts = facetInfo.getFacetCounts(SearchHelper.getPlaceTypeCategory());
 		otherPlaceTypesMap = new HashMap<String, Integer>();
 		for (FacetCount fc : facetCounts) {
 			// If we got a code different from current place type then we add it
@@ -66,17 +64,15 @@ public class GeoPlaceTypesSupportImpl implements GeoPlaceTypesSupport {
 		// Getting user and event pagination from APIS response to determine
 		// whether
 		// or not we should add those entries to the menu
-		final PaginationInfo userPagination = response
-				.getPaginationInfo(Constants.APIS_ALIAS_USER_COUNT);
-		final PaginationInfo eventPagination = response
-				.getPaginationInfo(Constants.APIS_ALIAS_EVENT_COUNT);
-		if (userPagination != null && userPagination.getItemCount() > 0) {
-			otherPlaceTypesMap.put(SearchType.MEN.getSubtype(),
-					userPagination.getItemCount());
-		}
+		// final PaginationInfo userPagination = response
+		// .getPaginationInfo(Constants.APIS_ALIAS_USER_COUNT);
+		final PaginationInfo eventPagination = response.getPaginationInfo(Constants.APIS_ALIAS_EVENT_COUNT);
+		// if (userPagination != null && userPagination.getItemCount() > 0) {
+		// otherPlaceTypesMap.put(SearchType.MEN.getSubtype(),
+		// userPagination.getItemCount());
+		// }
 		if (eventPagination != null && eventPagination.getItemCount() > 0) {
-			otherPlaceTypesMap.put(SearchType.EVENTS.getSubtype(),
-					eventPagination.getItemCount());
+			otherPlaceTypesMap.put(SearchType.EVENTS.getSubtype(), eventPagination.getItemCount());
 		}
 
 		// Building a sorted list of placetypes
@@ -101,8 +97,7 @@ public class GeoPlaceTypesSupportImpl implements GeoPlaceTypesSupport {
 
 	@Override
 	public String getPlaceTypeLabel(String placeType) {
-		return messageSource.getMessage(TRANSLATION_KEY_PLACETYPE_PREFIX
-				+ placeType, null, locale);
+		return messageSource.getMessage(TRANSLATION_KEY_PLACETYPE_PREFIX + placeType, null, locale);
 	}
 
 	@Override
@@ -119,8 +114,7 @@ public class GeoPlaceTypesSupportImpl implements GeoPlaceTypesSupport {
 	public String getPlaceTypeUrl(String placeType) {
 		// Building the URL for the given place type in the current geographic
 		// container
-		return urlService.buildSearchUrl(
-				DisplayHelper.getDefaultAjaxContainer(), parentGeoItem,
+		return urlService.buildSearchUrl(DisplayHelper.getDefaultAjaxContainer(), parentGeoItem,
 				SearchType.fromPlaceType(placeType), facetInfo, 0);
 	}
 

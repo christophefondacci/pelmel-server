@@ -57,6 +57,24 @@
 	</definition>
 
 	<!--  Homepage -->
+	<definition name="homepageStatic" template="/jsp/structure/homepage.jsp">
+		<put-attribute name="title" value="Overview" />
+		<put-attribute name="ads-footer" value="/jsp/footer/ads-footer.jsp" />
+		<put-attribute name="meta-header" value="/jsp/header/meta-header.jsp" />
+		<put-attribute name="header" value="/jsp/header/default-header.jsp" />
+		<put-attribute name="footer" value="/jsp/footer/default-footer.jsp" />
+		<put-attribute name="content" value="/jsp/structure/empty.jsp" />
+		<put-attribute name="central-block" value="/jsp/structure/empty.jsp" />
+		<put-attribute name="page-left" value="/jsp/left-column/left-messaging.jsp" />
+		<put-attribute name="page-top" value="/jsp/structure/empty.jsp" />
+		<put-attribute name="page-breadcrumb-section" value="default-breadcrumb" type="definition" />
+		<put-attribute name="page-toolbar" value="/jsp/structure/empty.jsp"/>
+		<put-attribute name="page-controls" value="/jsp/structure/empty.jsp"/>
+		<put-attribute name="header-bars" value="/jsp/blocks/block-header-bars.jsp"/>
+		<put-attribute name="background" value=""/>
+		<put-attribute name="left-style" value="left-header"/>
+		<put-attribute name="main-col-class" value="main-col"/>
+	</definition>
 	<definition name="homepage" extends="base">
 		<put-attribute name="content" value="/jsp/pages/homepage-content.jsp"/>
 		<put-attribute name="page-top" value="/jsp/top/top-homepage.jsp"/>
@@ -240,6 +258,9 @@
 	</definition>
 	<definition name="about" extends="static">
 		<put-attribute name="page-top" value="/jsp/top/top-about.jsp"/>
+	</definition>
+	<definition name="privacy" extends="static">
+		<put-attribute name="page-top" value="/jsp/top/top-privacy.jsp"/>
 	</definition>
 	<definition name="partners" extends="static">
 		<put-attribute name="page-top" value="/jsp/top/top-partners.jsp"/>

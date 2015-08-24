@@ -54,8 +54,9 @@
 		</div>
 	
 		<div class="col-xs-24">
-			<s:set value="activitySupport" var="activitySupport"/>
-			<tiles:insertTemplate template="/jsp/blocks/block-activities.jsp"/>
+<%-- 			<s:set value="activitySupport" var="activitySupport"/> --%>
+<%-- 			<tiles:insertTemplate template="/jsp/blocks/block-activities.jsp"/> --%>
+			&nbsp;
 		</div>
 	</div>
 </div>
