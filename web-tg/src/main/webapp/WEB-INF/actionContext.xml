@@ -337,6 +337,7 @@
 		<property name="currentUserSupport" ref="currentUserSupport"/>
 		<property name="jsonBuilder" ref="jsonBuilder"/>
 	</bean>
+	
 	<bean id="mobileSearchEvents" class="com.nextep.proto.action.mobile.impl.NearbyEventsListAction" parent="abstractMobileAction" scope="request">
 		<property name="searchSupport" ref="eventSearchSupport"/>
 		<property name="tagSupport" ref="mobileTagSupport"/>
@@ -791,6 +792,8 @@
 		<property name="urlService" ref="urlService"/>
 		<property name="currentUserSupport" ref="currentUserSupport"/>
 	</bean> 
+	<bean id="adminMessageAudienceAction" class="com.nextep.proto.action.impl.admin.AdminMessageAudienceAction" parent="abstractMobileAction" scope="request">
+	</bean>
 	<bean id="staticNotFoundAction" class="com.nextep.proto.action.impl.StaticNotFoundAction" parent="abstractAction">
 		<property name="headerSupport" ref="aboutHeaderSupport"/>
 	</bean>

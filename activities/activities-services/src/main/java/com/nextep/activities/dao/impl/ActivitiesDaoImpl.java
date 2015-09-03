@@ -4,6 +4,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,11 +30,9 @@ import com.videopolis.calm.model.ItemKey;
 import com.videopolis.calm.model.RequestType;
 import com.videopolis.cals.model.RequestSettings;
 
-public class ActivitiesDaoImpl extends AbstractCalDao<Activity> implements
-		ActivitiesDao {
+public class ActivitiesDaoImpl extends AbstractCalDao<Activity>implements ActivitiesDao {
 
-	private static final Log LOGGER = LogFactory
-			.getLog(ActivitiesDaoImpl.class);
+	private static final Log LOGGER = LogFactory.getLog(ActivitiesDaoImpl.class);
 	private static final int DEFAULT_RESULTS_COUNT = 30;
 
 	@PersistenceContext(unitName = "nextep-activities")
@@ -42,9 +41,8 @@ public class ActivitiesDaoImpl extends AbstractCalDao<Activity> implements
 	@Override
 	public Activity getById(long id) {
 		try {
-			return (Activity) entityManager
-					.createQuery("from ActivityImpl where id=:id")
-					.setParameter("id", id).getSingleResult();
+			return (Activity) entityManager.createQuery("from ActivityImpl where id=:id").setParameter("id", id)
+					.getSingleResult();
 		} catch (NoResultException e) {
 			LOGGER.error("Unable to get activity from unique id " + id);
 			return null;
@@ -55,9 +53,8 @@ public class ActivitiesDaoImpl extends AbstractCalDao<Activity> implements
 	@Override
 	public List<Activity> getByIds(List<Long> idList) {
 		if (!idList.isEmpty()) {
-			return entityManager
-					.createQuery("from ActivityImpl where id in (:ids)")
-					.setParameter("ids", idList).getResultList();
+			return entityManager.createQuery("from ActivityImpl where id in (:ids)").setParameter("ids", idList)
+					.getResultList();
 		} else {
 			return Collections.emptyList();
 		}
@@ -65,13 +62,10 @@ public class ActivitiesDaoImpl extends AbstractCalDao<Activity> implements
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<Activity> getItemsFor(ItemKey key, int resultsPerPage,
-			int pageOffset) {
+	public List<Activity> getItemsFor(ItemKey key, int resultsPerPage, int pageOffset) {
 		return entityManager
-				.createQuery(
-						"from ActivityImpl where loggedItemKey=:key and visible=true order by date DESC")
-				.setParameter("key", key.toString())
-				.setFirstResult(pageOffset * resultsPerPage)
+				.createQuery("from ActivityImpl where loggedItemKey=:key and visible=true order by date DESC")
+				.setParameter("key", key.toString()).setFirstResult(pageOffset * resultsPerPage)
 				.setMaxResults(resultsPerPage).getResultList();
 	}
 
@@ -80,13 +74,11 @@ public class ActivitiesDaoImpl extends AbstractCalDao<Activity> implements
 	public Map<ItemKey, List<Activity>> getActivitiesFor(List<ItemKey> itemKeys) {
 
 		// Transforming ItemKey list into string-based list
-		final Collection<String> loggedItemKeys = CalHelper
-				.unwrapItemKeys(itemKeys);
+		final Collection<String> loggedItemKeys = CalHelper.unwrapItemKeys(itemKeys);
 
 		// Querying all activities
 		final List<Activity> activities = entityManager
-				.createQuery(
-						"from ActivityImpl where loggedItemKey in (:itemKeys) and visible=true order by date DESC")
+				.createQuery("from ActivityImpl where loggedItemKey in (:itemKeys) and visible=true order by date DESC")
 				.setParameter("itemKeys", loggedItemKeys).getResultList();
 
 		// Preparing our resulting structure
@@ -110,17 +102,15 @@ public class ActivitiesDaoImpl extends AbstractCalDao<Activity> implements
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<Activity> getActivitiesCreatedByUser(ItemKey userKey,
-			int resultsPerPage, int pageOffset, ActivityType... activityTypes) {
+	public List<Activity> getActivitiesCreatedByUser(ItemKey userKey, int resultsPerPage, int pageOffset,
+			ActivityType... activityTypes) {
 		final List<String> types = unwrapActivityTypes(activityTypes);
 		final Query query = entityManager
 				.createQuery(
 						"from ActivityImpl where userKey=:key and activityType in (:activityTypes)  and visible=true order by date DESC")
-				.setParameter("key", userKey.toString())
-				.setParameter("activityTypes", types);
+				.setParameter("key", userKey.toString()).setParameter("activityTypes", types);
 		if (resultsPerPage > 0) {
-			query.setFirstResult(pageOffset * resultsPerPage).setMaxResults(
-					resultsPerPage);
+			query.setFirstResult(pageOffset * resultsPerPage).setMaxResults(resultsPerPage);
 		}
 		return query.getResultList();
 	}
@@ -128,19 +118,14 @@ public class ActivitiesDaoImpl extends AbstractCalDao<Activity> implements
 	@Override
 	public int getActivitiesForCount(ItemKey itemKey) {
 		return ((BigInteger) entityManager
-				.createNativeQuery(
-						"select count(1) from ACTIVITIES where ITEM_KEY=:itemKey and IS_VISIBLE='Y'")
-				.setParameter("itemKey", itemKey.toString()).getSingleResult())
-				.intValue();
+				.createNativeQuery("select count(1) from ACTIVITIES where ITEM_KEY=:itemKey and IS_VISIBLE='Y'")
+				.setParameter("itemKey", itemKey.toString()).getSingleResult()).intValue();
 	}
 
 	@Override
-	public int getTypedActivitiesForCount(ItemKey itemKey,
-			ActivityType... activityTypes) throws CalException {
-		Assert.notNull(itemKey,
-				"No item key provided for getTypedActivitiesForCount");
-		Assert.notNull(activityTypes,
-				"No activity types provided for getTypedActivitiesForCount");
+	public int getTypedActivitiesForCount(ItemKey itemKey, ActivityType... activityTypes) throws CalException {
+		Assert.notNull(itemKey, "No item key provided for getTypedActivitiesForCount");
+		Assert.notNull(activityTypes, "No activity types provided for getTypedActivitiesForCount");
 
 		// Building types list
 		final List<String> types = unwrapActivityTypes(activityTypes);
@@ -148,20 +133,17 @@ public class ActivitiesDaoImpl extends AbstractCalDao<Activity> implements
 		return ((BigInteger) entityManager
 				.createNativeQuery(
 						"select count(1) from ACTIVITIES where ITEM_KEY=:itemKey and ACTIVITY_TYPE in (:activityTypes) and IS_VISIBLE='Y'")
-				.setParameter("itemKey", itemKey.toString())
-				.setParameter("activityTypes", types).getSingleResult())
-				.intValue();
+				.setParameter("itemKey", itemKey.toString()).setParameter("activityTypes", types).getSingleResult())
+						.intValue();
 	}
 
 	@Override
-	public int getActivitiesCreatedByUserCount(ItemKey itemKey,
-			ActivityType... activityTypes) {
+	public int getActivitiesCreatedByUserCount(ItemKey itemKey, ActivityType... activityTypes) {
 		final List<String> types = unwrapActivityTypes(activityTypes);
 		return ((BigInteger) entityManager
 				.createNativeQuery(
 						"select count(1) from ACTIVITIES where USER_KEY=:itemKey and ACTIVITY_TYPE in (:types) and IS_VISIBLE='Y'")
-				.setParameter("itemKey", itemKey.toString())
-				.setParameter("types", types).getSingleResult()).intValue();
+				.setParameter("itemKey", itemKey.toString()).setParameter("types", types).getSingleResult()).intValue();
 	}
 
 	@Override
@@ -189,8 +171,7 @@ public class ActivitiesDaoImpl extends AbstractCalDao<Activity> implements
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<Activity> listItems(RequestType requestType,
-			RequestSettings requestSettings) {
+	public List<Activity> listItems(RequestType requestType, RequestSettings requestSettings) {
 		if (requestType instanceof RequestTypeLatestActivities) {
 			final RequestTypeLatestActivities rt = (RequestTypeLatestActivities) requestType;
 			// Retrieving request type parameters
@@ -199,14 +180,10 @@ public class ActivitiesDaoImpl extends AbstractCalDao<Activity> implements
 			final List<String> activityTypes = unwrapActivityTypes(types);
 
 			return entityManager
-					.createQuery(
-							"from ActivityImpl where activityType in (:activityTypes) and visible=true "
-									+ (rt.includeUserDirectActivity() ? ""
-											: "and loggedItemKey not like 'USER%'")
-									+ " order by date desc")
-					.setMaxResults(activitiesCount)
-					.setParameter("activityTypes", activityTypes)
-					.getResultList();
+					.createQuery("from ActivityImpl where activityType in (:activityTypes) and visible=true "
+							+ (rt.includeUserDirectActivity() ? "" : "and loggedItemKey not like 'USER%'")
+							+ " order by date desc")
+					.setMaxResults(activitiesCount).setParameter("activityTypes", activityTypes).getResultList();
 		}
 		return Collections.emptyList();
 	}
@@ -229,17 +206,14 @@ public class ActivitiesDaoImpl extends AbstractCalDao<Activity> implements
 	}
 
 	@Override
-	public List<Activity> getTypedActivitiesFor(ItemKey itemKey,
-			int maxActivitiesCount, ActivityType... activityTypes)
+	public List<Activity> getTypedActivitiesFor(ItemKey itemKey, int maxActivitiesCount, ActivityType... activityTypes)
 			throws CalException {
-		return getTypedActivitiesFor(itemKey, maxActivitiesCount, 0,
-				activityTypes);
+		return getTypedActivitiesFor(itemKey, maxActivitiesCount, 0, activityTypes);
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<Activity> getTypedActivitiesFor(ItemKey itemKey,
-			Integer resultsPerPage, Integer pageOffset,
+	public List<Activity> getTypedActivitiesFor(ItemKey itemKey, Integer resultsPerPage, Integer pageOffset,
 			ActivityType... activityTypes) throws CalException {
 		Assert.notNull(itemKey);
 		Assert.notNull(activityTypes);
@@ -251,13 +225,11 @@ public class ActivitiesDaoImpl extends AbstractCalDao<Activity> implements
 		final Query query = entityManager
 				.createQuery(
 						"from ActivityImpl where loggedItemKey=:itemKey and activityType in (:activityTypes) and visible=true order by date DESC")
-				.setParameter("itemKey", itemKey.toString())
-				.setParameter("activityTypes", typesList);
+				.setParameter("itemKey", itemKey.toString()).setParameter("activityTypes", typesList);
 
 		// Paginating if requested
 		if (resultsPerPage != null && pageOffset != null) {
-			query.setFirstResult(pageOffset * resultsPerPage).setMaxResults(
-					resultsPerPage);
+			query.setFirstResult(pageOffset * resultsPerPage).setMaxResults(resultsPerPage);
 		}
 
 		// Fetching
@@ -267,19 +239,36 @@ public class ActivitiesDaoImpl extends AbstractCalDao<Activity> implements
 	}
 
 	@Override
+	public List<Activity> getActivitiesFor(ItemKey itemKey, ActivityType activityType, Date fromDate)
+			throws CalException {
+		Assert.notNull(itemKey);
+		Assert.notNull(activityType);
+
+		// Querying all activities
+		final Query query = entityManager
+				.createQuery(
+						"from ActivityImpl where loggedItemKey=:itemKey and activityType=:activityType and date>:fromDate and visible=true order by date DESC")
+				.setParameter("itemKey", itemKey.toString()).setParameter("activityType", activityType.getCode())
+				.setParameter("fromDate", fromDate);
+
+		// Fetching
+		@SuppressWarnings("unchecked")
+		final List<Activity> activities = query.getResultList();
+
+		return activities;
+	}
+
+	@Override
 	public int getCount() {
-		return ((BigInteger) entityManager.createNativeQuery(
-				"select count(1) from ACTIVITIES where IS_VISIBLE='Y'")
+		return ((BigInteger) entityManager.createNativeQuery("select count(1) from ACTIVITIES where IS_VISIBLE='Y'")
 				.getSingleResult()).intValue();
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<Activity> listItems(RequestType requestType, Integer pageSize,
-			Integer pageOffset) {
-		final Query query = entityManager
-				.createQuery("from ActivityImpl where visible=true")
-				.setMaxResults(pageSize).setFirstResult(pageOffset);
+	public List<Activity> listItems(RequestType requestType, Integer pageSize, Integer pageOffset) {
+		final Query query = entityManager.createQuery("from ActivityImpl where visible=true").setMaxResults(pageSize)
+				.setFirstResult(pageOffset);
 		//
 		return query.getResultList();
 	}

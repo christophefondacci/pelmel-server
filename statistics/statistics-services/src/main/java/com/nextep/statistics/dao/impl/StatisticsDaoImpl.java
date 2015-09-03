@@ -57,8 +57,8 @@ public class StatisticsDaoImpl extends AbstractCalDao<Statistic>implements Stati
 		} else {
 			query = entityManager.createNativeQuery(
 					"select str_to_date(date_format(view_date,'%Y-%m-%d %H:00:00'),'%Y-%m-%d %H:%i:%s') as view_day, view_type, count(distinct item_key_viewer) from STAT_VIEWS "
-							+ "where ITEM_KEY_VIEWED=:itemKey "
-							+ "and view_date>date_add(now(),interval -1 day) and  ITEM_KEY_VIEWER is not null "
+							+ "where ITEM_KEY_VIEWED=:itemKey " + "and view_date>date_add(now(),interval -"
+							+ period.getRangeDuration() + " day) and  ITEM_KEY_VIEWER is not null "
 							+ "group by view_day, view_type")
 					.setParameter("itemKey", itemKey.toString());
 		}

@@ -76,4 +76,12 @@ public interface Subscription extends CalmObject {
 	 */
 	String getTransactionId();
 
+	/**
+	 * The last time when an announcement has been sent from this subscription.
+	 * This information is used to limit the number of announcements sent by a
+	 * same account.
+	 * 
+	 * @return the date of the last announcement made from this account
+	 */
+	Date getLastAnnouncementDate();
 }

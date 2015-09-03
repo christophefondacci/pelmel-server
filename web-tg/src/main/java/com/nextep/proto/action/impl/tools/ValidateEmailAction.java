@@ -10,7 +10,6 @@ import com.nextep.proto.services.NotificationService;
 import com.nextep.proto.spring.ContextHolder;
 import com.nextep.users.model.MutableUser;
 import com.nextep.users.model.User;
-import com.nextep.users.services.UsersService;
 import com.videopolis.apis.factory.ApisFactory;
 import com.videopolis.apis.model.ApisRequest;
 import com.videopolis.apis.service.ApiResponse;
@@ -49,12 +48,7 @@ public class ValidateEmailAction extends AbstractAction implements SimpleResultP
 					return REDIRECT;
 				}
 			} else {
-				// In case we don't have a token, we generate a new one
-				if (user.getEmailValidationToken() == null) {
-					final String emailToken = ((UsersService) getUsersService()).generateUniqueToken(user);
-					((MutableUser) user).setEmailValidationToken(emailToken);
-					getUsersService().saveItem(user);
-				}
+
 				// Sending the email
 				notificationService.sendEmailValidationEmail(user);
 			}

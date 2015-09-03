@@ -6,14 +6,13 @@ import java.io.InputStream;
 
 import com.nextep.media.model.Media;
 import com.nextep.media.model.MutableMedia;
-import com.nextep.users.model.User;
+import com.videopolis.calm.model.CalmObject;
 import com.videopolis.calm.model.ItemKey;
 
 public interface MediaPersistenceSupport {
 
-	Media createMedia(User author, ItemKey parentItemKey, File tmpFile,
-			String filename, String contentType, String title, boolean isVideo,
-			Integer firstMediaPriority) throws IOException;
+	Media createMedia(CalmObject author, ItemKey parentItemKey, File tmpFile, String filename, String contentType,
+			String title, boolean isVideo, Integer firstMediaPriority) throws IOException;
 
 	void generateThumb(MutableMedia mutableMedia, File localFile);
 
@@ -36,8 +35,7 @@ public interface MediaPersistenceSupport {
 	 *            crop height
 	 * @return the cropped file
 	 */
-	File crop(MutableMedia media, File image, int x, int y, int width,
-			int height);
+	File crop(MutableMedia media, File image, int x, int y, int width, int height);
 
 	/**
 	 * Provides the local location of the media from the media url

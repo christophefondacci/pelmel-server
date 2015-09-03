@@ -1,5 +1,8 @@
 package com.nextep.activities.model;
 
+import java.util.Date;
+
+import com.nextep.activities.model.impl.ActivityRequestTypeFromDate;
 import com.nextep.activities.model.impl.ActivityRequestTypeFromUserImpl;
 import com.videopolis.calm.model.RequestType;
 
@@ -31,8 +34,11 @@ public class ActivityRequestTypes {
 	 *            the {@link ActivityType} to restrict
 	 * @return the {@link RequestType}
 	 */
-	public static RequestType fromUser(int maxActivities,
-			ActivityType... activityTypes) {
+	public static RequestType fromUser(int maxActivities, ActivityType... activityTypes) {
 		return new ActivityRequestTypeFromUserImpl(activityTypes);
+	}
+
+	public static RequestType forTypeFromDate(ActivityType activityType, Date fromDate) {
+		return new ActivityRequestTypeFromDate(activityType, fromDate);
 	}
 }

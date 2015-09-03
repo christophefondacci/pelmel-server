@@ -17,10 +17,10 @@ module.exports = function(grunt) {
 					src : [ 'dist/' ]
 				},
 				useminPrepare : {
-					html : ['target/web-proto/jsp/structure/default.jsp','target/web-proto/jsp/structure/homepage.jsp']
+					html : ['target/web-proto/jsp/structure/homepage.jsp','target/web-proto/jsp/structure/default.jsp']
 				},
 				usemin : {
-					html : ['target/web-proto/jsp/structure/default.jsp','target/web-proto/jsp/structure/homepage.jsp'],
+					html : ['target/web-proto/jsp/structure/homepage.jsp','target/web-proto/jsp/structure/default.jsp'],
 					options : {
 						flow : {
 							html : {
@@ -37,7 +37,7 @@ module.exports = function(grunt) {
 				// Renames files for browser caching purposes
 				filerev : {
 					dist : {
-						src : [ 'dist/js/pelmel.min.js',
+						src : [ 'dist/js/pelmel.min.js','dist/js/pelmel-hp.min.js',
 								'dist/styles/pelmel.min.css', ]
 					}
 				},

@@ -3,7 +3,7 @@
 <p ><b>Welcome to PELMEL!</b></p>
 <p >Effective August 18, 2015</p>
 
-<p >Thanks for using our website and services. The Services are provided by FGP Digital, LLC located at 15524 Carney Lake Rd, SW Port Orchard, WA 98367, United States.</p>
+<p >Thanks for using our website and services. The Services are provided by FGP Digital, LLC registered agent LEGALINC CORPORATE SERVICES INC. - 3925 NE 72ND AVE # 107, Vancouver, WA 98661 United States.</p>
 
 <p >By using our Services, you are agreeing to these terms. Please read them carefully.</p>
 

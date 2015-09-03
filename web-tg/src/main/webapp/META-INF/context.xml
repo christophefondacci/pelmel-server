@@ -149,6 +149,8 @@
 
 
 	<Environment name="redirectEnabled" type="java.lang.Boolean" value="true"/>
+	<Environment name="announcement.reach.days" type="java.lang.Integer" value="30"/>
+	<Environment name="announcement.minDays" type="java.lang.Integer" value="7"/>
 	
 </Context>
 

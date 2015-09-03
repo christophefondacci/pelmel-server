@@ -45,6 +45,8 @@ public class DealImpl extends AbstractCalmObject implements MutableDeal {
 	private String dealType;
 	@Column(name = "STATUS")
 	private String status;
+	@Column(name = "MAX_DEALS_PER_DAY")
+	private Integer maxDealUses;
 
 	public DealImpl() {
 		super(null);
@@ -114,4 +116,13 @@ public class DealImpl extends AbstractCalmObject implements MutableDeal {
 		this.status = dealStatus == null ? null : dealStatus.name();
 	}
 
+	@Override
+	public void setMaxDealUses(Integer maxDealUses) {
+		this.maxDealUses = maxDealUses;
+	}
+
+	@Override
+	public Integer getMaxDealUses() {
+		return maxDealUses;
+	}
 }

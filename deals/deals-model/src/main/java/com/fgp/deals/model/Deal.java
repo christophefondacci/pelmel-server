@@ -43,4 +43,12 @@ public interface Deal extends CalmObject {
 	 * @return the {@link DealStatus}
 	 */
 	DealStatus getStatus();
+
+	/**
+	 * Provides the maximum number of deals per day
+	 * 
+	 * @return the maximum number of deal uses allowed, or <code>null</code> for
+	 *         no limit
+	 */
+	Integer getMaxDealUses();
 }

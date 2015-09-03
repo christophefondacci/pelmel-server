@@ -11,8 +11,8 @@ import javax.persistence.Table;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.nextep.advertising.model.SubscriptionType;
 import com.nextep.advertising.model.MutableSubscription;
+import com.nextep.advertising.model.SubscriptionType;
 import com.nextep.cal.util.helpers.CalHelper;
 import com.nextep.cal.util.model.Price;
 import com.nextep.cal.util.model.impl.PriceImpl;
@@ -63,6 +63,9 @@ public class SubscriptionImpl extends AbstractCalmObject implements MutableSubsc
 
 	@Column(name = "TRANSACTION_ID")
 	private String transactionId;
+
+	@Column(name = "LAST_ANNOUNCEMENT_DATE")
+	private Date lastAnnouncementDate;
 
 	public SubscriptionImpl() {
 		super(null);
@@ -179,5 +182,15 @@ public class SubscriptionImpl extends AbstractCalmObject implements MutableSubsc
 	@Override
 	public String getTransactionId() {
 		return transactionId;
+	}
+
+	@Override
+	public void setLastAnnouncementDate(Date lastAnnouncementDate) {
+		this.lastAnnouncementDate = lastAnnouncementDate;
+	}
+
+	@Override
+	public Date getLastAnnouncementDate() {
+		return lastAnnouncementDate;
 	}
 }

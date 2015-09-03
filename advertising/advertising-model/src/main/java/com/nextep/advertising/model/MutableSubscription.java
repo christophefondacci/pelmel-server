@@ -84,4 +84,12 @@ public interface MutableSubscription extends Subscription {
 	 *            the transaction ID.
 	 */
 	void setTransactionId(String transactionId);
+
+	/**
+	 * Sets the date of the last announcement from this account.
+	 * 
+	 * @param lastAnnouncementDate
+	 *            the date of the last sent announcement
+	 */
+	void setLastAnnouncementDate(Date lastAnnouncementDate);
 }

@@ -53,6 +53,7 @@ public class MobileActivateDealAction extends AbstractAction implements JsonProv
 	private String placeKey;
 	private String status;
 	private String dealType;
+	private Integer maxUses;
 
 	// Internal variables
 	private Deal deal;
@@ -87,6 +88,7 @@ public class MobileActivateDealAction extends AbstractAction implements JsonProv
 				deal.setStartDate(new Date());
 				deal.setStatus(DealStatus.RUNNING);
 				deal.setDealType(DealType.TWO_FOR_ONE);
+				deal.setMaxDealUses(maxUses);
 				dealsService.saveItem(deal);
 				this.deal = deal;
 			} else if (dealKey != null) {
@@ -103,6 +105,9 @@ public class MobileActivateDealAction extends AbstractAction implements JsonProv
 				// We only proceed if a match was found
 				if (selectedDeal != null) {
 					((MutableDeal) selectedDeal).setStatus(DealStatus.valueOf(status));
+					if (maxUses != null) {
+						((MutableDeal) selectedDeal).setMaxDealUses(maxUses);
+					}
 					dealsService.saveItem(selectedDeal);
 					this.deal = selectedDeal;
 				} else {
@@ -167,5 +172,13 @@ public class MobileActivateDealAction extends AbstractAction implements JsonProv
 
 	public String getDealType() {
 		return dealType;
+	}
+
+	public void setMaxUses(Integer maxUses) {
+		this.maxUses = maxUses;
+	}
+
+	public Integer getMaxUses() {
+		return maxUses;
 	}
 }

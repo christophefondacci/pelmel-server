@@ -7,6 +7,7 @@ import java.util.concurrent.Future;
 import com.nextep.messages.model.Message;
 import com.nextep.messages.model.MessageType;
 import com.nextep.users.model.User;
+import com.videopolis.calm.model.CalmObject;
 import com.videopolis.calm.model.ItemKey;
 
 /**
@@ -21,10 +22,10 @@ public interface MessagingService {
 
 	Future<Boolean> sendWelcomeMessage(ItemKey toKey, Locale locale);
 
-	Message sendMessage(User from, User to, ItemKey recipientsGroupKey, String message);
+	Message sendMessage(CalmObject from, User to, ItemKey recipientsGroupKey, String message);
 
-	Message sendMessage(User from, User to, ItemKey recipientsGroupKey, String message, MessageType type);
+	Message sendMessage(CalmObject from, User to, ItemKey recipientsGroupKey, String message, MessageType type);
 
-	Message sendMessageWithMedia(User from, User to, ItemKey recipientsGroupKey, String message, File mediaFile,
+	Message sendMessageWithMedia(CalmObject from, User to, ItemKey recipientsGroupKey, String message, File mediaFile,
 			String mediaContentType, String mediaFilename);
 }

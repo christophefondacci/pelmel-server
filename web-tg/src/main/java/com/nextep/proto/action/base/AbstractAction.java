@@ -7,8 +7,6 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import net.sf.json.JSONObject;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpStatus;
@@ -43,14 +41,15 @@ import com.opensymphony.xwork2.ActionSupport;
 import com.videopolis.apis.exception.ApisNoSuchElementException;
 import com.videopolis.apis.service.ApiService;
 
+import net.sf.json.JSONObject;
+
 /**
  * Global base action class providing exception management
  * 
  * @author Christophe Fondacci
  * 
  */
-public abstract class AbstractAction extends ActionSupport implements
-		HeaderAware, LoginAware, AdBannerAware {
+public abstract class AbstractAction extends ActionSupport implements HeaderAware, LoginAware, AdBannerAware {
 
 	// Static stuff
 	private static final long serialVersionUID = 4698469674120411898L;
@@ -99,8 +98,7 @@ public abstract class AbstractAction extends ActionSupport implements
 	@Override
 	public final String execute() throws Exception {
 		// Default login support initialization
-		loginSupport.initialize(getLocale(), getUrlService(),
-				getHeaderSupport(), null);
+		loginSupport.initialize(getLocale(), getUrlService(), getHeaderSupport(), null);
 		// Everything is readonly by default
 		ContextHolder.toggleReadonly();
 		final HttpServletResponse response = ServletActionContext.getResponse();
@@ -118,8 +116,7 @@ public abstract class AbstractAction extends ActionSupport implements
 		} catch (Exception e) {
 			lastException = e;
 			response.setStatus(HttpStatus.SC_INTERNAL_SERVER_ERROR);
-			LOGGER.error(
-					"Error while executing the action : " + e.getMessage(), e);
+			LOGGER.error("Error while executing the action : " + e.getMessage(), e);
 		}
 		return error();
 	}
@@ -137,47 +134,36 @@ public abstract class AbstractAction extends ActionSupport implements
 	 */
 	protected boolean handleRedirect() {
 		if (redirectEnabled) {
-			final HttpServletRequest request = ServletActionContext
-					.getRequest();
-			final String url = request.getRequestURL().toString()
-					.replace(request.getContextPath() + "/", "");
+			final HttpServletRequest request = ServletActionContext.getRequest();
+			final String url = request.getRequestURL().toString().replace(request.getContextPath() + "/", "");
 			final String language = getHeaderSupport().getLanguage();
 			String officialUrl = null;
 			if (getHeaderSupport() instanceof HeaderSearchSupport) {
-				officialUrl = ((HeaderSearchSupport) getHeaderSupport())
-						.getAlternate(language, true);
+				officialUrl = ((HeaderSearchSupport) getHeaderSupport()).getAlternate(language, true);
 			} else {
 				officialUrl = getHeaderSupport().getAlternate(language);
 			}
 			if (!officialUrl.equals(url)) {
 				if (url.startsWith(officialUrl)) {
-					LOGGER.warn("REDIRECT ignored for:   " + url + " -> "
-							+ officialUrl);
+					LOGGER.warn("REDIRECT ignored for:   " + url + " -> " + officialUrl);
 				} else {
 					// Last chance, ignoring everything in the last SEO part
 					try {
 						int lastSlash = url.lastIndexOf("/");
 						int lastSep = url.indexOf("-", lastSlash);
-						if (lastSep > 0
-								&& url.substring(0, lastSep).equals(
-										officialUrl.substring(0, lastSep))) {
-							LOGGER.warn("REDIRECT ignored (last SEO unmatch) for:   "
-									+ url + " -> " + officialUrl);
+						if (lastSep > 0 && url.substring(0, lastSep).equals(officialUrl.substring(0, lastSep))) {
+							LOGGER.warn("REDIRECT ignored (last SEO unmatch) for:   " + url + " -> " + officialUrl);
 							return false;
 						}
 					} catch (Exception e) {
-						LOGGER.error(
-								"REDIRECT: Error while trying to remove last SEO part from '"
-										+ url + "'", e);
+						LOGGER.error("REDIRECT: Error while trying to remove last SEO part from '" + url + "'", e);
 					}
 					LOGGER.warn("REDIRECT:   " + url + " -> " + officialUrl);
 					LOGGER.warn("REDIRECT: ->" + officialUrl);
-					final HttpServletResponse servletResponse = ServletActionContext
-							.getResponse();
+					final HttpServletResponse servletResponse = ServletActionContext.getResponse();
 					servletResponse.setStatus(HttpStatus.SC_MOVED_PERMANENTLY);
 					servletResponse.setHeader("Location", officialUrl);
-					servletResponse.setHeader("Cache-Control",
-							"max-age=3600, must-revalidate");
+					servletResponse.setHeader("Cache-Control", "max-age=3600, must-revalidate");
 					redirectUrl = officialUrl;
 					return true;
 				}
@@ -211,11 +197,9 @@ public abstract class AbstractAction extends ActionSupport implements
 		// .replace(request.getContextPath() + "/", "");
 		queryParams = request.getQueryString();
 		try {
-			userEmail = ((UsersService) usersService)
-					.getEmailFromToken(getNxtpUserToken());
+			userEmail = ((UsersService) usersService).getEmailFromToken(getNxtpUserToken());
 		} catch (RuntimeException e) {
-			LOGGER.error("Unable to get email from token " + getNxtpUserToken()
-					+ ": " + e.getMessage());
+			LOGGER.error("Unable to get email from token " + getNxtpUserToken() + ": " + e.getMessage());
 			userEmail = "";
 		}
 		final HttpServletResponse response = ServletActionContext.getResponse();
@@ -236,11 +220,9 @@ public abstract class AbstractAction extends ActionSupport implements
 			final Date timeout = user.getOnlineTimeout();
 			// If we have already spend half of our timeout, we reset timeout
 			if (timeout.getTime() - System.currentTimeMillis() < refreshTimeoutMillisec) {
-				final boolean previousWritableState = ContextHolder
-						.isWritable();
+				final boolean previousWritableState = ContextHolder.isWritable();
 				ContextHolder.toggleWrite();
-				((UsersService) usersService).refreshUserOnlineTimeout(user,
-						nxtpUserToken);
+				((UsersService) usersService).refreshUserOnlineTimeout(user, nxtpUserToken);
 				searchService.updateUserOnlineStatus(user);
 				if (!previousWritableState) {
 					ContextHolder.toggleReadonly();
@@ -248,6 +230,7 @@ public abstract class AbstractAction extends ActionSupport implements
 			}
 			// Update our logged flag
 			logged = true;
+			ContextHolder.setCurrentUserItemKey(user.getKey());
 		}
 	}
 
@@ -280,9 +263,8 @@ public abstract class AbstractAction extends ActionSupport implements
 	}
 
 	protected final ApiService getApiService() {
-		if (ActionContext.getContext() != null
-				&& UrlConstants.TEST_SUBDOMAIN.equals(ActionContext
-						.getContext().get(Constants.ACTION_CONTEXT_SUBDOMAIN))) {
+		if (ActionContext.getContext() != null && UrlConstants.TEST_SUBDOMAIN
+				.equals(ActionContext.getContext().get(Constants.ACTION_CONTEXT_SUBDOMAIN))) {
 			return noSeoApiService;
 		} else {
 			return apiService;
@@ -329,8 +311,7 @@ public abstract class AbstractAction extends ActionSupport implements
 		return usersService;
 	}
 
-	public final void setUserSearchService(
-			SearchPersistenceService searchService) {
+	public final void setUserSearchService(SearchPersistenceService searchService) {
 		this.searchService = searchService;
 	}
 
@@ -365,8 +346,7 @@ public abstract class AbstractAction extends ActionSupport implements
 	}
 
 	public String getLanguageLabel(String langCode) {
-		return messageSource.getMessage(MESSAGE_KEY_LANG + langCode, null,
-				getLocale());
+		return messageSource.getMessage(MESSAGE_KEY_LANG + langCode, null, getLocale());
 	}
 
 	@Override
@@ -415,13 +395,11 @@ public abstract class AbstractAction extends ActionSupport implements
 	}
 
 	public String buildUrl(String relativePath) {
-		return LocalizationHelper.buildUrl(getLocale(), domainName,
-				relativePath);
+		return LocalizationHelper.buildUrl(getLocale(), domainName, relativePath);
 	}
 
 	public String buildSecuredUrl(String relativePath) {
-		return LocalizationHelper.buildUrl(getLocale().getLanguage(),
-				domainName, relativePath, true);
+		return LocalizationHelper.buildUrl(getLocale().getLanguage(), domainName, relativePath, true);
 	}
 
 	public boolean isGoogleEnabled() {
@@ -429,8 +407,8 @@ public abstract class AbstractAction extends ActionSupport implements
 		if (!googleEnabled) {
 			return googleEnabled;
 		} else {
-			return !(context != null && UrlConstants.TEST_SUBDOMAIN
-					.equals(context.get(Constants.ACTION_CONTEXT_SUBDOMAIN)));
+			return !(context != null
+					&& UrlConstants.TEST_SUBDOMAIN.equals(context.get(Constants.ACTION_CONTEXT_SUBDOMAIN)));
 		}
 	}
 
@@ -442,8 +420,7 @@ public abstract class AbstractAction extends ActionSupport implements
 		return getUrlService().getPromoteUrl(getLocale());
 	}
 
-	public void setRightsManagementService(
-			RightsManagementService rightsManagementService) {
+	public void setRightsManagementService(RightsManagementService rightsManagementService) {
 		this.rightsManagementService = rightsManagementService;
 	}
 
@@ -499,8 +476,7 @@ public abstract class AbstractAction extends ActionSupport implements
 		try {
 			return ((JsonProvider) this).getJson();
 		} catch (Throwable e) {
-			final HttpServletResponse response = ServletActionContext
-					.getResponse();
+			final HttpServletResponse response = ServletActionContext.getResponse();
 			response.setStatus(HttpStatus.SC_INTERNAL_SERVER_ERROR);
 			final JsonStatus status = new JsonStatus();
 			status.setError(true);
@@ -518,23 +494,17 @@ public abstract class AbstractAction extends ActionSupport implements
 				final JsonStatus status = new JsonStatus();
 				status.setError(true);
 				status.setMessage(getErrorMessage() != null ? getErrorMessage()
-						: (lastException != null ? lastException.getMessage()
-								: "[No exception caught]"));
-				LOGGER.error(
-						"Error catched by safeJsonError: "
-								+ status.getMessage(), lastException);
+						: (lastException != null ? lastException.getMessage() : "[No exception caught]"));
+				LOGGER.error("Error catched by safeJsonError: " + status.getMessage(), lastException);
 				return JSONObject.fromObject(status).toString();
 			}
 		} catch (Throwable e) {
-			final HttpServletResponse response = ServletActionContext
-					.getResponse();
+			final HttpServletResponse response = ServletActionContext.getResponse();
 			response.setStatus(HttpStatus.SC_INTERNAL_SERVER_ERROR);
 			final JsonStatus status = new JsonStatus();
 			status.setError(true);
 			status.setMessage(e.getMessage());
-			LOGGER.error(
-					"Error while generating error message JSON: "
-							+ e.getMessage(), e);
+			LOGGER.error("Error while generating error message JSON: " + e.getMessage(), e);
 			return JSONObject.fromObject(status).toString();
 		}
 	}

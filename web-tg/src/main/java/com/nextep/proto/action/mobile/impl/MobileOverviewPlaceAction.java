@@ -11,6 +11,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.fgp.deals.model.Deal;
+import com.fgp.deals.model.DealUse;
+import com.fgp.deals.model.impl.DealRequestTypes;
 import com.nextep.activities.model.Activity;
 import com.nextep.advertising.model.Subscription;
 import com.nextep.comments.model.Comment;
@@ -99,7 +102,8 @@ public class MobileOverviewPlaceAction extends AbstractAction implements JsonPro
 		final ItemKey itemKey = CalmFactory.parseKey(id);
 		final ApisCriterion objCriterion = (ApisCriterion) SearchRestriction.uniqueKeys(Arrays.asList(itemKey))
 				.aliasedBy(APIS_ALIAS_PLACE).with(Description.class).with(Media.class).with(Tag.class)
-				.with(Property.class).with(Subscription.class);
+				.with(Property.class).with(Subscription.class).with((WithCriterion) SearchRestriction.with(Deal.class)
+						.with(DealUse.class, DealRequestTypes.DAILY_DEAL));
 		// For a place overview we would like to know people who currently are
 		// in that place
 		final Collection<FacetCategory> userFacetCategories = Arrays.asList(SearchHelper.getTagFacetCategory());

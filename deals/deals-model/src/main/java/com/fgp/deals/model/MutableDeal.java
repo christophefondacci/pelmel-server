@@ -38,4 +38,12 @@ public interface MutableDeal extends Deal {
 	 *            the {@link DealStatus} to set
 	 */
 	void setStatus(DealStatus dealStatus);
+
+	/**
+	 * Defines the maximum number of deal uses per day
+	 * 
+	 * @param maxDealUse
+	 *            the new number of max deals use
+	 */
+	void setMaxDealUses(Integer maxDealUse);
 }

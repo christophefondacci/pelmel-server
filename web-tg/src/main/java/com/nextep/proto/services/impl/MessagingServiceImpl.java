@@ -26,6 +26,7 @@ import com.nextep.messages.model.Message;
 import com.nextep.messages.model.MessageType;
 import com.nextep.messages.model.MutableMessage;
 import com.nextep.proto.blocks.MediaPersistenceSupport;
+import com.nextep.proto.helpers.DisplayHelper;
 import com.nextep.proto.model.Constants;
 import com.nextep.proto.services.MessagingService;
 import com.nextep.proto.services.NotificationService;
@@ -33,6 +34,7 @@ import com.nextep.proto.spring.ContextHolder;
 import com.nextep.users.model.User;
 import com.videopolis.calm.exception.CalException;
 import com.videopolis.calm.factory.CalmFactory;
+import com.videopolis.calm.model.CalmObject;
 import com.videopolis.calm.model.ItemKey;
 
 @Service
@@ -79,8 +81,8 @@ public class MessagingServiceImpl implements MessagingService {
 	}
 
 	@Override
-	public Message sendMessageWithMedia(User from, User to, ItemKey recipientsGroupKey, String message, File mediaFile,
-			String mediaContentType, String mediaFilename) {
+	public Message sendMessageWithMedia(CalmObject from, User to, ItemKey recipientsGroupKey, String message,
+			File mediaFile, String mediaContentType, String mediaFilename) {
 		final Message msg = createMessage(from.getKey(), to.getKey(), recipientsGroupKey,
 				message == null ? messageSource.getMessage("message.photoUpgrade", null, Locale.ENGLISH) : message,
 				MessageType.MESSAGE);
@@ -99,12 +101,12 @@ public class MessagingServiceImpl implements MessagingService {
 	}
 
 	@Override
-	public Message sendMessage(User from, User to, ItemKey recipientsGroupKey, String message) {
+	public Message sendMessage(CalmObject from, User to, ItemKey recipientsGroupKey, String message) {
 		return sendMessage(from, to, recipientsGroupKey, message, MessageType.MESSAGE);
 	}
 
 	@Override
-	public Message sendMessage(User from, User to, ItemKey recipientsGroupKey, String message, MessageType type) {
+	public Message sendMessage(CalmObject from, User to, ItemKey recipientsGroupKey, String message, MessageType type) {
 		final Message msg = createMessage(from.getKey(), to.getKey(), recipientsGroupKey, message, type);
 		sendPushNotification(from, to, message, false, type, msg.isUnread());
 		return msg;
@@ -135,7 +137,7 @@ public class MessagingServiceImpl implements MessagingService {
 		return msg;
 	}
 
-	private void sendPushNotification(User sourceUser, User targetUser, String message, boolean isMediaMessage,
+	private void sendPushNotification(CalmObject sourceUser, User targetUser, String message, boolean isMediaMessage,
 			MessageType messageType, boolean unread) {
 
 		// Notifying recipient if deviceId and push enabled (and not our own
@@ -147,14 +149,14 @@ public class MessagingServiceImpl implements MessagingService {
 				if (messageType == MessageType.MESSAGE) {
 					pushMsg = MessageFormat.format(
 							messageSource.getMessage("message.push.template", null, Locale.ENGLISH),
-							sourceUser.getPseudo(), message);
+							DisplayHelper.getName(sourceUser), message);
 				} else {
 					pushMsg = message;
 				}
 			} else {
 				pushMsg = MessageFormat.format(
 						messageSource.getMessage("message.push.photo.template", null, Locale.ENGLISH),
-						sourceUser.getPseudo());
+						DisplayHelper.getName(sourceUser));
 			}
 			// Sending message
 			final List<? extends User> toApprove = targetUser.get(User.class,

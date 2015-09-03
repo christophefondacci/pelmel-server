@@ -11,6 +11,7 @@ import com.nextep.activities.model.Activity;
 import com.nextep.activities.model.ActivityRequestTypeFromUser;
 import com.nextep.activities.model.ActivityType;
 import com.nextep.activities.model.impl.ActivityImpl;
+import com.nextep.activities.model.impl.ActivityRequestTypeFromDate;
 import com.nextep.activities.model.impl.RequestTypeLatestActivities;
 import com.nextep.cal.util.helpers.CalHelper;
 import com.nextep.cal.util.services.CalPersistenceService;
@@ -28,11 +29,9 @@ import com.videopolis.cals.model.impl.ItemsResponseImpl;
 import com.videopolis.cals.model.impl.MultiKeyItemsResponseImpl;
 import com.videopolis.cals.model.impl.PaginatedItemsResponseImpl;
 
-public class ActivitiesServiceImpl extends AbstractDaoBasedCalServiceImpl
-		implements CalPersistenceService {
+public class ActivitiesServiceImpl extends AbstractDaoBasedCalServiceImpl implements CalPersistenceService {
 
-	private static final Log LOGGER = LogFactory
-			.getLog(ActivitiesServiceImpl.class);
+	private static final Log LOGGER = LogFactory.getLog(ActivitiesServiceImpl.class);
 
 	@Override
 	public Class<? extends CalmObject> getProvidedClass() {
@@ -55,19 +54,16 @@ public class ActivitiesServiceImpl extends AbstractDaoBasedCalServiceImpl
 	}
 
 	@Override
-	public List<? extends CalmObject> setItemFor(ItemKey contributedItemKey,
-			ItemKey... internalItemKeys) throws CalException {
-		throw new UnsupportedCalServiceException(
-				"Method setItemFor is not supported for Activities");
+	public List<? extends CalmObject> setItemFor(ItemKey contributedItemKey, ItemKey... internalItemKeys)
+			throws CalException {
+		throw new UnsupportedCalServiceException("Method setItemFor is not supported for Activities");
 	}
 
 	@Override
-	public MultiKeyItemsResponse getItemsFor(List<ItemKey> itemKeys,
-			CalContext context) throws CalException {
+	public MultiKeyItemsResponse getItemsFor(List<ItemKey> itemKeys, CalContext context) throws CalException {
 
 		// Querying DAO for activities
-		final Map<ItemKey, List<Activity>> activitiesKeyMap = ((ActivitiesDao) getCalDao())
-				.getActivitiesFor(itemKeys);
+		final Map<ItemKey, List<Activity>> activitiesKeyMap = ((ActivitiesDao) getCalDao()).getActivitiesFor(itemKeys);
 
 		// Preparing response
 		final MultiKeyItemsResponseImpl response = new MultiKeyItemsResponseImpl();
@@ -83,14 +79,12 @@ public class ActivitiesServiceImpl extends AbstractDaoBasedCalServiceImpl
 	}
 
 	@Override
-	protected ItemsResponse getItemsFor(ItemKey itemKey, CalContext context,
-			RequestType requestType) throws CalException {
+	protected ItemsResponse getItemsFor(ItemKey itemKey, CalContext context, RequestType requestType)
+			throws CalException {
 		if (requestType instanceof ActivityRequestTypeFromUser) {
 			final ActivityRequestTypeFromUser userType = (ActivityRequestTypeFromUser) requestType;
-			final List<Activity> activities = ((ActivitiesDao) getCalDao())
-					.getActivitiesCreatedByUser(itemKey,
-							userType.getMaxActivities(), 0,
-							userType.getActivityTypes());
+			final List<Activity> activities = ((ActivitiesDao) getCalDao()).getActivitiesCreatedByUser(itemKey,
+					userType.getMaxActivities(), 0, userType.getActivityTypes());
 			final ItemsResponseImpl response = new ItemsResponseImpl();
 			response.setItems(activities);
 			return response;
@@ -98,17 +92,21 @@ public class ActivitiesServiceImpl extends AbstractDaoBasedCalServiceImpl
 
 			// Extracting activity type
 			final RequestTypeLatestActivities activityTypeRequestType = (RequestTypeLatestActivities) requestType;
-			final ActivityType[] activityTypes = activityTypeRequestType
-					.getActivityTypes();
-			final int maxActivities = activityTypeRequestType
-					.getActivitiesCount();
+			final ActivityType[] activityTypes = activityTypeRequestType.getActivityTypes();
+			final int maxActivities = activityTypeRequestType.getActivitiesCount();
 
 			// Querying data source through DAO
-			final List<Activity> activities = ((ActivitiesDao) getCalDao())
-					.getTypedActivitiesFor(itemKey, maxActivities,
-							activityTypes);
+			final List<Activity> activities = ((ActivitiesDao) getCalDao()).getTypedActivitiesFor(itemKey,
+					maxActivities, activityTypes);
 
 			// Building response
+			final ItemsResponseImpl response = new ItemsResponseImpl();
+			response.setItems(activities);
+			return response;
+		} else if (requestType instanceof ActivityRequestTypeFromDate) {
+			final ActivityRequestTypeFromDate rType = (ActivityRequestTypeFromDate) requestType;
+			final List<Activity> activities = ((ActivitiesDao) getCalDao()).getActivitiesFor(itemKey,
+					rType.getActivityType(), rType.getFromDate());
 			final ItemsResponseImpl response = new ItemsResponseImpl();
 			response.setItems(activities);
 			return response;
@@ -119,32 +117,27 @@ public class ActivitiesServiceImpl extends AbstractDaoBasedCalServiceImpl
 	}
 
 	@Override
-	public PaginatedItemsResponse getPaginatedItemsFor(ItemKey itemKey,
-			CalContext context, int resultsPerPage, int pageNumber,
-			RequestType requestType) throws CalException {
+	public PaginatedItemsResponse getPaginatedItemsFor(ItemKey itemKey, CalContext context, int resultsPerPage,
+			int pageNumber, RequestType requestType) throws CalException {
 		final ActivitiesDao dao = (ActivitiesDao) getCalDao();
 		List<Activity> activities = null;
 		int activitiesCount = 0;
 
 		if (requestType instanceof ActivityRequestTypeFromUser) {
 			final ActivityRequestTypeFromUser userType = (ActivityRequestTypeFromUser) requestType;
-			activities = dao.getActivitiesCreatedByUser(itemKey,
-					resultsPerPage, pageNumber, userType.getActivityTypes());
-			activitiesCount = dao.getActivitiesCreatedByUserCount(itemKey,
+			activities = dao.getActivitiesCreatedByUser(itemKey, resultsPerPage, pageNumber,
 					userType.getActivityTypes());
+			activitiesCount = dao.getActivitiesCreatedByUserCount(itemKey, userType.getActivityTypes());
 		} else if (requestType instanceof RequestTypeLatestActivities) {
 
 			// Extracting activity type from request type
 			final RequestTypeLatestActivities typeRequestType = (RequestTypeLatestActivities) requestType;
-			final ActivityType[] activityTypes = typeRequestType
-					.getActivityTypes();
+			final ActivityType[] activityTypes = typeRequestType.getActivityTypes();
 
 			// Querying activities for this type
-			activities = dao.getTypedActivitiesFor(itemKey, resultsPerPage,
-					pageNumber, activityTypes);
+			activities = dao.getTypedActivitiesFor(itemKey, resultsPerPage, pageNumber, activityTypes);
 			// Counting activities for this type
-			activitiesCount = dao.getTypedActivitiesForCount(itemKey,
-					activityTypes);
+			activitiesCount = dao.getTypedActivitiesForCount(itemKey, activityTypes);
 
 		} else {
 			activities = dao.getItemsFor(itemKey, resultsPerPage, pageNumber);
@@ -153,20 +146,16 @@ public class ActivitiesServiceImpl extends AbstractDaoBasedCalServiceImpl
 		}
 
 		// Building response
-		final PaginatedItemsResponseImpl response = new PaginatedItemsResponseImpl(
-				resultsPerPage, pageNumber);
+		final PaginatedItemsResponseImpl response = new PaginatedItemsResponseImpl(resultsPerPage, pageNumber);
 		response.setItems(activities);
 		response.setItemCount(activitiesCount);
-		response.setPageCount(CalHelper.getPageCount(resultsPerPage,
-				activitiesCount));
+		response.setPageCount(CalHelper.getPageCount(resultsPerPage, activitiesCount));
 		return response;
 	}
 
 	@Override
-	public PaginatedItemsResponse getPaginatedItemsFor(ItemKey itemKey,
-			CalContext context, int resultsPerPage, int pageNumber)
-			throws CalException {
-		return getPaginatedItemsFor(itemKey, context, resultsPerPage,
-				pageNumber, null);
+	public PaginatedItemsResponse getPaginatedItemsFor(ItemKey itemKey, CalContext context, int resultsPerPage,
+			int pageNumber) throws CalException {
+		return getPaginatedItemsFor(itemKey, context, resultsPerPage, pageNumber, null);
 	}
 }

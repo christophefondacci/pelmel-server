@@ -10,6 +10,8 @@ public class JsonDeal {
 	private Long startDate;
 	private String relatedItemKey;
 	private int usedToday;
+	private int maxUses;
+	private Long lastUsedTime;
 
 	public String getKey() {
 		return key;
@@ -61,5 +63,25 @@ public class JsonDeal {
 
 	public int getUsedToday() {
 		return usedToday;
+	}
+
+	public void setMaxUses(int maxUses) {
+		this.maxUses = maxUses;
+	}
+
+	public int getMaxUses() {
+		return maxUses;
+	}
+
+	public Long getLastUsedTime() {
+		return lastUsedTime;
+	}
+
+	public void setLastUsedTime(Long lastUsedTime) {
+		this.lastUsedTime = lastUsedTime;
+	}
+
+	public void setLastUsedDate(Date lastUsedDate) {
+		this.lastUsedTime = lastUsedDate.getTime() / 1000;
 	}
 }

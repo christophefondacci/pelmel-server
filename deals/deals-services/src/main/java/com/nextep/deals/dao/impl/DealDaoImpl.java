@@ -113,7 +113,7 @@ public class DealDaoImpl extends AbstractCalDao<Deal>implements DealDao {
 
 			// Processing activities
 			for (DealUse deal : dealUses) {
-				final ItemKey loggedItemKey = deal.getConsumerItemKey();
+				final ItemKey loggedItemKey = isForUserQuery ? deal.getConsumerItemKey() : deal.getDeal().getKey();
 				// Getting our list
 				List<DealUse> itemDealUses = dealsKeyMap.get(loggedItemKey);
 				if (itemDealUses == null) {

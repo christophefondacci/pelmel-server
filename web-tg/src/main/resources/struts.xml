@@ -751,6 +751,12 @@
 			<result name="error">/jsp/pages/json-error.jsp</result>
 			<interceptor-ref name="default" />
 		</action>
+		<action name="messageAudience" class="adminMessageAudienceAction">
+			<result>/jsp/pages/json.jsp</result>
+			<result name="input">/jsp/pages/json.jsp</result>
+			<result name="error">/jsp/pages/json-error.jsp</result>
+			<interceptor-ref name="default" />
+		</action>
 	</package>
 	<package name="api" extends="struts-default" namespace="/api">
 		<global-results>

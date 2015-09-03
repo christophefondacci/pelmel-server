@@ -71,6 +71,7 @@ import com.nextep.proto.model.Constants;
 import com.nextep.proto.services.DistanceDisplayService;
 import com.nextep.proto.services.EventManagementService;
 import com.nextep.proto.services.RightsManagementService;
+import com.nextep.proto.spring.ContextHolder;
 import com.nextep.statistic.model.ItemView;
 import com.nextep.tags.model.Tag;
 import com.nextep.users.model.User;
@@ -450,7 +451,7 @@ public class JsonBuilderImpl implements JsonBuilder {
 
 			// Building the map of referenced users
 			try {
-				final User fromUser = message.getUnique(User.class, Constants.ALIAS_FROM);
+				final CalmObject fromUser = message.getUnique(CalmObject.class, Constants.ALIAS_FROM);
 				fillUserMap(fromUser, msgUsersMap, highRes, l);
 				final User toUser = message.getUnique(User.class, Constants.ALIAS_TO);
 				fillUserMap(toUser, msgUsersMap, highRes, l);
@@ -467,14 +468,37 @@ public class JsonBuilderImpl implements JsonBuilder {
 		return messagesList;
 	}
 
-	private void fillUserMap(User user, Map<ItemKey, JsonLightUser> msgUsersMap, boolean highRes, Locale l) {
+	private void fillUserMap(CalmObject user, Map<ItemKey, JsonLightUser> msgUsersMap, boolean highRes, Locale l) {
 		if (user != null) {
 			// Have we already built this user ?
 			JsonLightUser jsonUser = msgUsersMap.get(user.getKey());
 			if (jsonUser == null) {
-				// If no, we build it and add it to our map
-				jsonUser = buildJsonLightUser(user, highRes, l);
-				msgUsersMap.put(user.getKey(), jsonUser);
+				if (user instanceof User) {
+					// If no, we build it and add it to our map
+					jsonUser = buildJsonLightUser((User) user, highRes, l);
+					msgUsersMap.put(user.getKey(), jsonUser);
+				} else if (user instanceof Place) {
+					// Here to support announcements
+					final Place place = (Place) user;
+					jsonUser = new JsonLightUser();
+					// try {
+					jsonUser.setKey(place.getKey().toString()); // CalmFactory.createKey(User.CAL_TYPE,
+																// place.getKey().toString()).toString());
+					jsonUser.setPseudo(place.getName());
+
+					// Handling media
+					JsonMedia jsonMedia = null;
+					final Media userMedia = MediaHelper.getSingleMedia(user);
+					if (userMedia != null) {
+						jsonMedia = buildJsonMedia(userMedia, highRes);
+					}
+					jsonUser.setThumb(jsonMedia);
+					msgUsersMap.put(user.getKey(), jsonUser);
+					// } catch (CalException e) {
+					// LOGGER.error("Unable to create CAL key for place as a
+					// user message sender: " + place.getKey());
+					// }
+				}
 			}
 		}
 	}
@@ -840,10 +864,19 @@ public class JsonBuilderImpl implements JsonBuilder {
 		json.setStartDateValue(deal.getStartDate());
 		json.setStatus(deal.getStatus().name());
 		json.setType(deal.getDealType().name());
+		json.setMaxUses(deal.getMaxDealUses() == null ? 0 : deal.getMaxDealUses());
 
 		final List<? extends DealUse> dealUses = deal.get(DealUse.class);
 		if (dealUses != null) {
 			json.setUsedToday(dealUses.size());
+		}
+
+		// Filling last used time
+		for (DealUse dealUse : dealUses) {
+			if (dealUse.getConsumerItemKey().equals(ContextHolder.getCurrentUserItemKey())) {
+				json.setLastUsedDate(dealUse.getUseTime());
+				break;
+			}
 		}
 		return json;
 	}

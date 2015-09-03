@@ -162,7 +162,7 @@
 
 
 <p ><b>Contact Us</b></p>
-<p >If you have any questions or comments about this Privacy Policy, the practices of the App, Site or Services, or your dealings with App, Site or Services, or your choices with regards to our collection and use of your personal information, please contact us at <a href="%22mailto:"><span class="s3">privacy@pelmelguide.com</span></a><span class="Apple-converted-space">  </span>or at FGP Digital LLC, 15524 Carney Lake Rd SW, Port Orchard, WA98367.</p>
+<p >If you have any questions or comments about this Privacy Policy, the practices of the App, Site or Services, or your dealings with App, Site or Services, or your choices with regards to our collection and use of your personal information, please contact us at <a href="%22mailto:"><span class="s3">privacy@pelmelguide.com</span></a><span class="Apple-converted-space">  </span>or at FGP Digital LLC - registered agent LEGALINC CORPORATE SERVICES INC. - 3925 NE 72ND AVE #107, Vancouver, WA 98661 United States.</p>
 	
 	
 	

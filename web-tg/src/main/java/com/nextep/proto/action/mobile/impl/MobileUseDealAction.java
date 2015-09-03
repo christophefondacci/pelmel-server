@@ -48,6 +48,7 @@ public class MobileUseDealAction extends AbstractAction implements JsonProvider 
 	private JsonBuilder jsonBuilder;
 
 	private String dealKey;
+	private boolean dryRun;
 
 	// Internal variable
 	private Deal deal;
@@ -69,35 +70,47 @@ public class MobileUseDealAction extends AbstractAction implements JsonProvider 
 		final User user = response.getUniqueElement(User.class, CurrentUserSupport.APIS_ALIAS_CURRENT_USER);
 		checkCurrentUser(user);
 
-		// Checking any deal used
-		final List<? extends DealUse> dealUses = user.get(DealUse.class);
-		for (DealUse dealUse : dealUses) {
-			if (dealUse.getDeal().getKey().equals(dealItemKey)) {
-				setErrorMessage("Already used");
-				return error(403);
-			}
-		}
-
 		// Getting deal
 		deal = response.getUniqueElement(Deal.class, APIS_ALIAS_DEAL);
 
-		// Saving new deal
-		ContextHolder.toggleWrite();
-		final MutableDealUse dealUse = (MutableDealUse) dealUseService.createTransientObject();
-		dealUse.setDeal(deal);
-		dealUse.setConsumerItemKey(user.getKey());
-		dealUse.setUseTime(new Date());
-		final Calendar cal = Calendar.getInstance();
-		cal.set(Calendar.HOUR, 0);
-		cal.set(Calendar.MINUTE, 0);
-		cal.set(Calendar.SECOND, 0);
-		cal.set(Calendar.MILLISECOND, 0);
-		dealUse.setUseDay(cal.getTime());
-		dealUseService.saveItem(dealUse);
+		// If dry run we only need to fetch the deal and return it, otherwise we
+		// use it
+		if (!dryRun) {
+			// Getting uses of this deal today
+			final List<? extends DealUse> dealUses = deal.get(DealUse.class);
 
-		// Logging event for place statistics
-		viewManagementService.logViewCountByKey(deal.getRelatedItemKey(), user, Constants.VIEW_STAT_DEAL_USE);
-		deal.add(dealUse);
+			// If maximum reached, we deny access to the deal
+			if (deal.getMaxDealUses() != null && deal.getMaxDealUses() > 0 && dealUses.size() > deal.getMaxDealUses()) {
+				setErrorMessage("Max deal uses reached");
+				return error(403);
+			}
+			// Checking if already used by this person
+			final List<? extends DealUse> userDealUses = user.get(DealUse.class);
+			for (DealUse dealUse : userDealUses) {
+				if (dealUse.getDeal().getKey().equals(dealItemKey)) {
+					setErrorMessage("Already used");
+					return error(403);
+				}
+			}
+
+			// Saving new deal
+			ContextHolder.toggleWrite();
+			final MutableDealUse dealUse = (MutableDealUse) dealUseService.createTransientObject();
+			dealUse.setDeal(deal);
+			dealUse.setConsumerItemKey(user.getKey());
+			dealUse.setUseTime(new Date());
+			final Calendar cal = Calendar.getInstance();
+			cal.set(Calendar.HOUR, 0);
+			cal.set(Calendar.MINUTE, 0);
+			cal.set(Calendar.SECOND, 0);
+			cal.set(Calendar.MILLISECOND, 0);
+			dealUse.setUseDay(cal.getTime());
+			dealUseService.saveItem(dealUse);
+
+			// Logging event for place statistics
+			viewManagementService.logViewCountByKey(deal.getRelatedItemKey(), user, Constants.VIEW_STAT_DEAL_USE);
+			deal.add(dealUse);
+		}
 		return SUCCESS;
 	}
 
@@ -113,5 +126,13 @@ public class MobileUseDealAction extends AbstractAction implements JsonProvider 
 
 	public String getDealKey() {
 		return dealKey;
+	}
+
+	public void setDryRun(boolean dryRun) {
+		this.dryRun = dryRun;
+	}
+
+	public boolean isDryRun() {
+		return dryRun;
 	}
 }

@@ -190,7 +190,7 @@
 	</div>
 </div>
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
-<!-- build:js(../web-static) /js/pelmel.min.js -->
+<!-- build:js(../web-static) /js/pelmel-hp.min.js -->
 <script src="/js/jquery-migrate-1.2.1.min.js"></script>
 <script type='text/javascript' src="/js/jquery.form.min.js"></script>
 <script type='text/javascript' src="/js/jquery.hoverIntent.min.js"></script>

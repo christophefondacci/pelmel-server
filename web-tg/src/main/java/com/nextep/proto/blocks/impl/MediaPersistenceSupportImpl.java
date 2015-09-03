@@ -31,17 +31,16 @@ import com.nextep.media.model.MutableMedia;
 import com.nextep.proto.blocks.MediaPersistenceSupport;
 import com.nextep.proto.services.StorageService;
 import com.nextep.proto.spring.ContextHolder;
-import com.nextep.users.model.User;
 import com.opensymphony.xwork2.ActionContext;
 import com.thebuzzmedia.imgscalr.Scalr;
 import com.thebuzzmedia.imgscalr.Scalr.Method;
 import com.thebuzzmedia.imgscalr.Scalr.Mode;
+import com.videopolis.calm.model.CalmObject;
 import com.videopolis.calm.model.ItemKey;
 
 public class MediaPersistenceSupportImpl implements MediaPersistenceSupport {
 
-	private static final Log log = LogFactory
-			.getLog(MediaPersistenceSupportImpl.class);
+	private static final Log log = LogFactory.getLog(MediaPersistenceSupportImpl.class);
 	private static final String KEY_MEDIA_DEFAULT_TITLE = "media.panel.mediaDescDefault";
 	private MessageSource messageSource;
 	private CalPersistenceService mediaService;
@@ -54,10 +53,9 @@ public class MediaPersistenceSupportImpl implements MediaPersistenceSupport {
 	private int thumbMaxHeight;
 	private int miniThumbMaxWidth, miniThumbMaxHeight;
 	private int maxWidth, maxHeight;
-	private int mobileMaxWidth, mobileMaxHeight, mobileMaxWidthLandscape,
-			mobileMaxHeightLandscape;
-	private int mobileMaxWidthHighDef, mobileMaxHeightHighDef,
-			mobileMaxWidthHighDefLandscape, mobileMaxHeightHighDefLandscape;
+	private int mobileMaxWidth, mobileMaxHeight, mobileMaxWidthLandscape, mobileMaxHeightLandscape;
+	private int mobileMaxWidthHighDef, mobileMaxHeightHighDef, mobileMaxWidthHighDefLandscape,
+			mobileMaxHeightHighDefLandscape;
 	private int previewWidth, previewHeight;
 	private boolean defaultAutoCrop = false;
 
@@ -65,8 +63,8 @@ public class MediaPersistenceSupportImpl implements MediaPersistenceSupport {
 		// use IIORegistry to get the available services
 		IIORegistry registry = IIORegistry.getDefaultInstance();
 		// return an iterator for the available ImageWriterSpi for jpeg images
-		Iterator<ImageWriterSpi> services = registry.getServiceProviders(
-				ImageWriterSpi.class, new ServiceRegistry.Filter() {
+		Iterator<ImageWriterSpi> services = registry.getServiceProviders(ImageWriterSpi.class,
+				new ServiceRegistry.Filter() {
 					@Override
 					public boolean filter(Object provider) {
 						if (!(provider instanceof ImageWriterSpi))
@@ -92,9 +90,8 @@ public class MediaPersistenceSupportImpl implements MediaPersistenceSupport {
 	}
 
 	@Override
-	public Media createMedia(User author, ItemKey parentItemKey, File tmpFile,
-			String filename, String contentType, String title, boolean isVideo,
-			Integer firstMediaPriority) throws IOException {
+	public Media createMedia(CalmObject author, ItemKey parentItemKey, File tmpFile, String filename,
+			String contentType, String title, boolean isVideo, Integer firstMediaPriority) throws IOException {
 		// Extracting extension
 		int dotIndex = filename.lastIndexOf(".");
 		String ext = "";
@@ -104,13 +101,10 @@ public class MediaPersistenceSupportImpl implements MediaPersistenceSupport {
 
 		// Copying media
 		FileInputStream inputStream = new FileInputStream(tmpFile);
-		final String originalFileName = writeStream(inputStream, parentItemKey,
-				ext, contentType);
+		final String originalFileName = writeStream(inputStream, parentItemKey, ext, contentType);
 
-		final MutableMedia mutableMedia = (MutableMedia) mediaService
-				.createTransientObject();
-		mutableMedia.setOriginalUrl(getLocalMediaUrlPrefix(parentItemKey)
-				+ originalFileName);
+		final MutableMedia mutableMedia = (MutableMedia) mediaService.createTransientObject();
+		mutableMedia.setOriginalUrl(getLocalMediaUrlPrefix(parentItemKey) + originalFileName);
 		mutableMedia.setVideo(isVideo);
 		mutableMedia.setRelatedItemKey(parentItemKey);
 		mutableMedia.setAuthorKey(author.getKey());
@@ -120,9 +114,8 @@ public class MediaPersistenceSupportImpl implements MediaPersistenceSupport {
 		if (firstMediaPriority != null) {
 			mutableMedia.setPreferenceOrder(firstMediaPriority - 1);
 		}
-		final String defaultTitle = messageSource.getMessage(
-				KEY_MEDIA_DEFAULT_TITLE, null, ActionContext.getContext()
-						.getLocale());
+		final String defaultTitle = messageSource.getMessage(KEY_MEDIA_DEFAULT_TITLE, null,
+				ActionContext.getContext().getLocale());
 		if (!defaultTitle.equals(title)) {
 			mutableMedia.setTitle(title);
 		}
@@ -151,8 +144,8 @@ public class MediaPersistenceSupportImpl implements MediaPersistenceSupport {
 	public void generateThumb(MutableMedia mutableMedia, InputStream stream) {
 		try {
 			final BufferedImage srcImg = ImageIO.read(stream);
-			final BufferedImage srcImage = new BufferedImage(srcImg.getWidth(),
-					srcImg.getHeight(), BufferedImage.TYPE_INT_RGB);
+			final BufferedImage srcImage = new BufferedImage(srcImg.getWidth(), srcImg.getHeight(),
+					BufferedImage.TYPE_INT_RGB);
 			long start = System.currentTimeMillis();
 			for (int x = 0; x < srcImg.getWidth(); x++) {
 				for (int y = 0; y < srcImg.getHeight(); y++) {
@@ -172,37 +165,30 @@ public class MediaPersistenceSupportImpl implements MediaPersistenceSupport {
 			Integer cropW;
 			Integer cropH;
 			if (defaultAutoCrop) {
-				cropW = mutableMedia.getCropWidth() == null ? maxWidth
-						: mutableMedia.getCropWidth();
-				cropH = mutableMedia.getCropHeight() == null ? maxHeight
-						: mutableMedia.getCropHeight();
+				cropW = mutableMedia.getCropWidth() == null ? maxWidth : mutableMedia.getCropWidth();
+				cropH = mutableMedia.getCropHeight() == null ? maxHeight : mutableMedia.getCropHeight();
 			} else {
 				cropW = mutableMedia.getCropWidth();
 				cropH = mutableMedia.getCropHeight();
 			}
-			String filename = generateThumb(mutableMedia, srcImage, maxWidth,
-					maxHeight, cropX, cropY, cropW, cropH);
-			final String localMediaUrlPrefix = getLocalMediaUrlPrefix(mutableMedia
-					.getRelatedItemKey());
+			String filename = generateThumb(mutableMedia, srcImage, maxWidth, maxHeight, cropX, cropY, cropW, cropH);
+			final String localMediaUrlPrefix = getLocalMediaUrlPrefix(mutableMedia.getRelatedItemKey());
 			if (filename != null) {
 				mutableMedia.setUrl(localMediaUrlPrefix + filename);
 			}
 
 			// Generating thumb (croping if needed)
-			String thumbFileName = generateThumb(mutableMedia, srcImage,
-					thumbMaxWidth, thumbMaxHeight, null, null, thumbMaxWidth,
-					thumbMaxHeight);
+			String thumbFileName = generateThumb(mutableMedia, srcImage, thumbMaxWidth, thumbMaxHeight, null, null,
+					thumbMaxWidth, thumbMaxHeight);
 			if (thumbFileName != null) {
 				mutableMedia.setThumbUrl(localMediaUrlPrefix + thumbFileName);
 			}
 
 			// Generating mini thumb (cropping if needed)
-			thumbFileName = generateThumb(mutableMedia, srcImage,
-					miniThumbMaxWidth, miniThumbMaxHeight, null, null,
+			thumbFileName = generateThumb(mutableMedia, srcImage, miniThumbMaxWidth, miniThumbMaxHeight, null, null,
 					miniThumbMaxWidth, miniThumbMaxHeight);
 			if (thumbFileName != null) {
-				mutableMedia.setMiniThumbUrl(localMediaUrlPrefix
-						+ thumbFileName);
+				mutableMedia.setMiniThumbUrl(localMediaUrlPrefix + thumbFileName);
 			}
 			// Generating mobile optimized file
 			final int imgWidth = srcImage.getWidth();
@@ -221,49 +207,40 @@ public class MediaPersistenceSupportImpl implements MediaPersistenceSupport {
 				resizedHeightHighDef = mobileMaxHeightHighDefLandscape;
 			}
 			// Standard definition
-			thumbFileName = generateThumb(mutableMedia, srcImage, resizedWidth,
-					resizedHeight, null, null, null, null);
+			thumbFileName = generateThumb(mutableMedia, srcImage, resizedWidth, resizedHeight, null, null, null, null);
 			// resizedWidth, resizedHeight);
 			if (thumbFileName != null) {
 				mutableMedia.setMobileUrl(localMediaUrlPrefix + thumbFileName);
 			}
 
 			// High definition
-			thumbFileName = generateThumb(mutableMedia, srcImage,
-					resizedWidthHighDef, resizedHeightHighDef, null, null,
+			thumbFileName = generateThumb(mutableMedia, srcImage, resizedWidthHighDef, resizedHeightHighDef, null, null,
 					null, null);
 			// resizedWidthHighDef, resizedHeightHighDef);
 			if (thumbFileName != null) {
-				mutableMedia.setMobileUrlHighDef(localMediaUrlPrefix
-						+ thumbFileName);
+				mutableMedia.setMobileUrlHighDef(localMediaUrlPrefix + thumbFileName);
 			}
 
 		} catch (IOException e) {
-			log.error(
-					"Unable to generate thumb for parent item '"
-							+ mutableMedia.getRelatedItemKey().toString()
-							+ "': " + e.getMessage(), e);
+			log.error("Unable to generate thumb for parent item '" + mutableMedia.getRelatedItemKey().toString() + "': "
+					+ e.getMessage(), e);
 			mutableMedia.setOnline(false);
 		}
 	}
 
-	private String generateThumb(MutableMedia media, BufferedImage srcImage,
-			int width, int height) throws IOException {
-		return generateThumb(media, srcImage, width, height, null, null, null,
-				null);
+	private String generateThumb(MutableMedia media, BufferedImage srcImage, int width, int height) throws IOException {
+		return generateThumb(media, srcImage, width, height, null, null, null, null);
 	}
 
-	private String generateThumb(MutableMedia media, BufferedImage srcImage,
-			int width, int height, Integer cX, Integer cY, Integer cropWidth,
-			Integer cropHeight) throws IOException {
+	private String generateThumb(MutableMedia media, BufferedImage srcImage, int width, int height, Integer cX,
+			Integer cY, Integer cropWidth, Integer cropHeight) throws IOException {
 		// Generating thumbnail
 		int myWidth = width;
 		int myHeight = height;
 		final ItemKey parentItemKey = media.getRelatedItemKey();
 
 		if (srcImage != null) {
-			log.info("Generating thumb for item '" + parentItemKey.toString()
-					+ "'");
+			log.info("Generating thumb for item '" + parentItemKey.toString() + "'");
 			final int imgWidth = srcImage.getWidth();
 			final int imgHeight = srcImage.getHeight();
 			final double imgRatio = (double) imgWidth / (double) imgHeight;
@@ -274,8 +251,7 @@ public class MediaPersistenceSupportImpl implements MediaPersistenceSupport {
 
 				// If we get the same ratio for crop and image : both have wider
 				// widths or both have taller heights
-				if ((cropRatio >= 1 && imgRatio >= 1)
-						|| (cropRatio < 1 && imgRatio < 1)) {
+				if ((cropRatio >= 1 && imgRatio >= 1) || (cropRatio < 1 && imgRatio < 1)) {
 					// If the image ratio is greater than the crop ratio (image
 					// has wider width for a same height) we fit to height
 					if (imgRatio >= cropRatio) {
@@ -315,14 +291,11 @@ public class MediaPersistenceSupportImpl implements MediaPersistenceSupport {
 			if (srcImage != null) {
 				BufferedImage thumb = null;
 				if (myHeight == -1) {
-					thumb = Scalr.resize(srcImage, Method.QUALITY,
-							Mode.FIT_TO_WIDTH, width);
+					thumb = Scalr.resize(srcImage, Method.QUALITY, Mode.FIT_TO_WIDTH, width);
 				} else if (myWidth == -1) {
-					thumb = Scalr.resize(srcImage, Method.QUALITY,
-							Mode.FIT_TO_HEIGHT, height);
+					thumb = Scalr.resize(srcImage, Method.QUALITY, Mode.FIT_TO_HEIGHT, height);
 				} else {
-					thumb = Scalr.resize(srcImage, Method.QUALITY, width,
-							height);
+					thumb = Scalr.resize(srcImage, Method.QUALITY, width, height);
 				}
 				// We just take a subset of the image by cropping resulting
 				// image
@@ -363,12 +336,10 @@ public class MediaPersistenceSupportImpl implements MediaPersistenceSupport {
 					cropX = cX;
 					cropY = cY;
 				}
-				if (cropX != null && cropWidth != null
-						&& cropX + cropWidth <= thumbWidth
+				if (cropX != null && cropWidth != null && cropX + cropWidth <= thumbWidth
 						&& cropY + cropHeight <= thumbHeight) {
 					try {
-						thumb = thumb.getSubimage(cropX, cropY,
-								Math.min(thumbWidth - cropX, cropWidth),
+						thumb = thumb.getSubimage(cropX, cropY, Math.min(thumbWidth - cropX, cropWidth),
 								Math.min(thumbHeight - cropY, cropHeight));
 					} catch (RuntimeException e) {
 						throw e;
@@ -412,8 +383,7 @@ public class MediaPersistenceSupportImpl implements MediaPersistenceSupport {
 	 * @return the location of the stored image in the current storage
 	 * @throws IOException
 	 */
-	private String writeFile(BufferedImage thumb, ItemKey parentItemKey)
-			throws IOException {
+	private String writeFile(BufferedImage thumb, ItemKey parentItemKey) throws IOException {
 
 		// Writing to our byte array
 		final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -427,9 +397,7 @@ public class MediaPersistenceSupportImpl implements MediaPersistenceSupport {
 		jpegParams.setCompressionQuality(0.9f);
 		writer.write(null, new IIOImage(thumb, null, null), jpegParams);
 
-		return writeStream(
-				new ByteArrayInputStream(outputStream.toByteArray()),
-				parentItemKey, ".jpg");
+		return writeStream(new ByteArrayInputStream(outputStream.toByteArray()), parentItemKey, ".jpg");
 	}
 
 	/**
@@ -443,17 +411,15 @@ public class MediaPersistenceSupportImpl implements MediaPersistenceSupport {
 	 * @return the name of the information in the underlying storage
 	 * @throws IOException
 	 */
-	private String writeStream(InputStream stream, ItemKey parentItemKey,
-			String extension) throws IOException {
+	private String writeStream(InputStream stream, ItemKey parentItemKey, String extension) throws IOException {
 		return writeStream(stream, parentItemKey, extension, null);
 	}
 
-	private String writeStream(InputStream stream, ItemKey parentItemKey,
-			String extension, String contentType) throws IOException {
+	private String writeStream(InputStream stream, ItemKey parentItemKey, String extension, String contentType)
+			throws IOException {
 		// Getting relative path
 		final String path = getLocalMediaUrlPrefix(parentItemKey);
-		final String filename = parentItemKey.toString()
-				+ System.currentTimeMillis() + extension;
+		final String filename = parentItemKey.toString() + System.currentTimeMillis() + extension;
 
 		// Now storing through storage
 		final String fullPath = path.substring(1) + filename;
@@ -464,8 +430,7 @@ public class MediaPersistenceSupportImpl implements MediaPersistenceSupport {
 	}
 
 	@Override
-	public File crop(MutableMedia m, File srcImage, int x, int y, int width,
-			int height) {
+	public File crop(MutableMedia m, File srcImage, int x, int y, int width, int height) {
 		try {
 			final BufferedImage img = ImageIO.read(srcImage);
 			// Scaling everything from preview coords to original image coords
@@ -478,19 +443,15 @@ public class MediaPersistenceSupportImpl implements MediaPersistenceSupport {
 
 			if (originalWidth > originalHeight) {
 				pWidth = previewWidth;
-				pHeight = (int) (((double) previewWidth)
-						/ ((double) originalWidth) * originalHeight);
+				pHeight = (int) (((double) previewWidth) / ((double) originalWidth) * originalHeight);
 			} else {
 				pHeight = previewHeight;
-				pWidth = (int) (((double) previewHeight)
-						/ ((double) originalHeight) * originalWidth);
+				pWidth = (int) (((double) previewHeight) / ((double) originalHeight) * originalWidth);
 			}
 
 			// Now scaling to preview-fitted bounds
-			final double widthRatio = ((double) originalWidth)
-					/ ((double) pWidth);
-			final double heightRatio = ((double) originalHeight)
-					/ ((double) pHeight);
+			final double widthRatio = ((double) originalWidth) / ((double) pWidth);
+			final double heightRatio = ((double) originalHeight) / ((double) pHeight);
 			final int cropX = (int) (x * widthRatio);
 			final int cropY = (int) (y * heightRatio);
 			final int cropWidth = (int) (width * widthRatio);
@@ -498,51 +459,42 @@ public class MediaPersistenceSupportImpl implements MediaPersistenceSupport {
 
 			// Adjusting max because of rounded doubles computation and
 			// approximations
-			final int finalCropWidth = Math.min(originalWidth - cropX,
-					cropWidth);
-			final int finalCropHeight = Math.min(originalHeight - cropY,
-					cropHeight);
+			final int finalCropWidth = Math.min(originalWidth - cropX, cropWidth);
+			final int finalCropHeight = Math.min(originalHeight - cropY, cropHeight);
 			// Cropping with scaled dimensions
-			final BufferedImage resultImg = img.getSubimage(cropX, cropY,
-					finalCropWidth, finalCropHeight);
+			final BufferedImage resultImg = img.getSubimage(cropX, cropY, finalCropWidth, finalCropHeight);
 			m.setCropX(cropX);
 			m.setCropY(cropY);
 			m.setCropWidth(finalCropWidth);
 			m.setCropHeight(finalCropHeight);
 
 			final String mediaPath = getLocalMediaPath(m.getRelatedItemKey());
-			final String mediaName = m.getRelatedItemKey().toString()
-					+ System.currentTimeMillis() + ".png";
+			final String mediaName = m.getRelatedItemKey().toString() + System.currentTimeMillis() + ".png";
 			final File fileDir = new File(mediaPath);
 			fileDir.mkdirs();
 			final File resultingFile = new File(mediaPath, mediaName);
 			ImageIO.write(resultImg, "png", resultingFile);
 
 			// Setting media width and height
-			final String resizedFileName = generateThumb(m, resultImg,
-					maxWidth, maxHeight);
+			final String resizedFileName = generateThumb(m, resultImg, maxWidth, maxHeight);
 			final File resizedFile = new File(mediaPath, resizedFileName);
 
 			return resizedFile;
 		} catch (IOException e) {
-			log.error(
-					"Unable to read / write a media file for crop operation : "
-							+ e.getMessage(), e);
+			log.error("Unable to read / write a media file for crop operation : " + e.getMessage(), e);
 			return null;
 		}
 	}
 
 	@Override
 	public File getMediaLocalFile(String mediaUrl) {
-		final String mediaLocation = mediaUrl.replace(localMediaUrlPrefix,
-				localMediaPath);
+		final String mediaLocation = mediaUrl.replace(localMediaUrlPrefix, localMediaPath);
 		return new File(mediaLocation);
 	}
 
 	@Override
 	public String getMediaUrl(File localMediaFile) {
-		return localMediaFile.getPath().replace(localMediaPath,
-				localMediaUrlPrefix);
+		return localMediaFile.getPath().replace(localMediaPath, localMediaUrlPrefix);
 	}
 
 	private String getLocalMediaPath(ItemKey key) {
@@ -573,8 +525,7 @@ public class MediaPersistenceSupportImpl implements MediaPersistenceSupport {
 
 	public void setLocalMediaPath(String localMediaPath) {
 		if (localMediaPath.charAt(localMediaPath.length() - 1) == File.separatorChar) {
-			this.localMediaPath = localMediaPath.substring(0,
-					localMediaPath.length() - 1);
+			this.localMediaPath = localMediaPath.substring(0, localMediaPath.length() - 1);
 		} else {
 			this.localMediaPath = localMediaPath;
 		}
@@ -644,13 +595,11 @@ public class MediaPersistenceSupportImpl implements MediaPersistenceSupport {
 		this.mobileMaxHeightLandscape = mobileMaxHeightLandscape;
 	}
 
-	public void setMobileMaxWidthHighDefLandscape(
-			int mobileMaxWidthHighDefLandscape) {
+	public void setMobileMaxWidthHighDefLandscape(int mobileMaxWidthHighDefLandscape) {
 		this.mobileMaxWidthHighDefLandscape = mobileMaxWidthHighDefLandscape;
 	}
 
-	public void setMobileMaxHeightHighDefLandscape(
-			int mobileMaxHeightHighDefLandscape) {
+	public void setMobileMaxHeightHighDefLandscape(int mobileMaxHeightHighDefLandscape) {
 		this.mobileMaxHeightHighDefLandscape = mobileMaxHeightHighDefLandscape;
 	}
 

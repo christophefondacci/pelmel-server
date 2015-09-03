@@ -44,6 +44,7 @@ import com.nextep.proto.spring.ContextHolder;
 import com.nextep.users.model.MutableUser;
 import com.nextep.users.model.PushProvider;
 import com.nextep.users.model.User;
+import com.nextep.users.services.UsersService;
 import com.notnoop.apns.APNS;
 import com.notnoop.apns.ApnsService;
 import com.notnoop.apns.ApnsServiceBuilder;
@@ -558,7 +559,15 @@ public class NotificationServiceImpl implements NotificationService {
 
 	}
 
+	@Override
 	public void sendEmailValidationEmail(User user) {
+		// In case we don't have a token, we generate a new one
+		if (user.getEmailValidationToken() == null) {
+			ContextHolder.toggleWrite();
+			final String emailToken = ((UsersService) usersService).generateUniqueToken(user);
+			((MutableUser) user).setEmailValidationToken(emailToken);
+			usersService.saveItem(user);
+		}
 
 		final StringBuilder buf = new StringBuilder();
 		buf.append("Hello " + user.getPseudo() + ",<br><br>");
