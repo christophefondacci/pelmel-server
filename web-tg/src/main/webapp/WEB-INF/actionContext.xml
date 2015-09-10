@@ -752,6 +752,11 @@
 		<property name="headerSupport" ref="aboutHeaderSupport"/>
 		<property name="localizationSupport" ref="placeLocalizationSupport"/>
 	</bean> 
+	<bean id="dealHelpAction" class="com.nextep.proto.action.impl.StaticAction" parent="abstractAction" scope="request">
+		<property name="urlService" ref="urlService"/>
+		<property name="headerSupport" ref="dealHelpHeaderSupport"/>
+		<property name="localizationSupport" ref="placeLocalizationSupport"/>
+	</bean> 
 	<bean id="partnersAction" class="com.nextep.proto.action.impl.StaticAction" parent="abstractAction" scope="request">
 		<property name="headerSupport" ref="partnersHeaderSupport"/>
 		<property name="localizationSupport" ref="placeLocalizationSupport"/>
@@ -775,6 +780,9 @@
 		<property name="urlService" ref="urlService"/>
 	</bean> 
 	<bean id="useDealAction" class="com.nextep.proto.action.mobile.impl.MobileUseDealAction" parent="abstractAction" scope="request">
+		<property name="urlService" ref="urlService"/>
+	</bean> 
+	<bean id="reportDealAction" class="com.nextep.proto.action.mobile.impl.MobileDealReportingAction" parent="abstractAction" scope="request">
 		<property name="urlService" ref="urlService"/>
 	</bean> 
 	<bean id="adminUsersAction" class="com.nextep.proto.action.impl.admin.AdminUsersAction" parent="abstractAction" scope="request">

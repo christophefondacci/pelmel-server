@@ -210,9 +210,10 @@ public class NotificationServiceImpl implements NotificationService {
 		notifyByEmail(title, html, "christophe@pelmelguide.com", adminEmailAlias);
 	}
 
-	private void notifyByEmail(String title, String html, String toAddress, String bccAddress) {
+	@Override
+	public void notifyByEmail(String title, String html, String toAddress, String bccAddress) {
 		notifyByEmail(title, html, Arrays.asList(toAddress.split(" ")), "43c9d208-8167-48f8-bc90-0edc03575c5f",
-				bccAddress.split(" "));
+				bccAddress != null ? bccAddress.split(" ") : null);
 	}
 
 	@Override

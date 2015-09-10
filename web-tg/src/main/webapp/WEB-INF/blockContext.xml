@@ -63,6 +63,12 @@
 		<property name="canonical" value="/about"/>
 		<property name="robotsTags" value="INDEX,FOLLOW"/>
 	</bean>
+	<bean id="dealHelpHeaderSupport" parent="titledHeaderSupport" scope="prototype">
+		<property name="titleMessageKey" value="header.title.dealHelp"/>
+		<property name="pageStyle" value="profile"/>
+		<property name="canonical" value="/deal-help"/>
+		<property name="robotsTags" value="INDEX,FOLLOW"/>
+	</bean>
 	<bean id="resetPasswordHeaderSupport" parent="titledHeaderSupport" scope="prototype">
 		<property name="titleMessageKey" value="header.title.resetPassword"/>
 		<property name="pageStyle" value="bar"/>

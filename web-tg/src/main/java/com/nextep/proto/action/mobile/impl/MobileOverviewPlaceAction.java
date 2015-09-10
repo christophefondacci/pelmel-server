@@ -137,11 +137,13 @@ public class MobileOverviewPlaceAction extends AbstractAction implements JsonPro
 
 		// Querying along with some global user facetting
 		final ApisRequest request = (ApisRequest) ApisFactory.createCompositeRequest().addCriterion(objCriterion)
-				.addCriterion(SearchRestriction
-						.searchNear(Activity.class, SearchScope.NEARBY_ACTIVITIES, lat, lng, radius, 1, 0)
-						.sortBy(activitiesDateSorter).aliasedBy(APIS_ALIAS_NEARBY_ACTIVITIES))
 				.addCriterion(SearchRestriction.searchForAllFacets(User.class, SearchScope.EVENTS).facettedBy(
 						Arrays.asList(SearchHelper.getUserPlacesCategory(), SearchHelper.getUserEventsCategory())));
+		if (lat != null && lng != null) {
+			request.addCriterion(
+					SearchRestriction.searchNear(Activity.class, SearchScope.NEARBY_ACTIVITIES, lat, lng, radius, 1, 0)
+							.sortBy(activitiesDateSorter).aliasedBy(APIS_ALIAS_NEARBY_ACTIVITIES));
+		}
 
 		// Fetching user if defined with liked elements
 		final ApisCriterion userCriterion = (ApisCriterion) currentUserSupport

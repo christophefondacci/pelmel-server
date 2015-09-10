@@ -9,8 +9,19 @@
 		<put-attribute name="page-breadcrumb" value="/jsp/blocks/block-breadcrumb.jsp"/>
 		<put-attribute name="page-subtitle" value="/jsp/structure/empty.jsp" />
 	</definition>
+	<definition name="raw" template="/jsp/structure/raw.jsp">
+		<put-attribute name="meta-header" value="/jsp/header/meta-header.jsp" />
+		<put-attribute name="header" value="/jsp/header/default-header.jsp" />
+		<put-attribute name="background" value=""/>
+		<put-attribute name="url.privacy" value="http://www.pelmelguide.com/privacy-agreement"/>
+		<put-attribute name="url.terms" value="http://www.pelmelguide.com/terms-agreement"/>
+		<put-attribute name="left-style" value="left-header"/>
+		<put-attribute name="main-col-class" value="main-col"/>
+	</definition>
 	<definition name="base" template="/jsp/structure/default.jsp">
 		<put-attribute name="title" value="Overview" />
+		<put-attribute name="url.privacy" value="http://www.pelmelguide.com/privacy"/>
+		<put-attribute name="url.terms" value="http://www.pelmelguide.com/about"/>
 		<put-attribute name="ads-footer" value="/jsp/footer/ads-footer.jsp" />
 		<put-attribute name="meta-header" value="/jsp/header/meta-header.jsp" />
 		<put-attribute name="header" value="/jsp/header/default-header.jsp" />
@@ -261,6 +272,15 @@
 	</definition>
 	<definition name="privacy" extends="static">
 		<put-attribute name="page-top" value="/jsp/top/top-privacy.jsp"/>
+	</definition>
+	<definition name="privacy-agreement" extends="raw">
+		<put-attribute name="content" value="/jsp/top/top-privacy.jsp"/>
+	</definition>
+	<definition name="deal-help" extends="raw">
+		<put-attribute name="content" value="/jsp/top/deal-help.jsp"/>
+	</definition>
+	<definition name="terms-agreement" extends="raw">
+		<put-attribute name="content" value="/jsp/top/terms.jsp"/>
 	</definition>
 	<definition name="partners" extends="static">
 		<put-attribute name="page-top" value="/jsp/top/top-partners.jsp"/>

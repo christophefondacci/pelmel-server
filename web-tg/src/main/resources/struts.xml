@@ -469,6 +469,7 @@
 				<param name="prependServletContext">false</param>
 				<param name="parse">true</param>
 				<param name="id">${subscribedKey}</param>
+				<param name="nxtpUserToken">${nxtpUserToken}</param>
 			</result>
 			<result name="input">/jsp/pages/json-error.jsp</result>
 			<result name="error">/jsp/pages/json-error.jsp</result>
@@ -587,6 +588,11 @@
 			<result name="input">/jsp/pages/json-error.jsp</result>
 			<result name="error">/jsp/pages/json-error.jsp</result>
 		</action>
+		<action name="mobileReportDeal" class="reportDealAction">
+			<result>/jsp/pages/json.jsp</result>
+			<result name="input">/jsp/pages/json-error.jsp</result>
+			<result name="error">/jsp/pages/json-error.jsp</result>
+		</action>
 		<action name="mobilePrivateList" class="mobilePrivateListAction">
 			<result>/jsp/pages/json.jsp</result>
 			<result name="input">/jsp/pages/json-error.jsp</result>
@@ -622,6 +628,18 @@
 		</action>
 		<action name="privacy" class="aboutAction">
 			<result type="tiles">privacy</result>
+			<interceptor-ref name="default" />
+		</action>
+		<action name="privacy-agreement" class="aboutAction">
+			<result type="tiles">privacy-agreement</result>
+			<interceptor-ref name="default" />
+		</action>
+		<action name="deal-help" class="dealHelpAction">
+			<result type="tiles">deal-help</result>
+			<interceptor-ref name="default" />
+		</action>
+		<action name="terms-agreement" class="aboutAction">
+			<result type="tiles">terms-agreement</result>
 			<interceptor-ref name="default" />
 		</action>
 		<action name="ajaxGetLoginForm" class="aboutAction">

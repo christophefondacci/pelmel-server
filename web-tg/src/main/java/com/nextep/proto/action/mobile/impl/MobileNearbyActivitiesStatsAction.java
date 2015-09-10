@@ -9,8 +9,6 @@ import java.util.Map;
 
 import javax.annotation.Resource;
 
-import net.sf.json.JSONArray;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,6 +49,8 @@ import com.videopolis.smaug.common.model.Facet;
 import com.videopolis.smaug.common.model.FacetCategory;
 import com.videopolis.smaug.common.model.SearchScope;
 
+import net.sf.json.JSONArray;
+
 /**
  * This action provides summarized statistics about activities that happened
  * around a given lat/lng in the last maxActivityTimeMs millisecs (defined
@@ -59,12 +59,10 @@ import com.videopolis.smaug.common.model.SearchScope;
  * @author cfondacci
  *
  */
-public class MobileNearbyActivitiesStatsAction extends AbstractAction implements
-		JsonProvider {
+public class MobileNearbyActivitiesStatsAction extends AbstractAction implements JsonProvider {
 
 	private static final long serialVersionUID = -3839026287727290015L;
-	private final static Log LOGGER = LogFactory
-			.getLog(MobileNearbyActivitiesStatsAction.class);
+	private final static Log LOGGER = LogFactory.getLog(MobileNearbyActivitiesStatsAction.class);
 
 	private static final ApisItemKeyAdapter activityTargetKeyAdapter = new ApisActivityTargetKeyAdapter();
 
@@ -98,29 +96,23 @@ public class MobileNearbyActivitiesStatsAction extends AbstractAction implements
 		final ApisRequest request = ApisFactory.createCompositeRequest();
 
 		// Preparing time facet
-		final Facet facet = ApisActivitiesHelper
-				.buildFacetFromMaxTime(maxActivityTime);
+		final Facet facet = ApisActivitiesHelper.buildFacetFromMaxTime(maxActivityTime);
 		final Collection<Facet> facets = Arrays.asList(facet);
 
 		// Preparing facetting
-		final Collection<FacetCategory> facetCategories = Arrays
-				.asList(SearchHelper.getFacetCategory("activityType"));
+		final Collection<FacetCategory> facetCategories = Arrays.asList(SearchHelper.getFacetCategory("activityType"));
 
 		// Adding activities
-		final List<Sorter> activitiesDateSorter = SearchHelper
-				.getActivitiesDateSorter(false);
+		final List<Sorter> activitiesDateSorter = SearchHelper.getActivitiesDateSorter(false);
 		// PLACE activity target type
-		request.addCriterion(buildNearbyFacettedCriterion(SearchScope.PLACES,
-				facets, facetCategories, activitiesDateSorter,
-				APIS_ALIAS_PLACES_ACTIVITIES));
+		request.addCriterion(buildNearbyFacettedCriterion(SearchScope.PLACES, facets, facetCategories,
+				activitiesDateSorter, APIS_ALIAS_PLACES_ACTIVITIES));
 		// EVNT activity target type
-		request.addCriterion(buildNearbyFacettedCriterion(SearchScope.EVENTS,
-				facets, facetCategories, activitiesDateSorter,
-				APIS_ALIAS_EVENTS_ACTIVITIES));
+		request.addCriterion(buildNearbyFacettedCriterion(SearchScope.EVENTS, facets, facetCategories,
+				activitiesDateSorter, APIS_ALIAS_EVENTS_ACTIVITIES));
 		// USER activity target type
-		request.addCriterion(buildNearbyFacettedCriterion(SearchScope.USERS,
-				facets, facetCategories, activitiesDateSorter,
-				APIS_ALIAS_USERS_ACTIVITIES));
+		request.addCriterion(buildNearbyFacettedCriterion(SearchScope.USERS, facets, facetCategories,
+				activitiesDateSorter, APIS_ALIAS_USERS_ACTIVITIES));
 		// Querying media
 		// request.addCriterion(buildNearbyFacettedCriterion(SearchScope.PHOTOS,
 		// (Collection<Facet>) facets, facetCategories,
@@ -134,94 +126,68 @@ public class MobileNearbyActivitiesStatsAction extends AbstractAction implements
 		// alias
 		// so that generic processing of media will work seamlessly
 
-		final Facet creationFacet = ApisActivitiesHelper
-				.buildFacetFromMaxTime(maxCreationActivityTime);
+		final Facet creationFacet = ApisActivitiesHelper.buildFacetFromMaxTime(maxCreationActivityTime);
 		final Collection<Facet> creationFacets = Arrays.asList(creationFacet);
 
 		request.addCriterion((ApisCriterion) SearchRestriction
-				.searchNear(Activity.class, SearchScope.CREATION, lat, lng,
-						radius, NEARBY_ACTIVITIES_COUNT, 0)
-				.filteredBy(creationFacets)
-				.facettedBy(creationFacetCategories)
-				.sortBy(activitiesDateSorter)
+				.searchNear(Activity.class, SearchScope.CREATION, lat, lng, radius, NEARBY_ACTIVITIES_COUNT, 0)
+				.filteredBy(creationFacets).facettedBy(creationFacetCategories).sortBy(activitiesDateSorter)
 				.aliasedBy(APIS_ALIAS_CREATION_ACTIVITIES)
-				.addCriterion(
-						(ApisCriterion) SearchRestriction
-								.adaptKey(new ApisActivityExtraKeyAdapter())
-								.aliasedBy(Constants.ALIAS_ACTIVITY_TARGET)
-								.with(Media.class)));
+				.addCriterion((ApisCriterion) SearchRestriction.adaptKey(new ApisActivityExtraKeyAdapter())
+						.aliasedBy(Constants.ALIAS_ACTIVITY_TARGET).with(Media.class)));
 
-		request.addCriterion(currentUserSupport.createApisCriterionFor(
-				getNxtpUserToken(), true));
+		request.addCriterion(currentUserSupport.createApisCriterionFor(getNxtpUserToken(), true));
 
 		// Adding required elements for activity generation
 		// ApisActivitiesHelper.addActivityConnectedItemsQuery(activitiesCrit);
 		// request.addCriterion(activitiesCrit);
 
 		// Executing query
-		response = (ApiCompositeResponse) getApiService().execute(request,
-				ContextFactory.createContext(getLocale()));
-		final User user = response.getUniqueElement(User.class,
-				CurrentUserSupport.APIS_ALIAS_CURRENT_USER);
+		response = (ApiCompositeResponse) getApiService().execute(request, ContextFactory.createContext(getLocale()));
+		final User user = response.getUniqueElement(User.class, CurrentUserSupport.APIS_ALIAS_CURRENT_USER);
 		checkCurrentUser(user);
 
 		return SUCCESS;
 	}
 
-	private ApisCriterion buildNearbyFacettedCriterion(SearchScope scope,
-			Collection<Facet> filters,
-			Collection<FacetCategory> facetCategories, List<Sorter> sorter,
-			String alias) throws ApisException {
+	private ApisCriterion buildNearbyFacettedCriterion(SearchScope scope, Collection<Facet> filters,
+			Collection<FacetCategory> facetCategories, List<Sorter> sorter, String alias) throws ApisException {
 
 		return (ApisCriterion) SearchRestriction
-				.searchNear(Activity.class, scope, lat, lng, radius,
-						NEARBY_ACTIVITIES_COUNT, 0)
-				.filteredBy(filters)
-				.facettedBy(facetCategories)
-				.sortBy(sorter)
-				.aliasedBy(alias)
-				.addCriterion(
-						(ApisCriterion) SearchRestriction
-								.adaptKey(activityTargetKeyAdapter)
-								.aliasedBy(Constants.ALIAS_ACTIVITY_TARGET)
-								.with(Media.class));
+				.searchNear(Activity.class, scope, lat, lng, radius, NEARBY_ACTIVITIES_COUNT, 0).filteredBy(filters)
+				.facettedBy(facetCategories).sortBy(sorter).aliasedBy(alias)
+				.addCriterion((ApisCriterion) SearchRestriction.adaptKey(activityTargetKeyAdapter)
+						.aliasedBy(Constants.ALIAS_ACTIVITY_TARGET).with(Media.class));
 	}
 
 	@Override
 	public String getJson() {
 		List<JsonActivityStatistic> jsonActivityStats = new ArrayList<JsonActivityStatistic>();
 
-		final FacetInformation placesFacetInfo = response
-				.getFacetInformation(SearchScope.PLACES);
-		final FacetInformation eventsFacetInfo = response
-				.getFacetInformation(SearchScope.EVENTS);
+		final FacetInformation placesFacetInfo = response.getFacetInformation(SearchScope.PLACES);
+		final FacetInformation eventsFacetInfo = response.getFacetInformation(SearchScope.EVENTS);
 		// final FacetInformation mediaFacetInfo = response
 		// .getFacetInformation(SearchScope.PHOTOS);
-		final FacetInformation usersFacetInfo = response
-				.getFacetInformation(SearchScope.USERS);
-		final FacetInformation creationFacetInfo = response
-				.getFacetInformation(SearchScope.CREATION);
+		final FacetInformation usersFacetInfo = response.getFacetInformation(SearchScope.USERS);
+		final FacetInformation creationFacetInfo = response.getFacetInformation(SearchScope.CREATION);
 
 		try {
-			final List<? extends Activity> placesActivities = response
-					.getElements(Activity.class, APIS_ALIAS_PLACES_ACTIVITIES);
-			final List<? extends Activity> eventsActivities = response
-					.getElements(Activity.class, APIS_ALIAS_EVENTS_ACTIVITIES);
+			final List<? extends Activity> placesActivities = response.getElements(Activity.class,
+					APIS_ALIAS_PLACES_ACTIVITIES);
+			final List<? extends Activity> eventsActivities = response.getElements(Activity.class,
+					APIS_ALIAS_EVENTS_ACTIVITIES);
 			// final List<? extends Activity> mediaActivities = response
 			// .getElements(Activity.class, APIS_ALIAS_MEDIA_ACTIVITIES);
-			final List<? extends Activity> usersActivities = response
-					.getElements(Activity.class, APIS_ALIAS_USERS_ACTIVITIES);
-			final List<? extends Activity> creationActivities = response
-					.getElements(Activity.class, APIS_ALIAS_CREATION_ACTIVITIES);
+			final List<? extends Activity> usersActivities = response.getElements(Activity.class,
+					APIS_ALIAS_USERS_ACTIVITIES);
+			final List<? extends Activity> creationActivities = response.getElements(Activity.class,
+					APIS_ALIAS_CREATION_ACTIVITIES);
 
-			final FacetCategory category = SearchHelper
-					.getFacetCategory("activityType");
-			final FacetCategory extraCategory = SearchHelper
-					.getFacetCategory("extraType");
+			final FacetCategory category = SearchHelper.getFacetCategory("activityType");
+			final FacetCategory extraCategory = SearchHelper.getFacetCategory("extraType");
 
 			// Places activities
-			final Map<String, Integer> placesFacetsMap = SearchHelper
-					.unwrapFacets(placesFacetInfo, category);
+			final Map<String, Integer> placesFacetsMap = SearchHelper.unwrapFacets(placesFacetInfo, category);
 			placesFacetsMap.remove(ActivityType.CREATION.getCode());
 			placesFacetsMap.remove(ActivityType.CHECKIN.getCode());
 			placesFacetsMap.remove(ActivityType.CHECKOUT.getCode());
@@ -230,17 +196,15 @@ public class MobileNearbyActivitiesStatsAction extends AbstractAction implements
 			placesFacetsMap.remove(ActivityType.REMOVAL_REQUESTED.getCode());
 			placesFacetsMap.remove(ActivityType.SEO_OPEN.getCode());
 			placesFacetsMap.remove(ActivityType.UNLIKE.getCode());
-			fillJsonStats(jsonActivityStats, Place.CAL_TYPE, placesFacetsMap,
-					placesActivities);
+			fillJsonStats(jsonActivityStats, Place.CAL_TYPE, placesFacetsMap, placesActivities);
 
 			// Events activities
-			final Map<String, Integer> eventsFacetsMap = SearchHelper
-					.unwrapFacets(eventsFacetInfo, category);
+			final Map<String, Integer> eventsFacetsMap = SearchHelper.unwrapFacets(eventsFacetInfo, category);
 			eventsFacetsMap.remove(ActivityType.DELETION.getCode());
 			eventsFacetsMap.remove(ActivityType.REMOVAL_REQUESTED.getCode());
 			eventsFacetsMap.remove(ActivityType.CREATION.getCode());
-			fillJsonStats(jsonActivityStats, Event.CAL_ID, eventsFacetsMap,
-					eventsActivities);
+			eventsFacetsMap.remove(ActivityType.COMMENT.getCode());
+			fillJsonStats(jsonActivityStats, Event.CAL_ID, eventsFacetsMap, eventsActivities);
 
 			// Photo activities
 			// final Map<String, Integer> mediaFacetsMap = SearchHelper
@@ -249,23 +213,18 @@ public class MobileNearbyActivitiesStatsAction extends AbstractAction implements
 			// mediaActivities);
 
 			// Users activities
-			final Map<String, Integer> usersFacetsMap = SearchHelper
-					.unwrapFacets(usersFacetInfo, category);
+			final Map<String, Integer> usersFacetsMap = SearchHelper.unwrapFacets(usersFacetInfo, category);
 			usersFacetsMap.remove(ActivityType.CREATION.getCode());
 			usersFacetsMap.remove(ActivityType.DELETION.getCode());
 			usersFacetsMap.remove(ActivityType.UNLIKE.getCode());
 			usersFacetsMap.remove(ActivityType.CHECKIN.getCode());
-			fillJsonStats(jsonActivityStats, User.CAL_TYPE, usersFacetsMap,
-					usersActivities);
+			fillJsonStats(jsonActivityStats, User.CAL_TYPE, usersFacetsMap, usersActivities);
 
 			// Creation activities
-			final Map<String, Integer> creationFacetsMap = SearchHelper
-					.unwrapFacets(creationFacetInfo, extraCategory);
+			final Map<String, Integer> creationFacetsMap = SearchHelper.unwrapFacets(creationFacetInfo, extraCategory);
 			creationFacetsMap.remove(EventSeries.SERIES_CAL_ID);
 			creationFacetsMap.remove(City.CAL_ID);
-			fillJsonStats(jsonActivityStats,
-					Constants.ACTIVITIES_CREATION_TYPE, creationFacetsMap,
-					creationActivities);
+			fillJsonStats(jsonActivityStats, Constants.ACTIVITIES_CREATION_TYPE, creationFacetsMap, creationActivities);
 
 		} catch (ApisException e) {
 			LOGGER.error("Cannot get activities: " + e.getMessage(), e);
@@ -273,8 +232,7 @@ public class MobileNearbyActivitiesStatsAction extends AbstractAction implements
 		return JSONArray.fromObject(jsonActivityStats).toString();
 	}
 
-	private void fillJsonStats(List<JsonActivityStatistic> stats,
-			String calType, Map<String, Integer> placesFacetsMap,
+	private void fillJsonStats(List<JsonActivityStatistic> stats, String calType, Map<String, Integer> placesFacetsMap,
 			List<? extends Activity> activities) {
 
 		// Hashing activities by their type (we might not have all types, there
@@ -296,10 +254,8 @@ public class MobileNearbyActivitiesStatsAction extends AbstractAction implements
 				activitiesPhotosMap.put(activityTypeCode, m);
 			}
 
-			if (a.getExtraInformation() != null
-					&& a.getExtraInformation().length() >= 4) {
-				final String extraPrefix = a.getExtraInformation().substring(0,
-						4);
+			if (a.getExtraInformation() != null && a.getExtraInformation().length() >= 4) {
+				final String extraPrefix = a.getExtraInformation().substring(0, 4);
 				// Registering activity under extra key prefix for "CREATION"
 				// specific compatibility where the facetting is not by
 				// activityType but by extra key type
@@ -325,8 +281,7 @@ public class MobileNearbyActivitiesStatsAction extends AbstractAction implements
 				// Getting registered media
 				final Media media = activitiesPhotosMap.get(activityType);
 				if (media != null) {
-					final JsonMedia m = jsonBuilder.buildJsonMedia(media,
-							highRes);
+					final JsonMedia m = jsonBuilder.buildJsonMedia(media, highRes);
 					stat.setMedia(m);
 				}
 
@@ -346,17 +301,14 @@ public class MobileNearbyActivitiesStatsAction extends AbstractAction implements
 	private Media getMediaFor(Activity a) {
 		Media media = null;
 		try {
-			final CalmObject target = a.getUnique(CalmObject.class,
-					Constants.ALIAS_ACTIVITY_TARGET);
+			final CalmObject target = a.getUnique(CalmObject.class, Constants.ALIAS_ACTIVITY_TARGET);
 			if (target instanceof Media) {
 				media = (Media) target;
 			} else if (target != null) {
 				media = MediaHelper.getSingleMedia(target);
 			}
 		} catch (CalException e) {
-			LOGGER.error(
-					"Unable to get target object from activity: "
-							+ e.getMessage(), e);
+			LOGGER.error("Unable to get target object from activity: " + e.getMessage(), e);
 		}
 		return media;
 	}

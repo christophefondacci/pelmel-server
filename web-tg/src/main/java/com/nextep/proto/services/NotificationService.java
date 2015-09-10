@@ -51,6 +51,21 @@ public interface NotificationService {
 	void notifyAdminByEmail(String title, String html);
 
 	/**
+	 * Sends an email to the given recipients using the provided title and HTML
+	 * content, wrapping the message using the PELMEL template.
+	 * 
+	 * @param title
+	 *            the title of the email to send
+	 * @param html
+	 *            the HTML content of the email
+	 * @param toAddress
+	 *            the TO email address
+	 * @param bccAddress
+	 *            the BCC email address
+	 */
+	void notifyByEmail(String title, String html, String toAddress, String bccAddress);
+
+	/**
 	 * Sends an email notification to the given address(es)
 	 * 
 	 * @param title
