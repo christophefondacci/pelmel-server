@@ -183,7 +183,8 @@ public class JsonBuilderImpl implements JsonBuilder {
 		if (url != null) {
 			jsonMedia.setUrl(MediaHelper.getImageUrl(url));
 		}
-		final String thumbUrl = highRes ? m.getThumbUrl() : m.getMiniThumbUrl();
+		final String thumbUrl = /* highRes ? */ m
+				.getThumbUrl() /* : m.getMiniThumbUrl() */;
 		jsonMedia.setThumbUrl(MediaHelper.getImageUrl(thumbUrl));
 		// jsonMedia.setTitle(m.getTitle());
 		jsonMedia.setKey(m.getKey().toString());

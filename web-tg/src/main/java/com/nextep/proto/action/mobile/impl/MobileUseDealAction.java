@@ -13,8 +13,9 @@ import com.fgp.deals.model.MutableDealUse;
 import com.fgp.deals.model.impl.DealRequestTypes;
 import com.nextep.cal.util.services.CalPersistenceService;
 import com.nextep.json.model.impl.JsonDeal;
+import com.nextep.json.model.impl.JsonStatus;
 import com.nextep.proto.action.base.AbstractAction;
-import com.nextep.proto.action.model.JsonProvider;
+import com.nextep.proto.action.model.JsonProviderWithError;
 import com.nextep.proto.blocks.CurrentUserSupport;
 import com.nextep.proto.builders.JsonBuilder;
 import com.nextep.proto.model.Constants;
@@ -32,7 +33,7 @@ import com.videopolis.cals.factory.ContextFactory;
 
 import net.sf.json.JSONObject;
 
-public class MobileUseDealAction extends AbstractAction implements JsonProvider {
+public class MobileUseDealAction extends AbstractAction implements JsonProviderWithError {
 
 	private static final long serialVersionUID = 1L;
 	private static final String APIS_ALIAS_DEAL = "deal";
@@ -118,6 +119,16 @@ public class MobileUseDealAction extends AbstractAction implements JsonProvider 
 	public String getJson() {
 		final JsonDeal json = jsonBuilder.buildJsonDeal(deal);
 		return JSONObject.fromObject(json).toString();
+	}
+
+	@Override
+	public String getJsonError() {
+		if (deal != null) {
+			return getJson();
+		} else {
+			final JsonStatus status = new JsonStatus(true, getErrorMessage());
+			return JSONObject.fromObject(status).toString();
+		}
 	}
 
 	public void setDealKey(String dealKey) {
