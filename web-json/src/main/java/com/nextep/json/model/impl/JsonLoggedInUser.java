@@ -10,6 +10,7 @@ public class JsonLoggedInUser extends JsonUser implements IPrivateListContainer 
 
 	private boolean emailValidated;
 	private boolean admin;
+	private boolean premium;
 	private List<JsonLightPlace> ownedPlaces = new ArrayList<>();
 	private List<IJsonLightUser> pendingApprovals = new ArrayList<IJsonLightUser>();
 	private List<IJsonLightUser> pendingRequests = new ArrayList<IJsonLightUser>();
@@ -21,6 +22,14 @@ public class JsonLoggedInUser extends JsonUser implements IPrivateListContainer 
 
 	public boolean isEmailValidated() {
 		return emailValidated;
+	}
+
+	public boolean isPremium() {
+		return premium;
+	}
+
+	public void setPremium(boolean premium) {
+		this.premium = premium;
 	}
 
 	public List<JsonLightPlace> getOwnedPlaces() {

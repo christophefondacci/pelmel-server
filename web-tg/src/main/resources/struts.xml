@@ -745,6 +745,9 @@
 		<action name="emailBatch" class="emailBatchAction">
 			<result>/jsp/tools/messages.jsp</result>
 		</action>
+		<action name="facebookEvents" class="facebookEvents">
+			<result>/jsp/tools/messages.jsp</result>
+		</action>
 	</package>
 	<package name="admin" extends="myPackage" namespace="/admin">
 		<action name="places" class="adminPlacesAction">

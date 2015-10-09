@@ -6,5 +6,7 @@ public class SandBox {
 
 	@Test
 	public void test() {
+		String s = "toto";
+		assert s.equals("toto");
 	}
 }

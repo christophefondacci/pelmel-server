@@ -1,6 +1,7 @@
 package com.nextep.events.services.impl;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
@@ -21,8 +22,7 @@ import com.videopolis.cals.model.CalContext;
 import com.videopolis.cals.model.ItemsResponse;
 import com.videopolis.cals.model.impl.ItemsResponseImpl;
 
-public class EventsServiceImpl extends AbstractDaoBasedCalServiceImpl implements
-		CalExtendedPersistenceService {
+public class EventsServiceImpl extends AbstractDaoBasedCalServiceImpl implements CalExtendedPersistenceService {
 
 	@Override
 	public Class<? extends CalmObject> getProvidedClass() {
@@ -32,6 +32,11 @@ public class EventsServiceImpl extends AbstractDaoBasedCalServiceImpl implements
 	@Override
 	public String getProvidedType() {
 		return Event.CAL_ID;
+	}
+
+	@Override
+	public Collection<String> getSupportedInputTypes() {
+		return Arrays.asList(Event.CAL_ID, Event.CAL_ID_FB);
 	}
 
 	@Override
@@ -51,11 +56,22 @@ public class EventsServiceImpl extends AbstractDaoBasedCalServiceImpl implements
 	}
 
 	@Override
-	protected ItemsResponse getItemsFor(ItemKey itemKey, CalContext context,
-			RequestType requestType) throws CalException {
+	public ItemsResponse getItems(List<ItemKey> ids, CalContext context) throws CalException {
+		if (ids != null && !ids.isEmpty() && Event.CAL_ID_FB.equals(ids.get(0).getType())) {
+			final List<Event> events = ((EventsDao) getCalDao()).getEventsFromFacebook(ids);
+			final ItemsResponseImpl response = new ItemsResponseImpl();
+			response.setItems(events);
+			return response;
+		} else {
+			return super.getItems(ids, context);
+		}
+	}
+
+	@Override
+	protected ItemsResponse getItemsFor(ItemKey itemKey, CalContext context, RequestType requestType)
+			throws CalException {
 		if (requestType == EventRequestTypes.ALL_EVENTS) {
-			final List<Event> events = ((EventsDao) getCalDao())
-					.getAllItemsFor(itemKey);
+			final List<Event> events = ((EventsDao) getCalDao()).getAllItemsFor(itemKey);
 			final ItemsResponseImpl response = new ItemsResponseImpl();
 			response.setItems(events);
 			return response;
@@ -65,30 +81,23 @@ public class EventsServiceImpl extends AbstractDaoBasedCalServiceImpl implements
 	}
 
 	@Override
-	public List<? extends CalmObject> setItemFor(ItemKey contributedItemKey,
-			ItemKey... internalItemKeys) throws CalException {
-		Assert.notNull(contributedItemKey,
-				"Cannot define Event association with null item key");
-		Assert.notNull(internalItemKeys,
-				"Cannot define Event association with no events");
-		Assert.moreThan(internalItemKeys.length, 0,
-				"Cannot define Event association with empty events");
-		return ((EventsDao) getCalDao()).bindEvents(contributedItemKey,
-				Arrays.asList(internalItemKeys));
-	}
-
-	@Override
-	public List<? extends CalmObject> setItemFor(ItemKey contributedItemKey,
-			String connectionType, ItemKey... internalItemKeys)
+	public List<? extends CalmObject> setItemFor(ItemKey contributedItemKey, ItemKey... internalItemKeys)
 			throws CalException {
-		throw new UnsupportedCalServiceException(
-				"setItemFor(ItemKey, connectionType, ItemKey...) is not implemented");
+		Assert.notNull(contributedItemKey, "Cannot define Event association with null item key");
+		Assert.notNull(internalItemKeys, "Cannot define Event association with no events");
+		Assert.moreThan(internalItemKeys.length, 0, "Cannot define Event association with empty events");
+		return ((EventsDao) getCalDao()).bindEvents(contributedItemKey, Arrays.asList(internalItemKeys));
 	}
 
 	@Override
-	public boolean deleteItemFor(ItemKey contributedItemKey,
-			String connectionType, ItemKey internalItemKey) throws CalException {
-		throw new UnsupportedCalServiceException(
-				"deleteItemFor not implemented");
+	public List<? extends CalmObject> setItemFor(ItemKey contributedItemKey, String connectionType,
+			ItemKey... internalItemKeys) throws CalException {
+		throw new UnsupportedCalServiceException("setItemFor(ItemKey, connectionType, ItemKey...) is not implemented");
+	}
+
+	@Override
+	public boolean deleteItemFor(ItemKey contributedItemKey, String connectionType, ItemKey internalItemKey)
+			throws CalException {
+		throw new UnsupportedCalServiceException("deleteItemFor not implemented");
 	}
 }

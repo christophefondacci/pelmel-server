@@ -53,6 +53,10 @@
 			<label><s:text name="place.form.tags"/></label>
 			<tiles:insertTemplate template="/jsp/edition/block-edit-tags.jsp"/>
 		</div>
+		<div class="form-group">
+			<label><s:text name="place.form.facebookId"/></label>
+			<input type="text" class="form-control" name="facebookId" value="<s:property value="#editionSupport.facebookId"/>">
+		</div>
 	</div>
 <!-- 	<div class="clearfix"></div> -->
 <!-- 	<div class="prepend-top col-sm-offset-1 col-sm-10 col-xs-offset-1 col-xs-22"> -->

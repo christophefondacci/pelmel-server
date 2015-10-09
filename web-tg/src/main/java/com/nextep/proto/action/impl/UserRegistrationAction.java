@@ -288,6 +288,7 @@ public class UserRegistrationAction extends AbstractAction
 			// Sending the welcome message for new users
 			messagingService.sendWelcomeMessage(user.getKey(), getLocale());
 			notificationService.sendUserRegisteredEmailNotification(user);
+			notificationService.sendEmailValidationEmail(user);
 		}
 
 		redirectUrl = getUrlService().getUserOverviewUrl(DisplayHelper.getDefaultAjaxContainer(), user);

@@ -185,7 +185,8 @@ public class NotificationServiceImpl implements NotificationService {
 				final Sender sender = new Sender(pushAndroidSenderId);
 				final com.google.android.gcm.server.Message gcmMsg = new com.google.android.gcm.server.Message.Builder()
 						.collapseKey(user.getPushDeviceId()).timeToLive(30).delayWhileIdle(true)
-						.addData("message", message).addData("unreadCount", String.valueOf(badgeCount)).build();
+						.addData("message", message).addData("unreadCount", String.valueOf(badgeCount))
+						.addData(APNS_FIELD_UNREAD_NETWORK, String.valueOf(unreadNetwork)).build();
 				try {
 					MulticastResult result = sender.send(gcmMsg, Arrays.asList(user.getPushDeviceId()), 1);
 					if (result.getResults() != null) {

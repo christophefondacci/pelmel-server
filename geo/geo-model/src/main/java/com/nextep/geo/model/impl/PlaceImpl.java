@@ -79,6 +79,9 @@ public class PlaceImpl extends AbstractCalmObject implements MutablePlace {
 	@Column(name = "CLOSED_REPORT_COUNT")
 	private int closedCount;
 
+	@Column(name = "FACEBOOK_ID")
+	private String facebookId;
+
 	public PlaceImpl() {
 		super(null);
 	}
@@ -194,8 +197,7 @@ public class PlaceImpl extends AbstractCalmObject implements MutablePlace {
 			try {
 				return CalmFactory.parseKey(redirectionItemKey);
 			} catch (CalException e) {
-				LOGGER.error("Unable to build redirection item key : "
-						+ redirectionItemKey + " for place id " + id, e);
+				LOGGER.error("Unable to build redirection item key : " + redirectionItemKey + " for place id " + id, e);
 			}
 		}
 		return null;
@@ -203,8 +205,7 @@ public class PlaceImpl extends AbstractCalmObject implements MutablePlace {
 
 	@Override
 	public void setRedirectionItemKey(ItemKey redirectionItemKey) {
-		this.redirectionItemKey = redirectionItemKey != null ? redirectionItemKey
-				.toString() : null;
+		this.redirectionItemKey = redirectionItemKey != null ? redirectionItemKey.toString() : null;
 	}
 
 	@Override
@@ -245,5 +246,15 @@ public class PlaceImpl extends AbstractCalmObject implements MutablePlace {
 	@Override
 	public int getClosedCount() {
 		return closedCount;
+	}
+
+	@Override
+	public String getFacebookId() {
+		return facebookId;
+	}
+
+	@Override
+	public void setFacebookId(String facebookId) {
+		this.facebookId = facebookId;
 	}
 }

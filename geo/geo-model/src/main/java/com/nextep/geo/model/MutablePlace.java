@@ -59,4 +59,6 @@ public interface MutablePlace extends Place {
 	 *            number of reports
 	 */
 	void setClosedCount(int closedCount);
+
+	void setFacebookId(String facebookId);
 }

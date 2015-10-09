@@ -32,20 +32,17 @@ public class PlaceEditionSupportImpl implements PlaceEditionSupport {
 	private User currentUser;
 
 	@Override
-	public void initialize(Locale locale, CalmObject placeOrCity,
-			String placeType, User currentUser) {
+	public void initialize(Locale locale, CalmObject placeOrCity, String placeType, User currentUser) {
 		this.locale = locale;
 		if (placeOrCity instanceof Place) {
 			this.place = (Place) placeOrCity;
 			this.location = place.getCity();
-			this.description = DisplayHelper.getMainLocaleDescription(place,
-					locale);
+			this.description = DisplayHelper.getMainLocaleDescription(place, locale);
 		} else {
 			this.place = null;
 			this.location = (GeographicItem) placeOrCity;
 		}
-		this.placeType = this.place == null ? placeType : this.place
-				.getPlaceType();
+		this.placeType = this.place == null ? placeType : this.place.getPlaceType();
 		this.currentUser = currentUser;
 	}
 
@@ -71,8 +68,7 @@ public class PlaceEditionSupportImpl implements PlaceEditionSupport {
 	@Override
 	public List<String> getPlaceTypes() {
 		final List<String> placeTypes = new ArrayList<String>();
-		final List<PlaceType> authorizedTypes = rightsManagementService
-				.getAvailablePlaceTypes(currentUser, location);
+		final List<PlaceType> authorizedTypes = rightsManagementService.getAvailablePlaceTypes(currentUser, location);
 		for (PlaceType type : authorizedTypes) {
 			placeTypes.add(type.name());
 		}
@@ -81,8 +77,7 @@ public class PlaceEditionSupportImpl implements PlaceEditionSupport {
 
 	@Override
 	public String getPlaceTypeLabel(String placeType) {
-		return messageSource.getMessage(TRANSLATION_PLACE_TYPE_PREFIX
-				+ placeType, null, locale);
+		return messageSource.getMessage(TRANSLATION_PLACE_TYPE_PREFIX + placeType, null, locale);
 	}
 
 	@Override
@@ -101,8 +96,7 @@ public class PlaceEditionSupportImpl implements PlaceEditionSupport {
 
 	@Override
 	public String getCityName() {
-		return GeoHelper.buildShortLocalizationString(location,
-				DisplayHelper.getName(location));
+		return GeoHelper.buildShortLocalizationString(location, DisplayHelper.getName(location));
 	}
 
 	@Override
@@ -151,8 +145,12 @@ public class PlaceEditionSupportImpl implements PlaceEditionSupport {
 		return placeType;
 	}
 
-	public void setRightsManagementService(
-			RightsManagementService rightsManagementService) {
+	public void setRightsManagementService(RightsManagementService rightsManagementService) {
 		this.rightsManagementService = rightsManagementService;
+	}
+
+	@Override
+	public String getFacebookId() {
+		return place != null ? place.getFacebookId() : null;
 	}
 }

@@ -264,7 +264,7 @@ public class FacebookLoginAction extends AbstractAction implements CookieProvide
 		media.setTitle(getMessageSource().getMessage("login.facebook.photoTitle", null, getLocale()));
 		newUser.setPseudo(username);
 		newUser.setEmail(email);
-
+		newUser.setEmailValidated(true);
 		newUser.setFacebookId(id);
 		// newUser.setFacebookToken(accessToken);
 

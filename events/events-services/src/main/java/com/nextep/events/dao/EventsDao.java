@@ -19,7 +19,9 @@ public interface EventsDao extends CalDaoExt<Event> {
 	 */
 	List<Event> bindEvents(ItemKey externalItem, List<ItemKey> eventKey);
 
-	public List<Event> getAllItemsFor(ItemKey key);
+	List<Event> getAllItemsFor(ItemKey key);
 
 	void delete(ItemKey key);
+
+	List<Event> getEventsFromFacebook(List<ItemKey> facebookKeys);
 }

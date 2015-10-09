@@ -74,4 +74,11 @@ public interface MutableEvent extends Event {
 	 *            <code>false</code> to hide/cancel it
 	 */
 	void setOnline(boolean isOnline);
+
+	/**
+	 * Assigns a facebook ID to this event
+	 * 
+	 * @param facebookId
+	 */
+	void setFacebookId(String facebookId);
 }

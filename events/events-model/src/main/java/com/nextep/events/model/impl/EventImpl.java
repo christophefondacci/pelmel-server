@@ -49,6 +49,8 @@ public class EventImpl extends AbstractCalmObject implements MutableEvent {
 	@Column(name = "IS_ONLINE")
 	@Type(type = "yes_no")
 	private boolean isOnline = true;
+	@Column(name = "FACEBOOK_ID")
+	private String facebookId;
 
 	public EventImpl() {
 		super(null);
@@ -80,8 +82,7 @@ public class EventImpl extends AbstractCalmObject implements MutableEvent {
 				return null;
 			}
 		} catch (CalException e) {
-			LOGGER.error("Unable to parse place ItemKey '" + placeKey
-					+ "' of event '" + id + "'");
+			LOGGER.error("Unable to parse place ItemKey '" + placeKey + "' of event '" + id + "'");
 			return null;
 		}
 	}
@@ -152,8 +153,7 @@ public class EventImpl extends AbstractCalmObject implements MutableEvent {
 			try {
 				return CalmFactory.parseKey(seriesKey);
 			} catch (CalException e) {
-				LOGGER.error("Unable to create parent series key [" + seriesKey
-						+ "]: " + e.getMessage());
+				LOGGER.error("Unable to create parent series key [" + seriesKey + "]: " + e.getMessage());
 			}
 		}
 		return null;
@@ -183,8 +183,7 @@ public class EventImpl extends AbstractCalmObject implements MutableEvent {
 		try {
 			return authorKey == null ? null : CalmFactory.parseKey(authorKey);
 		} catch (CalException e) {
-			LOGGER.error("Unable to create series author key [" + authorKey
-					+ "]: " + e.getMessage());
+			LOGGER.error("Unable to create series author key [" + authorKey + "]: " + e.getMessage());
 		}
 		return null;
 	}
@@ -202,5 +201,15 @@ public class EventImpl extends AbstractCalmObject implements MutableEvent {
 	@Override
 	public void setOnline(boolean isOnline) {
 		this.isOnline = isOnline;
+	}
+
+	@Override
+	public String getFacebookId() {
+		return facebookId;
+	}
+
+	@Override
+	public void setFacebookId(String facebookId) {
+		this.facebookId = facebookId;
 	}
 }

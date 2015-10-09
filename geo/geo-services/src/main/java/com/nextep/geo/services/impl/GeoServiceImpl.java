@@ -35,8 +35,7 @@ import com.videopolis.cals.model.impl.ItemsResponseImpl;
 import com.videopolis.cals.model.impl.MultiKeyItemsResponseImpl;
 import com.videopolis.cals.model.impl.PaginatedItemsResponseImpl;
 
-public class GeoServiceImpl extends AbstractDaoBasedCalServiceImpl implements
-		GeoService, CalPersistenceService {
+public class GeoServiceImpl extends AbstractDaoBasedCalServiceImpl implements GeoService, CalPersistenceService {
 
 	@Override
 	public Class<? extends CalmObject> getProvidedClass() {
@@ -50,8 +49,7 @@ public class GeoServiceImpl extends AbstractDaoBasedCalServiceImpl implements
 
 	@Override
 	public Collection<String> getSupportedInputTypes() {
-		return Arrays.asList(Country.CAL_ID, Continent.CAL_ID, Admin.CAL_ID,
-				City.CAL_ID);
+		return Arrays.asList(Country.CAL_ID, Continent.CAL_ID, Admin.CAL_ID, City.CAL_ID);
 	}
 
 	@Override
@@ -71,14 +69,12 @@ public class GeoServiceImpl extends AbstractDaoBasedCalServiceImpl implements
 
 	@Override
 	public List<City> listCities(ItemKey parentKey, int count) {
-		final List<City> cities = ((GeoDao) getCalDao()).listCities(parentKey,
-				0, count);
+		final List<City> cities = ((GeoDao) getCalDao()).listCities(parentKey, 0, count);
 		final Map<Long, List<CalmObject>> alternateIdMap = new HashMap<Long, List<CalmObject>>();
 		for (City c : cities) {
 			GeoServiceHelper.fillAlternateMap(alternateIdMap, c);
 		}
-		GeoServiceHelper.fillAlternatesFromMap((GeoDao) getCalDao(),
-				alternateIdMap, null);
+		GeoServiceHelper.fillAlternatesFromMap((GeoDao) getCalDao(), alternateIdMap, null);
 		return cities;
 	}
 
@@ -95,8 +91,7 @@ public class GeoServiceImpl extends AbstractDaoBasedCalServiceImpl implements
 	@Override
 	public List<City> findCities(String cityName) {
 		List<City> cities = ((GeoDao) getCalDao()).findCities(cityName, false);
-		List<City> approxCities = ((GeoDao) getCalDao()).findCities(cityName,
-				true);
+		List<City> approxCities = ((GeoDao) getCalDao()).findCities(cityName, true);
 		cities.addAll(approxCities);
 		return cities;
 	}
@@ -112,22 +107,18 @@ public class GeoServiceImpl extends AbstractDaoBasedCalServiceImpl implements
 	}
 
 	@Override
-	public List<? extends CalmObject> setItemFor(ItemKey contributedItemKey,
-			ItemKey... internalItemKeys) throws CalException {
+	public List<? extends CalmObject> setItemFor(ItemKey contributedItemKey, ItemKey... internalItemKeys)
+			throws CalException {
 		Assert.notNull(internalItemKeys, "Need to define the city item key");
-		Assert.notNull(contributedItemKey,
-				"Need to define the item to assign a city to");
-		Assert.equals(internalItemKeys.length, 1,
-				"Can only assign 1 city to an element");
+		Assert.notNull(contributedItemKey, "Need to define the item to assign a city to");
+		Assert.equals(internalItemKeys.length, 1, "Can only assign 1 city to an element");
 		final ItemKey cityKey = internalItemKeys[0];
-		final City city = ((GeoDao) getCalDao()).bindCity(contributedItemKey,
-				cityKey);
+		final City city = ((GeoDao) getCalDao()).bindCity(contributedItemKey, cityKey);
 		return Arrays.asList((CalmObject) city);
 	}
 
 	@Override
-	public ItemsResponse getItems(List<ItemKey> ids, CalContext context)
-			throws CalException {
+	public ItemsResponse getItems(List<ItemKey> ids, CalContext context) throws CalException {
 		// Casting our well-known DAO
 		GeoDao dao = (GeoDao) getCalDao();
 		// Preparing our id map (one id list per requested type)
@@ -144,9 +135,7 @@ public class GeoServiceImpl extends AbstractDaoBasedCalServiceImpl implements
 				idsMap.put(calType, idsList);
 			}
 			// Appending our ID
-			if (Admin.CAL_ID.equals(calType)
-					|| Continent.CAL_ID.equals(calType)
-					|| Country.CAL_ID.equals(calType)) {
+			if (Admin.CAL_ID.equals(calType) || Continent.CAL_ID.equals(calType) || Country.CAL_ID.equals(calType)) {
 				idsList.add(key.getId());
 			} else {
 				idsList.add(key.getNumericId());
@@ -190,14 +179,13 @@ public class GeoServiceImpl extends AbstractDaoBasedCalServiceImpl implements
 				final List<Continent> continents = dao.getContinents(typedIds);
 				objects.addAll(continents);
 				for (Continent continent : continents) {
-					GeoServiceHelper
-							.fillAlternateMap(alternateIdMap, continent);
+					GeoServiceHelper.fillAlternateMap(alternateIdMap, continent);
 				}
+
 			}
 		}
 		if (!alternateIdMap.isEmpty()) {
-			GeoServiceHelper.fillAlternatesFromMap(dao, alternateIdMap,
-					context.getLocale());
+			GeoServiceHelper.fillAlternatesFromMap(dao, alternateIdMap, context.getLocale());
 		}
 		// Reordering
 		// Building response
@@ -208,8 +196,8 @@ public class GeoServiceImpl extends AbstractDaoBasedCalServiceImpl implements
 	}
 
 	@Override
-	public MultiKeyItemsResponse getItemsFor(List<ItemKey> itemKeys,
-			CalContext context, RequestType requestType) throws CalException {
+	public MultiKeyItemsResponse getItemsFor(List<ItemKey> itemKeys, CalContext context, RequestType requestType)
+			throws CalException {
 		// Only supporting unique element as input key
 		if (requestType == GeoRequestTypes.TOP_CITIES) {
 			Assert.uniqueElement(itemKeys);
@@ -220,8 +208,7 @@ public class GeoServiceImpl extends AbstractDaoBasedCalServiceImpl implements
 			for (City c : cities) {
 				GeoServiceHelper.fillAlternateMap(alternateIdMap, c);
 			}
-			GeoServiceHelper.fillAlternatesFromMap((GeoDao) getCalDao(),
-					alternateIdMap, context.getLocale());
+			GeoServiceHelper.fillAlternatesFromMap((GeoDao) getCalDao(), alternateIdMap, context.getLocale());
 			final MultiKeyItemsResponseImpl response = new MultiKeyItemsResponseImpl();
 			response.setItemsFor(parentKey, cities);
 			return response;
@@ -231,47 +218,39 @@ public class GeoServiceImpl extends AbstractDaoBasedCalServiceImpl implements
 	}
 
 	@Override
-	public MultiKeyItemsResponse getItemsFor(List<ItemKey> itemKeys,
-			CalContext context) throws CalException {
-		final MultiKeyItemsResponse response = super.getItemsFor(itemKeys,
-				context);
+	public MultiKeyItemsResponse getItemsFor(List<ItemKey> itemKeys, CalContext context) throws CalException {
+		final MultiKeyItemsResponse response = super.getItemsFor(itemKeys, context);
 		// Filling alternates
 		final Map<Long, List<CalmObject>> alternateIdMap = new HashMap<Long, List<CalmObject>>();
 		for (ItemKey itemKey : itemKeys) {
-			final List<? extends CalmObject> items = response
-					.getItemsFor(itemKey);
+			final List<? extends CalmObject> items = response.getItemsFor(itemKey);
 			for (CalmObject obj : items) {
 				if (obj instanceof GeographicItem) {
-					GeoServiceHelper.fillAlternateMap(alternateIdMap,
-							(GeographicItem) obj);
+					GeoServiceHelper.fillAlternateMap(alternateIdMap, (GeographicItem) obj);
 				}
 			}
 		}
-		GeoServiceHelper.fillAlternatesFromMap((GeoDao) getCalDao(),
-				alternateIdMap, context.getLocale());
+		GeoServiceHelper.fillAlternatesFromMap((GeoDao) getCalDao(), alternateIdMap, context.getLocale());
 		return response;
 	}
 
 	@Override
 	public List<Place> findPlaces(String placeName) {
-		List<Place> places = ((GeoDao) getCalDao())
-				.findPlaces(placeName, false);
-		List<Place> approxPlaces = ((GeoDao) getCalDao()).findPlaces(placeName,
-				true);
+		List<Place> places = ((GeoDao) getCalDao()).findPlaces(placeName, false);
+		List<Place> approxPlaces = ((GeoDao) getCalDao()).findPlaces(placeName, true);
 		places.addAll(approxPlaces);
 		return places;
 	}
 
 	@Override
-	public ItemsResponse listItems(CalContext context, RequestType requestType,
-			RequestSettings requestSettings) throws CalException {
+	public ItemsResponse listItems(CalContext context, RequestType requestType, RequestSettings requestSettings)
+			throws CalException {
 		int pageOffset = 0;
 		int pageSize = 1000;
 		int minPopulation = 0;
 		// Adjusting any minimum population requested
 		if (requestType instanceof RequestTypeMinPopulation) {
-			minPopulation = ((RequestTypeMinPopulation) requestType)
-					.getMinPopulation();
+			minPopulation = ((RequestTypeMinPopulation) requestType).getMinPopulation();
 		}
 		// Adjusting pagination from input
 		if (requestSettings instanceof PaginationRequestSettings) {
@@ -280,21 +259,18 @@ public class GeoServiceImpl extends AbstractDaoBasedCalServiceImpl implements
 			pageSize = paginationSettings.getResultsPerPage();
 		}
 		final GeoDao geoDao = (GeoDao) getCalDao();
-		final List<City> cities = geoDao.listCities(null,
-				pageOffset * pageSize, pageSize, minPopulation);
+		final List<City> cities = geoDao.listCities(null, pageOffset * pageSize, pageSize, minPopulation);
 
 		// Filling alternate names
 		Map<Long, List<CalmObject>> alternateIdMap = new HashMap<Long, List<CalmObject>>();
 		for (City city : cities) {
 			GeoServiceHelper.fillAlternateMap(alternateIdMap, city);
 		}
-		GeoServiceHelper.fillAlternatesFromMap(geoDao, alternateIdMap,
-				context.getLocale());
+		GeoServiceHelper.fillAlternatesFromMap(geoDao, alternateIdMap, context.getLocale());
 
 		// Preparing pagination info
 		final int citiesCount = geoDao.getCitiesCount(null, minPopulation);
-		final PaginatedItemsResponseImpl response = new PaginatedItemsResponseImpl(
-				pageSize, pageOffset);
+		final PaginatedItemsResponseImpl response = new PaginatedItemsResponseImpl(pageSize, pageOffset);
 
 		// Defining statistics for pagination
 		response.setItemCount(citiesCount);

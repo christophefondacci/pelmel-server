@@ -21,8 +21,7 @@ import com.videopolis.calm.model.ItemKey;
 
 @Entity
 @Table(name = "EVENTS_SERIES")
-public class EventSeriesImpl extends AbstractCalmObject implements
-		MutableEventSeries {
+public class EventSeriesImpl extends AbstractCalmObject implements MutableEventSeries {
 
 	private static final long serialVersionUID = 7939172366927627865L;
 	private static final Log LOGGER = LogFactory.getLog(EventSeriesImpl.class);
@@ -110,8 +109,7 @@ public class EventSeriesImpl extends AbstractCalmObject implements
 			try {
 				return CalmFactory.createKey(SERIES_CAL_ID, seriesId);
 			} catch (CalException e) {
-				LOGGER.error("Unable to build event series item key from id ["
-						+ seriesId + "]: " + e.getMessage());
+				LOGGER.error("Unable to build event series item key from id [" + seriesId + "]: " + e.getMessage());
 			}
 		}
 		return null;
@@ -272,8 +270,7 @@ public class EventSeriesImpl extends AbstractCalmObject implements
 			try {
 				return CalmFactory.parseKey(placeKey);
 			} catch (CalException e) {
-				LOGGER.error("Unable to parse place item key for event series : "
-						+ e.getMessage());
+				LOGGER.error("Unable to parse place item key for event series : " + e.getMessage());
 			}
 		}
 		return null;
@@ -312,8 +309,7 @@ public class EventSeriesImpl extends AbstractCalmObject implements
 				type = CalendarType.valueOf(calendarType.trim());
 			}
 		} catch (IllegalArgumentException e) {
-			LOGGER.warn("Invalid calendar type '" + calendarType
-					+ "' for event", e);
+			LOGGER.warn("Invalid calendar type '" + calendarType + "' for event", e);
 		}
 		return type;
 	}
@@ -323,8 +319,7 @@ public class EventSeriesImpl extends AbstractCalmObject implements
 		if (calendarType != null) {
 			this.calendarType = calendarType.name();
 		} else {
-			LOGGER.warn("Trying to assign unknown calendar type '"
-					+ calendarType + "' to event");
+			LOGGER.warn("Trying to assign unknown calendar type '" + calendarType + "' to event");
 			this.calendarType = CalendarType.EVENT.name();
 		}
 	}
@@ -344,8 +339,7 @@ public class EventSeriesImpl extends AbstractCalmObject implements
 		try {
 			return authorKey == null ? null : CalmFactory.parseKey(authorKey);
 		} catch (CalException e) {
-			LOGGER.error("Unable to create series author key [" + authorKey
-					+ "]: " + e.getMessage());
+			LOGGER.error("Unable to create series author key [" + authorKey + "]: " + e.getMessage());
 		}
 		return null;
 	}
@@ -363,5 +357,15 @@ public class EventSeriesImpl extends AbstractCalmObject implements
 	@Override
 	public void setOnline(boolean isOnline) {
 		this.isOnline = isOnline;
+	}
+
+	@Override
+	public String getFacebookId() {
+		return null;
+	}
+
+	@Override
+	public void setFacebookId(String facebookId) {
+		throw new UnsupportedOperationException("Event Series facebook ID are not supported");
 	}
 }

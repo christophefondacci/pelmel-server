@@ -15,6 +15,7 @@ import com.videopolis.calm.model.ItemKey;
 public interface Event extends CalmObject, Named {
 
 	String CAL_ID = "EVNT";
+	String CAL_ID_FB = "EFBK";
 
 	/**
 	 * Event's name
@@ -79,4 +80,11 @@ public interface Event extends CalmObject, Named {
 	 * @return <code>true</code> when visible, else <code>false</code>
 	 */
 	boolean isOnline();
+
+	/**
+	 * Get the event ID from facebook if this event has been generated from FB
+	 * 
+	 * @return
+	 */
+	String getFacebookId();
 }

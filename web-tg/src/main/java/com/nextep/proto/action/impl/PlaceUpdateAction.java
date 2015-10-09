@@ -6,8 +6,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-import net.sf.json.JSONObject;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -53,13 +51,14 @@ import com.videopolis.calm.model.RequestType;
 import com.videopolis.cals.factory.ContextFactory;
 import com.videopolis.smaug.common.model.SearchScope;
 
-public class PlaceUpdateAction extends AbstractAction implements
-		PropertiesUpdateAware, DescriptionsUpdateAware, JsonProvider {
+import net.sf.json.JSONObject;
+
+public class PlaceUpdateAction extends AbstractAction
+		implements PropertiesUpdateAware, DescriptionsUpdateAware, JsonProvider {
 
 	private static final long serialVersionUID = 1594590269681266362L;
 
-	private static final Log LOGGER = LogFactory
-			.getLog(PlaceUpdateAction.class);
+	private static final Log LOGGER = LogFactory.getLog(PlaceUpdateAction.class);
 	private static final RequestType MAIN_DESC = DescriptionRequestType.SINGLE_DESC;
 
 	private static final String APIS_ALIAS_CITY = "city";
@@ -93,6 +92,7 @@ public class PlaceUpdateAction extends AbstractAction implements
 	private String address;
 	private String placeType;
 	private String cityId;
+	private String facebookId;
 	private double latitude;
 	private double longitude;
 	private double cityRadius;
@@ -102,8 +102,7 @@ public class PlaceUpdateAction extends AbstractAction implements
 	private String[] propertyValue;
 	private String[] propertyKey;
 	private String newPlaceId;
-	private String[] descriptionLanguageCode, descriptionKey, description,
-			descriptionSourceId;
+	private String[] descriptionLanguageCode, descriptionKey, description, descriptionSourceId;
 	private String[] tags;
 
 	private JsonPlace jsonPlace;
@@ -117,12 +116,10 @@ public class PlaceUpdateAction extends AbstractAction implements
 		// If a city ID is defined, we fetch the corresponding city
 		if (cityId != null) {
 			final ItemKey cityKey = CalmFactory.parseKey(cityId);
-			request.addCriterion(SearchRestriction.uniqueKeys(
-					Arrays.asList(cityKey)).aliasedBy(APIS_ALIAS_CITY));
+			request.addCriterion(SearchRestriction.uniqueKeys(Arrays.asList(cityKey)).aliasedBy(APIS_ALIAS_CITY));
 		} else {
 			// Adding the city lookup
-			request.addCriterion(ApisLocalizationHelper
-					.buildNearestCityCriterion(latitude, longitude, cityRadius));
+			request.addCriterion(ApisLocalizationHelper.buildNearestCityCriterion(latitude, longitude, cityRadius));
 		}
 		// We fetch selected tags definition
 		final List<ItemKey> tagKeys = new ArrayList<ItemKey>();
@@ -131,29 +128,23 @@ public class PlaceUpdateAction extends AbstractAction implements
 				final ItemKey tagKey = CalmFactory.parseKey(tag);
 				tagKeys.add(tagKey);
 			}
-			request.addCriterion(SearchRestriction.uniqueKeys(tagKeys)
-					.aliasedBy(APIS_ALIAS_TAGS));
+			request.addCriterion(SearchRestriction.uniqueKeys(tagKeys).aliasedBy(APIS_ALIAS_TAGS));
 		}
 		// Adding the criterion that fetches USER
-		final ItemKey currentUserKey = CalmFactory.createKey(User.TOKEN_TYPE,
-				getNxtpUserToken());
-		request.addCriterion(SearchRestriction.alternateKey(User.class,
-				currentUserKey).aliasedBy(
-				CurrentUserSupport.APIS_ALIAS_CURRENT_USER));
+		final ItemKey currentUserKey = CalmFactory.createKey(User.TOKEN_TYPE, getNxtpUserToken());
+		request.addCriterion(SearchRestriction.alternateKey(User.class, currentUserKey)
+				.aliasedBy(CurrentUserSupport.APIS_ALIAS_CURRENT_USER));
 
 		// If a placeId is defined we fetch it for update
 		if (placeId != null && !"".equals(placeId)) {
 			// We fetch the Place from CAL provider when existing (update)
 			final ItemKey placeKey = CalmFactory.parseKey(placeId);
-			request.addCriterion((ApisCriterion) SearchRestriction
-					.uniqueKeys(Arrays.asList(placeKey))
-					.aliasedBy(APIS_ALIAS_PLACE).with(Property.class)
-					.with(Description.class).with(Tag.class)
-					.with(Subscription.class));
+			request.addCriterion(
+					(ApisCriterion) SearchRestriction.uniqueKeys(Arrays.asList(placeKey)).aliasedBy(APIS_ALIAS_PLACE)
+							.with(Property.class).with(Description.class).with(Tag.class).with(Subscription.class));
 			response = (ApiCompositeResponse) getApiService().execute(request,
 					ContextFactory.createContext(getLocale()));
-			place = response.getUniqueElement(MutablePlace.class,
-					APIS_ALIAS_PLACE);
+			place = response.getUniqueElement(MutablePlace.class, APIS_ALIAS_PLACE);
 
 		} else {
 			// We create a new transient place for creation
@@ -170,12 +161,10 @@ public class PlaceUpdateAction extends AbstractAction implements
 			city = response.getUniqueElement(City.class, APIS_ALIAS_CITY);
 		} else {
 			// Extracting nearest city
-			city = response.getUniqueElement(City.class,
-					ApisLocalizationHelper.APIS_ALIAS_CITY_NEARBY);
+			city = response.getUniqueElement(City.class, ApisLocalizationHelper.APIS_ALIAS_CITY_NEARBY);
 		}
 
-		final User user = response.getUniqueElement(User.class,
-				CurrentUserSupport.APIS_ALIAS_CURRENT_USER);
+		final User user = response.getUniqueElement(User.class, CurrentUserSupport.APIS_ALIAS_CURRENT_USER);
 		checkCurrentUser(user);
 
 		// Checking whether we are allowed to make a change
@@ -187,14 +176,11 @@ public class PlaceUpdateAction extends AbstractAction implements
 		final String oldName = place.getName();
 		final String oldAddress = place.getAddress1();
 		final String oldPlaceType = place.getPlaceType();
-		final String oldCity = place.getCity() == null ? null : place.getCity()
-				.getKey().toString();
-		final String oldCityName = place.getCity() == null ? null : place
-				.getCity().getName();
+		final String oldCity = place.getCity() == null ? null : place.getCity().getKey().toString();
+		final String oldCityName = place.getCity() == null ? null : place.getCity().getName();
 		final String oldLat = String.valueOf(place.getLatitude());
 		final String oldLng = String.valueOf(place.getLongitude());
-		final List<? extends Description> oldDescriptions = place
-				.get(Description.class);
+		final List<? extends Description> oldDescriptions = place.get(Description.class);
 		final List<ItemKey> oldTagKeys = new ArrayList<ItemKey>();
 		for (Tag tag : place.get(Tag.class)) {
 			oldTagKeys.add(tag.getKey());
@@ -204,6 +190,9 @@ public class PlaceUpdateAction extends AbstractAction implements
 		place.setAddress1(address);
 		place.setPlaceType(placeType == null ? PlaceType.bar.name() : placeType);
 		place.setCity(city);
+		if (facebookId != null && !facebookId.trim().isEmpty()) {
+			place.setFacebookId(facebookId);
+		}
 		// Setting localization
 		if (latitude != 0 && longitude != 0) {
 			place.setLatitude(latitude);
@@ -218,70 +207,57 @@ public class PlaceUpdateAction extends AbstractAction implements
 
 		if (!mobile) {
 			// Storing tags
-			tagsService.setItemFor(place.getKey(),
-					tagKeys.toArray(new ItemKey[tagKeys.size()]));
+			tagsService.setItemFor(place.getKey(), tagKeys.toArray(new ItemKey[tagKeys.size()]));
 		}
 		// Now we have the new place id
 		final ItemKey placeKey = place.getKey();
 		final Locale locale = getLocale();
-		final boolean nameChanged = puffService.log(placeKey, PUFF_FIELD_NAME,
-				oldName, name, locale, user);
-		final boolean addressChanged = puffService.log(placeKey,
-				PUFF_FIELD_ADDRESS, oldAddress, address, locale, user);
-		final boolean cityChanged = puffService.log(placeKey, PUFF_FIELD_CITY,
-				oldCity, cityId, locale, user);
-		final boolean placeTypeChanged = puffService.log(placeKey,
-				PUFF_FIELD_PLACE_TYPE, oldPlaceType, placeType, locale, user);
-		final boolean tagsChanged = puffService.log(placeKey, PUFF_FIELD_TAGS,
-				oldTagKeys.toString(), tagKeys.toString(), locale, user);
-		boolean localizationChanged = puffService.log(placeKey,
-				PUFF_FIELD_LATITUDE, oldLat, String.valueOf(latitude), locale,
-				user);
-		localizationChanged |= puffService.log(placeKey, PUFF_FIELD_LONGITUDE,
-				oldLng, String.valueOf(longitude), locale, user);
+		final boolean nameChanged = puffService.log(placeKey, PUFF_FIELD_NAME, oldName, name, locale, user);
+		final boolean addressChanged = puffService.log(placeKey, PUFF_FIELD_ADDRESS, oldAddress, address, locale, user);
+		final boolean cityChanged = puffService.log(placeKey, PUFF_FIELD_CITY, oldCity, cityId, locale, user);
+		final boolean placeTypeChanged = puffService.log(placeKey, PUFF_FIELD_PLACE_TYPE, oldPlaceType, placeType,
+				locale, user);
+		final boolean tagsChanged = puffService.log(placeKey, PUFF_FIELD_TAGS, oldTagKeys.toString(),
+				tagKeys.toString(), locale, user);
+		boolean localizationChanged = puffService.log(placeKey, PUFF_FIELD_LATITUDE, oldLat, String.valueOf(latitude),
+				locale, user);
+		localizationChanged |= puffService.log(placeKey, PUFF_FIELD_LONGITUDE, oldLng, String.valueOf(longitude),
+				locale, user);
 		// Updating descriptions by delegating to the management service
 		boolean descChanged = false;
 		boolean propertiesChanged = false;
 
 		// Only for non mobile
 		if (!mobile) {
-			descChanged = descriptionManagementService.updateDescriptions(user,
-					place, descriptionLanguageCode, descriptionKey,
-					description, descriptionSourceId);
+			descChanged = descriptionManagementService.updateDescriptions(user, place, descriptionLanguageCode,
+					descriptionKey, description, descriptionSourceId);
 			// Updating properties by delegating to the management service
-			propertiesChanged = propertiesService.updateProperties(user, place,
-					getLocale(), propertyKey, propertyCode, propertyValue);
+			propertiesChanged = propertiesService.updateProperties(user, place, getLocale(), propertyKey, propertyCode,
+					propertyValue);
 		} else {
-			descChanged = descriptionManagementService.updateSingleDescription(
-					user, place, descriptionLanguageCode, descriptionKey,
-					description, descriptionSourceId);
+			descChanged = descriptionManagementService.updateSingleDescription(user, place, descriptionLanguageCode,
+					descriptionKey, description, descriptionSourceId);
 		}
 
 		// Fetching the updated place for search storage
-		final ApisRequest fetchRequest = (ApisRequest) ApisFactory
-				.createRequest(Place.class).uniqueKey(place.getKey().getId())
-				.with(Tag.class).with(Subscription.class)
-				.with(Statistic.class);
+		final ApisRequest fetchRequest = (ApisRequest) ApisFactory.createRequest(Place.class)
+				.uniqueKey(place.getKey().getId()).with(Tag.class).with(Subscription.class).with(Statistic.class);
 		final ApiResponse fetchResponse = getApiService().execute(fetchRequest,
 				ContextFactory.createContext(getLocale()));
 		final Place fetchedPlace = (Place) fetchResponse.getUniqueElement();
 		searchService.storeCalmObject(fetchedPlace, SearchScope.CHILDREN);
 
 		// Logging activity
-		if (nameChanged || addressChanged || cityChanged || placeTypeChanged
-				|| descChanged || localizationChanged || propertiesChanged
-				|| tagsChanged) {
-			final MutableActivity activity = (MutableActivity) activitiesService
-					.createTransientObject();
+		if (nameChanged || addressChanged || cityChanged || placeTypeChanged || descChanged || localizationChanged
+				|| propertiesChanged || tagsChanged) {
+			final MutableActivity activity = (MutableActivity) activitiesService.createTransientObject();
 			activity.add(city);
-			activity.setActivityType(isCreation ? ActivityType.CREATION
-					: ActivityType.UPDATE);
+			activity.setActivityType(isCreation ? ActivityType.CREATION : ActivityType.UPDATE);
 			activity.setDate(new Date());
 			activity.setLoggedItemKey(place.getKey());
 			activity.setUserKey(user.getKey());
 			if (isCreation) {
-				activity.setExtraInformation(place.getCity().getKey()
-						.toString());
+				activity.setExtraInformation(place.getCity().getKey().toString());
 			} else {
 				final StringBuilder buf = new StringBuilder();
 				String separator = "";
@@ -330,13 +306,10 @@ public class PlaceUpdateAction extends AbstractAction implements
 			activitiesService.saveItem(activity);
 			searchService.storeCalmObject(activity, SearchScope.CHILDREN);
 			try {
-				notificationService.sendPlaceUpdateEmailNotification(place,
-						user, oldName, oldAddress, oldPlaceType, oldCityName,
-						oldLat, oldLng, oldTagKeys, oldDescriptions,
-						description, descriptionKey);
+				notificationService.sendPlaceUpdateEmailNotification(place, user, oldName, oldAddress, oldPlaceType,
+						oldCityName, oldLat, oldLng, oldTagKeys, oldDescriptions, description, descriptionKey);
 			} catch (Exception e) {
-				LOGGER.error("Unable to send notification: " + e.getMessage(),
-						e);
+				LOGGER.error("Unable to send notification: " + e.getMessage(), e);
 			}
 		}
 
@@ -469,8 +442,7 @@ public class PlaceUpdateAction extends AbstractAction implements
 	}
 
 	@Override
-	public void setPropertiesManagementService(
-			PropertiesManagementService propertiesService) {
+	public void setPropertiesManagementService(PropertiesManagementService propertiesService) {
 		this.propertiesService = propertiesService;
 	}
 
@@ -505,8 +477,7 @@ public class PlaceUpdateAction extends AbstractAction implements
 	}
 
 	@Override
-	public void setDescriptionsManagementService(
-			DescriptionsManagementService descriptionManagementService) {
+	public void setDescriptionsManagementService(DescriptionsManagementService descriptionManagementService) {
 		this.descriptionManagementService = descriptionManagementService;
 	}
 
@@ -533,8 +504,7 @@ public class PlaceUpdateAction extends AbstractAction implements
 	}
 
 	@Override
-	public void setRightsManagementService(
-			RightsManagementService rightsManagementService) {
+	public void setRightsManagementService(RightsManagementService rightsManagementService) {
 		this.rightsManagementService = rightsManagementService;
 	}
 

@@ -9,8 +9,7 @@ import com.videopolis.calm.model.ItemKey;
 
 public interface PlaceEditionSupport {
 
-	void initialize(Locale locale, CalmObject placeOrCity, String placeType,
-			User currentUser);
+	void initialize(Locale locale, CalmObject placeOrCity, String placeType, User currentUser);
 
 	/**
 	 * Retrieves the place unique key
@@ -97,5 +96,7 @@ public interface PlaceEditionSupport {
 	Double getLatitude();
 
 	Double getLongitude();
+
+	String getFacebookId();
 
 }

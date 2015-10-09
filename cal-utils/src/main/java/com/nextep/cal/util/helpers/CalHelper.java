@@ -44,10 +44,8 @@ public final class CalHelper {
 	 * @throws CalException
 	 *             whenever the creation of a multi key cannot be accomplished
 	 */
-	public static ItemKey createMultiKey(ItemKey... itemKeys)
-			throws CalException {
-		Assert.moreThan(itemKeys.length, 1,
-				"You need at least 2 keys to create a multi cal key");
+	public static ItemKey createMultiKey(ItemKey... itemKeys) throws CalException {
+		Assert.moreThan(itemKeys.length, 1, "You need at least 2 keys to create a multi cal key");
 		final StringBuilder buf = new StringBuilder();
 		String separator = "";
 		for (ItemKey itemKey : itemKeys) {
@@ -67,15 +65,13 @@ public final class CalHelper {
 	 * @throws CalException
 	 *             whenever we experienced problem parsing the contained key
 	 */
-	public static List<ItemKey> extractKeysFromMultiKey(ItemKey multiKey)
-			throws CalException {
+	public static List<ItemKey> extractKeysFromMultiKey(ItemKey multiKey) throws CalException {
 		if (!MULTI_CAL_TYPE.equals(multiKey.getType())) {
 			throw new CalException("A multi key is required to extract keys");
 		}
 		final String keys = multiKey.getId();
 		// Splitting the key via our separator
-		final String[] keyTable = keys.split(Matcher
-				.quoteReplacement(MULTI_KEY_SEPARATOR));
+		final String[] keyTable = keys.split(Matcher.quoteReplacement(MULTI_KEY_SEPARATOR));
 		final List<ItemKey> itemKeys = new ArrayList<ItemKey>();
 		// Parsing every split key
 		for (String key : keyTable) {
@@ -131,6 +127,16 @@ public final class CalHelper {
 		return keysStr;
 	}
 
+	public static Collection<String> unwrapItemKeyValues(Collection<ItemKey> itemKeys) {
+		final List<String> keysStr = new ArrayList<String>();
+		for (ItemKey itemKey : itemKeys) {
+			if (itemKey != null) {
+				keysStr.add(itemKey.getId());
+			}
+		}
+		return keysStr;
+	}
+
 	/**
 	 * Converts a list of {@link ItemKey} into a list of their ID by stripping
 	 * their domain prefix
@@ -149,8 +155,7 @@ public final class CalHelper {
 		return keyIds;
 	}
 
-	public static List<ItemKey> wrapItemKeys(List<String> itemKeysStr)
-			throws CalException {
+	public static List<ItemKey> wrapItemKeys(List<String> itemKeysStr) throws CalException {
 		final List<ItemKey> keys = new ArrayList<ItemKey>();
 		for (String itemKeyStr : itemKeysStr) {
 			if (itemKeysStr != null) {
@@ -165,15 +170,13 @@ public final class CalHelper {
 		if (itemKey != null) {
 			type = itemKey.getType();
 			if (itemKey instanceof ExpirableItemKeyImpl) {
-				type = ((ExpirableItemKeyImpl) itemKey).getBaseItemKey()
-						.getType();
+				type = ((ExpirableItemKeyImpl) itemKey).getBaseItemKey().getType();
 			}
 		}
 		return type;
 	}
 
-	public static <T extends CalmObject> Map<String, T> buildItemKeyMap(
-			List<? extends T> objects) {
+	public static <T extends CalmObject> Map<String, T> buildItemKeyMap(List<? extends T> objects) {
 		final Map<String, T> users = new HashMap<String, T>();
 		for (T o : objects) {
 			users.put(o.getKey().toString(), o);

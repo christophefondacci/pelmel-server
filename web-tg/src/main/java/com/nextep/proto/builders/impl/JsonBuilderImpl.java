@@ -260,9 +260,13 @@ public class JsonBuilderImpl implements JsonBuilder {
 			if (subscription.getStartDate().getTime() < System.currentTimeMillis()
 					&& subscription.getEndDate().getTime() > System.currentTimeMillis()) {
 				try {
-					final Place ownedPlace = subscription.getUnique(Place.class);
-					final JsonLightPlace jsonPlace = buildJsonLightPlace(ownedPlace, highRes, l);
-					json.addOwnedPlace(jsonPlace);
+					if (Place.CAL_TYPE.equals(subscription.getRelatedItemKey().getType())) {
+						final Place ownedPlace = subscription.getUnique(Place.class);
+						final JsonLightPlace jsonPlace = buildJsonLightPlace(ownedPlace, highRes, l);
+						json.addOwnedPlace(jsonPlace);
+					} else if (User.CAL_TYPE.equals(subscription.getRelatedItemKey().getType())) {
+						json.setPremium(true);
+					}
 				} catch (CalException e) {
 					LOGGER.error(
 							"Unable to get place from subscription '" + subscription.getKey() + "': " + e.getMessage(),

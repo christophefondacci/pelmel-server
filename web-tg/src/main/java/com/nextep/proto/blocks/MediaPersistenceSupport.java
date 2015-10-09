@@ -14,6 +14,11 @@ public interface MediaPersistenceSupport {
 	Media createMedia(CalmObject author, ItemKey parentItemKey, File tmpFile, String filename, String contentType,
 			String title, boolean isVideo, Integer firstMediaPriority) throws IOException;
 
+	// Media createMedia(CalmObject author, ItemKey parentItemKey, InputStream
+	// inputStream, String contentType, String ext,
+	// String title, boolean isVideo, Integer firstMediaPriority) throws
+	// IOException;
+
 	void generateThumb(MutableMedia mutableMedia, File localFile);
 
 	void generateThumb(MutableMedia mutableMedia, InputStream stream);

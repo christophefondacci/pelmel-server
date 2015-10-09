@@ -2,6 +2,7 @@ package com.nextep.events.dao.impl;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -14,6 +15,7 @@ import javax.persistence.PersistenceContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.nextep.cal.util.helpers.CalHelper;
 import com.nextep.events.dao.EventsDao;
 import com.nextep.events.model.Event;
 import com.nextep.events.model.EventRequestTypes;
@@ -35,23 +37,21 @@ public class EventsDaoImpl implements EventsDao {
 
 	@Override
 	public Event getById(long id) {
-		return (Event) entityManager.createQuery("from EventImpl where id=:id")
-				.setParameter("id", id).getSingleResult();
+		return (Event) entityManager.createQuery("from EventImpl where id=:id").setParameter("id", id)
+				.getSingleResult();
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<Event> getByIds(final List<Long> idList) {
-		List<Event> objList = entityManager
-				.createQuery("from EventImpl where id in (:ids)")
-				.setParameter("ids", idList).getResultList();
+		List<Event> objList = entityManager.createQuery("from EventImpl where id in (:ids)").setParameter("ids", idList)
+				.getResultList();
 		// Reordering list according to initial input to preserve order (CAL
 		// Contract)
 		Collections.sort(objList, new Comparator<CalmObject>() {
 			@Override
 			public int compare(CalmObject o1, CalmObject o2) {
-				return idList.indexOf(o1.getKey().getNumericId())
-						- idList.indexOf(o2.getKey().getNumericId());
+				return idList.indexOf(o1.getKey().getNumericId()) - idList.indexOf(o2.getKey().getNumericId());
 			}
 		});
 		return objList;
@@ -96,22 +96,18 @@ public class EventsDaoImpl implements EventsDao {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<Event> getItemsFor(ItemKey key, int resultsPerPage,
-			int pageOffset) {
+	public List<Event> getItemsFor(ItemKey key, int resultsPerPage, int pageOffset) {
 		return entityManager
 				.createQuery(
 						"from EventImpl where placeKey=:placeKey and endDate > CURRENT_TIMESTAMP and isOnline=true order by startDate")
-				.setParameter("placeKey", key.toString())
-				.setFirstResult(pageOffset * resultsPerPage)
+				.setParameter("placeKey", key.toString()).setFirstResult(pageOffset * resultsPerPage)
 				.setMaxResults(resultsPerPage).getResultList();
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<Event> listItems(RequestType requestType,
-			RequestSettings requestSettings) {
-		return entityManager.createQuery("from EventImpl where isOnline=true")
-				.getResultList();
+	public List<Event> listItems(RequestType requestType, RequestSettings requestSettings) {
+		return entityManager.createQuery("from EventImpl where isOnline=true").getResultList();
 	}
 
 	@Override
@@ -124,8 +120,7 @@ public class EventsDaoImpl implements EventsDao {
 	}
 
 	@SuppressWarnings("unchecked")
-	public List<ItemEventImpl> findItemEventFor(ItemKey externalItem,
-			boolean futureEventsOnly) {
+	public List<ItemEventImpl> findItemEventFor(ItemKey externalItem, boolean futureEventsOnly) {
 		final StringBuilder buf = new StringBuilder();
 		buf.append("select itemEvent from ItemEventImpl as itemEvent, EventImpl as event "
 				+ "where itemEvent.externalItemKey=:extId and event.id=itemEvent.itemId ");
@@ -133,8 +128,15 @@ public class EventsDaoImpl implements EventsDao {
 			buf.append("and event.endDate > CURRENT_TIMESTAMP ");
 		}
 		buf.append("order by event.startDate");
-		return entityManager.createQuery(buf.toString())
-				.setParameter("extId", externalItem.toString()).getResultList();
+		return entityManager.createQuery(buf.toString()).setParameter("extId", externalItem.toString()).getResultList();
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<Event> getEventsFromFacebook(List<ItemKey> facebookKeys) {
+		final Collection<String> fbIds = CalHelper.unwrapItemKeyValues(facebookKeys);
+		return entityManager.createQuery("from EventImpl where facebookId in (:fbids)").setParameter("fbids", fbIds)
+				.getResultList();
 	}
 
 	@Override
@@ -145,8 +147,7 @@ public class EventsDaoImpl implements EventsDao {
 		final Map<ItemKey, ItemEventImpl> itemEventsMap = new HashMap<ItemKey, ItemEventImpl>();
 		for (ItemEventImpl itemEvent : itemEvents) {
 			try {
-				final ItemKey eventKey = CalmFactory.createKey(Event.CAL_ID,
-						itemEvent.getItemId());
+				final ItemKey eventKey = CalmFactory.createKey(Event.CAL_ID, itemEvent.getItemId());
 				itemEventsMap.put(eventKey, itemEvent);
 			} catch (CalException e) {
 				LOGGER.error("Exception: " + e.getMessage(), e);
@@ -171,8 +172,7 @@ public class EventsDaoImpl implements EventsDao {
 			final List<Event> events = getByIds(eventIds);
 			for (Event p : events) {
 				// Setting up new association
-				final ItemEventImpl itemPlace = new ItemEventImpl(externalItem,
-						p.getKey());
+				final ItemEventImpl itemPlace = new ItemEventImpl(externalItem, p.getKey());
 				entityManager.persist(itemPlace);
 			}
 			allEvents.addAll(events);
@@ -182,35 +182,31 @@ public class EventsDaoImpl implements EventsDao {
 
 	@Override
 	public void delete(ItemKey itemKey) {
-		// entityManager.createQuery("delete ItemEventImpl where itemId=:eventId")
+		// entityManager.createQuery("delete ItemEventImpl where
+		// itemId=:eventId")
 		// .setParameter("eventId", itemKey.getNumericId())
 		// .executeUpdate();
-		entityManager
-				.createQuery(
-						"update EventImpl set isOnline=false where id=:eventId")
-				.setParameter("eventId", itemKey.getNumericId())
-				.executeUpdate();
+		entityManager.createQuery("update EventImpl set isOnline=false where id=:eventId")
+				.setParameter("eventId", itemKey.getNumericId()).executeUpdate();
 
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<Event> listItems(RequestType requestType, Integer pageSize,
-			Integer pageOffset) {
+	public List<Event> listItems(RequestType requestType, Integer pageSize, Integer pageOffset) {
 		String query = null;
 		if (requestType == EventRequestTypes.ALL_EVENTS) {
 			query = "from EventImpl order by lastUpdateTime desc";
 		} else {
 			query = "from EventImpl where endDate > CURRENT_TIMESTAMP order by startDate asc";
 		}
-		return entityManager.createQuery(query).setFirstResult(pageOffset)
-				.setMaxResults(pageSize).getResultList();
+		return entityManager.createQuery(query).setFirstResult(pageOffset).setMaxResults(pageSize).getResultList();
 	}
 
 	@Override
 	public int getCount() {
-		return ((BigInteger) entityManager.createNativeQuery(
-				"select count(1) from EVENTS").getSingleResult()).intValue();
+		return ((BigInteger) entityManager.createNativeQuery("select count(1) from EVENTS").getSingleResult())
+				.intValue();
 	}
 
 	@Override
@@ -221,7 +217,6 @@ public class EventsDaoImpl implements EventsDao {
 		} else {
 			query = "select count(1) from EVENTS where EVNT_END_DATE > CURRENT_TIMESTAMP";
 		}
-		return ((BigInteger) entityManager.createNativeQuery(query)
-				.getSingleResult()).intValue();
+		return ((BigInteger) entityManager.createNativeQuery(query).getSingleResult()).intValue();
 	}
 }

@@ -34,37 +34,42 @@ import com.videopolis.cals.model.impl.ItemsResponseImpl;
 import com.videopolis.cals.model.impl.PaginatedItemsResponseImpl;
 import com.videopolis.cals.service.base.AbstractCalService;
 
-public class PlacesServiceImpl extends AbstractCalService implements
-		CalPersistenceService {
+public class PlacesServiceImpl extends AbstractCalService implements CalPersistenceService {
 
-	private static final Log LOGGER = LogFactory
-			.getLog(PlacesServiceImpl.class);
+	private static final Log LOGGER = LogFactory.getLog(PlacesServiceImpl.class);
 	private GeoDao geoDao;
 
 	@Override
-	public ItemsResponse getItems(List<ItemKey> ids, CalContext context)
-			throws CalException {
+	public ItemsResponse getItems(List<ItemKey> ids, CalContext context) throws CalException {
 		// Unwrapping places id
-		final List<Long> idList = new ArrayList<Long>();
+		final List<Object> idList = new ArrayList<Object>();
+		boolean facebookIds = false;
 		for (ItemKey key : ids) {
-			if (!Place.CAL_TYPE.equals(key.getType())) {
+			if (Place.CAL_TYPE.equals(key.getType())) {
+				idList.add(key.getNumericId());
+			} else if (Place.CAL_FB_TYPE.equals(key.getType())) {
+				facebookIds = true;
+				idList.add(key.getId());
+			} else {
 				throw new CalException("Could only getItems of PLAC type");
 			}
-			idList.add(key.getNumericId());
 		}
 		final ItemsResponseImpl response = new ItemsResponseImpl();
-		List<Place> places = geoDao.getPlaces(idList);
+		List<Place> places;
+		if (!facebookIds) {
+			places = geoDao.getPlaces((List) idList);
+		} else {
+			places = geoDao.getPlacesFromFacebookId((List) idList);
+		}
 		// Filling geo alternates of place localization
 		final Map<Long, List<CalmObject>> alternateIdMap = new HashMap<Long, List<CalmObject>>();
 		for (Place p : places) {
 			if (LOGGER.isTraceEnabled()) {
-				LOGGER.trace("Filling alternate for place "
-						+ p.getKey().toString());
+				LOGGER.trace("Filling alternate for place " + p.getKey().toString());
 			}
 			GeoServiceHelper.fillAlternateMap(alternateIdMap, p);
 		}
-		GeoServiceHelper.fillAlternatesFromMap(geoDao, alternateIdMap,
-				context.getLocale());
+		GeoServiceHelper.fillAlternatesFromMap(geoDao, alternateIdMap, context.getLocale());
 		// Reordering elements
 		places = reorderCalmObjects(ids, places);
 		response.setItems(places);
@@ -72,37 +77,30 @@ public class PlacesServiceImpl extends AbstractCalService implements
 	}
 
 	@Override
-	public PaginatedItemsResponse getPaginatedItemsFor(ItemKey itemKey,
-			CalContext context, int resultsPerPage, int pageNumber)
-			throws CalException {
+	public PaginatedItemsResponse getPaginatedItemsFor(ItemKey itemKey, CalContext context, int resultsPerPage,
+			int pageNumber) throws CalException {
 		if (City.CAL_ID.equals(itemKey.getType())) {
-			List<Place> places = geoDao.getPlacesInCity(itemKey.getNumericId(),
-					resultsPerPage, pageNumber);
+			List<Place> places = geoDao.getPlacesInCity(itemKey.getNumericId(), resultsPerPage, pageNumber);
 			// Filling geo alternates of place localization
 			final Map<Long, List<CalmObject>> alternateIdMap = new HashMap<Long, List<CalmObject>>();
 			for (Place p : places) {
 				GeoServiceHelper.fillAlternateMap(alternateIdMap, p);
 			}
-			GeoServiceHelper.fillAlternatesFromMap(geoDao, alternateIdMap,
-					context.getLocale());
+			GeoServiceHelper.fillAlternatesFromMap(geoDao, alternateIdMap, context.getLocale());
 			// Building response
-			final PaginatedItemsResponseImpl response = new PaginatedItemsResponseImpl(
-					resultsPerPage, pageNumber);
+			final PaginatedItemsResponseImpl response = new PaginatedItemsResponseImpl(resultsPerPage, pageNumber);
 			response.setItems(places);
 			return response;
 		} else {
-			final List<Place> places = geoDao.getPlacesFor(itemKey,
-					resultsPerPage, pageNumber);
+			final List<Place> places = geoDao.getPlacesFor(itemKey, resultsPerPage, pageNumber);
 			// Filling geo alternates of place localization
 			final Map<Long, List<CalmObject>> alternateIdMap = new HashMap<Long, List<CalmObject>>();
 			for (Place p : places) {
 				GeoServiceHelper.fillAlternateMap(alternateIdMap, p);
 			}
-			GeoServiceHelper.fillAlternatesFromMap(geoDao, alternateIdMap,
-					context.getLocale());
+			GeoServiceHelper.fillAlternatesFromMap(geoDao, alternateIdMap, context.getLocale());
 			final int placesCount = geoDao.getPlacesForCount(itemKey);
-			final PaginatedItemsResponseImpl response = new PaginatedItemsResponseImpl(
-					resultsPerPage, pageNumber);
+			final PaginatedItemsResponseImpl response = new PaginatedItemsResponseImpl(resultsPerPage, pageNumber);
 			response.setItemCount(placesCount);
 			response.setItems(places);
 			int pages = placesCount / resultsPerPage;
@@ -113,8 +111,8 @@ public class PlacesServiceImpl extends AbstractCalService implements
 	}
 
 	@Override
-	public ItemsResponse listItems(CalContext context, RequestType rt,
-			RequestSettings requestSettings) throws CalException {
+	public ItemsResponse listItems(CalContext context, RequestType rt, RequestSettings requestSettings)
+			throws CalException {
 		ItemsResponse r = null;
 		if (rt instanceof RequestTypeListPlaces) {
 			final RequestTypeListPlaces requestType = (RequestTypeListPlaces) rt;
@@ -124,8 +122,7 @@ public class PlacesServiceImpl extends AbstractCalService implements
 					requestType.getPageSize(), requestType.getPage());
 			paginatedResponse.setItems(places);
 			paginatedResponse.setItemCount(placesCount);
-			paginatedResponse.setPageCount(CalHelper.getPageCount(
-					requestType.getPageSize(), placesCount));
+			paginatedResponse.setPageCount(CalHelper.getPageCount(requestType.getPageSize(), placesCount));
 			r = paginatedResponse;
 		} else {
 			final ItemsResponseImpl response = new ItemsResponseImpl();
@@ -136,8 +133,7 @@ public class PlacesServiceImpl extends AbstractCalService implements
 				for (Place p : places) {
 					GeoServiceHelper.fillAlternateMap(alternateIdMap, p);
 				}
-				GeoServiceHelper.fillAlternatesFromMap(geoDao, alternateIdMap,
-						null);
+				GeoServiceHelper.fillAlternatesFromMap(geoDao, alternateIdMap, null);
 			}
 			r = response;
 		}
@@ -156,21 +152,18 @@ public class PlacesServiceImpl extends AbstractCalService implements
 
 	@Override
 	public Collection<String> getSupportedInputTypes() {
-		// TODO Auto-generated method stub
-		return null;
+		return Arrays.asList(Place.CAL_TYPE, Place.CAL_FB_TYPE);
 	}
 
 	@Override
-	protected ItemsResponse getItemsFor(ItemKey itemKey, CalContext context)
-			throws CalException {
+	protected ItemsResponse getItemsFor(ItemKey itemKey, CalContext context) throws CalException {
 		final List<Place> places = geoDao.getPlacesFor(itemKey);
 		// Filling geo alternates of place localization
 		final Map<Long, List<CalmObject>> alternateIdMap = new HashMap<Long, List<CalmObject>>();
 		for (Place p : places) {
 			GeoServiceHelper.fillAlternateMap(alternateIdMap, p);
 		}
-		GeoServiceHelper.fillAlternatesFromMap(geoDao, alternateIdMap,
-				context.getLocale());
+		GeoServiceHelper.fillAlternatesFromMap(geoDao, alternateIdMap, context.getLocale());
 		final ItemsResponseImpl response = new ItemsResponseImpl();
 		response.setItems(places);
 		return response;
@@ -188,13 +181,11 @@ public class PlacesServiceImpl extends AbstractCalService implements
 	}
 
 	@Override
-	public List<? extends CalmObject> setItemFor(ItemKey contributedItemKey,
-			ItemKey... internalItemKeys) throws CalException {
+	public List<? extends CalmObject> setItemFor(ItemKey contributedItemKey, ItemKey... internalItemKeys)
+			throws CalException {
 		Assert.notNull(internalItemKeys, "Need to define the place item key");
-		Assert.notNull(contributedItemKey,
-				"Need to define the item to assign a place to");
-		return geoDao.bindPlaces(contributedItemKey,
-				Arrays.asList(internalItemKeys));
+		Assert.notNull(contributedItemKey, "Need to define the item to assign a place to");
+		return geoDao.bindPlaces(contributedItemKey, Arrays.asList(internalItemKeys));
 	}
 
 	@Override

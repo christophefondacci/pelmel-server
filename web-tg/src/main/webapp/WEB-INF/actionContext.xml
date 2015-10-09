@@ -504,6 +504,8 @@
 		<property name="searchService" ref="searchPersistenceService"/>
 		<property name="taskRunnerService" ref="apisToolsTaskRunnerService"/>
 	</bean>
+	<bean id="facebookEvents" class="com.nextep.proto.action.impl.tools.FacebookEventsBatchAction" parent="abstractAction" scope="request">
+	</bean>
 	<bean id="processPushFeedbackAction" class="com.nextep.proto.action.impl.tools.ProcessPushFeedbackAction" parent="abstractAction" scope="request">
 	</bean>
 	<bean id="generateThumbsAction" class="com.nextep.proto.action.impl.tools.GenerateMissingThumbsAction" parent="abstractAction" scope="request">

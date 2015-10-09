@@ -53,8 +53,7 @@ public interface GeoDao {
 	 * @return a map of all found alternates hashed by the geoname id. Note that
 	 *         when not all provided items may have alternates
 	 */
-	Map<Long, List<AlternateName>> getAlternateNamesFor(
-			Collection<Long> geonameIds, Locale locale);
+	Map<Long, List<AlternateName>> getAlternateNamesFor(Collection<Long> geonameIds, Locale locale);
 
 	/**
 	 * Lists cities inside the given parent area, ordered by population.
@@ -69,8 +68,7 @@ public interface GeoDao {
 	 *            that list
 	 * @return the list of found cities, ordered by population
 	 */
-	List<City> listCities(ItemKey parentKey, int offset, int count,
-			int minPopulation);
+	List<City> listCities(ItemKey parentKey, int offset, int count, int minPopulation);
 
 	/**
 	 * Lists cities inside the given parent area, ordered by population.
@@ -191,6 +189,15 @@ public interface GeoDao {
 	 *         places if the requested id does not exist
 	 */
 	List<Place> getPlaces(List<Long> placeIds);
+
+	/**
+	 * Gets the places from their facebook id
+	 * 
+	 * @param facebookIds
+	 *            the list of facebook ids
+	 * @return the list of places attached to those ids
+	 */
+	List<Place> getPlacesFromFacebookId(List<String> facebookIds);
 
 	/**
 	 * Retrieves the places assigned to the given item key

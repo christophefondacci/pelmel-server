@@ -9,6 +9,7 @@ import com.videopolis.calm.model.Localized;
 public interface Place extends GeographicItem, Localized, Indexable {
 
 	String CAL_TYPE = "PLAC";
+	String CAL_FB_TYPE = "PFBK";
 
 	/**
 	 * Provides the type of place
@@ -70,4 +71,11 @@ public interface Place extends GeographicItem, Localized, Indexable {
 	 * @return the number of reports
 	 */
 	int getClosedCount();
+
+	/**
+	 * Provides the facebook page ID for this place
+	 * 
+	 * @return
+	 */
+	String getFacebookId();
 }

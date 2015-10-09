@@ -151,6 +151,10 @@
 	<Environment name="redirectEnabled" type="java.lang.Boolean" value="true"/>
 	<Environment name="announcement.reach.days" type="java.lang.Integer" value="30"/>
 	<Environment name="announcement.minDays" type="java.lang.Integer" value="7"/>
+
+	<Environment name="facebook.accessToken" type="java.lang.String" value="CAAETGkK9RygBAKhH9itUZCovhrQJcCQddvFsdtr5YZBsg3HZCRMoSFAJS0hI2dV2ahuGb5mmGZB3RHCBRRoqlnkoLlZBxsg6gfVZCxDS1ZBtmo3ECg4VfUe5ny3dW0QItXpf2fKZAggBgH9ufcoC5o8BDtYylOgpSyqHdngm8PCK5zOzsNZBHnJljEDnZA9dKfL2XibsI52QOK5wZDZD"/>
+	<Environment name="facebook.appId" type="java.lang.String" value="302478486488872"/>
+	<Environment name="facebook.appSecret" type="java.lang.String" value="f16e1ba84008262848fccc07f2bb7a38"/>
 	
 </Context>
 

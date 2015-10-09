@@ -50,9 +50,8 @@ public class GeoDaoImpl implements CalDao<CalmObject>, GeoDao {
 
 	@Override
 	public CalmObject getById(long id) {
-		return (CalmObject) entityManager
-				.createQuery("from CityImpl where id=:id")
-				.setParameter("id", id).getSingleResult();
+		return (CalmObject) entityManager.createQuery("from CityImpl where id=:id").setParameter("id", id)
+				.getSingleResult();
 	}
 
 	// public Map<Long, AlternateName> getAlternateNamesForObjects(
@@ -66,21 +65,18 @@ public class GeoDaoImpl implements CalDao<CalmObject>, GeoDao {
 	// }
 
 	@Override
-	public Map<Long, List<AlternateName>> getAlternateNamesFor(
-			Collection<Long> geonameIds, Locale locale) {
+	public Map<Long, List<AlternateName>> getAlternateNamesFor(Collection<Long> geonameIds, Locale locale) {
 		// Extracting language
 		final Map<Long, List<AlternateName>> alternateNamesMap = new HashMap<Long, List<AlternateName>>();
 		if (geonameIds != null) {
 			// Searching
 			final List<AlternateName> alternates = entityManager
-					.createQuery(
-							"from AlternateNameImpl where geonameId in (:geonameIds)")
+					.createQuery("from AlternateNameImpl where geonameId in (:geonameIds)")
 					.setParameter("geonameIds", geonameIds).getResultList();
 			// Building our result map by hashing by geoname ID
 			for (AlternateName altName : alternates) {
 				final Long geonameId = altName.getParentGeonameId();
-				List<AlternateName> alternateResults = alternateNamesMap
-						.get(geonameId);
+				List<AlternateName> alternateResults = alternateNamesMap.get(geonameId);
 				if (alternateResults == null) {
 					alternateResults = new ArrayList<AlternateName>();
 					alternateNamesMap.put(geonameId, alternateResults);
@@ -93,14 +89,10 @@ public class GeoDaoImpl implements CalDao<CalmObject>, GeoDao {
 
 	@Override
 	public List<CalmObject> getByIds(final List<Long> idList) {
-		final List<CalmObject> objList = entityManager
-				.createQuery(
-						"from CityImpl c left join fetch c.adm1 "
-								+ "left join fetch c.adm2 "
-								+ "left join fetch c.country country "
-								+ "left join fetch country.continent "
-								+ "where c.id in (:ids) ")
-				.setParameter("ids", idList).getResultList();
+		final List<CalmObject> objList = entityManager.createQuery("from CityImpl c left join fetch c.adm1 "
+				+ "left join fetch c.adm2 " + "left join fetch c.country country "
+				+ "left join fetch country.continent " + "where c.id in (:ids) ").setParameter("ids", idList)
+				.getResultList();
 		return objList;
 
 	}
@@ -108,24 +100,21 @@ public class GeoDaoImpl implements CalDao<CalmObject>, GeoDao {
 	@Override
 	public List<Country> getCountries(List<Long> ids) {
 		final List<Country> objList = entityManager
-				.createQuery(
-						"from CountryImpl c left join fetch c.continent where c.id in (:ids)")
+				.createQuery("from CountryImpl c left join fetch c.continent where c.id in (:ids)")
 				.setParameter("ids", ids).getResultList();
 		return objList;
 	}
 
 	@Override
 	public List<Admin> getAdmins(List<String> ids) {
-		final List<Admin> objList = entityManager
-				.createQuery("from AdmImpl where id in (:ids)")
+		final List<Admin> objList = entityManager.createQuery("from AdmImpl where id in (:ids)")
 				.setParameter("ids", ids).getResultList();
 		return objList;
 	}
 
 	@Override
 	public List<Continent> getContinents(List<String> ids) {
-		final List<Continent> objList = entityManager
-				.createQuery("from ContinentImpl where id in (:ids)")
+		final List<Continent> objList = entityManager.createQuery("from ContinentImpl where id in (:ids)")
 				.setParameter("ids", ids).getResultList();
 		return objList;
 	}
@@ -155,17 +144,14 @@ public class GeoDaoImpl implements CalDao<CalmObject>, GeoDao {
 		if (key == null) {
 			return null;
 		} else {
-			final Query query = entityManager.createQuery(
-					"from ItemCityImpl where externalItemKey=:key")
+			final Query query = entityManager.createQuery("from ItemCityImpl where externalItemKey=:key")
 					.setParameter("key", key.toString());
 			try {
 				// Retrieving from DB
-				final ItemCityImpl itemCity = (ItemCityImpl) query
-						.getSingleResult();
+				final ItemCityImpl itemCity = (ItemCityImpl) query.getSingleResult();
 				return itemCity;
 			} catch (RuntimeException e) {
-				log.error("Unable to retrieve city for item id "
-						+ key.toString() + ": " + e.getMessage());
+				log.error("Unable to retrieve city for item id " + key.toString() + ": " + e.getMessage());
 				return null;
 			}
 		}
@@ -182,13 +168,11 @@ public class GeoDaoImpl implements CalDao<CalmObject>, GeoDao {
 	 *            the {@link ItemKey} of element to get places for
 	 * @return the list of places for this item
 	 */
-	private List<ItemPlaceImpl> findItemPlacesFor(ItemKey key, int pageSize,
-			int pageOffset) {
+	private List<ItemPlaceImpl> findItemPlacesFor(ItemKey key, int pageSize, int pageOffset) {
 		if (key == null) {
 			return null;
 		} else {
-			final Query query = entityManager.createQuery(
-					"from ItemPlaceImpl where externalItemKey=:key")
+			final Query query = entityManager.createQuery("from ItemPlaceImpl where externalItemKey=:key")
 					.setParameter("key", key.toString());
 			if (pageSize >= 0) {
 				query.setMaxResults(pageSize);
@@ -205,16 +189,14 @@ public class GeoDaoImpl implements CalDao<CalmObject>, GeoDao {
 					return Collections.emptyList();
 				}
 			} catch (RuntimeException e) {
-				log.error("Unable to retrieve places for id " + key.toString()
-						+ ": " + e.getMessage());
+				log.error("Unable to retrieve places for id " + key.toString() + ": " + e.getMessage());
 				return Collections.emptyList();
 			}
 		}
 	}
 
 	@Override
-	public List<CalmObject> listItems(RequestType requestType,
-			RequestSettings requestSettings) {
+	public List<CalmObject> listItems(RequestType requestType, RequestSettings requestSettings) {
 		return null;
 	}
 
@@ -234,21 +216,17 @@ public class GeoDaoImpl implements CalDao<CalmObject>, GeoDao {
 
 	@Override
 	public List<GeographicItem> listCountries(GeographicItem continent) {
-		return entityManager
-				.createQuery("from CountryImpl where continent=:continent")
+		return entityManager.createQuery("from CountryImpl where continent=:continent")
 				.setParameter("continent", continent).getResultList();
 	}
 
 	@Override
 	public List<Admin> listAdmins(GeographicItem country) {
 		if (CountryImpl.CAL_ID.equals(country.getKey().getType())) {
-			return entityManager
-					.createQuery(
-							"from AdmImpl where country=:country and parentAdm is null")
+			return entityManager.createQuery("from AdmImpl where country=:country and parentAdm is null")
 					.setParameter("country", country).getResultList();
 		} else if (AdmImpl.CAL_ID.equals(country.getKey().getType())) {
-			return entityManager
-					.createQuery("from AdmImpl where parentAdm=:parentAdm")
+			return entityManager.createQuery("from AdmImpl where parentAdm=:parentAdm")
 					.setParameter("parentAdm", country).getResultList();
 		}
 		return Collections.emptyList();
@@ -260,36 +238,28 @@ public class GeoDaoImpl implements CalDao<CalmObject>, GeoDao {
 	}
 
 	@Override
-	public List<City> listCities(ItemKey adminKey, int offset, int count,
-			int minPopulation) {
+	public List<City> listCities(ItemKey adminKey, int offset, int count, int minPopulation) {
 		if (adminKey == null) {
-			return entityManager
-					.createQuery(
-							"from CityImpl where population>=:minPop order by population desc")
-					.setParameter("minPop", minPopulation).setMaxResults(count)
-					.setFirstResult(offset).getResultList();
+			return entityManager.createQuery("from CityImpl where population>=:minPop order by population desc")
+					.setParameter("minPop", minPopulation).setMaxResults(count).setFirstResult(offset).getResultList();
 		} else if (Country.CAL_ID.equals(adminKey.getType())) {
 			return entityManager
 					.createQuery(
 							"from CityImpl where country.code=:country and population>=:minPop order by population desc")
-					.setParameter("country", adminKey.getId())
-					.setParameter("minPop", minPopulation).setMaxResults(count)
-					.setFirstResult(offset).getResultList();
+					.setParameter("country", adminKey.getId()).setParameter("minPop", minPopulation)
+					.setMaxResults(count).setFirstResult(offset).getResultList();
 		} else if (Admin.CAL_ID.equals(adminKey.getType())) {
 			return entityManager
 					.createQuery(
 							"from CityImpl where population>=:minPop and (adm1.admId=:adm1 or adm2.admId=:adm2) order by population desc")
-					.setParameter("adm1", adminKey.getId())
-					.setParameter("adm2", adminKey.getId())
-					.setParameter("minPop", minPopulation).setMaxResults(count)
-					.setFirstResult(offset).getResultList();
+					.setParameter("adm1", adminKey.getId()).setParameter("adm2", adminKey.getId())
+					.setParameter("minPop", minPopulation).setMaxResults(count).setFirstResult(offset).getResultList();
 		} else if (Continent.CAL_ID.equals(adminKey.getType())) {
 			return entityManager
 					.createQuery(
 							"from CityImpl where population>=:minPop and country.continent.code=:continent order by population desc")
-					.setParameter("continent", adminKey.getId())
-					.setParameter("minPop", minPopulation).setMaxResults(count)
-					.setFirstResult(offset).getResultList();
+					.setParameter("continent", adminKey.getId()).setParameter("minPop", minPopulation)
+					.setMaxResults(count).setFirstResult(offset).getResultList();
 		}
 		return Collections.emptyList();
 	}
@@ -304,8 +274,7 @@ public class GeoDaoImpl implements CalDao<CalmObject>, GeoDao {
 		// Building sql query
 		Query q = null;
 		if (parentKey == null) {
-			q = entityManager.createNativeQuery(
-					"select count(1) from GEO_CITIES where population>:minPop")
+			q = entityManager.createNativeQuery("select count(1) from GEO_CITIES where population>:minPop")
 					.setParameter("minPop", minPopulation);
 		} else {
 			final String type = parentKey.getType();
@@ -313,14 +282,12 @@ public class GeoDaoImpl implements CalDao<CalmObject>, GeoDao {
 				q = entityManager
 						.createNativeQuery(
 								"select count(1) from GEO_CITIES where country_code=:country and population>:minPop")
-						.setParameter("country", parentKey.getId())
-						.setParameter("minPop", minPopulation);
+						.setParameter("country", parentKey.getId()).setParameter("minPop", minPopulation);
 			} else if (Admin.CAL_ID.equals(type)) {
 				q = entityManager
 						.createNativeQuery(
 								"select count(1) from GEO_CITIES where (adm1_id=:adm1 or adm2_id=:adm2) and population>:minPop")
-						.setParameter("adm1", parentKey.getId())
-						.setParameter("adm2", parentKey.getId())
+						.setParameter("adm1", parentKey.getId()).setParameter("adm2", parentKey.getId())
 						.setParameter("minPop", minPopulation);
 			}
 		}
@@ -340,25 +307,20 @@ public class GeoDaoImpl implements CalDao<CalmObject>, GeoDao {
 
 	@Override
 	public Admin getAdmin(String countryCode, String admCode) {
-		return (Admin) entityManager
-				.createQuery(
-						"from AdmImpl where country.code = :countryCode and admCode=:admCode")
-				.setParameter("countryCode", countryCode)
-				.setParameter("admCode", admCode).getSingleResult();
+		return (Admin) entityManager.createQuery("from AdmImpl where country.code = :countryCode and admCode=:admCode")
+				.setParameter("countryCode", countryCode).setParameter("admCode", admCode).getSingleResult();
 	}
 
 	@Override
 	public Country getCountry(String countryCode) {
-		return (Country) entityManager
-				.createQuery("from CountryImpl where code = :code")
+		return (Country) entityManager.createQuery("from CountryImpl where code = :code")
 				.setParameter("code", countryCode).getSingleResult();
 	}
 
 	@Override
 	public Admin getAdmin(String adminId) {
-		return (Admin) entityManager
-				.createQuery("from AdmImpl where admId = :id")
-				.setParameter("id", adminId).getSingleResult();
+		return (Admin) entityManager.createQuery("from AdmImpl where admId = :id").setParameter("id", adminId)
+				.getSingleResult();
 	}
 
 	@Override
@@ -368,51 +330,38 @@ public class GeoDaoImpl implements CalDao<CalmObject>, GeoDao {
 
 	@Override
 	public GeographicItem getContinent(String continentCode) {
-		return (GeographicItem) entityManager
-				.createQuery("from ContinentImpl where code = :code")
+		return (GeographicItem) entityManager.createQuery("from ContinentImpl where code = :code")
 				.setParameter("code", continentCode).getSingleResult();
 	}
 
 	@Override
 	public List<City> findCities(String cityName, boolean approx) {
 		if (approx) {
-			return entityManager
-					.createQuery(
-							"from CityImpl where name like :name and name <> :exactName")
-					.setParameter("name", cityName + "%")
-					.setParameter("exactName", cityName).setMaxResults(20)
+			return entityManager.createQuery("from CityImpl where name like :name and name <> :exactName")
+					.setParameter("name", cityName + "%").setParameter("exactName", cityName).setMaxResults(20)
 					.getResultList();
 		} else {
-			return entityManager
-					.createQuery("from CityImpl where name like :name")
-					.setParameter("name", cityName).setMaxResults(20)
-					.getResultList();
+			return entityManager.createQuery("from CityImpl where name like :name").setParameter("name", cityName)
+					.setMaxResults(20).getResultList();
 		}
 	}
 
 	@Override
 	public List<Place> findPlaces(String placeName, boolean approx) {
 		if (approx) {
-			return entityManager
-					.createQuery(
-							"from PlaceImpl where name like :name and name <> :exactName")
-					.setParameter("name", placeName + "%")
-					.setParameter("exactName", placeName).setMaxResults(20)
+			return entityManager.createQuery("from PlaceImpl where name like :name and name <> :exactName")
+					.setParameter("name", placeName + "%").setParameter("exactName", placeName).setMaxResults(20)
 					.getResultList();
 		} else {
-			return entityManager
-					.createQuery("from CityImpl where name like :name")
-					.setParameter("name", placeName).setMaxResults(20)
-					.getResultList();
+			return entityManager.createQuery("from CityImpl where name like :name").setParameter("name", placeName)
+					.setMaxResults(20).getResultList();
 		}
 	}
 
 	@Override
 	public City bindCity(ItemKey externalItem, ItemKey cityKey) {
 		// Deleting previous entries
-		entityManager
-				.createQuery(
-						"delete from ItemCityImpl where externalItemKey=:key")
+		entityManager.createQuery("delete from ItemCityImpl where externalItemKey=:key")
 				.setParameter("key", externalItem.toString()).executeUpdate();
 		// If not existing we load the city
 		final City city = (City) getById(cityKey.getNumericId());
@@ -430,8 +379,7 @@ public class GeoDaoImpl implements CalDao<CalmObject>, GeoDao {
 		final Map<ItemKey, ItemPlaceImpl> itemPlacesMap = new HashMap<ItemKey, ItemPlaceImpl>();
 		for (ItemPlaceImpl itemPlace : itemPlaces) {
 			try {
-				final ItemKey placeKey = CalmFactory.createKey(Place.CAL_TYPE,
-						itemPlace.getPlaceId());
+				final ItemKey placeKey = CalmFactory.createKey(Place.CAL_TYPE, itemPlace.getPlaceId());
 				itemPlacesMap.put(placeKey, itemPlace);
 			} catch (CalException e) {
 				log.error("Exception: " + e.getMessage(), e);
@@ -457,8 +405,7 @@ public class GeoDaoImpl implements CalDao<CalmObject>, GeoDao {
 		for (Place p : places) {
 			// final Place mergedPlace = entityManager.merge(p);
 			// Setting up new association
-			final ItemPlaceImpl itemPlace = new ItemPlaceImpl(externalItem,
-					p.getKey());
+			final ItemPlaceImpl itemPlace = new ItemPlaceImpl(externalItem, p.getKey());
 			entityManager.persist(itemPlace);
 		}
 		entityManager.flush();
@@ -467,8 +414,7 @@ public class GeoDaoImpl implements CalDao<CalmObject>, GeoDao {
 	}
 
 	@Override
-	public List<CalmObject> getItemsFor(ItemKey key, int resultsPerPage,
-			int pageOffset) {
+	public List<CalmObject> getItemsFor(ItemKey key, int resultsPerPage, int pageOffset) {
 		return Collections.emptyList();
 	}
 
@@ -478,13 +424,10 @@ public class GeoDaoImpl implements CalDao<CalmObject>, GeoDao {
 	}
 
 	@Override
-	public List<Place> getPlacesInCity(long cityId, int itemsPerPage,
-			int pageOffset) {
+	public List<Place> getPlacesInCity(long cityId, int itemsPerPage, int pageOffset) {
 		try {
-			return entityManager
-					.createQuery("from PlaceImpl where city.id=:cityId")
-					.setParameter("cityId", cityId).setMaxResults(itemsPerPage)
-					.setFirstResult(pageOffset).getResultList();
+			return entityManager.createQuery("from PlaceImpl where city.id=:cityId").setParameter("cityId", cityId)
+					.setMaxResults(itemsPerPage).setFirstResult(pageOffset).getResultList();
 		} catch (NoResultException e) {
 			// This is a normal use case: there could be no place defined in a
 			// city
@@ -501,8 +444,7 @@ public class GeoDaoImpl implements CalDao<CalmObject>, GeoDao {
 	public List<Place> listPlaces(RequestTypeListPlaces request) {
 		final String jpqlQuery = buildListPlacesQuery(request);
 		final Query query = entityManager.createQuery(jpqlQuery);
-		query.setMaxResults(request.getPageSize()).setFirstResult(
-				request.getPage() * request.getPageSize());
+		query.setMaxResults(request.getPageSize()).setFirstResult(request.getPage() * request.getPageSize());
 
 		return query.getResultList();
 	}
@@ -510,15 +452,13 @@ public class GeoDaoImpl implements CalDao<CalmObject>, GeoDao {
 	@Override
 	public long countPlaces(RequestTypeListPlaces request) {
 		final String jpqlQuery = buildListPlacesQuery(request);
-		final Query query = entityManager.createQuery("select count(p) "
-				+ jpqlQuery);
+		final Query query = entityManager.createQuery("select count(p) " + jpqlQuery);
 		return (long) query.getSingleResult();
 	}
 
 	private String buildListPlacesQuery(RequestTypeListPlaces request) {
 		final StringBuilder buf = new StringBuilder("from PlaceImpl as p");
-		final Collection<RequestTypeListPlaces.FilterField> filters = request
-				.getFilterFields();
+		final Collection<RequestTypeListPlaces.FilterField> filters = request.getFilterFields();
 		String prefix = " where ";
 		if (filters != null && !filters.isEmpty()) {
 			for (FilterField filter : filters) {
@@ -564,23 +504,30 @@ public class GeoDaoImpl implements CalDao<CalmObject>, GeoDao {
 			return Collections.emptyList();
 		} else {
 			return entityManager
-					.createQuery(
-							"from PlaceImpl p "
-									+ "left join fetch p.city city "
-									+ "left join fetch city.adm1 "
-									+ "left join fetch city.adm2 "
-									+ "left join fetch city.country country "
-									+ "left join fetch country.continent "
-									+ "where p.id in (:placeIds)")
+					.createQuery("from PlaceImpl p " + "left join fetch p.city city " + "left join fetch city.adm1 "
+							+ "left join fetch city.adm2 " + "left join fetch city.country country "
+							+ "left join fetch country.continent " + "where p.id in (:placeIds)")
 					.setParameter("placeIds", placeIds).getResultList();
 		}
 	}
 
 	@Override
-	public List<Place> getPlacesFor(ItemKey itemKey, int pageSize,
-			int pageOffset) {
-		final List<ItemPlaceImpl> itemPlaces = findItemPlacesFor(itemKey,
-				pageSize, pageOffset);
+	public List<Place> getPlacesFromFacebookId(List<String> facebookIds) {
+
+		if (facebookIds == null || facebookIds.isEmpty()) {
+			return Collections.emptyList();
+		} else {
+			return entityManager
+					.createQuery("from PlaceImpl p " + "left join fetch p.city city " + "left join fetch city.adm1 "
+							+ "left join fetch city.adm2 " + "left join fetch city.country country "
+							+ "left join fetch country.continent " + "where p.facebookId in (:fbIds)")
+					.setParameter("fbIds", facebookIds).getResultList();
+		}
+	}
+
+	@Override
+	public List<Place> getPlacesFor(ItemKey itemKey, int pageSize, int pageOffset) {
+		final List<ItemPlaceImpl> itemPlaces = findItemPlacesFor(itemKey, pageSize, pageOffset);
 		final List<Long> placeIds = new ArrayList<Long>();
 		for (ItemPlaceImpl itemPlace : itemPlaces) {
 			placeIds.add(Long.valueOf(itemPlace.getPlaceId()));
@@ -596,9 +543,7 @@ public class GeoDaoImpl implements CalDao<CalmObject>, GeoDao {
 	@Override
 	public int getPlacesForCount(ItemKey itemKey) {
 		return ((BigInteger) entityManager
-				.createNativeQuery(
-						"select count(1) from GEO_ITEMS_PLACES where ITEM_KEY=:itemKey")
-				.setParameter("itemKey", itemKey.toString()).getSingleResult())
-				.intValue();
+				.createNativeQuery("select count(1) from GEO_ITEMS_PLACES where ITEM_KEY=:itemKey")
+				.setParameter("itemKey", itemKey.toString()).getSingleResult()).intValue();
 	}
 }

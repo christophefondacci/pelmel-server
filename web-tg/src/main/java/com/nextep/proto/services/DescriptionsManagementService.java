@@ -13,18 +13,18 @@ import com.videopolis.calm.model.CalmObject;
  */
 public interface DescriptionsManagementService {
 
-	boolean updateDescriptions(User author, CalmObject parent,
-			String[] descriptionLanguageCodes, String[] descriptionItemKeys,
-			String[] descriptions, String[] descriptionSourceIds)
-			throws GenericWebappException;
+	boolean updateDescriptions(User author, CalmObject parent, String[] descriptionLanguageCodes,
+			String[] descriptionItemKeys, String[] descriptions, String[] descriptionSourceIds)
+					throws GenericWebappException;
 
-	boolean updateDescriptions(User author, String descFieldCode,
-			CalmObject parent, String[] descriptionLanguageCodes,
-			String[] descriptionItemKeys, String[] descriptions,
-			String[] descriptionSourceIds) throws GenericWebappException;
+	boolean updateDescriptions(User author, String descFieldCode, CalmObject parent, String[] descriptionLanguageCodes,
+			String[] descriptionItemKeys, String[] descriptions, String[] descriptionSourceIds)
+					throws GenericWebappException;
 
-	boolean updateSingleDescription(User author, CalmObject parent,
-			String[] descriptionLanguageCodes, String[] descriptionItemKeys,
-			String[] descriptions, String[] descriptionSourceIds)
+	boolean updateSingleDescription(User author, CalmObject parent, String[] descriptionLanguageCodes,
+			String[] descriptionItemKeys, String[] descriptions, String[] descriptionSourceIds)
+					throws GenericWebappException;
+
+	void updateDescription(User author, CalmObject parent, String language, String description)
 			throws GenericWebappException;
 }
