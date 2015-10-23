@@ -408,6 +408,8 @@ public class NotificationServiceImpl implements NotificationService {
 			objectType = "Recurring event";
 		} else if (object instanceof Event) {
 			objectType = "Event";
+		} else if (object instanceof Media) {
+			objectType = "Photo";
 		}
 		return objectType;
 	}
@@ -425,7 +427,12 @@ public class NotificationServiceImpl implements NotificationService {
 	 *            the type of action
 	 */
 	private void fillEmailHeaderFor(StringBuilder buf, CalmObject object, User user, String actionType) {
-		final String url = baseUrl + urlService.getOverviewUrl(DisplayHelper.getDefaultAjaxContainer(), object);
+		String url;
+		if (object instanceof Media) {
+			url = MediaHelper.getImageUrl(((Media) object).getUrl());
+		} else {
+			url = baseUrl + urlService.getOverviewUrl(DisplayHelper.getDefaultAjaxContainer(), object);
+		}
 		final String userUrl = baseUrl + urlService.getOverviewUrl(DisplayHelper.getDefaultAjaxContainer(), user);
 
 		final String objectType = getObjectTypeName(object);
@@ -436,6 +443,19 @@ public class NotificationServiceImpl implements NotificationService {
 		final String name = DisplayHelper.getName(object);
 		buf.append(objectType + " " + actionType + ": <a href=\"" + url + "\">"
 				+ (name == null || name.trim().isEmpty() ? "[No name]" : name) + "</a><br>");
+		try {
+			final CalmObject parentObj = object.getUnique(CalmObject.class, Constants.APIS_ALIAS_PARENT);
+			if (parentObj != null) {
+				final String parentUrl = baseUrl
+						+ urlService.getOverviewUrl(DisplayHelper.getDefaultAjaxContainer(), parentObj);
+				final String parentName = DisplayHelper.getName(parentObj);
+				buf.append(objectType + " defined for: <a href=\"" + parentUrl + "\">"
+						+ (parentName == null || parentName.trim().isEmpty() ? "[No name]" : parentName) + "</a><br>");
+			}
+		} catch (CalException e) {
+			LOGGER.error("Unable to extract parent object of '" + object.getKey() + "' for report notification: "
+					+ e.getMessage(), e);
+		}
 		buf.append(objectType + " " + actionType + " by: <a href=\"" + userUrl + "\">" + user.getPseudo()
 				+ "</a><br><br>");
 	}
@@ -483,6 +503,11 @@ public class NotificationServiceImpl implements NotificationService {
 		}
 		buf.append(reportTypeLabel);
 		buf.append("</b>");
+		if (obj instanceof Media) {
+			buf.append("<br>Photo reported: <br>");
+			buf.append("<img src=\"" + MediaHelper.getImageUrl(((Media) obj).getUrl()) + "\">");
+		}
+
 		fillEmailFooterFor(buf, obj, user);
 		final String objectType = getObjectTypeName(obj);
 		notifyAdminByEmail(objectType + " " + DisplayHelper.getName(obj) + " reported as " + reportTypeLabel + " by "

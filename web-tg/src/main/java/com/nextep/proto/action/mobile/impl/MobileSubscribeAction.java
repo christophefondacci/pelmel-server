@@ -5,6 +5,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Resource;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,11 +18,15 @@ import com.nextep.advertising.model.SubscriptionType;
 import com.nextep.advertising.model.impl.AdvertisingRequestTypes;
 import com.nextep.cal.util.model.impl.PriceImpl;
 import com.nextep.cal.util.services.CalPersistenceService;
+import com.nextep.geo.model.Place;
 import com.nextep.json.model.impl.JsonStatus;
 import com.nextep.proto.action.base.AbstractAction;
 import com.nextep.proto.action.model.JsonProviderWithError;
 import com.nextep.proto.blocks.CurrentUserSupport;
+import com.nextep.proto.model.Constants;
 import com.nextep.proto.services.BannerDisplayService;
+import com.nextep.proto.services.LocalizationService;
+import com.nextep.proto.services.ViewManagementService;
 import com.nextep.proto.spring.ContextHolder;
 import com.nextep.users.model.User;
 import com.videopolis.apis.factory.ApisFactory;
@@ -32,6 +38,7 @@ import com.videopolis.calm.factory.CalmFactory;
 import com.videopolis.calm.model.CalmObject;
 import com.videopolis.calm.model.ItemKey;
 import com.videopolis.cals.factory.ContextFactory;
+import com.videopolis.smaug.common.model.SearchScope;
 
 import net.sf.json.JSONObject;
 
@@ -46,13 +53,23 @@ public class MobileSubscribeAction extends AbstractAction implements JsonProvide
 	@Autowired
 	private BannerDisplayService bannerDisplayService;
 	@Autowired
+	private LocalizationService localizationService;
+	@Autowired
 	@Qualifier("advertisingService")
 	private CalPersistenceService advertisingService;
+	@Autowired
+	private ViewManagementService viewManagementService;
+
+	@Resource(mappedName = "subscription.referrerMaxDistance")
+	private Double referrerMaxDistance;
+	@Resource(mappedName = "subscription.referrerDays")
+	private Integer referrerDays;
 
 	// Dynamic arguments
 	private String subscribedKey;
 	private String appStoreReceipt;
 	private String transactionId;
+	private Double lat, lng;
 
 	// Internal vars
 	private JsonStatus status = new JsonStatus();
@@ -65,7 +82,12 @@ public class MobileSubscribeAction extends AbstractAction implements JsonProvide
 		final ApisRequest request = (ApisRequest) ApisFactory.createCompositeRequest()
 				.addCriterion((ApisCriterion) currentUserSupport.createApisCriterionFor(getNxtpUserToken(), true)
 						.with(Subscription.class, AdvertisingRequestTypes.USER_SUBSCRIPTIONS));
-
+		// If localization is provided, we fetch the nearest place
+		if (lat != null && lng != null) {
+			request.addCriterion(SearchRestriction
+					.searchNear(Place.class, SearchScope.NEARBY_BLOCK, lat, lng, referrerMaxDistance, 5, 0)
+					.aliasedBy(Constants.APIS_ALIAS_NEARBY_PLACES));
+		}
 		// If subscribed item key is provided then we fetch it
 		ItemKey subscribedItemKey = null;
 		if (subscribedKey != null) {
@@ -133,12 +155,16 @@ public class MobileSubscribeAction extends AbstractAction implements JsonProvide
 						// subscription to find a matching
 						// original transaction ID
 						final List<? extends Subscription> subscriptions = user.get(Subscription.class);
+						Subscription firstSubscription = null;
 						Subscription formerSubscription = null;
 						Subscription matchingSubscription = null;
 						for (Subscription subscription : subscriptions) {
 							if (subscription.getOriginalTransactionId() != null
 									&& subscription.getOriginalTransactionId().equals(originalTransactionId)) {
 								formerSubscription = subscription;
+								if (firstSubscription == null) {
+									firstSubscription = subscription;
+								}
 							}
 							if (subscription.getTransactionId() != null
 									&& subscription.getTransactionId().equals(transactionId)) {
@@ -183,7 +209,49 @@ public class MobileSubscribeAction extends AbstractAction implements JsonProvide
 							subscription.setPurchaserItemKey(user.getKey());
 							subscription.setSubscriptionType(SubscriptionType.DEFAULT);
 
+							// Processing referrer
+							if (user.getKey().equals(subscribedItemKey)) {
+								LOGGER.info("User '" + user.getKey() + " is subscribed user!");
+								// For a subscription renewal, the referrer is
+								// the previous referrer is less than
+								// 'referrerDays' months
+								boolean referrerAssigned = false;
+								if (formerSubscription != null) {
+									if (System.currentTimeMillis()
+											- firstSubscription.getStartDate().getTime() < referrerDays * 24 * 60 * 60
+													* 1000) {
+										LOGGER.info("User '" + user.getKey() + " subscription has been assigned to '"
+												+ formerSubscription.getReferrerItemKey() + "' forwarded from '"
+												+ firstSubscription.getKey() + "' !");
+										referrerAssigned = true;
+										subscription.setReferrerItemKey(formerSubscription.getReferrerItemKey());
+									}
+								}
+								if (!referrerAssigned) {
+									final ItemKey checkedInPlace = localizationService.getCheckedInPlaceKey(user);
+									if (checkedInPlace != null) {
+										subscription.setReferrerItemKey(checkedInPlace);
+									} else {
+										final List<? extends Place> nearbyPlaces = response.getElements(Place.class,
+												Constants.APIS_ALIAS_NEARBY_PLACES);
+										if (!nearbyPlaces.isEmpty()) {
+											final Place nearestPlace = nearbyPlaces.iterator().next();
+											subscription.setReferrerItemKey(nearestPlace.getKey());
+										}
+									}
+								}
+							} else {
+								LOGGER.warn(
+										"User '" + user.getKey() + " is NOT subscribed user '" + subscribedKey + "'!");
+							}
 							advertisingService.saveItem(subscription);
+
+							// If we have a referrer we log the statistic for
+							// reporting
+							if (subscription.getReferrerItemKey() != null) {
+								viewManagementService.logViewCountByKey(subscription.getReferrerItemKey(), user,
+										Constants.VIEW_STAT_SUBSCRIPTION_REFERRER);
+							}
 						}
 					} else {
 						LOGGER.warn("No expiration time found, skipping (receipt transactionId" + transactionId);
@@ -195,7 +263,7 @@ public class MobileSubscribeAction extends AbstractAction implements JsonProvide
 			if (!transactionFound) {
 				LOGGER.warn("NOT FOUND transaction " + transactionId + " in Apple Receipt:\n" + receiptData);
 			}
-			return SUCCESS;
+			return subscribedItemKey.getType().equals(Place.CAL_TYPE) ? "redirectPlace" : "redirectUser";
 		}
 
 		status.setError(true);
@@ -242,5 +310,21 @@ public class MobileSubscribeAction extends AbstractAction implements JsonProvide
 
 	public String getTransactionId() {
 		return transactionId;
+	}
+
+	public void setLat(double lat) {
+		this.lat = lat;
+	}
+
+	public void setLng(double lng) {
+		this.lng = lng;
+	}
+
+	public double getLat() {
+		return this.lat == null ? 0 : this.lat.doubleValue();
+	}
+
+	public double getLng() {
+		return this.lng == null ? 0 : this.lng.doubleValue();
 	}
 }

@@ -3,8 +3,6 @@ package com.nextep.proto.action.mobile.impl;
 import java.util.Arrays;
 import java.util.Date;
 
-import net.sf.json.JSONObject;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +21,7 @@ import com.nextep.media.model.MutableMedia;
 import com.nextep.proto.action.base.AbstractAction;
 import com.nextep.proto.action.model.JsonProvider;
 import com.nextep.proto.apis.adapters.ApisEventLocationAdapter;
+import com.nextep.proto.apis.adapters.ApisMediaParentKeyAdapter;
 import com.nextep.proto.blocks.CurrentUserSupport;
 import com.nextep.proto.model.Constants;
 import com.nextep.proto.services.EventManagementService;
@@ -42,17 +41,17 @@ import com.videopolis.calm.model.CalmObject;
 import com.videopolis.calm.model.ItemKey;
 import com.videopolis.cals.factory.ContextFactory;
 
+import net.sf.json.JSONObject;
+
 /**
  * This action is dedicated to reports from mobile devices
  * 
  * @author cfondacci
  */
-public class MobileReportingAction extends AbstractAction implements
-		JsonProvider {
+public class MobileReportingAction extends AbstractAction implements JsonProvider {
 
 	// Logger
-	private static final Log LOGGER = LogFactory
-			.getLog(MobileReportingAction.class);
+	private static final Log LOGGER = LogFactory.getLog(MobileReportingAction.class);
 
 	// Serial ID
 	private static final long serialVersionUID = -6184880687085681826L;
@@ -82,57 +81,36 @@ public class MobileReportingAction extends AbstractAction implements
 		final ItemKey itemKey = CalmFactory.parseKey(key);
 		final ApisCriterion itemCriterion = buildApisCriterionFor(itemKey);
 		// Building a request which retrieves the user and the element
-		final ApisRequest request = (ApisRequest) ApisFactory
-				.createCompositeRequest()
-				.addCriterion(
-						currentUserSupport.createApisCriterionFor(
-								getNxtpUserToken(), true))
+		final ApisRequest request = (ApisRequest) ApisFactory.createCompositeRequest()
+				.addCriterion(currentUserSupport.createApisCriterionFor(getNxtpUserToken(), true))
 				.addCriterion(itemCriterion);
 
 		// Querying
-		final ApiCompositeResponse response = (ApiCompositeResponse) getApiService()
-				.execute(request, ContextFactory.createContext(getLocale()));
+		final ApiCompositeResponse response = (ApiCompositeResponse) getApiService().execute(request,
+				ContextFactory.createContext(getLocale()));
 
 		// Getting user
-		final User currentUser = response.getUniqueElement(User.class,
-				CurrentUserSupport.APIS_ALIAS_CURRENT_USER);
+		final User currentUser = response.getUniqueElement(User.class, CurrentUserSupport.APIS_ALIAS_CURRENT_USER);
 		checkCurrentUser(currentUser);
 
 		// Getting element
-		final CalmObject item = response.getUniqueElement(CalmObject.class,
-				APIS_ALIAS_ITEM);
+		final CalmObject item = response.getUniqueElement(CalmObject.class, APIS_ALIAS_ITEM);
 
+		String redirectAction = REDIRECT;
 		ActivityType reportActivity = null;
 		switch (type) {
 		case Constants.REPORT_TYPE_ABUSE:
-			if (Media.CAL_TYPE.equals(item.getKey().getType())) {
-				// Getting a mutable media
-				final MutableMedia media = (MutableMedia) item;
-				// Getting current number of abuses
-				final int abuseCount = media.getAbuseCount();
-				// Adding 1
-				media.setAbuseCount(abuseCount + 1);
-				// Storing back to storage
-				ContextHolder.toggleWrite();
-				mediaService.saveItem(media);
-				// Logging
-				LOGGER.info("MOBILE_REPORT: User " + currentUser.getKey()
-						+ " reported abuse on media " + media.getKey());
-				reportActivity = ActivityType.ABUSE;
-			}
-			break;
 		case Constants.REPORT_TYPE_NOTGAY:
 		case Constants.REPORT_TYPE_LOCATION:
 		case Constants.REPORT_TYPE_CLOSED:
 		case Constants.REPORT_TYPE_REMOVAL_REQUESTED:
 			ContextHolder.toggleWrite();
 
-			LOGGER.info("MOBILE_REPORT: User " + currentUser.getKey()
-					+ " reported that place has closed: " + itemKey);
+			LOGGER.info(
+					"MOBILE_REPORT: User " + currentUser.getKey() + " reported code " + type + " on '" + itemKey + "'");
 			reportActivity = ActivityType.REMOVAL_REQUESTED;
 			// Registering activity
-			final MutableActivity activity = (MutableActivity) activitiesService
-					.createTransientObject();
+			final MutableActivity activity = (MutableActivity) activitiesService.createTransientObject();
 
 			activity.setActivityType(reportActivity);
 			activity.setDate(new Date());
@@ -152,25 +130,36 @@ public class MobileReportingAction extends AbstractAction implements
 				// Setting up activity
 				activity.add(place.getCity());
 			} else if (Event.CAL_ID.equals(item.getKey().getType())
-					|| EventSeries.SERIES_CAL_ID
-							.equals(item.getKey().getType())) {
+					|| EventSeries.SERIES_CAL_ID.equals(item.getKey().getType())) {
 				// Extracting event city to localize activity
 				final Event event = (Event) item;
 				final City city = eventManagementService.getEventCity(event);
 				activity.add(city);
+			} else if (Media.CAL_TYPE.equals(item.getKey().getType())) {
+				// Getting a mutable media
+				final MutableMedia media = (MutableMedia) item;
+				// Getting current number of abuses
+				final int abuseCount = media.getAbuseCount();
+				// Adding 1
+				media.setAbuseCount(abuseCount + 1);
+				// Storing back to storage
+				ContextHolder.toggleWrite();
+				mediaService.saveItem(media);
+				// Logging
+				LOGGER.info(
+						"MOBILE_REPORT: User " + currentUser.getKey() + " reported abuse on media " + media.getKey());
+				reportActivity = ActivityType.ABUSE;
+				redirectAction = "redirectMedia";
 			}
 			activitiesService.saveItem(activity);
 			try {
-				notificationService.sendReportEmailNotification(item,
-						currentUser, type);
+				notificationService.sendReportEmailNotification(item, currentUser, type);
 			} catch (Exception e) {
-				LOGGER.error(
-						"Problems sending email notification: "
-								+ e.getMessage(), e);
+				LOGGER.error("Problems sending email notification: " + e.getMessage(), e);
 			}
 			// Now if current user is admin we close it
 			if (getRightsManagementService().canDelete(currentUser, item)) {
-				return REDIRECT;
+				return redirectAction;
 			}
 		}
 
@@ -178,13 +167,13 @@ public class MobileReportingAction extends AbstractAction implements
 		return SUCCESS;
 	}
 
-	private ApisCriterion buildApisCriterionFor(ItemKey itemKey)
-			throws CalException, ApisException {
-		ApisCriterion crit = SearchRestriction.uniqueKeys(
-				Arrays.asList(itemKey)).aliasedBy(APIS_ALIAS_ITEM);
-		if (Event.CAL_ID.equals(itemKey.getType())
-				|| EventSeries.SERIES_CAL_ID.equals(itemKey.getType())) {
+	private ApisCriterion buildApisCriterionFor(ItemKey itemKey) throws CalException, ApisException {
+		ApisCriterion crit = SearchRestriction.uniqueKeys(Arrays.asList(itemKey)).aliasedBy(APIS_ALIAS_ITEM);
+		if (Event.CAL_ID.equals(itemKey.getType()) || EventSeries.SERIES_CAL_ID.equals(itemKey.getType())) {
 			crit.addCriterion(SearchRestriction.adaptKey(eventLocationAdapter));
+		} else if (Media.CAL_TYPE.equals(itemKey.getType())) {
+			crit.addCriterion(
+					SearchRestriction.adaptKey(new ApisMediaParentKeyAdapter()).aliasedBy(Constants.APIS_ALIAS_PARENT));
 		}
 		return crit;
 	}

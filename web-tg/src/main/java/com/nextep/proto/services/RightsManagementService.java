@@ -6,6 +6,7 @@ import com.nextep.geo.model.GeographicItem;
 import com.nextep.proto.model.PlaceType;
 import com.nextep.users.model.User;
 import com.videopolis.calm.model.CalmObject;
+import com.videopolis.calm.model.ItemKey;
 
 public interface RightsManagementService {
 
@@ -27,4 +28,6 @@ public interface RightsManagementService {
 	List<PlaceType> getAvailablePlaceTypes(User user, GeographicItem location);
 
 	boolean isAdministrator(User user);
+
+	boolean isAdministrator(ItemKey userKey);
 }

@@ -503,6 +503,14 @@ public class PlaceUpdateAction extends AbstractAction
 		return descriptionSourceId;
 	}
 
+	public void setFacebookId(String facebookId) {
+		this.facebookId = facebookId;
+	}
+
+	public String getFacebookId() {
+		return facebookId;
+	}
+
 	@Override
 	public void setRightsManagementService(RightsManagementService rightsManagementService) {
 		this.rightsManagementService = rightsManagementService;

@@ -463,12 +463,19 @@
 		</action>
 		<action name="mobileSubscribe" class="mobileSubscribeAction">
 			<result>/jsp/pages/json.jsp</result>
-			<result name="success" type="redirectAction">
+			<result name="redirectPlace" type="redirectAction">
 				<param name="actionName">place</param>
 				<param name="namespace">/api</param>
 				<param name="prependServletContext">false</param>
 				<param name="parse">true</param>
 				<param name="id">${subscribedKey}</param>
+				<param name="nxtpUserToken">${nxtpUserToken}</param>
+			</result>
+			<result name="redirectUser" type="redirectAction">
+				<param name="actionName">mobileLogin</param>
+				<param name="namespace">/</param>
+				<param name="prependServletContext">false</param>
+				<param name="parse">true</param>
 				<param name="nxtpUserToken">${nxtpUserToken}</param>
 			</result>
 			<result name="input">/jsp/pages/json-error.jsp</result>
@@ -616,6 +623,15 @@
 				<param name="prependServletContext">false</param>
 				<param name="parse">true</param>
 				<param name="key">${key}</param>
+				<param name="confirmed">true</param>
+				<param name="nxtpUserToken">${nxtpUserToken}</param>
+			</result>
+			<result name="redirectMedia" type="redirectAction">
+				<param name="actionName">mobileDeleteMedia</param>
+				<param name="namespace">/</param>
+				<param name="prependServletContext">false</param>
+				<param name="parse">true</param>
+				<param name="id">${key}</param>
 				<param name="confirmed">true</param>
 				<param name="nxtpUserToken">${nxtpUserToken}</param>
 			</result>

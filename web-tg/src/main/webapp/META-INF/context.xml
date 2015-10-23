@@ -156,5 +156,7 @@
 	<Environment name="facebook.appId" type="java.lang.String" value="302478486488872"/>
 	<Environment name="facebook.appSecret" type="java.lang.String" value="f16e1ba84008262848fccc07f2bb7a38"/>
 	
+	<Environment name="subscription.referrerMaxDistance" type="java.lang.Double" value="0.12427"/>
+	<Environment name="subscription.referrerDays" type="java.lang.Integer" value="180"/>
 </Context>
 

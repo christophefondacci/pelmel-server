@@ -67,6 +67,9 @@ public class SubscriptionImpl extends AbstractCalmObject implements MutableSubsc
 	@Column(name = "LAST_ANNOUNCEMENT_DATE")
 	private Date lastAnnouncementDate;
 
+	@Column(name = "REFERRER_ITEM_KEY")
+	private String referrerItemKey;
+
 	public SubscriptionImpl() {
 		super(null);
 	}
@@ -192,5 +195,20 @@ public class SubscriptionImpl extends AbstractCalmObject implements MutableSubsc
 	@Override
 	public Date getLastAnnouncementDate() {
 		return lastAnnouncementDate;
+	}
+
+	@Override
+	public ItemKey getReferrerItemKey() {
+		try {
+			return referrerItemKey == null ? null : CalmFactory.parseKey(referrerItemKey);
+		} catch (CalException e) {
+			LOGGER.error("Unable to parse related item key " + relatedItemKey + " : " + e.getMessage(), e);
+		}
+		return null;
+	}
+
+	@Override
+	public void setReferrerItemKey(ItemKey itemKey) {
+		this.referrerItemKey = itemKey == null ? null : itemKey.toString();
 	}
 }

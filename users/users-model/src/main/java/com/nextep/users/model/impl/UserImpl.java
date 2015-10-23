@@ -10,6 +10,7 @@ import javax.persistence.Table;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.annotations.Type;
 
 import com.nextep.users.model.MutableUser;
 import com.nextep.users.model.PushProvider;
@@ -98,6 +99,10 @@ public class UserImpl extends AbstractCalmObject implements User, MutableUser {
 
 	@Column(name = "EMAIL_VALIDATED")
 	private boolean emailValidated;
+
+	@Column(name = "IS_ANONYMOUS")
+	@Type(type = "yes_no")
+	private boolean anonymous;
 
 	private static final long serialVersionUID = 4236481091171015199L;
 
@@ -418,5 +423,15 @@ public class UserImpl extends AbstractCalmObject implements User, MutableUser {
 	@Override
 	public void setEmailValidated(boolean emailValidated) {
 		this.emailValidated = emailValidated;
+	}
+
+	@Override
+	public boolean isAnonymous() {
+		return anonymous;
+	}
+
+	@Override
+	public void setAnonymous(boolean anonymous) {
+		this.anonymous = anonymous;
 	}
 }

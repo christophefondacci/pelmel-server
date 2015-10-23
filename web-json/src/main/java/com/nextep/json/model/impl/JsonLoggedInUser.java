@@ -11,6 +11,7 @@ public class JsonLoggedInUser extends JsonUser implements IPrivateListContainer 
 	private boolean emailValidated;
 	private boolean admin;
 	private boolean premium;
+	private boolean anonymous;
 	private List<JsonLightPlace> ownedPlaces = new ArrayList<>();
 	private List<IJsonLightUser> pendingApprovals = new ArrayList<IJsonLightUser>();
 	private List<IJsonLightUser> pendingRequests = new ArrayList<IJsonLightUser>();
@@ -80,5 +81,13 @@ public class JsonLoggedInUser extends JsonUser implements IPrivateListContainer 
 
 	public void setAdmin(boolean admin) {
 		this.admin = admin;
+	}
+
+	public boolean isAnonymous() {
+		return anonymous;
+	}
+
+	public void setAnonymous(boolean anonymous) {
+		this.anonymous = anonymous;
 	}
 }

@@ -92,4 +92,13 @@ public interface MutableSubscription extends Subscription {
 	 *            the date of the last sent announcement
 	 */
 	void setLastAnnouncementDate(Date lastAnnouncementDate);
+
+	/**
+	 * Sets the item key of the element which led to this subscription and who
+	 * may therefore receive compensation.
+	 * 
+	 * @param itemKey
+	 *            the {@link ItemKey} of the referrer of this subscription
+	 */
+	void setReferrerItemKey(ItemKey itemKey);
 }

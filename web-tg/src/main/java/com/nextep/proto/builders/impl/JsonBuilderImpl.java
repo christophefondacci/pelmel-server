@@ -17,6 +17,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.fgp.deals.model.Deal;
+import com.fgp.deals.model.DealStatus;
 import com.fgp.deals.model.DealUse;
 import com.nextep.activities.model.Activity;
 import com.nextep.advertising.model.AdvertisingBanner;
@@ -240,6 +241,7 @@ public class JsonBuilderImpl implements JsonBuilder {
 		final JsonLoggedInUser json = new JsonLoggedInUser();
 		fillJsonUser(json, user, highRes, l, null);
 		json.setEmailValidated(user.isEmailValidated());
+		json.setAnonymous(user.isAnonymous());
 
 		// Getting lists
 		final List<? extends User> pendingApprovals = user.get(User.class,
@@ -853,10 +855,27 @@ public class JsonBuilderImpl implements JsonBuilder {
 		}
 
 		final List<? extends Deal> deals = place.get(Deal.class);
+
+		// Computing ownership
+		final List<? extends Subscription> subscriptions = place.get(Subscription.class);
+		boolean isOwner = false;
+		for (Subscription s : subscriptions) {
+			if (s.getStartDate().getTime() < System.currentTimeMillis()
+					&& s.getEndDate().getTime() > System.currentTimeMillis()) {
+				isOwner = isOwner || s.getPurchaserItemKey().equals(ContextHolder.getCurrentUserItemKey());
+			}
+		}
+
+		// Computing admin flag
+		boolean isAdmin = rightsManagementService.isAdministrator(ContextHolder.getCurrentUserItemKey());
+
+		// Computing deals
 		final List<JsonDeal> jsonDeals = new ArrayList<>();
 		for (Deal deal : deals) {
-			final JsonDeal jsonDeal = buildJsonDeal(deal);
-			jsonDeals.add(jsonDeal);
+			if (deal.getStatus() == DealStatus.RUNNING || isAdmin || isOwner) {
+				final JsonDeal jsonDeal = buildJsonDeal(deal);
+				jsonDeals.add(jsonDeal);
+			}
 		}
 		json.setDeals(jsonDeals);
 	}

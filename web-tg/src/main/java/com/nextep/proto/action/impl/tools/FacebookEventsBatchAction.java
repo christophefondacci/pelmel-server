@@ -16,6 +16,9 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Resource;
 
@@ -30,11 +33,14 @@ import com.nextep.events.model.Event;
 import com.nextep.events.model.MutableEvent;
 import com.nextep.geo.model.Place;
 import com.nextep.geo.model.impl.RequestTypeWithAlternates;
+import com.nextep.media.model.Media;
+import com.nextep.media.model.MutableMedia;
 import com.nextep.proto.action.base.AbstractAction;
 import com.nextep.proto.blocks.MediaPersistenceSupport;
 import com.nextep.proto.exceptions.GenericWebappException;
 import com.nextep.proto.services.DescriptionsManagementService;
 import com.nextep.proto.spring.ContextHolder;
+import com.nextep.smaug.service.SearchPersistenceService;
 import com.nextep.users.model.User;
 import com.videopolis.apis.exception.ApisException;
 import com.videopolis.apis.factory.ApisFactory;
@@ -46,6 +52,7 @@ import com.videopolis.calm.exception.CalException;
 import com.videopolis.calm.factory.CalmFactory;
 import com.videopolis.calm.model.ItemKey;
 import com.videopolis.cals.factory.ContextFactory;
+import com.videopolis.smaug.common.model.SearchScope;
 
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
@@ -69,9 +76,15 @@ public class FacebookEventsBatchAction extends AbstractAction {
 	@Qualifier("eventsService")
 	private CalPersistenceService eventsService;
 	@Autowired
+	@Qualifier("mediaService")
+	private CalPersistenceService mediaService;
+	@Autowired
 	private DescriptionsManagementService descriptionsManagementService;
 	@Autowired
 	private MediaPersistenceSupport mediaPersistenceSupport;
+	@Autowired
+	@Qualifier("searchPersistenceService")
+	private SearchPersistenceService searchService;
 
 	@Override
 	protected String doExecute() throws Exception {
@@ -136,7 +149,6 @@ public class FacebookEventsBatchAction extends AbstractAction {
 					end = new Date(start.getTime() + 1000 * 60 * 60 * 4);
 				}
 				final String name = jsonEvent.getString("name");
-				final String desc = jsonEvent.getString("description");
 				final String id = jsonEvent.getString("id");
 				String placeId = null;
 				if (jsonEvent.containsKey("place")) {
@@ -148,8 +160,10 @@ public class FacebookEventsBatchAction extends AbstractAction {
 
 				final JSONObject jsonCover = jsonEvent.getJSONObject("cover");
 				String mediaUrl = null;
-				if (jsonCover != null) {
+				String mediaId = null;
+				if (jsonCover != null && !jsonCover.isNullObject()) {
 					mediaUrl = jsonCover.getString("source");
+					mediaId = jsonCover.getString("id");
 					LOGGER.info("MEDIA: " + mediaUrl);
 				}
 				MutableEvent event = null;
@@ -158,7 +172,7 @@ public class FacebookEventsBatchAction extends AbstractAction {
 					final ApisRequest r = (ApisRequest) ApisFactory.createCompositeRequest()
 							.addCriterion((ApisCriterion) SearchRestriction
 									.uniqueKey(CalmFactory.createKey(Event.CAL_ID_FB, id)).aliasedBy(APIS_ALIAS_EVENT)
-									.with(Description.class));
+									.with(Media.class).with(Description.class));
 
 					// Fetching event place by its facebook id
 					if (placeId != null) {
@@ -182,14 +196,23 @@ public class FacebookEventsBatchAction extends AbstractAction {
 						event.setLocationKey(place.getKey());
 					}
 					eventsService.saveItem(event);
-
+					event.add(place);
+					searchService.storeCalmObject(event, SearchScope.CHILDREN);
 				} catch (ApisException | CalException e) {
 					LOGGER.error("APIS Error element " + (place != null ? "'" + place.getKey() + "'" : facebookId)
 							+ " index " + i + ": " + e.getMessage(), e);
 				}
 
+				final Map<String, Media> mediaIdMap = new HashMap<>();
+				final List<? extends Media> medias = event.get(Media.class);
+				for (Media m : medias) {
+					mediaIdMap.put(m.getTitle(), m);
+				}
+				// Formatting ID to max it to 200 char (db limit)
+				final String pelmelMediaId = mediaId == null ? null
+						: mediaId.substring(0, Math.min(mediaId.length(), 200));
 				// Creating media
-				if (mediaUrl != null) {
+				if (mediaUrl != null && !mediaIdMap.containsKey(mediaId)) {
 					final URL mUrl = new URL(mediaUrl);
 
 					// Storing media in local temp file first as we need to read
@@ -206,20 +229,25 @@ public class FacebookEventsBatchAction extends AbstractAction {
 					}
 
 					// Creating the media
-					mediaPersistenceSupport.createMedia(systemUser, event.getKey(), tmpFile, tmpFile.getName(),
-							"image/png", null, false, 0);
+					final MutableMedia m = (MutableMedia) mediaPersistenceSupport.createMedia(systemUser,
+							event.getKey(), tmpFile, tmpFile.getName(), "image/png", null, false, 0);
+					m.setTitle(pelmelMediaId);
+					mediaService.saveItem(m);
 				}
 
 				// Creating description
-				try {
-					descriptionsManagementService.updateDescription(systemUser, event, "en", desc);
-				} catch (GenericWebappException e) {
-					LOGGER.error("Error storing description of event '" + event.getKey() + "' id:" + id + " -> "
-							+ e.getMessage(), e);
+				if (jsonEvent.has("description")) {
+					String desc = jsonEvent.getString("description");
+					try {
+						descriptionsManagementService.updateDescription(systemUser, event, "en", desc);
+					} catch (GenericWebappException e) {
+						LOGGER.error("Error storing description of event '" + event.getKey() + "' id:" + id + " -> "
+								+ e.getMessage(), e);
+					}
 				}
 
-				LOGGER.info("Event '" + jsonEvent.getString("name") + "' : " + jsonEvent.getString("description")
-						+ " starts at " + jsonEvent.getString("start_time"));
+				LOGGER.info("Updated event '" + jsonEvent.getString("name") + "' starting at "
+						+ jsonEvent.getString("start_time"));
 			}
 		} else {
 			LOGGER.error("Unable to fetch FB events for item " + (place != null ? place.getKey() : facebookId));

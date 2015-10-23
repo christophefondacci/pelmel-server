@@ -181,4 +181,12 @@ public interface User extends CalmObject, Localized {
 	 *         <code>false</code>
 	 */
 	boolean isEmailValidated();
+
+	/**
+	 * Whether this user is an anonymous logged in user (a user who has not
+	 * explicitly signed up yet).
+	 * 
+	 * @return <code>true</code> if anonymous, else <code>false</code>
+	 */
+	boolean isAnonymous();
 }

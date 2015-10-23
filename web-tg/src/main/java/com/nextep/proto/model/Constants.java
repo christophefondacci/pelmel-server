@@ -27,6 +27,7 @@ public interface Constants {
 	String APIS_ALIAS_EVENT_COUNT = "eventCount";
 	String APIS_ALIAS_LIKES = "likeActivity";
 	String APIS_ALIAS_BANNER_TARGET = "bannerTarget";
+	String APIS_ALIAS_PARENT = "parent";
 
 	// Counts
 	int TOP_PLACES_PER_PAGE = 20;
@@ -112,4 +113,5 @@ public interface Constants {
 
 	// STATS
 	String VIEW_STAT_DEAL_USE = "DEAL_USED";
+	String VIEW_STAT_SUBSCRIPTION_REFERRER = "SUBS_REFERRER";
 }

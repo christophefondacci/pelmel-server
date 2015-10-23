@@ -42,8 +42,7 @@ public final class DisplayHelper {
 	public static String getName(CalmObject o, Locale l) {
 		if (o != null) {
 			final String language = l.getLanguage();
-			final List<? extends AlternateName> alternates = o
-					.get(AlternateName.class);
+			final List<? extends AlternateName> alternates = o.get(AlternateName.class);
 			if (alternates != null) {
 				for (AlternateName alternate : alternates) {
 					if (alternate.getLanguage().equals(language)) {
@@ -57,7 +56,7 @@ public final class DisplayHelper {
 		} else if (o instanceof User) {
 			return ((User) o).getPseudo();
 		} else {
-			return "";
+			return o.getKey().toString();
 		}
 	}
 
@@ -75,39 +74,32 @@ public final class DisplayHelper {
 		return "mainContent";
 	}
 
-	public static String getHeight(MessageSource messageSource,
-			Integer heightInCm, Locale l) {
+	public static String getHeight(MessageSource messageSource, Integer heightInCm, Locale l) {
 		if (heightInCm != null) {
 			double feetVal = Math.floor(heightInCm * 0.0328084d);
 			double inchVal = Math.round(heightInCm * 0.3937008 - feetVal * 12);
-			return messageSource.getMessage(TRANSLATION_HEIGHT, new Object[] {
-					heightInCm, feetVal, inchVal }, l);
+			return messageSource.getMessage(TRANSLATION_HEIGHT, new Object[] { heightInCm, feetVal, inchVal }, l);
 		} else {
 			return "n/a";
 		}
 	}
 
-	public static String getWeight(MessageSource messageSource,
-			Integer weightInKg, Locale l) {
+	public static String getWeight(MessageSource messageSource, Integer weightInKg, Locale l) {
 		if (weightInKg != null) {
 			double lbsVal = Math.round(weightInKg * 2.204623);
-			return messageSource.getMessage(TRANSLATION_WEIGHT, new Object[] {
-					weightInKg, lbsVal }, l);
+			return messageSource.getMessage(TRANSLATION_WEIGHT, new Object[] { weightInKg, lbsVal }, l);
 		} else {
 			return "n/a";
 		}
 	}
 
-	public static Description getMainLocaleDescription(CalmObject o,
-			Locale locale) {
+	public static Description getMainLocaleDescription(CalmObject o, Locale locale) {
 		Description description = null;
 		if (o != null) {
-			final List<? extends Description> descriptions = o
-					.get(Description.class);
+			final List<? extends Description> descriptions = o.get(Description.class);
 			if (descriptions != null) {
 				for (Description d : descriptions) {
-					if (locale.getLanguage()
-							.equals(d.getLocale().getLanguage())) {
+					if (locale.getLanguage().equals(d.getLocale().getLanguage())) {
 						description = d;
 						break;
 					}
@@ -132,8 +124,7 @@ public final class DisplayHelper {
 	 */
 	public static Description getSingleDescription(CalmObject o, Locale l) {
 		// Building the ordered list on which we'll base our description search
-		final List<String> languages = Arrays.asList(l.getLanguage(), "en",
-				null);
+		final List<String> languages = Arrays.asList(l.getLanguage(), "en", null);
 		for (String language : languages) {
 			final Description d = getLocaleDescription(o, language);
 			if (d != null) {
@@ -143,15 +134,13 @@ public final class DisplayHelper {
 		return null;
 	}
 
-	private static Description getLocaleDescription(CalmObject o,
-			String language) {
+	private static Description getLocaleDescription(CalmObject o, String language) {
 		final List<? extends Description> descs = o.get(Description.class);
 		if (descs == null) {
 			return null;
 		} else {
 			for (Description d : descs) {
-				if (language == null
-						|| d.getLocale().getLanguage().equals(language)) {
+				if (language == null || d.getLocale().getLanguage().equals(language)) {
 					return d;
 				}
 			}
@@ -175,8 +164,7 @@ public final class DisplayHelper {
 	 * @return a list of the appropriate page number sequence where
 	 *         <code>null</code> represents the dots.
 	 */
-	public static List<Integer> buildPagesList(int pageCount, int currentPage,
-			int pagesBeforeAfter) {
+	public static List<Integer> buildPagesList(int pageCount, int currentPage, int pagesBeforeAfter) {
 		final List<Integer> pagesList = new ArrayList<Integer>();
 		final List<Integer> pagesTail = new ArrayList<Integer>();
 		int start = 1;
@@ -251,7 +239,6 @@ public final class DisplayHelper {
 	 * @return an HTML-safe string that could be put as is
 	 */
 	public static String getHtmlSafe(String str) {
-		return str.replace("&", "&amp;").replace("<", "&lt;")
-				.replace(">", "&gt;");
+		return str.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;");
 	}
 }

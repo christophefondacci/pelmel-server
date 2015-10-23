@@ -43,8 +43,8 @@ public interface LocalizationService {
 	 * @param lng
 	 *            user's longitude
 	 */
-	Future<Boolean> localize(User user, List<? extends Place> nearbyPlaces,
-			ApiResponse response, double lat, double lng);
+	Future<Boolean> localize(User user, List<? extends Place> nearbyPlaces, ApiResponse response, double lat,
+			double lng);
 
 	/**
 	 * Checkin the given user to the given place
@@ -60,8 +60,7 @@ public interface LocalizationService {
 	 * @param lng
 	 *            current user longitude
 	 */
-	void checkin(MutableUser user, GeographicItem place,
-			ActivityType activityType, double lat, double lng);
+	void checkin(MutableUser user, GeographicItem place, ActivityType activityType, double lat, double lng);
 
 	/**
 	 * Checks the user out of the given place
@@ -77,6 +76,14 @@ public interface LocalizationService {
 	 * @param lng
 	 *            the user's current longitude
 	 */
-	void checkout(MutableUser user, GeographicItem place,
-			ActivityType activityType, double lat, double lng);
+	void checkout(MutableUser user, GeographicItem place, ActivityType activityType, double lat, double lng);
+
+	/**
+	 * Provides the place where the user is currently checked in
+	 * 
+	 * @param user
+	 *            the {@link User} to process
+	 * @return the currently checked in place
+	 */
+	ItemKey getCheckedInPlaceKey(User user);
 }

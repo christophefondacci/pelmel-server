@@ -35,17 +35,14 @@ public class RightsManagementServiceImpl implements RightsManagementService {
 		} else if (object instanceof Media) {
 			// Can only delete media of the user or that the user created
 			final Media media = (Media) object;
-			boolean isAuthor = media.getAuthorKey() != null
-					&& media.getAuthorKey().equals(user.getKey());
+			boolean isAuthor = media.getAuthorKey() != null && media.getAuthorKey().equals(user.getKey());
 
-			return media.getRelatedItemKey().equals(user.getKey()) || isAuthor
-					|| isAdministrator(user);
+			return media.getRelatedItemKey().equals(user.getKey()) || isAuthor || isAdministrator(user);
 		} else if (object instanceof Place || object instanceof Activity) {
 			return isAdministrator(user);
 		} else if (object instanceof Event) {
 			final Event event = (Event) object;
-			boolean isAuthor = event.getAuthorKey() != null
-					&& event.getAuthorKey().equals(user.getKey());
+			boolean isAuthor = event.getAuthorKey() != null && event.getAuthorKey().equals(user.getKey());
 			return isAuthor || isAdministrator(user);
 		}
 		return false;
@@ -56,6 +53,11 @@ public class RightsManagementServiceImpl implements RightsManagementService {
 		return adminUserKeys.contains(user.getKey().toString());
 	}
 
+	@Override
+	public boolean isAdministrator(ItemKey userKey) {
+		return adminUserKeys.contains(userKey.toString());
+	}
+
 	private ItemKey getOwnerKey(CalmObject object) {
 		if (object == null) {
 			return null;
@@ -63,16 +65,14 @@ public class RightsManagementServiceImpl implements RightsManagementService {
 			return ((AdvertisingBanner) object).getOwnerItemKey();
 		} else {
 			// Retrieving existing boosters
-			final List<? extends Subscription> boosters = object
-					.get(Subscription.class);
+			final List<? extends Subscription> boosters = object.get(Subscription.class);
 			// Getting current time
 			final long currentTime = System.currentTimeMillis();
 			// For all defined boosters
 			for (Subscription booster : boosters) {
 				// If the booster is active (=current time is inside the booster
 				// period)
-				if (booster.getStartDate().getTime() <= currentTime
-						&& booster.getEndDate().getTime() > currentTime) {
+				if (booster.getStartDate().getTime() <= currentTime && booster.getEndDate().getTime() > currentTime) {
 					// We return the purchaser key
 					return booster.getPurchaserItemKey();
 				}
@@ -92,8 +92,7 @@ public class RightsManagementServiceImpl implements RightsManagementService {
 			// Otherwise, same rules as delete (= must be the author or
 			// superuser id 1)
 			return canDelete(user, object);
-		} else if (object instanceof GeographicItem
-				&& !(object instanceof Place)) {
+		} else if (object instanceof GeographicItem && !(object instanceof Place)) {
 			return isAdministrator(user);
 		} else {
 			return ownerKey == null || isAdministrator(user);
@@ -106,12 +105,10 @@ public class RightsManagementServiceImpl implements RightsManagementService {
 	}
 
 	@Override
-	public List<PlaceType> getAvailablePlaceTypes(User user,
-			GeographicItem location) {
+	public List<PlaceType> getAvailablePlaceTypes(User user, GeographicItem location) {
 		final List<PlaceType> placeTypes = new ArrayList<PlaceType>();
 		for (PlaceType pt : PlaceType.values()) {
-			if (pt != PlaceType.hotel
-					|| (user != null && user.getKey().getNumericId() == 1)) {
+			if (pt != PlaceType.hotel || (user != null && user.getKey().getNumericId() == 1)) {
 				placeTypes.add(pt);
 			}
 		}

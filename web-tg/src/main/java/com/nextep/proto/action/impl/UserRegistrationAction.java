@@ -107,6 +107,7 @@ public class UserRegistrationAction extends AbstractAction
 	private File media;
 	// Dynamic arguments
 	private String name, email, password, contentType, fileName, passwordConfirm;
+	private boolean anonymous;
 	private String defaultCityKey;
 	private String userKey;
 	private String cityKey;
@@ -190,6 +191,7 @@ public class UserRegistrationAction extends AbstractAction
 			final String emailToken = ((UsersService) getUsersService()).generateUniqueToken(user);
 			user.setEmailValidationToken(emailToken);
 		}
+		user.setAnonymous(anonymous);
 		// Parsing birthday
 		if (birthDD != null && birthMM != null && birthYYYY != null) {
 			if (birthDD.length() < 2) {
@@ -595,5 +597,13 @@ public class UserRegistrationAction extends AbstractAction
 
 	public void setWelcomeMsgUser(String welcomeMsgUser) {
 		this.welcomeMsgUser = welcomeMsgUser;
+	}
+
+	public void setAnonymous(boolean anonymous) {
+		this.anonymous = anonymous;
+	}
+
+	public boolean isAnonymous() {
+		return anonymous;
 	}
 }

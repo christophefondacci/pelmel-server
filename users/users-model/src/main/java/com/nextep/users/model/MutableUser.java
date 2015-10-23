@@ -47,4 +47,6 @@ public interface MutableUser extends User {
 	void setEmailValidationToken(String token);
 
 	void setEmailValidated(boolean validated);
+
+	void setAnonymous(boolean anonymous);
 }

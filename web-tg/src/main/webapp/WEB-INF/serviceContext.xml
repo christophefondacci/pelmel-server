@@ -167,9 +167,6 @@
 		<property name="localizationDistance">
 			<jee:jndi-lookup jndi-name="java:comp/env/mobile/localizationDistance"></jee:jndi-lookup>
 		</property>
-		<property name="lastSeenMaxTime">
-			<jee:jndi-lookup jndi-name="java:comp/env/smaug/lastSeenMaxTime"/>
-		</property>
 		<property name="searchService" ref="searchPersistenceService"/>
 		<property name="geoService" ref="geoService"/>		
 	</bean>

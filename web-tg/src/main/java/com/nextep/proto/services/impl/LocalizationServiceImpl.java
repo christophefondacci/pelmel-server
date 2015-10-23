@@ -4,6 +4,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Future;
 
+import javax.annotation.Resource;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,8 +35,7 @@ import com.videopolis.smaug.common.model.SearchScope;
 
 public class LocalizationServiceImpl implements LocalizationService {
 
-	private final static Log LOGGER = LogFactory
-			.getLog(LocalizationServiceImpl.class);
+	private final static Log LOGGER = LogFactory.getLog(LocalizationServiceImpl.class);
 	private static final Log CHECKIN_LOGGER = LogFactory.getLog("CHECKIN");
 	private static final String LOCALIZATION_AUTO_STAT = "LOCALIZATION_AUTO_STAT";
 	private static final String STAT_CHECKIN = "CHECKIN";
@@ -47,13 +48,13 @@ public class LocalizationServiceImpl implements LocalizationService {
 	@Autowired
 	private ViewManagementService viewManagementService;
 	private double localizationDistance;
-	private long lastSeenMaxTime;
+	@Resource(mappedName = "smaug/lastSeenMaxTime")
+	private Long lastSeenMaxTime;
 
 	@Async
 	@Override
-	public Future<Boolean> localize(User user,
-			List<? extends Place> nearbyPlaces, ApiResponse response,
-			double lat, double lng) {
+	public Future<Boolean> localize(User user, List<? extends Place> nearbyPlaces, ApiResponse response, double lat,
+			double lng) {
 		final MutableUser currentUser = (MutableUser) user;
 		if (currentUser != null) {
 			ItemKey currentPlaceKey = null;
@@ -67,8 +68,7 @@ public class LocalizationServiceImpl implements LocalizationService {
 			// If we have places around
 			if (!nearbyPlaces.isEmpty()) {
 				final Place p = nearbyPlaces.iterator().next();
-				final SearchStatistic stat = response.getStatistic(p.getKey(),
-						SearchStatistic.DISTANCE);
+				final SearchStatistic stat = response.getStatistic(p.getKey(), SearchStatistic.DISTANCE);
 				// We compute if the closest one is under localization distance
 				if (stat != null) {
 					if (stat.getNumericValue().doubleValue() < localizationDistance) {
@@ -79,14 +79,11 @@ public class LocalizationServiceImpl implements LocalizationService {
 
 				// If localized, we store the place
 				if (currentPlaceKey != null) {
-					viewManagementService.logViewCount(currentPlace,
-							currentUser, LOCALIZATION_AUTO_STAT);
+					viewManagementService.logViewCount(currentPlace, currentUser, LOCALIZATION_AUTO_STAT);
 
 					// Logging lat/lng with checkin
-					CHECKIN_LOGGER.info(currentPlaceKey + ";"
-							+ LOCALIZATION_AUTO_STAT + ";"
-							+ System.currentTimeMillis() + ";" + user.getKey()
-							+ ";" + lat + ";" + lng);
+					CHECKIN_LOGGER.info(currentPlaceKey + ";" + LOCALIZATION_AUTO_STAT + ";"
+							+ System.currentTimeMillis() + ";" + user.getKey() + ";" + lat + ";" + lng);
 				}
 			}
 			// Assigning statistic place key
@@ -98,36 +95,27 @@ public class LocalizationServiceImpl implements LocalizationService {
 
 			if (response instanceof ApiCompositeResponse) {
 				try {
-					final City city = ((ApiCompositeResponse) response)
-							.getUniqueElement(
-									City.class,
-									ApisLocalizationHelper.APIS_ALIAS_CITY_NEARBY);
+					final City city = ((ApiCompositeResponse) response).getUniqueElement(City.class,
+							ApisLocalizationHelper.APIS_ALIAS_CITY_NEARBY);
 					final City currentCity = user.getUnique(City.class);
 					if (city != null) {
 						geoService.setItemFor(user.getKey(), city.getKey());
 					}
 					// Generating an activity when the city changes
-					if (city != null && currentCity != null
-							&& !city.getKey().equals(currentCity.getKey())) {
-						final MutableActivity activity = (MutableActivity) activitiesService
-								.createTransientObject();
+					if (city != null && currentCity != null && !city.getKey().equals(currentCity.getKey())) {
+						final MutableActivity activity = (MutableActivity) activitiesService.createTransientObject();
 						activity.setActivityType(ActivityType.CITY_CHANGE);
 						activity.setUserKey(currentUser.getKey());
 						activity.setDate(new Date());
 						activity.setLoggedItemKey(city.getKey());
 						activity.add(city);
 						activitiesService.saveItem(activity);
-						searchService.storeCalmObject(activity,
-								SearchScope.CHILDREN);
+						searchService.storeCalmObject(activity, SearchScope.CHILDREN);
 					}
 				} catch (ApisException e) {
-					LOGGER.error(
-							"Unable to bind user's localized city for user "
-									+ user.getKey(), e);
+					LOGGER.error("Unable to bind user's localized city for user " + user.getKey(), e);
 				} catch (CalException e) {
-					LOGGER.error(
-							"Unable to bind user's localized city for user "
-									+ user.getKey(), e);
+					LOGGER.error("Unable to bind user's localized city for user " + user.getKey(), e);
 				}
 			}
 
@@ -136,19 +124,17 @@ public class LocalizationServiceImpl implements LocalizationService {
 	}
 
 	@Override
-	public void checkin(MutableUser user, GeographicItem place,
-			ActivityType activityType, double lat, double lng) {
+	public void checkin(MutableUser user, GeographicItem place, ActivityType activityType, double lat, double lng) {
 		checkinOrOut(user, place, activityType, lat, lng, false);
 	}
 
 	@Override
-	public void checkout(MutableUser user, GeographicItem place,
-			ActivityType activityType, double lat, double lng) {
+	public void checkout(MutableUser user, GeographicItem place, ActivityType activityType, double lat, double lng) {
 		checkinOrOut(user, place, activityType, lat, lng, true);
 	}
 
-	private void checkinOrOut(MutableUser user, GeographicItem place,
-			ActivityType activityType, double lat, double lng, boolean checkout) {
+	private void checkinOrOut(MutableUser user, GeographicItem place, ActivityType activityType, double lat, double lng,
+			boolean checkout) {
 		final ItemKey placeKey = place.getKey();
 		if (!checkout) {
 			user.setLastLocationKey(placeKey);
@@ -159,12 +145,8 @@ public class LocalizationServiceImpl implements LocalizationService {
 				user.setLastLocationKey(null);
 			} else {
 				// Logging
-				LOGGER.warn("Attempt to checkout from a place where the user is not: userKey='"
-						+ user.getKey()
-						+ "' / placeKeyToCheckout='"
-						+ placeKey
-						+ "' / currentPlaceKey='"
-						+ user.getLastLocationKey()
+				LOGGER.warn("Attempt to checkout from a place where the user is not: userKey='" + user.getKey()
+						+ "' / placeKeyToCheckout='" + placeKey + "' / currentPlaceKey='" + user.getLastLocationKey()
 						+ "'");
 			}
 		}
@@ -172,8 +154,7 @@ public class LocalizationServiceImpl implements LocalizationService {
 		user.setLongitude(lng);
 
 		// Adding activity
-		final MutableActivity activity = (MutableActivity) activitiesService
-				.createTransientObject();
+		final MutableActivity activity = (MutableActivity) activitiesService.createTransientObject();
 		activity.setActivityType(activityType);
 		activity.setUserKey(user.getKey());
 		activity.setDate(user.getLastLocationTime());
@@ -188,12 +169,18 @@ public class LocalizationServiceImpl implements LocalizationService {
 		usersService.saveItem(user);
 
 		// Logging lat/lng with checkin
-		CHECKIN_LOGGER.info(placeKey + ";"
-				+ (checkout ? STAT_CHECKOUT : STAT_CHECKIN) + ";"
-				+ System.currentTimeMillis() + ";" + user.getKey() + ";" + lat
-				+ ";" + lng);
-		viewManagementService.logViewCountByKey(placeKey, user,
-				checkout ? STAT_CHECKOUT : STAT_CHECKIN);
+		CHECKIN_LOGGER.info(placeKey + ";" + (checkout ? STAT_CHECKOUT : STAT_CHECKIN) + ";"
+				+ System.currentTimeMillis() + ";" + user.getKey() + ";" + lat + ";" + lng);
+		viewManagementService.logViewCountByKey(placeKey, user, checkout ? STAT_CHECKOUT : STAT_CHECKIN);
+	}
+
+	@Override
+	public ItemKey getCheckedInPlaceKey(User user) {
+		if (user.getLastLocationTime().getTime() + lastSeenMaxTime > System.currentTimeMillis()) {
+			return user.getLastLocationKey();
+		} else {
+			return null;
+		}
 	}
 
 	public void setActivitiesService(CalPersistenceService activitiesService) {
@@ -210,10 +197,6 @@ public class LocalizationServiceImpl implements LocalizationService {
 
 	public void setLocalizationDistance(double localizationDistance) {
 		this.localizationDistance = localizationDistance;
-	}
-
-	public void setLastSeenMaxTime(long lastSeenMaxTime) {
-		this.lastSeenMaxTime = lastSeenMaxTime;
 	}
 
 	public void setGeoService(CalPersistenceService geoService) {

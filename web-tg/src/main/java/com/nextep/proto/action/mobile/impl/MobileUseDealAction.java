@@ -19,6 +19,7 @@ import com.nextep.proto.action.model.JsonProviderWithError;
 import com.nextep.proto.blocks.CurrentUserSupport;
 import com.nextep.proto.builders.JsonBuilder;
 import com.nextep.proto.model.Constants;
+import com.nextep.proto.services.LocalizationService;
 import com.nextep.proto.services.ViewManagementService;
 import com.nextep.proto.spring.ContextHolder;
 import com.nextep.users.model.User;
@@ -45,6 +46,8 @@ public class MobileUseDealAction extends AbstractAction implements JsonProviderW
 	private CalPersistenceService dealUseService;
 	@Autowired
 	private ViewManagementService viewManagementService;
+	@Autowired
+	private LocalizationService localizationService;
 	@Autowired
 	private JsonBuilder jsonBuilder;
 
@@ -92,6 +95,13 @@ public class MobileUseDealAction extends AbstractAction implements JsonProviderW
 					setErrorMessage("Already used");
 					return error(403);
 				}
+			}
+
+			// If not checked in
+			final ItemKey checkedInPlaceKey = localizationService.getCheckedInPlaceKey(user);
+			if (!deal.getRelatedItemKey().equals(checkedInPlaceKey)) {
+				setErrorMessage("Not checked in");
+				return error(403);
 			}
 
 			// Saving new deal

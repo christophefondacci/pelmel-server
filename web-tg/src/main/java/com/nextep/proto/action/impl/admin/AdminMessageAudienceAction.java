@@ -102,6 +102,7 @@ public class AdminMessageAudienceAction extends AbstractAction implements JsonPr
 		Subscription currentSubscription = null;
 		for (Subscription subscription : subscriptions) {
 			if (subscription.getRelatedItemKey().equals(itemKey)
+					&& subscription.getPurchaserItemKey().equals(user.getKey())
 					&& subscription.getStartDate().getTime() < System.currentTimeMillis()
 					&& subscription.getEndDate().getTime() > System.currentTimeMillis()) {
 				currentSubscription = subscription;

@@ -84,4 +84,12 @@ public interface Subscription extends CalmObject {
 	 * @return the date of the last announcement made from this account
 	 */
 	Date getLastAnnouncementDate();
+
+	/**
+	 * Provides the item key of the element which should receive compensation
+	 * for this subscription
+	 * 
+	 * @return the referrer's {@link ItemKey}
+	 */
+	ItemKey getReferrerItemKey();
 }

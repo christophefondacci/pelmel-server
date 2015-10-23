@@ -24,8 +24,8 @@ import org.apache.solr.client.solrj.response.QueryResponse;
 import com.nextep.activities.model.Activity;
 import com.nextep.activities.model.ActivityType;
 import com.nextep.advertising.model.AdvertisingBanner;
-import com.nextep.advertising.model.Subscription;
 import com.nextep.advertising.model.BannerStatus;
+import com.nextep.advertising.model.Subscription;
 import com.nextep.cal.util.helpers.CalHelper;
 import com.nextep.events.model.Event;
 import com.nextep.events.model.EventSeries;
@@ -64,11 +64,9 @@ import com.videopolis.smaug.exception.SearchException;
  * @author cfondacci
  * 
  */
-public class SolrSearchPersistenceServiceImpl implements
-		SearchPersistenceService {
+public class SolrSearchPersistenceServiceImpl implements SearchPersistenceService {
 
-	private final static Log log = LogFactory
-			.getLog(SolrSearchPersistenceServiceImpl.class);
+	private final static Log log = LogFactory.getLog(SolrSearchPersistenceServiceImpl.class);
 	private final static String TAG_DISPLAY_CHECKBOX = "CHECKBOX";
 	private String userSolrUrl;
 	private String placesSolrUrl;
@@ -97,30 +95,26 @@ public class SolrSearchPersistenceServiceImpl implements
 		citiesSolrServer = new HttpSolrClient(citiesSolrUrl);
 	}
 
-	private <T extends SearchItemImpl> T getSearchItem(SolrClient solrServer,
-			ItemKey itemKey, Class<T> searchClass) {
+	private <T extends SearchItemImpl> T getSearchItem(SolrClient solrServer, ItemKey itemKey, Class<T> searchClass) {
 		// First we fetch user from SOLR
 		final SolrQuery query = new SolrQuery("id:" + itemKey.toString());
 		QueryResponse response = null;
 		try {
 			response = solrServer.query(query);
 		} catch (SolrServerException | IOException e) {
-			throw new SearchException("Cannot fetch user from SOLR: "
-					+ e.getMessage(), e);
+			throw new SearchException("Cannot fetch user from SOLR: " + e.getMessage(), e);
 		}
 		final List<T> users = response.getBeans(searchClass);
 		// We need 1 and only 1 user
 		if (users.size() != 1) {
-			log.error(users.size()
-					+ " items where fetched from SOLR, expected 1 only.");
+			log.error(users.size() + " items where fetched from SOLR, expected 1 only.");
 			return null;
 		}
 		return users.iterator().next();
 	}
 
 	@Override
-	public void storeCalmObject(CalmObject object, SearchScope scope)
-			throws SearchException {
+	public void storeCalmObject(CalmObject object, SearchScope scope) throws SearchException {
 		if (object instanceof User) {
 			storeUser((User) object);
 		} else if (object instanceof Event) {
@@ -139,30 +133,26 @@ public class SolrSearchPersistenceServiceImpl implements
 		} else if (object instanceof AdvertisingBanner) {
 			storeBanner((AdvertisingBanner) object);
 		} else {
-			throw new SearchException(
-					"Unsupported CAL object to store in index: "
-							+ object.getClass());
+			throw new SearchException("Unsupported CAL object to store in index: " + object.getClass());
 		}
 	}
 
 	private void storeCity(City city) throws SearchException {
-		CitiesSearchItemImpl searchItem = new CitiesSearchItemImpl(city
-				.getKey().toString());
+		CitiesSearchItemImpl searchItem = new CitiesSearchItemImpl(city.getKey().toString());
 		searchItem.setLat(city.getLatitude());
 		searchItem.setLng(city.getLongitude());
 		saveBean(searchItem, citiesSolrServer);
 	}
 
 	private void storeBanner(AdvertisingBanner banner) throws SearchException {
-		if (banner.getStatus() != BannerStatus.READY
-				|| (banner.getEndValidity() != null && banner.getEndValidity()
-						.getTime() < System.currentTimeMillis())) {
+		if (banner.getStatus() != BannerStatus.READY || (banner.getEndValidity() != null
+				&& banner.getEndValidity().getTime() < System.currentTimeMillis())) {
 			try {
 				bannersSolrServer.deleteById(banner.getKey().toString());
 				bannersSolrServer.commit();
 			} catch (IOException | SolrServerException e) {
-				throw new SearchException("Cannot unindex banner with key '"
-						+ banner.getKey() + "':" + e.getMessage(), e);
+				throw new SearchException("Cannot unindex banner with key '" + banner.getKey() + "':" + e.getMessage(),
+						e);
 			}
 		} else {
 			BannerSearchItemImpl searchItem = new BannerSearchItemImpl();
@@ -178,8 +168,8 @@ public class SolrSearchPersistenceServiceImpl implements
 	@Override
 	public void updateWithRemoval(CalmObject object, List<ItemKey> events) {
 		if (object instanceof User) {
-			final UserSearchItemImpl solrUser = getSearchItem(userSolrServer,
-					object.getKey(), UserSearchItemImpl.class);
+			final UserSearchItemImpl solrUser = getSearchItem(userSolrServer, object.getKey(),
+					UserSearchItemImpl.class);
 			if (solrUser != null) {
 				solrUser.setEvents(new ArrayList<String>());
 				for (ItemKey key : events) {
@@ -195,8 +185,7 @@ public class SolrSearchPersistenceServiceImpl implements
 	public LikeActionResult toggleLike(ItemKey liker, ItemKey likedKey) {
 		// Liker could only be a user, but we enforce this constraint
 		if (User.CAL_TYPE.equals(liker.getType())) {
-			final UserSearchItemImpl solrUser = getSearchItem(userSolrServer,
-					liker, UserSearchItemImpl.class);
+			final UserSearchItemImpl solrUser = getSearchItem(userSolrServer, liker, UserSearchItemImpl.class);
 			if (solrUser != null) {
 				List<String> likedKeys = null;
 
@@ -206,8 +195,7 @@ public class SolrSearchPersistenceServiceImpl implements
 					likedKeys = solrUser.getPlaces();
 				} else if (User.CAL_TYPE.equals(keyType)) {
 					likedKeys = solrUser.getUsers();
-				} else if (Event.CAL_ID.equals(keyType)
-						|| EventSeries.SERIES_CAL_ID.equals(keyType)) {
+				} else if (Event.CAL_ID.equals(keyType) || EventSeries.SERIES_CAL_ID.equals(keyType)) {
 					likedKeys = solrUser.getEvents();
 				}
 				// If we got something
@@ -243,8 +231,7 @@ public class SolrSearchPersistenceServiceImpl implements
 
 			// Getting expiration time
 			if (likedKey.contains("-")) {
-				final long expirationTime = Long
-						.valueOf(likedKey.split("-")[1]);
+				final long expirationTime = Long.valueOf(likedKey.split("-")[1]);
 
 				// Checking if expired
 				if (expirationTime < System.currentTimeMillis()) {
@@ -260,8 +247,7 @@ public class SolrSearchPersistenceServiceImpl implements
 	public void toggleIndex(CalmObject object, int seoIndexed) {
 		if (object instanceof Place) {
 			// Getting place entry
-			final PlaceSearchItemImpl solrPlace = getSearchItem(
-					placesSolrServer, object.getKey(),
+			final PlaceSearchItemImpl solrPlace = getSearchItem(placesSolrServer, object.getKey(),
 					PlaceSearchItemImpl.class);
 			if (solrPlace != null) {
 				// Setting SEO flag
@@ -281,8 +267,7 @@ public class SolrSearchPersistenceServiceImpl implements
 		}
 
 		if (server != null) {
-			final PlaceSearchItemImpl solrItem = getSearchItem(server, itemKey,
-					PlaceSearchItemImpl.class);
+			final PlaceSearchItemImpl solrItem = getSearchItem(server, itemKey, PlaceSearchItemImpl.class);
 			solrItem.setRating(rating);
 			saveBean(solrItem, server);
 		}
@@ -296,8 +281,7 @@ public class SolrSearchPersistenceServiceImpl implements
 			// Getting place entry
 			if (activity != null) {
 				try {
-					activitiesSolrServer.deleteById(activity.getKey()
-							.toString());
+					activitiesSolrServer.deleteById(activity.getKey().toString());
 					activitiesSolrServer.commit();
 				} catch (SolrServerException | IOException e) {
 					// Not deleting an activity is OK
@@ -307,8 +291,7 @@ public class SolrSearchPersistenceServiceImpl implements
 		} else {
 			final ActivitySearchItemImpl searchItem = new ActivitySearchItemImpl();
 			try {
-				final GeographicItem location = activity
-						.getUnique(GeographicItem.class);
+				final GeographicItem location = activity.getUnique(GeographicItem.class);
 				searchItem.setKey(activity.getKey());
 				searchItem.setActivityDate(activity.getDate());
 				searchItem.setTargetType(activity.getLoggedItemKey().getType());
@@ -316,11 +299,9 @@ public class SolrSearchPersistenceServiceImpl implements
 					searchItem.setUserKey(activity.getUserKey().toString());
 				}
 				if (activity.getLoggedItemKey() != null) {
-					searchItem.setPlaceKey(activity.getLoggedItemKey()
-							.toString());
+					searchItem.setPlaceKey(activity.getLoggedItemKey().toString());
 				}
-				searchItem
-						.setActivityType(activity.getActivityType().getCode());
+				searchItem.setActivityType(activity.getActivityType().getCode());
 
 				// Extracting extra info itemKey (if any) and setting as extra
 				// type
@@ -329,13 +310,11 @@ public class SolrSearchPersistenceServiceImpl implements
 					if (!activity.getExtraInformation().contains(",")) {
 						// Trying to parse an ItemKey
 						try {
-							final ItemKey itemKey = CalmFactory
-									.parseKey(activity.getExtraInformation());
+							final ItemKey itemKey = CalmFactory.parseKey(activity.getExtraInformation());
 							// If we succeed we set as extra type
 							searchItem.setExtraType(itemKey.getType());
 						} catch (CalException e) {
-							log.error("Unable to convert extra info '"
-									+ activity.getExtraInformation()
+							log.error("Unable to convert extra info '" + activity.getExtraInformation()
 									+ "' to itemKey: " + e.getMessage());
 						}
 					}
@@ -348,17 +327,15 @@ public class SolrSearchPersistenceServiceImpl implements
 					searchItem.setLat(((City) location).getLatitude());
 					searchItem.setLng(((City) location).getLongitude());
 				} else {
-					log.error("Activity '"
-							+ activity.getKey()
-							+ "' does not have PLACE or CITY localization, skipping");
+					log.error(
+							"Activity '" + activity.getKey() + "' does not have PLACE or CITY localization, skipping");
 					return;
 				}
 				if (location instanceof Localized) {
 					searchItem.setLat(((Localized) location).getLatitude());
 					searchItem.setLng(((Localized) location).getLongitude());
 				} else {
-					log.warn("Null activity localization for "
-							+ activity.getKey().toString());
+					log.warn("Null activity localization for " + activity.getKey().toString());
 				}
 				// Updating SOLR
 				if (location != null) {
@@ -366,17 +343,13 @@ public class SolrSearchPersistenceServiceImpl implements
 						activitiesSolrServer.addBean(searchItem);
 						activitiesSolrServer.commit();
 					} catch (SolrServerException e) {
-						throw new SearchException(
-								"Unable to store calm object: " + e, e);
+						throw new SearchException("Unable to store calm object: " + e, e);
 					} catch (IOException e) {
-						throw new SearchException(
-								"Unable to store calm object: " + e, e);
+						throw new SearchException("Unable to store calm object: " + e, e);
 					}
 				}
 			} catch (CalException e) {
-				throw new SearchException(
-						"Unable to extract activity localization: "
-								+ e.getMessage(), e);
+				throw new SearchException("Unable to extract activity localization: " + e.getMessage(), e);
 			}
 		}
 	}
@@ -424,8 +397,7 @@ public class SolrSearchPersistenceServiceImpl implements
 				}
 			}
 			// Adding ad boosts
-			final List<? extends Subscription> adBoosters = place
-					.get(Subscription.class);
+			final List<? extends Subscription> adBoosters = place.get(Subscription.class);
 			// TODO: ADBOOST adjust this computation
 			// Computing upper date bound and higher price
 			Date maxDate = null;
@@ -451,9 +423,7 @@ public class SolrSearchPersistenceServiceImpl implements
 					searchItem.setRating(stat.getRating());
 				}
 			} catch (CalException e) {
-				log.error(
-						"Unable to store rating in SOLR for place : "
-								+ e.getMessage(), e);
+				log.error("Unable to store rating in SOLR for place : " + e.getMessage(), e);
 			}
 
 			// Updating SOLR
@@ -461,14 +431,11 @@ public class SolrSearchPersistenceServiceImpl implements
 				placesSolrServer.addBean(searchItem);
 				placesSolrServer.commit();
 			} catch (SolrServerException e) {
-				throw new SearchException("Unable to store calm object: " + e,
-						e);
+				throw new SearchException("Unable to store calm object: " + e, e);
 			} catch (IOException e) {
-				throw new SearchException("Unable to store calm object: " + e,
-						e);
+				throw new SearchException("Unable to store calm object: " + e, e);
 			}
-			storeSuggest(place.getKey(), Arrays.asList(place.getName()),
-					place.getCity());
+			storeSuggest(place.getKey(), Arrays.asList(place.getName()), place.getCity());
 		} else {
 			remove(place);
 		}
@@ -486,23 +453,18 @@ public class SolrSearchPersistenceServiceImpl implements
 				suggestSolrServer.deleteById(object.getKey().toString());
 				suggestSolrServer.commit();
 			} catch (SolrServerException e) {
-				throw new SearchException("Unable to store calm object: " + e,
-						e);
+				throw new SearchException("Unable to store calm object: " + e, e);
 			} catch (IOException e) {
-				throw new SearchException("Unable to store calm object: " + e,
-						e);
+				throw new SearchException("Unable to store calm object: " + e, e);
 			}
 		} else if (object instanceof Activity) {
-			log.info("Removing activity " + object.getKey()
-					+ " from SOLR index");
+			log.info("Removing activity " + object.getKey() + " from SOLR index");
 			try {
 				activitiesSolrServer.deleteById(object.getKey().toString());
 			} catch (SolrServerException e) {
-				throw new SearchException("Unable to store calm object: " + e,
-						e);
+				throw new SearchException("Unable to store calm object: " + e, e);
 			} catch (IOException e) {
-				throw new SearchException("Unable to store calm object: " + e,
-						e);
+				throw new SearchException("Unable to store calm object: " + e, e);
 			}
 		} else if (object instanceof Event) {
 			log.info("Removing event " + object.getKey() + " from SOLR index");
@@ -512,8 +474,7 @@ public class SolrSearchPersistenceServiceImpl implements
 				suggestSolrServer.deleteById(object.getKey().toString());
 				suggestSolrServer.commit();
 			} catch (SolrServerException | IOException e) {
-				throw new SearchException("Unable to store calm object: " + e,
-						e);
+				throw new SearchException("Unable to store calm object: " + e, e);
 			}
 		}
 	}
@@ -549,9 +510,7 @@ public class SolrSearchPersistenceServiceImpl implements
 				}
 				fillLocalization(searchItem, city);
 			} catch (CalException e) {
-				log.error(
-						"Unable to get city information for user addition, skipping: "
-								+ e.getMessage(), e);
+				log.error("Unable to get city information for user addition, skipping: " + e.getMessage(), e);
 				if (City.CAL_ID.equals(locationKey.getType())) {
 					searchItem.setCityId(locationKey.toString());
 				}
@@ -565,19 +524,20 @@ public class SolrSearchPersistenceServiceImpl implements
 				eventsSolrServer.addBean(searchItem);
 				eventsSolrServer.commit();
 			} catch (SolrServerException e) {
-				throw new SearchException("Unable to store calm object: " + e,
-						e);
+				throw new SearchException("Unable to store calm object: " + e, e);
 			} catch (IOException e) {
-				throw new SearchException("Unable to store calm object: " + e,
-						e);
+				throw new SearchException("Unable to store calm object: " + e, e);
 			}
-			storeSuggest(event.getKey(), Arrays.asList(event.getName()), city,
-					event.getEndDate());
+			storeSuggest(event.getKey(), Arrays.asList(event.getName()), city, event.getEndDate());
 		}
 	}
 
 	private void storeUser(User user) throws SearchException {
 		UserSearchItemImpl searchItem = null;
+		// We are not storing or indexing anonymous users
+		if (user.isAnonymous()) {
+			return;
+		}
 		// if (user.getKey() != null) {
 		// try {
 		// searchItem = getUserSearchItem(user.getKey());
@@ -628,9 +588,7 @@ public class SolrSearchPersistenceServiceImpl implements
 		final List<? extends Event> events = user.get(Event.class, "favorites");
 		if (events != null) {
 			for (Event e : events) {
-				if (e.getEndDate() == null
-						|| e.getEndDate().getTime() > System
-								.currentTimeMillis()) {
+				if (e.getEndDate() == null || e.getEndDate().getTime() > System.currentTimeMillis()) {
 					searchItem.addEvent(e.getKey().toString());
 				}
 			}
@@ -648,30 +606,25 @@ public class SolrSearchPersistenceServiceImpl implements
 			city = user.getUnique(City.class);
 			fillLocalization(searchItem, city);
 		} catch (CalException e) {
-			log.error(
-					"Unable to get city information for user addition, skipping: "
-							+ e.getMessage(), e);
+			log.error("Unable to get city information for user addition, skipping: " + e.getMessage(), e);
 		}
 		if (user.getLastLocationKey() != null) {
 			searchItem.setCurrentPlace(user.getLastLocationKey().toString());
-			searchItem.setCurrentPlaceTimeout(user.getLastLocationTime()
-					.getTime() + lastSeenMaxTime);
+			searchItem.setCurrentPlaceTimeout(user.getLastLocationTime().getTime() + lastSeenMaxTime);
 		}
 		// If current last location is expired or not existing and we have an
 		// automatic localization
-		if ((user.getLastLocationTime() == null || (user.getLastLocationTime()
-				.getTime() + lastSeenMaxTime) < System.currentTimeMillis())
+		if ((user.getLastLocationTime() == null
+				|| (user.getLastLocationTime().getTime() + lastSeenMaxTime) < System.currentTimeMillis())
 				&& user.getStatLocationKey() != null) {
 			// Then we set the user at the auto localization place for him being
 			// counted
 			searchItem.setCurrentPlace(user.getStatLocationKey().toString());
-			searchItem.setCurrentPlaceTimeout(System.currentTimeMillis()
-					+ lastSeenMaxTime);
+			searchItem.setCurrentPlaceTimeout(System.currentTimeMillis() + lastSeenMaxTime);
 		}
 
 		// Availability
-		searchItem.setAvailable(user.getPushDeviceId() != null
-				&& !user.getPushDeviceId().isEmpty());
+		searchItem.setAvailable(user.getPushDeviceId() != null && !user.getPushDeviceId().isEmpty());
 
 		// Storing
 		try {
@@ -704,8 +657,7 @@ public class SolrSearchPersistenceServiceImpl implements
 				searchItem.setCountryId(country.getKey().toString());
 			}
 			if (country.getContinent() != null) {
-				searchItem.setContinentId(country.getContinent().getKey()
-						.toString());
+				searchItem.setContinentId(country.getContinent().getKey().toString());
 			}
 		}
 
@@ -713,8 +665,7 @@ public class SolrSearchPersistenceServiceImpl implements
 
 	@Override
 	public void updateUserOnlineStatus(User user) throws SearchException {
-		final UserSearchItemImpl solrUser = getSearchItem(userSolrServer,
-				user.getKey(), UserSearchItemImpl.class);
+		final UserSearchItemImpl solrUser = getSearchItem(userSolrServer, user.getKey(), UserSearchItemImpl.class);
 		if (solrUser != null) {
 			// Updating timeout
 			solrUser.setOnlineTimeout(user.getOnlineTimeout());
@@ -736,16 +687,13 @@ public class SolrSearchPersistenceServiceImpl implements
 			if (lastLocationTime == null) {
 				lastLocationTime = new Date();
 			}
-			final long lastSeenDate = System.currentTimeMillis()
-					- lastLocationTime.getTime();
+			final long lastSeenDate = System.currentTimeMillis() - lastLocationTime.getTime();
 
 			solrUser.setCurrentAutoPlace(null);
 			solrUser.setCurrentPlaceTimeout(0);
-			if (user.getLastLocationKey() != null
-					&& lastSeenDate < lastSeenMaxTime) {
+			if (user.getLastLocationKey() != null && lastSeenDate < lastSeenMaxTime) {
 				solrUser.setCurrentPlace(user.getLastLocationKey().toString());
-				solrUser.setCurrentPlaceTimeout(user.getLastLocationTime()
-						.getTime() + lastSeenMaxTime);
+				solrUser.setCurrentPlaceTimeout(user.getLastLocationTime().getTime() + lastSeenMaxTime);
 			} else {
 				// If current last location is expired or not existing and we
 				// have an automatic localization
@@ -767,9 +715,7 @@ public class SolrSearchPersistenceServiceImpl implements
 					fillLocalization(solrUser, city);
 				}
 			} catch (CalException e) {
-				log.error(
-						"Unable to get city information for user addition, skipping: "
-								+ e.getMessage(), e);
+				log.error("Unable to get city information for user addition, skipping: " + e.getMessage(), e);
 			}
 
 			// Saving bean back to solr
@@ -782,11 +728,9 @@ public class SolrSearchPersistenceServiceImpl implements
 			server.addBean(item);
 			server.commit();
 		} catch (SolrServerException e) {
-			throw new SearchException("Cannot update user in SOLR: "
-					+ e.getMessage(), e);
+			throw new SearchException("Cannot update user in SOLR: " + e.getMessage(), e);
 		} catch (IOException e) {
-			throw new SearchException("Cannot update user in SOLR: "
-					+ e.getMessage(), e);
+			throw new SearchException("Cannot update user in SOLR: " + e.getMessage(), e);
 		}
 	}
 
@@ -808,11 +752,9 @@ public class SolrSearchPersistenceServiceImpl implements
 			try {
 				server.deleteByQuery("*:*");
 			} catch (IOException e) {
-				throw new SearchException(
-						"Unable to delete: " + e.getMessage(), e);
+				throw new SearchException("Unable to delete: " + e.getMessage(), e);
 			} catch (SolrServerException e) {
-				throw new SearchException(
-						"Unable to delete: " + e.getMessage(), e);
+				throw new SearchException("Unable to delete: " + e.getMessage(), e);
 			}
 
 		}
@@ -824,8 +766,7 @@ public class SolrSearchPersistenceServiceImpl implements
 	}
 
 	private Collection<String> getNameWithAlternates(String name, CalmObject o) {
-		final List<? extends AlternateName> alternateNames = o
-				.get(AlternateName.class);
+		final List<? extends AlternateName> alternateNames = o.get(AlternateName.class);
 		final Set<String> names = new HashSet<String>();
 		names.add(name);
 		for (AlternateName alternateName : alternateNames) {
@@ -839,8 +780,7 @@ public class SolrSearchPersistenceServiceImpl implements
 		storeSuggest(itemKey, knownNames, city, null);
 	}
 
-	public void storeSuggest(ItemKey itemKey, List<String> knownNames,
-			City city, Date expirationDate) {
+	public void storeSuggest(ItemKey itemKey, List<String> knownNames, City city, Date expirationDate) {
 
 		final SearchTextItemImpl item = new SearchTextItemImpl();
 		item.setId(itemKey.toString());
@@ -848,17 +788,15 @@ public class SolrSearchPersistenceServiceImpl implements
 		item.setType(itemKey.getType());
 		item.setExpirationTime(expirationDate);
 		if (city != null) {
-			final Collection<String> cityNames = getNameWithAlternates(
-					city.getName(), city);
+			final Collection<String> cityNames = getNameWithAlternates(city.getName(), city);
 			item.setCityName(cityNames);
 			if (city.getAdm1() != null) {
-				final Collection<String> stateNames = getNameWithAlternates(
-						city.getAdm1().getName(), city.getAdm1());
+				final Collection<String> stateNames = getNameWithAlternates(city.getAdm1().getName(), city.getAdm1());
 				item.setStateName(stateNames);
 			}
 			if (city.getCountry() != null) {
-				final Collection<String> countryNames = getNameWithAlternates(
-						city.getCountry().getName(), city.getCountry());
+				final Collection<String> countryNames = getNameWithAlternates(city.getCountry().getName(),
+						city.getCountry());
 				item.setCountryName(countryNames);
 			}
 		}
@@ -866,20 +804,16 @@ public class SolrSearchPersistenceServiceImpl implements
 			suggestSolrServer.addBean(item);
 			suggestSolrServer.commit();
 		} catch (IOException e) {
-			throw new SearchException("Unable to store suggest for " + itemKey
-					+ " : " + e.getMessage());
+			throw new SearchException("Unable to store suggest for " + itemKey + " : " + e.getMessage());
 		} catch (SolrServerException e) {
-			throw new SearchException("Unable to store suggest for " + itemKey
-					+ " : " + e.getMessage());
+			throw new SearchException("Unable to store suggest for " + itemKey + " : " + e.getMessage());
 		}
 	}
 
 	@Override
-	public void addBooster(CalmObject object, Date endDate, int boostFactor)
-			throws SearchException {
+	public void addBooster(CalmObject object, Date endDate, int boostFactor) throws SearchException {
 		if (object instanceof Place) {
-			PlaceSearchItemImpl placeItem = getSearchItem(placesSolrServer,
-					object.getKey(), PlaceSearchItemImpl.class);
+			PlaceSearchItemImpl placeItem = getSearchItem(placesSolrServer, object.getKey(), PlaceSearchItemImpl.class);
 			if (placeItem != null) {
 				placeItem.setAdBoostEndDate(endDate);
 				placeItem.setAdBoostValue(boostFactor);
@@ -887,9 +821,8 @@ public class SolrSearchPersistenceServiceImpl implements
 				return;
 			}
 		}
-		throw new SearchException(
-				"Cannot boost non-place element or place not found for item "
-						+ (object == null ? "null" : object.getKey()));
+		throw new SearchException("Cannot boost non-place element or place not found for item "
+				+ (object == null ? "null" : object.getKey()));
 	}
 
 	public void setLastSeenMaxTime(long lastSeenMaxTime) {

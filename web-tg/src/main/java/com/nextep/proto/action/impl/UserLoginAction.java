@@ -79,12 +79,16 @@ public class UserLoginAction extends AbstractAction implements CookieProvider, J
 	protected String doExecute() throws Exception {
 		final UsersService usersService = (UsersService) getUsersService();
 		getHeaderSupport().initialize(getLocale(), null, null, null);
-		if (email != null && !"".equals(email.trim())) {
+		if ((email != null && !"".equals(email.trim())) || getNxtpUserToken() != null) {
 			try {
-				ContextHolder.toggleWrite();
-				user = usersService.login(email, password, pushDeviceId, pushProvider, deviceInfo);
-				searchService.updateUserOnlineStatus(user);
-				if (user != null) {
+				String token = getNxtpUserToken();
+				if (email != null && !email.isEmpty()) {
+					ContextHolder.toggleWrite();
+					user = usersService.login(email, password, pushDeviceId, pushProvider, deviceInfo);
+					searchService.updateUserOnlineStatus(user);
+					token = user.getToken();
+				}
+				if (token != null) {
 					if (isMobileService) {
 
 						// Checking on our read replica that we can login with
@@ -105,8 +109,7 @@ public class UserLoginAction extends AbstractAction implements CookieProvider, J
 							}
 							// Building user criterion
 							final ApisCriterion userCriterion = (ApisCriterion) currentUserSupport
-									.createApisCriterionFor(user.getToken(), false).with(Description.class)
-									.with(Tag.class)
+									.createApisCriterionFor(token, false).with(Description.class).with(Tag.class)
 									.addCriterion((ApisCriterion) SearchRestriction
 											.with(Subscription.class,
 													AdvertisingRequestTypes.USER_CURRENT_SUBSCRIPTIONS)
