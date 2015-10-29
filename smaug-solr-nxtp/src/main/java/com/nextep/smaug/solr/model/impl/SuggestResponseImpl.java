@@ -32,15 +32,13 @@ public class SuggestResponseImpl implements SearchTextResponse {
 	 * @param itemCount
 	 *            The number of founded items
 	 */
-	public SuggestResponseImpl(List<SearchItem> items,
-			SearchTextSettings settings, SearchWindow window,
+	public SuggestResponseImpl(List<SearchItem> items, SearchTextSettings settings, SearchWindow window,
 			final int itemCount) {
 		this.items = items;
 		this.settings = settings;
 
 		if (window != null) {
-			this.window = new SearchWindowResponseImpl(window.getPageNumber(),
-					window.getItemsPerPage(), itemCount);
+			this.window = new SearchWindowResponseImpl(window.getPageNumber(), window.getItemsPerPage(), itemCount);
 		}
 	}
 

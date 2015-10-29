@@ -114,7 +114,7 @@
 		</div>
 		<div class="col-xs-24 col-sm-12 col-md-8">
 			<div class="hp logo">
-				<a href="<s:property value="#homeUrl"/>"><img class="logo-icon" alt="PELMEL Guide" src="/images/V2/web-logo-pelmel-3.png"/></a>
+				<a href="<s:property value="#homeUrl"/>"><img class="logo-icon" alt="PELMEL Guide" src="/images/V3/web-logo-pelmel-4.png"/></a>
 			</div>
 			<div class="row hp-social-bar">
 				<div class="col-xs-8 social-link text-right">

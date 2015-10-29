@@ -15,12 +15,12 @@
     <link href="/styles/slider.min.css" rel="stylesheet" type="text/css" media="all"/>
     <link href="/styles/tg-main.css" rel="stylesheet" type="text/css" media="all"/>
     <!-- endbuild -->
-    <link rel="stylesheet" href="<s:property value="getStaticUrl('/images/favicon.ico?v=5')"/>" />
-    <link rel="icon" type="image/png" href="<s:property value="getStaticUrl('/images/favicon-32x32.png')"/>" sizes="32x32">
-	<link rel="icon" type="image/png" href="<s:property value="getStaticUrl('/images/android-chrome-192x192.png')"/>" sizes="192x192">
-	<link rel="icon" type="image/png" href="<s:property value="getStaticUrl('/images/favicon-96x96.png')"/>" sizes="96x96">
-	<link rel="icon" type="image/png" href="<s:property value="getStaticUrl('/images/favicon-16x16.png')"/>" sizes="16x16">
-	<link rel="shortcut icon" href="<s:property value="getStaticUrl('/images/favicon.ico?v=5')"/>">
+    <link rel="stylesheet" href="<s:property value="getStaticUrl('/images/favicon.ico?v=7')"/>" />
+    <link rel="icon" type="image/png" href="<s:property value="getStaticUrl('/images/favicon-32x32.png?v=1')"/>" sizes="32x32">
+	<link rel="icon" type="image/png" href="<s:property value="getStaticUrl('/images/android-chrome-192x192.png?v=1')"/>" sizes="192x192">
+	<link rel="icon" type="image/png" href="<s:property value="getStaticUrl('/images/favicon-96x96.png?v=1')"/>" sizes="96x96">
+	<link rel="icon" type="image/png" href="<s:property value="getStaticUrl('/images/favicon-16x16.png?v=1')"/>" sizes="16x16">
+	<link rel="shortcut icon" href="<s:property value="getStaticUrl('/images/favicon.ico?v=7')"/>">
     <tiles:insertAttribute name="header"/>
     <!--[if lt IE 9]>
 	  <script src="http://static.pelmelguide.com/js/html5shiv.js"></script>
@@ -73,19 +73,9 @@
 					</ul>
 				</li>
 			</ul>
-			<s:if test="!isHomePage()">
-				<ul class="hidden-xs hidden-sm col-md-6 nav navbar-nav">
-					<li class="right"><a class="pelmel-slogan" href="/"><s:text name="pelmel.slogan" /></a></li>
-				</ul>
-			</s:if>
-			<div class="hidden-xs col-sm-11 <s:property value="!isHomePage() ? 'col-md-7' : 'hidden-md hidden-lg'"/>">
-				<tiles:insertTemplate template="/jsp/blocks/search-field.jsp"/>
+			<div class="hidden-xs hidden-sm col-md-13 nav-title nav navbar-nav">
+				<a class="pelmel-slogan" href="#"><s:text name="homepage.sentence.4"/></a>
 			</div>
-			<s:if test="isHomePage()">
-				<div class="hidden-xs hidden-sm col-md-13 nav-title nav navbar-nav">
-					<a class="pelmel-slogan" href="#"><s:text name="homepage.sentence.4"/></a>
-				</div>
-			</s:if>
 			
 			
 			<s:if test="logged">
@@ -117,7 +107,7 @@
 	<div class="row <tiles:insertAttribute name="left-style"/>">
 		<div class="hidden-sm hidden-xs left-col col-md-5 margin-span5-first">
 			<div class="margin-span5-first logo">
-				<a href="<s:property value="#homeUrl"/>"><img class="logo-icon" alt="PELMEL Guide" src="/images/V2/web-logo-pelmel-3.png"/></a>
+				<a href="<s:property value="#homeUrl"/>"><img class="logo-icon" alt="PELMEL Guide" src="/images/V3/web-logo-pelmel-4.png"/></a>
 			</div>
 			<div class="row hp-social-bar">
 				<div class="col-xs-8 social-link text-right">

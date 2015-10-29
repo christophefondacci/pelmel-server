@@ -413,10 +413,30 @@ public final class SearchRestriction {
 		return searchFromText(itemType, Arrays.asList(scopes), text, itemsCount);
 	}
 
+	/**
+	 * @deprecated please use the version without itemsCount and use paginatedBy
+	 *             on it
+	 * @param itemType
+	 * @param scopes
+	 * @param text
+	 * @param itemsCount
+	 * @return
+	 */
+	@Deprecated
 	public static WithCriterion searchFromText(final Class<? extends CalmObject> itemType,
 			final List<SuggestScope> scopes, final String text, final int itemsCount) {
+		final WithCriterion searchCrit = searchFromText(itemType, scopes, text);
+		searchCrit.paginatedBy(itemsCount, 0);
+		return searchCrit;
+	}
+
+	public static WithCriterion searchFromText(final Class<? extends CalmObject> itemType,
+			final List<SuggestScope> scopes, final String text) {
+
 		final String type = ApisRegistry.getTypeFromModel(itemType);
-		return new SearchTextCriterionImpl(type, scopes, text, itemsCount);
+		final SearchTextCriterionImpl crit = new SearchTextCriterionImpl(type, scopes, text);
+
+		return crit;
 	}
 
 	public static SearchCriterion searchAll(Class<? extends CalmObject> itemType, SearchScope scope, int pageSize,

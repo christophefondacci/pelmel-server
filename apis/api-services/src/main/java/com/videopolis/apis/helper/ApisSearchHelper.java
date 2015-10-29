@@ -17,6 +17,7 @@ import com.videopolis.smaug.model.FacetCount;
 import com.videopolis.smaug.model.SearchItem;
 import com.videopolis.smaug.model.SearchResponse;
 import com.videopolis.smaug.model.SearchWindowResponse;
+import com.videopolis.smaug.model.WindowedResponse;
 
 /**
  * This class provides common helper methods which perform some action related
@@ -42,18 +43,14 @@ public final class ApisSearchHelper {
 	 * @throws ApisException
 	 *             whenever we experienced problems while registering facet info
 	 */
-	public static void fillFacettingInformation(ApiMutableResponse apiResponse,
-			SearchResponse searchResponse) throws ApisException {
-		final Map<FacetCategory, List<FacetCount>> facetCountsMap = searchResponse
-				.getFacetsMap();
+	public static void fillFacettingInformation(ApiMutableResponse apiResponse, SearchResponse searchResponse)
+			throws ApisException {
+		final Map<FacetCategory, List<FacetCount>> facetCountsMap = searchResponse.getFacetsMap();
 		if (facetCountsMap != null && !facetCountsMap.isEmpty()) {
-			final FacetInformationImpl facetInfo = new FacetInformationImpl(
-					facetCountsMap);
-			facetInfo.setFacetFilters(searchResponse.getSearchSettings()
-					.getFilters());
+			final FacetInformationImpl facetInfo = new FacetInformationImpl(facetCountsMap);
+			facetInfo.setFacetFilters(searchResponse.getSearchSettings().getFilters());
 
-			apiResponse.setFacetInformation(searchResponse.getSearchSettings()
-					.getSearchScope(), facetInfo);
+			apiResponse.setFacetInformation(searchResponse.getSearchSettings().getSearchScope(), facetInfo);
 		}
 	}
 
@@ -71,13 +68,10 @@ public final class ApisSearchHelper {
 	 * @param alias
 	 *            the alias of the criterion which provides this information
 	 */
-	public static void fillPaginationInformation(
-			ApiMutableResponse apiResponse, SearchResponse searchResponse,
+	public static void fillPaginationInformation(ApiMutableResponse apiResponse, WindowedResponse searchResponse,
 			String itemType, String alias) {
-		final SearchWindowResponse windowResponse = searchResponse
-				.getSearchWindow();
-		final PaginationInfo paginationResponse = new PaginationInfoAdapter(
-				windowResponse);
+		final SearchWindowResponse windowResponse = searchResponse.getSearchWindow();
+		final PaginationInfo paginationResponse = new PaginationInfoAdapter(windowResponse);
 		if (alias == null) {
 			apiResponse.setPaginationInfo(itemType, paginationResponse);
 		} else {
@@ -85,8 +79,8 @@ public final class ApisSearchHelper {
 		}
 	}
 
-	public static void fillPaginationInformation(ApiMutableResponse response,
-			ApisCriterion crit, PaginationInfo paginationInfo) {
+	public static void fillPaginationInformation(ApiMutableResponse response, ApisCriterion crit,
+			PaginationInfo paginationInfo) {
 		if (crit instanceof Aliasable<?>) {
 			final String alias = ((Aliasable<?>) crit).getAlias();
 			if (alias != null && !"".equals(alias)) {

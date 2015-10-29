@@ -11,34 +11,28 @@ import com.videopolis.smaug.common.model.FacetCategory;
  * @author julien
  * 
  */
-public interface SearchResponse {
+public interface SearchResponse extends WindowedResponse {
 
-    /**
-     * Returns the list of items this query found
-     * 
-     * @return Items
-     */
-    List<? extends SearchItem> getItems();
+	/**
+	 * Returns the list of items this query found
+	 * 
+	 * @return Items
+	 */
+	List<? extends SearchItem> getItems();
 
-    /**
-     * Returns the facets this query found
-     * 
-     * @return a map containing a list of {@link FacetCount} hashed by their
-     *         corresponding {@link FacetCategory}
-     */
-    Map<FacetCategory, List<FacetCount>> getFacetsMap();
+	/**
+	 * Returns the facets this query found
+	 * 
+	 * @return a map containing a list of {@link FacetCount} hashed by their
+	 *         corresponding {@link FacetCategory}
+	 */
+	Map<FacetCategory, List<FacetCount>> getFacetsMap();
 
-    /**
-     * Returns the settings used to issue the request
-     * 
-     * @return Settings
-     */
-    SearchSettings getSearchSettings();
+	/**
+	 * Returns the settings used to issue the request
+	 * 
+	 * @return Settings
+	 */
+	SearchSettings getSearchSettings();
 
-    /**
-     * Returns information about pagination of the results
-     * 
-     * @return Pagination window
-     */
-    SearchWindowResponse getSearchWindow();
 }

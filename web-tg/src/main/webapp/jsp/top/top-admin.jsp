@@ -38,6 +38,9 @@
 						<option value="DESC" <s:property value="'DESC'.equals(sortDirection) ? 'selected' : ''"/>>DESC</option>
 					</select>
 				</div>
+				<div class="form-group">
+					<input class="form-control" id="searchTerm" name="searchTerm" placeholder="Name, city, country" value="<s:property value="searchTerm"/>">
+				</div>
 				<button class="btn btn-primary">Refresh</button>
 			</form>
 			<s:set value="searchSupport" var="search"/>
@@ -56,7 +59,7 @@
 						<tr><td>
 							<img src="<s:property value="#search.getResultMiniThumbUrl(#place)"/>">
 						</td>
-						<td><a href="<s:property value="#urlService.getOverviewUrl('mainContent',#place)"/>"><s:property value="#place.name"/></a></td>
+						<td><a href="<s:property value="#urlService.getOverviewUrl('mainContent',#place)"/>"><s:property value="getHtmlName(#place)" escapeHtml="false"/></a></td>
 						<td class="center"><s:property value="#place.getPlaceType()"/></td>
 						<td class="center"><s:if test="#place.online"><img class="admin-icon" src="/images/V3/check.png"></s:if><s:else><img class="admin-icon" src="/images/V3/delete.png"></s:else></td>
 						<td class="center"><s:if test="#place.indexed"><img class="admin-icon" src="/images/V3/check.png"></s:if><s:else><img class="admin-icon" src="/images/V3/delete.png"></s:else></td>

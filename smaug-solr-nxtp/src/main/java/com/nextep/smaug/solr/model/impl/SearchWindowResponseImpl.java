@@ -26,8 +26,7 @@ public class SearchWindowResponseImpl implements SearchWindowResponse {
 	 * @param itemCount
 	 *            The total number of items to set
 	 */
-	public SearchWindowResponseImpl(int pageNumber, int itemPerPage,
-			int itemCount) {
+	public SearchWindowResponseImpl(int pageNumber, int itemPerPage, int itemCount) {
 		this.pageNumber = pageNumber;
 		this.itemPerPage = itemPerPage;
 		this.itemCount = itemCount;

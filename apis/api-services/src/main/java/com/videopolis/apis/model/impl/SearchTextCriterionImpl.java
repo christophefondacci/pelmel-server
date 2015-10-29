@@ -23,7 +23,6 @@ public class SearchTextCriterionImpl extends AbstractWithCriterion {
 	private final List<SuggestScope> scopes;
 	private final String searchedText;
 	private final String itemType;
-	private final int itemsCount;
 
 	/**
 	 * Creates a new search text criterion from information provided
@@ -35,20 +34,16 @@ public class SearchTextCriterionImpl extends AbstractWithCriterion {
 	 * @param text
 	 *            the text to search for
 	 */
-	public SearchTextCriterionImpl(String itemType, List<SuggestScope> scopes,
-			String text, int itemsCount) {
+	public SearchTextCriterionImpl(String itemType, List<SuggestScope> scopes, String text) {
 		this.itemType = itemType;
 		this.scopes = scopes;
 		this.searchedText = text;
-		this.itemsCount = itemsCount;
 	}
 
 	@Override
-	public Task<ItemsResponse> getTask(CriteriaContainer parent,
-			ApisContext context, CalmObject... parentObjects)
+	public Task<ItemsResponse> getTask(CriteriaContainer parent, ApisContext context, CalmObject... parentObjects)
 			throws ApisException {
-		final SearchTextTask task = new SearchTextTask(itemType, scopes,
-				searchedText, itemsCount, context);
+		final SearchTextTask task = new SearchTextTask(itemType, scopes, searchedText, getPagination(), context);
 		task.setSorters(getSorters());
 		return task;
 	}

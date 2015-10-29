@@ -6,7 +6,11 @@ import java.util.List;
 
 import com.videopolis.apis.concurrent.base.AbstractApisTask;
 import com.videopolis.apis.helper.ApisRegistry;
+import com.videopolis.apis.helper.ApisSearchHelper;
+import com.videopolis.apis.model.Aliasable;
 import com.videopolis.apis.model.ApisContext;
+import com.videopolis.apis.model.ApisCriterion;
+import com.videopolis.apis.model.PaginationSettings;
 import com.videopolis.apis.model.SearchStatistic;
 import com.videopolis.apis.model.impl.SearchStatisticImpl;
 import com.videopolis.apis.service.ApiMutableResponse;
@@ -37,7 +41,7 @@ public class SearchTextTask extends AbstractApisTask {
 	private final List<SuggestScope> scopes;
 	private final String searchedText;
 	private final ApisContext apisContext;
-	private final int itemsCount;
+	private final PaginationSettings pagination;
 	private List<Sorter> sorters = Collections.emptyList();
 
 	/**
@@ -53,13 +57,12 @@ public class SearchTextTask extends AbstractApisTask {
 	 * @param apisContext
 	 *            the current apisContext
 	 */
-	public SearchTextTask(final String calType,
-			final List<SuggestScope> scopes, final String searchedText,
-			final int itemsCount, final ApisContext apisContext) {
+	public SearchTextTask(final String calType, final List<SuggestScope> scopes, final String searchedText,
+			final PaginationSettings pagination, final ApisContext apisContext) {
 		this.calType = calType;
 		this.scopes = scopes;
 		this.searchedText = searchedText;
-		this.itemsCount = itemsCount;
+		this.pagination = pagination;
 		this.apisContext = apisContext;
 	}
 
@@ -67,12 +70,10 @@ public class SearchTextTask extends AbstractApisTask {
 	protected ItemsResponse doExecute(final TaskExecutionContext context)
 			throws TaskExecutionException, InterruptedException {
 		final SearchService searchService = apisContext.getSearchService();
-		final SearchTextSettings textSettings = SearchFactory
-				.createSuggestSettings(scopes, sorters);
-		final SearchWindow window = SearchFactory.createSearchWindow(
-				itemsCount, 0);
-		final SearchTextResponse response = searchService.searchText(
-				searchedText, textSettings, window);
+		final SearchTextSettings textSettings = SearchFactory.createSuggestSettings(scopes, sorters);
+		final SearchWindow window = SearchFactory.createSearchWindow(pagination.getItemsByPage(),
+				pagination.getPageOffset());
+		final SearchTextResponse response = searchService.searchText(searchedText, textSettings, window);
 		final CalService calService = ApisRegistry.getCalService(calType);
 		// Unwrapping items and extracting matched information
 		final List<SearchItem> items = response.getItems();
@@ -81,12 +82,22 @@ public class SearchTextTask extends AbstractApisTask {
 		for (final SearchItem item : items) {
 			final ItemKey itemKey = item.getKey();
 			keys.add(itemKey);
-			apiResponse.setStatistic(itemKey, new SearchStatisticImpl(
-					SearchStatistic.MATCHED_TEXT, item.getMatchedText()));
+			apiResponse.setStatistic(itemKey,
+					new SearchStatisticImpl(SearchStatistic.MATCHED_TEXT, item.getMatchedText()));
 		}
+		// Extracting alias to fill pagination info for this alias
+		String alias = null;
+		final ApisCriterion criterion = getCriterion();
+		if (criterion instanceof Aliasable<?>) {
+			alias = ((Aliasable<?>) criterion).getAlias();
+		}
+		// Filling pagination information
+		final ApiMutableResponse apisResponse = apisContext.getApiResponse();
+		ApisSearchHelper.fillPaginationInformation(apisResponse, response, calType, alias);
+
 		// Fetching sub-elements
-		final Task<ItemsResponse> getItemsTask = new GetCalItemsTask(
-				calService, apisContext, keys.toArray(new ItemKey[keys.size()]));
+		final Task<ItemsResponse> getItemsTask = new GetCalItemsTask(calService, apisContext,
+				keys.toArray(new ItemKey[keys.size()]));
 		return getItemsTask.execute(context);
 	}
 

@@ -9,11 +9,11 @@ package com.videopolis.smaug.model;
  */
 public interface SearchWindowResponse extends SearchWindow {
 
-    /**
-     * Returns the count of all the items found in the result
-     * 
-     * @return Item count
-     */
-    int getItemCount();
+	/**
+	 * Returns the count of all the items found in the result
+	 * 
+	 * @return Item count
+	 */
+	int getItemCount();
 
 }

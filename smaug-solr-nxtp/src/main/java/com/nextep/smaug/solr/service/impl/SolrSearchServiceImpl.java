@@ -84,13 +84,10 @@ public class SolrSearchServiceImpl implements SearchService {
 	private static final String GEO_FIELD = "latlon";
 	private static final String SFIELD = "sfield";
 
-	private static final DateFormat EVENT_DATE_FORMAT = new SimpleDateFormat(
-			"yyyyMMddHHmmss");
-	private static final DateFormat USERS_DATE_FORMAT = new SimpleDateFormat(
-			"yyyyMMddHHmmss");
+	private static final DateFormat EVENT_DATE_FORMAT = new SimpleDateFormat("yyyyMMddHHmmss");
+	private static final DateFormat USERS_DATE_FORMAT = new SimpleDateFormat("yyyyMMddHHmmss");
 
-	private final static Log log = LogFactory
-			.getLog(SolrSearchServiceImpl.class);
+	private final static Log log = LogFactory.getLog(SolrSearchServiceImpl.class);
 	private String userSolrUrl;
 	private String placesSolrUrl;
 	private String eventsSolrUrl;
@@ -121,16 +118,15 @@ public class SolrSearchServiceImpl implements SearchService {
 	}
 
 	@Override
-	public SearchResponse searchNear(Localized point, double radius,
-			SearchSettings settings, SearchWindow window) {
+	public SearchResponse searchNear(Localized point, double radius, SearchSettings settings, SearchWindow window) {
 		final SolrQuery query = queryBuilder.buildQuery(settings, window);
 		// Building the query string
 		if (query.getQuery() == null || query.getQuery().equals("")) {
 			query.setQuery("*:*");
 		}
 		query.addFilterQuery(GEO_QUERY_TYPE);
-		query.setParam(POINT_PARAMETER, String.valueOf(point.getLatitude())
-				+ "," + String.valueOf(point.getLongitude()));
+		query.setParam(POINT_PARAMETER,
+				String.valueOf(point.getLatitude()) + "," + String.valueOf(point.getLongitude()));
 		// query.setParam(LATITUDE_PARAMETER,
 		// String.valueOf(point.getLatitude()));
 		// query.setParam(LONGITUDE_PARAMETER,
@@ -182,8 +178,7 @@ public class SolrSearchServiceImpl implements SearchService {
 			}
 			query.addSort("activityDate", ORDER.desc);
 			// query.addSortField(DISTANCE_FIELD, SolrQuery.ORDER.asc);
-			return processSolrQuery(activitiesSolrServer, query, settings,
-					window);
+			return processSolrQuery(activitiesSolrServer, query, settings, window);
 		} else if (settings.getSearchScope() == SearchScope.CITY) {
 			query.addSort(DISTANCE_FIELD, SolrQuery.ORDER.asc);
 			return processSolrQuery(citiesSolrServer, query, settings, window);
@@ -199,11 +194,9 @@ public class SolrSearchServiceImpl implements SearchService {
 			final Date now = new Date();
 			final String nowTimeStr = USERS_DATE_FORMAT.format(now);
 			if (settings.getSearchScope() == SearchScope.USERS_ONLINE) {
-				query.setQuery("onlineTimeout:[" + nowTimeStr
-						+ " TO *] OR available:1");
+				query.setQuery("onlineTimeout:[" + nowTimeStr + " TO *] OR available:1");
 			} else if (settings.getSearchScope() == SearchScope.USERS_OFFLINE) {
-				query.setQuery("onlineTimeout:[* TO " + nowTimeStr
-						+ "] AND available:0");
+				query.setQuery("onlineTimeout:[* TO " + nowTimeStr + "] AND available:0");
 			}
 			query.addSort(DISTANCE_FIELD, SolrQuery.ORDER.asc);
 			return processSolrQuery(userSolrServer, query, settings, window);
@@ -211,8 +204,7 @@ public class SolrSearchServiceImpl implements SearchService {
 	}
 
 	@Override
-	public SearchResponse searchIn(ItemKey parent, SearchSettings settings,
-			SearchWindow window) {
+	public SearchResponse searchIn(ItemKey parent, SearchSettings settings, SearchWindow window) {
 		final SolrQuery query = queryBuilder.buildQuery(settings, window);
 		// Building the query string
 		final StringBuilder buf = new StringBuilder();
@@ -222,33 +214,28 @@ public class SolrSearchServiceImpl implements SearchService {
 		} else if (City.CAL_ID.equals(keyType)) {
 			buf.append("cityId:" + parent.toString());
 		} else if (Admin.CAL_ID.equals(keyType)) {
-			buf.append("(adm1:" + parent.toString() + " OR adm2:"
-					+ parent.toString() + ")");
+			buf.append("(adm1:" + parent.toString() + " OR adm2:" + parent.toString() + ")");
 		} else if (Country.CAL_ID.equals(keyType)) {
 			buf.append("countryId:" + parent.toString());
 		} else if (Place.CAL_TYPE.equals(keyType)) {
 			switch (settings.getSearchScope()) {
 			case NEARBY_BLOCK:
 				// Nearby block is the scope for search of users IN a place
-				buf.append("currentPlaceTimeout:[" + System.currentTimeMillis()
-						+ " TO *]");
+				buf.append("currentPlaceTimeout:[" + System.currentTimeMillis() + " TO *]");
 				buf.append(" AND currentPlace:" + parent.toString());
 				break;
 			case USER_LOCALIZATION:
 				// USER_LOCALIZATION block is the scope for search of users IN a
 				// place through auto localization
-				buf.append("currentPlaceTimeout:[" + System.currentTimeMillis()
-						+ " TO *]");
+				buf.append("currentPlaceTimeout:[" + System.currentTimeMillis() + " TO *]");
 				buf.append(" AND currentAutoPlace:" + parent.toString());
 				break;
 			default:
 				buf.append("places:" + parent.toString());
 			}
-		} else if (Event.CAL_ID.equals(keyType)
-				|| EventSeries.SERIES_CAL_ID.equals(keyType)) {
+		} else if (Event.CAL_ID.equals(keyType) || EventSeries.SERIES_CAL_ID.equals(keyType)) {
 			buf.append("events:" + parent.toString());
-		} else if (User.CAL_TYPE.equals(keyType)
-				&& User.CAL_TYPE.equals(settings.getReturnedType())) {
+		} else if (User.CAL_TYPE.equals(keyType) && User.CAL_TYPE.equals(settings.getReturnedType())) {
 			buf.append("users:" + parent.toString());
 		} else {
 			buf.append("continentId:" + parent.toString());
@@ -277,8 +264,7 @@ public class SolrSearchServiceImpl implements SearchService {
 
 		// Targetting the Solr server
 		SolrClient solrServer = userSolrServer;
-		if (settings.getSearchScope() == SearchScope.POI
-				|| Place.CAL_TYPE.equals(settings.getReturnedType())) {
+		if (settings.getSearchScope() == SearchScope.POI || Place.CAL_TYPE.equals(settings.getReturnedType())) {
 			solrServer = placesSolrServer;
 			// Optional SEO filter
 			if (filterSeo) {
@@ -298,8 +284,7 @@ public class SolrSearchServiceImpl implements SearchService {
 	}
 
 	@Override
-	public SearchTextResponse searchText(String textToSearch,
-			SearchTextSettings settings, SearchWindow window) {
+	public SearchTextResponse searchText(String textToSearch, SearchTextSettings settings, SearchWindow window) {
 		final StringBuilder buf = new StringBuilder();
 		if (settings.getSuggestScope().contains(SuggestScope.GEO_FULLTEXT)) {
 			textToSearch = textToSearch.replaceAll(" ", " AND ");
@@ -322,8 +307,7 @@ public class SolrSearchServiceImpl implements SearchService {
 			buf.append(separator + "(type:" + Event.CAL_ID);
 			// Filtering unexpired events (i.e. keeping only events in the
 			// future)
-			buf.append(" AND expirationTime:[" + System.currentTimeMillis()
-					+ " TO *])");
+			buf.append(" AND expirationTime:[" + System.currentTimeMillis() + " TO *])");
 			separator = " OR ";
 		}
 		if (settings.getSuggestScope().contains(SuggestScope.USER)) {
@@ -344,13 +328,11 @@ public class SolrSearchServiceImpl implements SearchService {
 		QueryResponse response;
 		try {
 			response = suggestSolrServer.query(query);
-			final List<SearchTextItemImpl> items = response
-					.getBeans(SearchTextItemImpl.class);
+			final List<SearchTextItemImpl> items = response.getBeans(SearchTextItemImpl.class);
 			// Unwrapping highlights
 			for (SearchTextItemImpl item : items) {
 				if (response.getHighlighting() != null) {
-					Map<String, List<String>> highlights = response
-							.getHighlighting().get(item.getKey().toString());
+					Map<String, List<String>> highlights = response.getHighlighting().get(item.getKey().toString());
 					if (highlights != null) {
 						final List<String> snippets = highlights.get("name");
 						if (snippets != null && !snippets.isEmpty()) {
@@ -360,12 +342,9 @@ public class SolrSearchServiceImpl implements SearchService {
 				}
 			}
 			// Builds response and returns
-			return new SuggestResponseImpl((List) items, settings, window,
-					items.size());
+			return new SuggestResponseImpl((List) items, settings, window, (int) response.getResults().getNumFound());
 		} catch (SolrServerException | IOException e) {
-			throw new SearchException(
-					"Unable to complete suggest SOLR query : " + e.getMessage(),
-					e);
+			throw new SearchException("Unable to complete suggest SOLR query : " + e.getMessage(), e);
 		}
 	}
 
@@ -393,9 +372,7 @@ public class SolrSearchServiceImpl implements SearchService {
 				// A week = 60 x 60 x 24 x 7 x 1000 millis
 				final Calendar cal = Calendar.getInstance();
 				cal.add(Calendar.DAY_OF_YEAR, -7);
-				final long lastWeekDate = Long
-						.valueOf(ActivitySearchItemImpl.DATE_FORMAT.format(cal
-								.getTime()));
+				final long lastWeekDate = Long.valueOf(ActivitySearchItemImpl.DATE_FORMAT.format(cal.getTime()));
 				queryBuf.append("activityDate:[" + lastWeekDate + " TO *]");
 				prefix = " AND ";
 			}
@@ -405,8 +382,7 @@ public class SolrSearchServiceImpl implements SearchService {
 			// Getting current time
 			final long currentTime = System.currentTimeMillis();
 			// Restricting SOLR query to get users
-			queryBuf.append(prefix + "currentPlaceTimeout: [" + currentTime
-					+ " TO *]");
+			queryBuf.append(prefix + "currentPlaceTimeout: [" + currentTime + " TO *]");
 			prefix = " AND ";
 		}
 		// Adding optional SEO filter
@@ -419,19 +395,17 @@ public class SolrSearchServiceImpl implements SearchService {
 		}
 		// Setting query
 		query.setQuery(queryBuf.toString());
-		log.info("Solr ALL query [" + ((HttpSolrClient) server).getBaseURL()
-				+ "] = " + query);
+		log.info("Solr ALL query [" + ((HttpSolrClient) server).getBaseURL() + "] = " + query);
 		// Processing searchAll query
 		return processSolrQuery(server, query, settings, window);
 	}
 
-	private SearchResponse processSolrQuery(SolrClient solrServer,
-			SolrQuery query, SearchSettings settings, SearchWindow window) {
+	private SearchResponse processSolrQuery(SolrClient solrServer, SolrQuery query, SearchSettings settings,
+			SearchWindow window) {
 		try {
 			log.info("Solr query = " + query);
 			final QueryResponse response = solrServer.query(query);
-			final List<? extends SearchItem> items = response
-					.getBeans(SearchItemImpl.class);
+			final List<? extends SearchItem> items = response.getBeans(SearchItemImpl.class);
 
 			Map<FacetCategory, List<FacetCount>> facetMap = new HashMap<FacetCategory, List<FacetCount>>();
 			// Filling statistics
@@ -444,8 +418,7 @@ public class SolrSearchServiceImpl implements SearchService {
 					facetMap.put(c, counts);
 				}
 				// Retrieving facet field
-				final FacetField field = response.getFacetField(c
-						.getCategoryCode());
+				final FacetField field = response.getFacetField(c.getCategoryCode());
 
 				// Filling information
 				if (field != null && field.getValues() != null) {
@@ -467,8 +440,7 @@ public class SolrSearchServiceImpl implements SearchService {
 						// Here we extract min / max from discrete values
 						for (Count count : field.getValues()) {
 							try {
-								final long value = Long.parseLong(count
-										.getName());
+								final long value = Long.parseLong(count.getName());
 								if (value < min) {
 									min = value;
 								}
@@ -476,16 +448,13 @@ public class SolrSearchServiceImpl implements SearchService {
 									max = value;
 								}
 							} catch (NumberFormatException e) {
-								log.error("Unable to parse range facet value for "
-										+ c.getCategoryCode()
-										+ " : "
+								log.error("Unable to parse range facet value for " + c.getCategoryCode() + " : "
 										+ count.getName());
 							}
 						}
 						// Initializing our single range information
 						final FacetCountImpl facetCount = new FacetCountImpl();
-						facetCount.setFacet(FacetFactory.createFacetRange(c,
-								"", min, max + 1));
+						facetCount.setFacet(FacetFactory.createFacetRange(c, "", min, max + 1));
 						counts.add(facetCount);
 					}
 				}
@@ -500,8 +469,7 @@ public class SolrSearchServiceImpl implements SearchService {
 					}
 				});
 			}
-			return new SearchResponseImpl(items, facetMap, settings, window,
-					(int) response.getResults().getNumFound());
+			return new SearchResponseImpl(items, facetMap, settings, window, (int) response.getResults().getNumFound());
 		} catch (SolrServerException | IOException e) {
 			log.error("Error during search : " + e.getMessage(), e);
 		}
@@ -518,10 +486,8 @@ public class SolrSearchServiceImpl implements SearchService {
 	 * @param facetMap
 	 *            the facet map to fill
 	 */
-	private void fillStatistics(QueryResponse response,
-			Map<FacetCategory, List<FacetCount>> facetMap) {
-		final Map<String, FieldStatsInfo> fieldStatsMap = response
-				.getFieldStatsInfo();
+	private void fillStatistics(QueryResponse response, Map<FacetCategory, List<FacetCount>> facetMap) {
+		final Map<String, FieldStatsInfo> fieldStatsMap = response.getFieldStatsInfo();
 		if (fieldStatsMap != null) {
 			// For every statistic we generate Facet ranges
 			for (final String field : fieldStatsMap.keySet()) {
@@ -532,12 +498,9 @@ public class SolrSearchServiceImpl implements SearchService {
 					c.setCategoryCode(field);
 					// Preparing our facet count
 					final FacetCountImpl facetCount = new FacetCountImpl();
-					long min = stats.getMin() == null ? 0 : ((Number) stats
-							.getMin()).longValue();
-					long max = stats.getMax() == null ? 0 : ((Number) stats
-							.getMax()).longValue() + 1;
-					facetCount.setFacet(FacetFactory.createFacetRange(c, "",
-							min, max));
+					long min = stats.getMin() == null ? 0 : ((Number) stats.getMin()).longValue();
+					long max = stats.getMax() == null ? 0 : ((Number) stats.getMax()).longValue() + 1;
+					facetCount.setFacet(FacetFactory.createFacetRange(c, "", min, max));
 					facetCount.setCount(0);
 					// Filling our map
 					List<FacetCount> counts = facetMap.get(c);

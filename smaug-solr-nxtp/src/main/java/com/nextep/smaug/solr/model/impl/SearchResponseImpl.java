@@ -42,16 +42,14 @@ public class SearchResponseImpl implements SearchResponse {
 	 * @param itemCount
 	 *            The number of found items
 	 */
-	public SearchResponseImpl(List<? extends SearchItem> items,
-			Map<FacetCategory, List<FacetCount>> facetsMap,
+	public SearchResponseImpl(List<? extends SearchItem> items, Map<FacetCategory, List<FacetCount>> facetsMap,
 			SearchSettings settings, SearchWindow window, final int itemCount) {
 		this.facetsMap = facetsMap;
 		this.items = items;
 		this.settings = settings;
 
 		if (window != null) {
-			this.window = new SearchWindowResponseImpl(window.getPageNumber(),
-					window.getItemsPerPage(), itemCount);
+			this.window = new SearchWindowResponseImpl(window.getPageNumber(), window.getItemsPerPage(), itemCount);
 		}
 	}
 
