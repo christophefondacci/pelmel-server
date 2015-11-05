@@ -169,7 +169,7 @@ button.close {
 	margin: auto;
 }
 .logo-icon-xs {
-	width:50px;
+	width:38px;
 	vertical-align:middle;
 	display:inline-block;
 	margin-top:-9px;
@@ -3037,6 +3037,7 @@ label.text-right {
 	font-weight:bold;
 	font-size:21px;
 	margin-bottom:0;
+	color:white;
 }
 
 @media (min-width: 992px) {

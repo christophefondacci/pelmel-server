@@ -27,7 +27,7 @@
 			</s:else>
 		</div>
 		<tiles:insertTemplate template="/jsp/blocks/block-search-content-facets.jsp"/>
-		<div class="col-xs-24">
+		<div class="col-md-24 hidden-xs hidden-sm">
 			<div class="ads-center">
 				<s:property value="adBannerSupport.getHorizontalBannerHtml()" escapeHtml="false"/>
 			</div>

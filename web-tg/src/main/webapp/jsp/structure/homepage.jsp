@@ -15,12 +15,12 @@
     <link href="/styles/slider.min.css" rel="stylesheet" type="text/css" media="all"/>
     <link href="/styles/tg-main.css" rel="stylesheet" type="text/css" media="all"/>
     <!-- endbuild -->
-    <link rel="stylesheet" href="<s:property value="getStaticUrl('/images/favicon.ico?v=5')"/>" />
-    <link rel="icon" type="image/png" href="<s:property value="getStaticUrl('/images/favicon-32x32.png')"/>" sizes="32x32">
-	<link rel="icon" type="image/png" href="<s:property value="getStaticUrl('/images/android-chrome-192x192.png')"/>" sizes="192x192">
-	<link rel="icon" type="image/png" href="<s:property value="getStaticUrl('/images/favicon-96x96.png')"/>" sizes="96x96">
-	<link rel="icon" type="image/png" href="<s:property value="getStaticUrl('/images/favicon-16x16.png')"/>" sizes="16x16">
-	<link rel="shortcut icon" href="<s:property value="getStaticUrl('/images/favicon.ico?v=5')"/>">
+    <link rel="stylesheet" href="<s:property value="getStaticUrl('/images/favicon.ico?v=7')"/>" />
+    <link rel="icon" type="image/png" href="<s:property value="getStaticUrl('/images/favicon-32x32.png?v=1')"/>" sizes="32x32">
+	<link rel="icon" type="image/png" href="<s:property value="getStaticUrl('/images/android-chrome-192x192.png?v=1')"/>" sizes="192x192">
+	<link rel="icon" type="image/png" href="<s:property value="getStaticUrl('/images/favicon-96x96.png?v=1')"/>" sizes="96x96">
+	<link rel="icon" type="image/png" href="<s:property value="getStaticUrl('/images/favicon-16x16.png?v=1')"/>" sizes="16x16">
+	<link rel="shortcut icon" href="<s:property value="getStaticUrl('/images/favicon.ico?v=7')"/>">
     <tiles:insertAttribute name="header"/>
     <!--[if lt IE 9]>
 	  <script src="http://static.pelmelguide.com/js/html5shiv.js"></script>
@@ -51,7 +51,7 @@
 	        <span class="icon-bar"></span>
 	        <span class="icon-bar"></span>
 	      </button>
-	      <a class="navbar-brand hidden-md hidden-lg" href="<s:property value="#homeUrl"/>"><img class="logo-icon-xs" alt="PELMEL Guide" src="/images/V3/logoMob.png"/></a>
+	      <a class="navbar-brand hidden-md hidden-lg" href="<s:property value="#homeUrl"/>"><img class="logo-icon-xs" alt="PELMEL Guide" src="/images/V3/logo-small.png"/></a>
 	      <div class="hidden-sm hidden-md hidden-lg col-xs-16 mini-hp-title">
 	      	<a class="pelmel-slogan" href="#">PELMEL Guide</a>
 	      	

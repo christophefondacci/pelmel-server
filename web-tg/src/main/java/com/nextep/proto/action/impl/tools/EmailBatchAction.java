@@ -64,8 +64,7 @@ public class EmailBatchAction extends AbstractAction {
 	private static final Log LOGGER = LogFactory.getLog(EmailBatchAction.class);
 	private static final String URL_APPSTORE = "https://itunes.apple.com/us/app/pelmel-guide-your-mobile-guide/id603515989?mt=8";
 
-	private final DateFormat timeFormat = new SimpleDateFormat("hh:mmaa",
-			Locale.ENGLISH);
+	private final DateFormat timeFormat = new SimpleDateFormat("hh:mmaa", Locale.ENGLISH);
 	@Autowired
 	private NotificationService notificationService;
 
@@ -84,6 +83,9 @@ public class EmailBatchAction extends AbstractAction {
 
 	@Resource(mappedName = "email/maxSentEmails")
 	private Integer maxSentEmails;
+
+	@Resource(mappedName = "email/maxNearbyUsers")
+	private Integer maxNearbyUsers;
 
 	@Resource(mappedName = "email/newsletterTemplateId")
 	private String newsletterTemplateId;
@@ -120,20 +122,17 @@ public class EmailBatchAction extends AbstractAction {
 
 			// Executing query
 			final ApiCompositeResponse response = (ApiCompositeResponse) getApiService()
-					.execute(buildRequestForPage(page),
-							ContextFactory.createContext(getLocale()));
+					.execute(buildRequestForPage(page), ContextFactory.createContext(getLocale()));
 
 			// Getting users
-			final List<? extends User> users = response.getElements(User.class,
-					APIS_ALIAS_USERS);
+			final List<? extends User> users = response.getElements(User.class, APIS_ALIAS_USERS);
 			noMoreUsers = users.isEmpty();
 			for (User user : users) {
 				// Preparing HTML buffer
 				final StringBuilder buf = new StringBuilder();
 
 				// For now, only sending if we have not send anything
-				LOGGER.info("Processing USER " + user.getKey()
-						+ " with email '" + user.getEmail() + "'");
+				LOGGER.info("Processing USER " + user.getKey() + " with email '" + user.getEmail() + "'");
 				final City city = user.getUnique(City.class);
 				final Admin adm1 = city == null ? null : city.getAdm1();
 				if (city != null && adm1 != null) {
@@ -149,77 +148,46 @@ public class EmailBatchAction extends AbstractAction {
 					// && !user.getKey().toString().equals("USER308")) {
 					continue;
 				}
-				if (adm1 != null
-						&& user != null
-						&& (user.getLastEmailDate() == null || dryRun || EMAIL_STATUS_BUG
-								.equals(user.getStatusMessage()))
-						&& ("WA".equals(adm1.getAdminCode())
-								|| "CA".equals(adm1.getAdminCode()) || "OR"
-									.equals(adm1.getAdminCode()))) {
+				if (adm1 != null && user != null && (user.getLastEmailDate() == null
+						|| user.getLastEmailDate()
+								.getTime() < (System.currentTimeMillis() - daysFromLastEmail * 24 * 60 * 60 * 1000)
+						|| dryRun)
+						&& ("WA".equals(adm1.getAdminCode()) || "CA".equals(adm1.getAdminCode())
+								|| "OR".equals(adm1.getAdminCode()))) {
 
 					// Querying nearby users for email customization
-					final ApisRequest userRequest = (ApisRequest) ApisFactory
-							.createCompositeRequest()
+					final ApisRequest userRequest = (ApisRequest) ApisFactory.createCompositeRequest()
+							.addCriterion((ApisCriterion) SearchRestriction
+									.searchNear(User.class, SearchScope.NEARBY_BLOCK, user.getLatitude(),
+											user.getLongitude(), 100, maxNearbyUsers + 10, 0)
+									.sortBy(userSorters).aliasedBy(APIS_ALIAS_USERS)
+									.with(Media.class, MediaRequestTypes.THUMB))
+							.addCriterion((ApisCriterion) SearchRestriction
+									.searchNear(Place.class, SearchScope.NEARBY_BLOCK, user.getLatitude(),
+											user.getLongitude(), nearbyPlacesRadius, nearbyPlacesCount, 0)
+									.aliasedBy(APIS_ALIAS_PLACES)
+									.with((WithCriterion) SearchRestriction.with(EventSeries.class).with(Media.class,
+											MediaRequestTypes.THUMB))
+									.with(Media.class, MediaRequestTypes.THUMB))
 							.addCriterion(
 									(ApisCriterion) SearchRestriction
-											.searchNear(User.class,
-													SearchScope.NEARBY_BLOCK,
-													user.getLatitude(),
-													user.getLongitude(), 100,
-													10, 0)
-											.sortBy(userSorters)
-											.aliasedBy(APIS_ALIAS_USERS)
-											.with(Media.class,
-													MediaRequestTypes.THUMB))
-							.addCriterion(
-									(ApisCriterion) SearchRestriction
-											.searchNear(Place.class,
-													SearchScope.NEARBY_BLOCK,
-													user.getLatitude(),
-													user.getLongitude(),
-													nearbyPlacesRadius,
-													nearbyPlacesCount, 0)
-											.aliasedBy(APIS_ALIAS_PLACES)
-											.with((WithCriterion) SearchRestriction
-													.with(EventSeries.class)
-													.with(Media.class,
-															MediaRequestTypes.THUMB))
-											.with(Media.class,
-													MediaRequestTypes.THUMB))
-							.addCriterion(
-									(ApisCriterion) SearchRestriction
-											.searchNear(Event.class,
-													SearchScope.EVENTS,
-													user.getLatitude(),
-													user.getLongitude(),
-													nearbyPlacesRadius, 20, 0)
-											.aliasedBy(APIS_ALIAS_EVENTS)
-											.with(Media.class,
-													MediaRequestTypes.THUMB)
-											.addCriterion(
-													(ApisCriterion) SearchRestriction
-															.adaptKey(
-																	new ApisEventLocationAdapter())
-															.with(Media.class,
-																	MediaRequestTypes.THUMB)));
+											.searchNear(Event.class, SearchScope.EVENTS, user.getLatitude(),
+													user.getLongitude(), nearbyPlacesRadius, 20, 0)
+											.aliasedBy(APIS_ALIAS_EVENTS).with(Media.class, MediaRequestTypes.THUMB)
+											.addCriterion((ApisCriterion) SearchRestriction
+													.adaptKey(new ApisEventLocationAdapter())
+													.with(Media.class, MediaRequestTypes.THUMB)));
 
 					// Executing nearby query
 					final ApiCompositeResponse userResponse = (ApiCompositeResponse) getApiService()
-							.execute(userRequest,
-									ContextFactory.createContext(getLocale()));
+							.execute(userRequest, ContextFactory.createContext(getLocale()));
 
 					// Preparing subject / template
 					String subject = "Your events this week";
 					String templateId = newsletterTemplateId;
 					String newStatus = null;
-					if (EMAIL_STATUS_BUG.equals(user.getStatusMessage())) {
-						subject = "Oops, we messed up the dates";
-						templateId = erratumNewsletterTemplateId;
-						newStatus = "BUGGED";
-					} else {
-						// Filling nearby users section
-						fillNearbyUsers(buf, user, userResponse);
-					}
+					// Filling nearby users section
+					fillNearbyUsers(buf, user, userResponse);
 
 					fillNearbyEvents(buf, user, userResponse);
 					usersEmails.add(user.getEmail());
@@ -232,8 +200,8 @@ public class EmailBatchAction extends AbstractAction {
 					// Sending message
 					messages.add("Sending message to " + user.getEmail());
 
-					notificationService.notifyByEmail(subject, buf.toString(),
-							Arrays.asList(user.getEmail()), templateId);
+					notificationService.notifyByEmail(subject, buf.toString(), Arrays.asList(user.getEmail()),
+							templateId);
 
 					// notificationService.not
 					emailsSent++;
@@ -252,32 +220,29 @@ public class EmailBatchAction extends AbstractAction {
 		LOGGER.info(orCount + " users in Oregon");
 		if (!usersEmails.isEmpty()) {
 			LOGGER.info("Sending messages to " + usersEmails.toString());
-			// notificationService.notifyByEmail("PELMEL: New Version Available",
+			// notificationService.notifyByEmail("PELMEL: New Version
+			// Available",
 			// "", usersEmails, newsletterTemplateId);
 		}
 
 		return SUCCESS;
 	}
 
-	private void fillNearbyEvents(StringBuilder buf, User user,
-			ApiCompositeResponse userResponse) throws ApisException,
-			CalException {
+	private void fillNearbyEvents(StringBuilder buf, User user, ApiCompositeResponse userResponse)
+			throws ApisException, CalException {
 		final DateFormat format = new SimpleDateFormat("yyyyMMdd");
-		final DateFormat fullFormat = new SimpleDateFormat("EEEE, MMMM dd",
-				Locale.ENGLISH);
+		final DateFormat fullFormat = new SimpleDateFormat("EEEE, MMMM dd", Locale.ENGLISH);
 
 		// Preparing hash maps storing events
 		final Map<String, List<Event>> seriesDayMap = new HashMap<String, List<Event>>();
 		final Map<String, Date> seriesKeysStartMap = new HashMap<String, Date>();
 
 		// One time events
-		final List<? extends Event> events = userResponse.getElements(
-				Event.class, APIS_ALIAS_EVENTS);
+		final List<? extends Event> events = userResponse.getElements(Event.class, APIS_ALIAS_EVENTS);
 		for (Event event : events) {
 			final Place p = event.getUnique(Place.class);
-			final Date startDate = eventManagementService.convertDate(event
-					.getStartDate(), TimeZone.getDefault().getID(), p.getCity()
-					.getTimezoneId());
+			final Date startDate = eventManagementService.convertDate(event.getStartDate(),
+					TimeZone.getDefault().getID(), p.getCity().getTimezoneId());
 			final String eventDay = format.format(startDate);
 			List<Event> dayEvents = seriesDayMap.get(eventDay);
 			if (dayEvents == null) {
@@ -288,20 +253,18 @@ public class EmailBatchAction extends AbstractAction {
 		}
 
 		// Extracting places
-		final List<? extends Place> places = userResponse.getElements(
-				Place.class, APIS_ALIAS_PLACES);
+		final List<? extends Place> places = userResponse.getElements(Place.class, APIS_ALIAS_PLACES);
 		for (Place place : places) {
 			// Extracting place recurring events
-			final List<? extends EventSeries> series = place
-					.get(EventSeries.class);
+			final List<? extends EventSeries> series = place.get(EventSeries.class);
 			for (EventSeries serie : series) {
 
 				// Only considering theme nights
 				if (serie.getCalendarType() == CalendarType.THEME) {
 
 					// Computing next date
-					final Date nextStart = eventManagementService.computeNext(
-							serie, place.getCity().getTimezoneId(), true);
+					final Date nextStart = eventManagementService.computeNext(serie, place.getCity().getTimezoneId(),
+							true);
 
 					// Isolating the day
 					final String startDay = format.format(nextStart);
@@ -312,8 +275,7 @@ public class EmailBatchAction extends AbstractAction {
 						dayEvents = new ArrayList<Event>();
 						seriesDayMap.put(startDay, dayEvents);
 					}
-					seriesKeysStartMap
-							.put(serie.getKey().toString(), nextStart);
+					seriesKeysStartMap.put(serie.getKey().toString(), nextStart);
 					serie.add(place);
 					dayEvents.add(serie);
 				}
@@ -327,8 +289,7 @@ public class EmailBatchAction extends AbstractAction {
 			if (EMAIL_STATUS_BUG.equals(user.getStatusMessage())) {
 				padding = 10;
 			}
-			buf.append("<p style='margin-top:0;padding-top:"
-					+ padding
+			buf.append("<p style='margin-top:0;padding-top:" + padding
 					+ "px;'><span style='text-align: center; font-size:36px;'>Coming up</span></p>");
 
 			int dayCount = 0;
@@ -337,8 +298,9 @@ public class EmailBatchAction extends AbstractAction {
 					final Date day = format.parse(dayStr);
 					String htmlDay = obfuscateDate(fullFormat.format(day));
 
-					buf.append("<p style='margin-top:0;padding-top:10px;'><span style='text-align: center; font-size:26px;'>"
-							+ htmlDay + "</span></p>");
+					buf.append(
+							"<p style='margin-top:0;padding-top:10px;'><span style='text-align: center; font-size:26px;'>"
+									+ htmlDay + "</span></p>");
 					buf.append("<table cellpadding='5' cellspacing='0' style='margin:auto;'><tbody>");
 					for (Event e : seriesDayMap.get(dayStr)) {
 
@@ -349,32 +311,27 @@ public class EmailBatchAction extends AbstractAction {
 						// .getKey().toString());
 
 						// Building URL
-						String url = getUrlService().getOverviewUrl(
-								DisplayHelper.getDefaultAjaxContainer(), e);
+						String url = getUrlService().getOverviewUrl(DisplayHelper.getDefaultAjaxContainer(), e);
 						url = getFullUrl(user, url, true);
 
 						// Building a 2 column table, image on the left and info
 						// on the right
-						buf.append("<tr><td><a href='" + url
-								+ "'><img height='100px' width='100px' src='");
+						buf.append("<tr><td><a href='" + url + "'><img height='100px' width='100px' src='");
 						Media m = MediaHelper.getSingleMedia(e);
 						String mediaUrl = null;
 						if (m == null) {
 							m = MediaHelper.getSingleMedia(place);
-							mediaUrl = (m == null) ? MediaHelper
-									.getNoThumbUrl(e) : getFullUrl(user,
-									m.getThumbUrl(), false);
+							mediaUrl = (m == null) ? MediaHelper.getNoThumbUrl(e)
+									: getFullUrl(user, m.getThumbUrl(), false);
 						} else {
 							mediaUrl = getFullUrl(user, m.getThumbUrl(), false);
 						}
 						buf.append(mediaUrl + "'></a></td>");
 
 						// Second column: title, location, time
-						buf.append("<td><div><a href='" + url + "'>"
-								+ e.getName() + "</a></div>");
+						buf.append("<td><div><a href='" + url + "'>" + e.getName() + "</a></div>");
 						if (place != null) {
-							buf.append("<div style='color:#F4D400;'>@ "
-									+ place.getName() + "</div>");
+							buf.append("<div style='color:#F4D400;'>@ " + place.getName() + "</div>");
 						}
 						String timeRange = getTimeRange(e);
 						buf.append("<div>" + timeRange + "</div>");
@@ -413,16 +370,15 @@ public class EmailBatchAction extends AbstractAction {
 	}
 
 	private String getFullUrl(User user, String url, boolean isLink) {
-		String fullUrl = LocalizationHelper
-				.buildUrl("en", getDomainName(), url);
-		if (isLink) {
-			// if (user.getDeviceInfo() == null) {
-			return URL_APPSTORE;
-			// } else {
-			// return "pelmel://open";
-			// }
-			// fullUrl = fullUrl.replace("http", "pelmel");
-		}
+		String fullUrl = LocalizationHelper.buildUrl("en", getDomainName(), url);
+		// if (isLink) {
+		// if (user.getDeviceInfo() == null) {
+		// return URL_APPSTORE;
+		// } else {
+		// return "pelmel://open";
+		// }
+		// fullUrl = fullUrl.replace("http", "pelmel");
+		// }
 		return fullUrl;
 	}
 
@@ -430,27 +386,21 @@ public class EmailBatchAction extends AbstractAction {
 		if (e instanceof EventSeries) {
 			try {
 				final Place p = e.getUnique(Place.class);
-				final Date now = eventManagementService.getLocalizedNow(p
-						.getCity().getTimezoneId());
-				final Date nextStart = eventManagementService.computeNextStart(
-						(EventSeries) e, now, true);
-				final Date nextEnd = eventManagementService.computeNextStart(
-						(EventSeries) e, now, false);
+				final Date now = eventManagementService.getLocalizedNow(p.getCity().getTimezoneId());
+				final Date nextStart = eventManagementService.computeNextStart((EventSeries) e, now, true);
+				final Date nextEnd = eventManagementService.computeNextStart((EventSeries) e, now, false);
 				return buildTimeRange(nextStart, nextEnd);
 
 			} catch (CalException ex) {
-				LOGGER.error("Unable to get place of event " + e.getKey()
-						+ ", skipping time range for email (reason: "
+				LOGGER.error("Unable to get place of event " + e.getKey() + ", skipping time range for email (reason: "
 						+ ex.getMessage() + ")");
 			}
 		} else {
 			final Place p = e.getUnique(Place.class);
-			final Date startDate = eventManagementService.convertDate(e
-					.getStartDate(), TimeZone.getDefault().getID(), p.getCity()
-					.getTimezoneId());
-			final Date endDate = eventManagementService.convertDate(e
-					.getEndDate(), TimeZone.getDefault().getID(), p.getCity()
-					.getTimezoneId());
+			final Date startDate = eventManagementService.convertDate(e.getStartDate(), TimeZone.getDefault().getID(),
+					p.getCity().getTimezoneId());
+			final Date endDate = eventManagementService.convertDate(e.getEndDate(), TimeZone.getDefault().getID(),
+					p.getCity().getTimezoneId());
 
 			return buildTimeRange(startDate, endDate);
 		}
@@ -466,11 +416,9 @@ public class EmailBatchAction extends AbstractAction {
 		// + "<span></span>" + endStr.substring(2);
 	}
 
-	private void fillNearbyUsers(StringBuilder buf, User user,
-			ApiCompositeResponse userResponse) throws ApisException {
+	private void fillNearbyUsers(StringBuilder buf, User user, ApiCompositeResponse userResponse) throws ApisException {
 		// Getting users
-		final List<? extends User> nearbyUsers = userResponse.getElements(
-				User.class, APIS_ALIAS_USERS);
+		final List<? extends User> nearbyUsers = userResponse.getElements(User.class, APIS_ALIAS_USERS);
 
 		// Processing nearby users
 		final StringBuilder nearbyBuf = new StringBuilder();
@@ -479,26 +427,25 @@ public class EmailBatchAction extends AbstractAction {
 			final Media m = MediaHelper.getSingleMedia(nearbyUser);
 			// Only considering users with photos
 			if (m != null && !nearbyUser.getKey().equals(user.getKey())) {
-				final String thumbUrl = MediaHelper
-						.getImageUrl(m.getThumbUrl());
-				String url = getUrlService().getOverviewUrl(
-						DisplayHelper.getDefaultAjaxContainer(), nearbyUser);
+				final String thumbUrl = MediaHelper.getImageUrl(m.getThumbUrl());
+				String url = getUrlService().getOverviewUrl(DisplayHelper.getDefaultAjaxContainer(), nearbyUser);
 				url = LocalizationHelper.buildUrl("en", getDomainName(), url);
 				url = url.replace("http", "pelmel");
 				// Buidling the thumb for this user
-				nearbyBuf
-						.append("<div style='width:100px;height:100px; display:inline-block; padding:1px;'><a href='"
-								+ url
-								+ "'><img height='100px' src='"
-								+ thumbUrl + "' width='100px' /></a></div>");
+				nearbyBuf.append("<div style='width:100px;height:100px; display:inline-block; padding:1px;'><a href='"
+						+ url + "'><img height='100px' src='" + thumbUrl + "' width='100px' /></a></div>");
 				usersCount++;
+			}
+			if (usersCount >= maxNearbyUsers) {
+				break;
 			}
 		}
 
 		// We display nearby users block when at least 2 nearby
 		// users to display
 		if (usersCount >= 2) {
-			buf.append("<p style='margin-top:0;padding-top:30px;'><span style='text-align: center; font-size:36px;'>Guys near you</span></p>");
+			buf.append(
+					"<p style='margin-top:0;padding-top:30px;'><span style='text-align: center; font-size:36px;'>Guys near you</span></p>");
 			buf.append(nearbyBuf.toString());
 		}
 	}
@@ -508,15 +455,10 @@ public class EmailBatchAction extends AbstractAction {
 	}
 
 	private ApisRequest buildRequestForPage(int page) throws ApisException {
-		final ApisRequest request = (ApisRequest) ApisFactory
-				.createCompositeRequest().addCriterion(
-						(ApisCriterion) SearchRestriction
-								.list(User.class,
-										new UserLastLoginRequestType(
-												daysFromLastLogin, true))
-								.paginatedBy(100, page)
-								.aliasedBy(APIS_ALIAS_USERS)
-								.with(GeographicItem.class));
+		final ApisRequest request = (ApisRequest) ApisFactory.createCompositeRequest()
+				.addCriterion((ApisCriterion) SearchRestriction
+						.list(User.class, new UserLastLoginRequestType(daysFromLastLogin, true)).paginatedBy(100, page)
+						.aliasedBy(APIS_ALIAS_USERS).with(GeographicItem.class));
 		return request;
 	}
 }

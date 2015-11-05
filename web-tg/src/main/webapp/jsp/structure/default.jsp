@@ -51,9 +51,9 @@
 	        <span class="icon-bar"></span>
 	        <span class="icon-bar"></span>
 	      </button>
-	      <a class="navbar-brand hidden-md hidden-lg" href="<s:property value="#homeUrl"/>"><img class="logo-icon-xs" alt="PELMEL Guide" src="/images/V3/logoMob.png"/></a>
-	      <div class="hidden-sm hidden-md hidden-lg col-xs-16 mini-search">
-	      	<tiles:insertTemplate template="/jsp/blocks/search-field.jsp"/>
+	      <a class="navbar-brand hidden-md hidden-lg" href="<s:property value="#homeUrl"/>"><img class="logo-icon-xs" alt="PELMEL Guide" src="/images/V3/logo-small.png"/></a>
+	      <div class="hidden-sm hidden-md hidden-lg col-xs-16 mini-hp-title">
+	      	<a class="pelmel-slogan" href="#">PELMEL Guide</a>
 	      </div>
 	    </div>
 	    
